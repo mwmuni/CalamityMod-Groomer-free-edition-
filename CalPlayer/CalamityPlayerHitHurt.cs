@@ -513,46 +513,12 @@ namespace CalamityMod.CalPlayer
                 if (item.CountsAsClass<MeleeDamageClass>())
                 {
                     float meleeBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, 1 - DistanceInterpolant);
-                    modifiers.SourceDamage += meleeBoost;
-
-                    if (meleeBoost >= FrostArmorSetChange.ProximityBoost * 0.5f)
-                    {
-                        float intensity = meleeBoost / FrostArmorSetChange.ProximityBoost;
-                        SoundEngine.PlaySound(Cryogen.HitSound with { Volume = intensity - 0.2f }, Player.Center);
-                    }
-                    if (meleeBoost > 0f)
-                    {
-                        int count = (int)(30f * meleeBoost);
-                        for (int i = 0; i < count; i++)
-                        {
-                            Vector2 velocity = Main.rand.NextVector2Unit() * (5f + 100f * meleeBoost);
-                            float scale = Main.rand.NextFloat(0.5f, 1f) + 0.5f * meleeBoost / FrostArmorSetChange.ProximityBoost;
-                            Particle sparkle = new CritSpark(target.Center, velocity, Color.White, Color.DodgerBlue, scale, 15, 0.1f, scale * 2f);
-                            GeneralParticleHandler.SpawnParticle(sparkle);
-                        }
-                    }
+                    ApplyFrostArmorDamageBoost(target, ref modifiers, meleeBoost);
                 }
                 else if (item.CountsAsClass<RangedDamageClass>())
                 {
                     float rangedBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, DistanceInterpolant);
-                    modifiers.SourceDamage += rangedBoost;
-
-                    if (rangedBoost >= FrostArmorSetChange.ProximityBoost * 0.5f)
-                    {
-                        float intensity = rangedBoost / FrostArmorSetChange.ProximityBoost;
-                        SoundEngine.PlaySound(Cryogen.HitSound with { Volume = intensity - 0.2f }, Player.Center);
-                    }
-                    if (rangedBoost > 0f)
-                    {
-                        int count = (int)(30f * rangedBoost);
-                        for (int i = 0; i < count; i++)
-                        {
-                            Vector2 velocity = Main.rand.NextVector2Unit() * (5f + 100f * rangedBoost);
-                            float scale = Main.rand.NextFloat(0.5f, 1f) + 0.5f * rangedBoost / FrostArmorSetChange.ProximityBoost;
-                            Particle sparkle = new CritSpark(target.Center, velocity, Color.White, Color.DodgerBlue, scale, 15, 0.1f, scale * 2f);
-                            GeneralParticleHandler.SpawnParticle(sparkle);
-                        }
-                    }
+                    ApplyFrostArmorDamageBoost(target, ref modifiers, rangedBoost);
                 }
             }
         }
@@ -617,46 +583,12 @@ namespace CalamityMod.CalPlayer
                 if (proj.CountsAsClass<MeleeDamageClass>())
                 {
                     float meleeBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, 1 - DistanceInterpolant);
-                    modifiers.SourceDamage += meleeBoost;
-
-                    if (meleeBoost >= FrostArmorSetChange.ProximityBoost * 0.5f)
-                    {
-                        float intensity = meleeBoost / FrostArmorSetChange.ProximityBoost;
-                        SoundEngine.PlaySound(Cryogen.HitSound with { Volume = intensity - 0.2f }, Player.Center);
-                    }
-                    if (meleeBoost > 0f)
-                    {
-                        int count = (int)(30f * meleeBoost);
-                        for (int i = 0; i < count; i++)
-                        {
-                            Vector2 velocity = Main.rand.NextVector2Unit() * (5f + 100f * meleeBoost);
-                            float scale = Main.rand.NextFloat(0.5f, 1f) + 0.5f * meleeBoost / FrostArmorSetChange.ProximityBoost;
-                            Particle sparkle = new CritSpark(target.Center, velocity, Color.White, Color.DodgerBlue, scale, 15, 0.1f, scale * 2f);
-                            GeneralParticleHandler.SpawnParticle(sparkle);
-                        }
-                    }
+                    ApplyFrostArmorDamageBoost(target, ref modifiers, meleeBoost);
                 }
                 else if (proj.CountsAsClass<RangedDamageClass>())
                 {
                     float rangedBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, DistanceInterpolant);
-                    modifiers.SourceDamage += rangedBoost;
-
-                    if (rangedBoost >= FrostArmorSetChange.ProximityBoost * 0.5f)
-                    {
-                        float intensity = rangedBoost / FrostArmorSetChange.ProximityBoost;
-                        SoundEngine.PlaySound(Cryogen.HitSound with { Volume = intensity - 0.2f }, Player.Center);
-                    }
-                    if (rangedBoost > 0f)
-                    {
-                        int count = (int)(30f * rangedBoost);
-                        for (int i = 0; i < count; i++)
-                        {
-                            Vector2 velocity = Main.rand.NextVector2Unit() * (5f + 100f * rangedBoost);
-                            float scale = Main.rand.NextFloat(0.5f, 1f) + 0.5f * rangedBoost / FrostArmorSetChange.ProximityBoost;
-                            Particle sparkle = new CritSpark(target.Center, velocity, Color.White, Color.DodgerBlue, scale, 15, 0.1f, scale * 2f);
-                            GeneralParticleHandler.SpawnParticle(sparkle);
-                        }
-                    }
+                    ApplyFrostArmorDamageBoost(target, ref modifiers, rangedBoost);
                 }
             }
 
@@ -675,6 +607,28 @@ namespace CalamityMod.CalPlayer
 
                 if (CalamityUtils.ShouldTriggerSummonPenalty(Player, heldItem) && !CalamityProjectileSets.MinionWhichIgnoresSummonerNerf[proj.type])
                     modifiers.FinalDamage *= BalancingConstants.SummonerCrossClassNerf;
+            }
+        }
+
+        private void ApplyFrostArmorDamageBoost(NPC target, ref NPC.HitModifiers modifiers, float boost)
+        {
+            modifiers.SourceDamage += boost;
+
+            if (boost >= FrostArmorSetChange.ProximityBoost * 0.5f)
+            {
+                float intensity = boost / FrostArmorSetChange.ProximityBoost;
+                SoundEngine.PlaySound(Cryogen.HitSound with { Volume = intensity - 0.2f }, Player.Center);
+            }
+            if (boost > 0f)
+            {
+                int count = (int)(30f * boost);
+                for (int i = 0; i < count; i++)
+                {
+                    Vector2 velocity = Main.rand.NextVector2Unit() * (5f + 100f * boost);
+                    float scale = Main.rand.NextFloat(0.5f, 1f) + 0.5f * boost / FrostArmorSetChange.ProximityBoost;
+                    Particle sparkle = new CritSpark(target.Center, velocity, Color.White, Color.DodgerBlue, scale, 15, 0.1f, scale * 2f);
+                    GeneralParticleHandler.SpawnParticle(sparkle);
+                }
             }
         }
         #endregion
@@ -2074,21 +2028,7 @@ namespace CalamityMod.CalPlayer
             {
                 // Summon a portal if needed.
                 if (Player.Calamity().persecutedEnchant)
-                {
-                    if (NPC.CountNPCS(ModContent.NPCType<DemonPortal>()) < 2)
-                    {
-                        int tries = 0;
-                        Vector2 spawnPosition;
-                        Vector2 spawnPositionOffset = Vector2.One * 24f;
-                        do
-                        {
-                            spawnPosition = Player.Center + Main.rand.NextVector2Unit() * Main.rand.NextFloat(270f, 420f);
-                            tries++;
-                        }
-                        while (Collision.SolidCollision(spawnPosition - spawnPositionOffset, 48, 24) && tries < 100);
-                        CalamityNetcode.NewNPC_ClientSide(spawnPosition, ModContent.NPCType<DemonPortal>(), Player);
-                    }
-                }
+                    SpawnPersecutedDemonPortalIfNeeded();
 
                 if (daedalusAbsorb && Main.rand.NextBool(DaedalusHeadMagic.AbsorptionChanceDenominator))
                 {
@@ -2687,17 +2627,7 @@ namespace CalamityMod.CalPlayer
         /// <param name="hurtInfo">HurtInfo of the incoming strike to the player.</param>
         public void DealDefenseDamage(Player.HurtInfo hurtInfo)
         {
-            // Legacy safeguard: Skip defense damage if the player is somehow "hit for zero" (this should never happen).
-            if (hurtInfo.Damage <= 0 || hurtInfo.SourceDamage <= 0)
-                return;
-
-            // Under typical circumstances, defense damage scales with "net mitigation", aka how much damage the player DIDN'T take.
-            // Thematically, this means it scales with how much damage the player's defense took instead of them.
-            int netMitigation = hurtInfo.SourceDamage - hurtInfo.Damage;
-            int incomingDamageToUse = netMitigation <= 0 ? 0 : netMitigation;
-
-            // Leave it to the direct function to determine how much defense damage is taken. Use standard ratios.
-            DealDefenseDamage(incomingDamageToUse, false);
+            DealDefenseDamage(hurtInfo, 0);
         }
 
         /// <summary>

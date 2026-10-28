@@ -4,15 +4,12 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Systems
 {
-    public class PBGBackgroundScene : ModSceneEffect
+    public class PBGBackgroundScene : BaseBiomeVisualSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
 
-        public override bool IsSceneEffectActive(Player player) => NPC.AnyNPCs(ModContent.NPCType<PlaguebringerGoliath>()) || Main.LocalPlayer.Calamity().monolithPlagueShader > 0;
+        protected override string BiomeVisualKey => "CalamityMod:PlaguebringerGoliath";
 
-        public override void SpecialVisuals(Player player, bool isActive)
-        {
-            player.ManageSpecialBiomeVisuals("CalamityMod:PlaguebringerGoliath", isActive);
-        }
+        public override bool IsSceneEffectActive(Player player) => NPC.AnyNPCs(ModContent.NPCType<PlaguebringerGoliath>()) || Main.LocalPlayer.Calamity().monolithPlagueShader > 0;
     }
 }

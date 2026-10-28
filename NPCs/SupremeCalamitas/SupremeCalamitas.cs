@@ -2085,96 +2085,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
                 if (NPC.ai[1] == -1f)
                 {
-                    phaseChange++;
-                    if (phaseChange > 23)
-                        phaseChange = 0;
-
-                    int phase = 0; //0 = shots above 1 = charge 2 = nothing 3 = hellblasts 4 = fireblasts
-                    switch (phaseChange)
-                    {
-                        case 0:
-                            phase = 0;
-                            willCharge = false;
-                            break; //0341
-                        case 1:
-                            phase = 3;
-                            break;
-                        case 2:
-                            phase = 4;
-                            willCharge = true;
-                            break;
-                        case 3:
-                            phase = 1;
-                            break;
-                        case 4:
-                            phase = 1;
-                            break; //1430
-                        case 5:
-                            phase = 4;
-                            willCharge = false;
-                            break;
-                        case 6:
-                            phase = 3;
-                            break;
-                        case 7:
-                            phase = 0;
-                            willCharge = true;
-                            break;
-                        case 8:
-                            phase = 1;
-                            break; //1034
-                        case 9:
-                            phase = 0;
-                            willCharge = false;
-                            break;
-                        case 10:
-                            phase = 3;
-                            break;
-                        case 11:
-                            phase = 4;
-                            break;
-                        case 12:
-                            phase = 4;
-                            break; //4310
-                        case 13:
-                            phase = 3;
-                            willCharge = true;
-                            break;
-                        case 14:
-                            phase = 1;
-                            break;
-                        case 15:
-                            phase = 0;
-                            willCharge = false;
-                            break;
-                        case 16:
-                            phase = 4;
-                            break; //4411
-                        case 17:
-                            phase = 4;
-                            willCharge = true;
-                            break;
-                        case 18:
-                            phase = 1;
-                            break;
-                        case 19:
-                            phase = 1;
-                            break;
-                        case 20:
-                            phase = 0;
-                            break; //0101
-                        case 21:
-                            phase = 1;
-                            break;
-                        case 22:
-                            phase = 0;
-                            break;
-                        case 23:
-                            phase = 1;
-                            break;
-                    }
-
-                    NPC.ai[1] = phase;
+                    NPC.ai[1] = GetNextAttackPhase();
                     NPC.ai[2] = 0f;
                     NPC.ai[3] = 0f;
                 }
@@ -2653,96 +2564,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
                 if (NPC.ai[1] == -1f)
                 {
-                    phaseChange++;
-                    if (phaseChange > 23)
-                        phaseChange = 0;
-
-                    int phase = 0; //0 = shots above 1 = charge 2 = nothing 3 = hellblasts 4 = fireblasts
-                    switch (phaseChange)
-                    {
-                        case 0:
-                            phase = 0;
-                            willCharge = false;
-                            break; //0341
-                        case 1:
-                            phase = 3;
-                            break;
-                        case 2:
-                            phase = 4;
-                            willCharge = true;
-                            break;
-                        case 3:
-                            phase = 1;
-                            break;
-                        case 4:
-                            phase = 1;
-                            break; //1430
-                        case 5:
-                            phase = 4;
-                            willCharge = false;
-                            break;
-                        case 6:
-                            phase = 3;
-                            break;
-                        case 7:
-                            phase = 0;
-                            willCharge = true;
-                            break;
-                        case 8:
-                            phase = 1;
-                            break; //1034
-                        case 9:
-                            phase = 0;
-                            willCharge = false;
-                            break;
-                        case 10:
-                            phase = 3;
-                            break;
-                        case 11:
-                            phase = 4;
-                            break;
-                        case 12:
-                            phase = 4;
-                            break; //4310
-                        case 13:
-                            phase = 3;
-                            willCharge = true;
-                            break;
-                        case 14:
-                            phase = 1;
-                            break;
-                        case 15:
-                            phase = 0;
-                            willCharge = false;
-                            break;
-                        case 16:
-                            phase = 4;
-                            break; //4411
-                        case 17:
-                            phase = 4;
-                            willCharge = true;
-                            break;
-                        case 18:
-                            phase = 1;
-                            break;
-                        case 19:
-                            phase = 1;
-                            break;
-                        case 20:
-                            phase = 0;
-                            break; //0101
-                        case 21:
-                            phase = 1;
-                            break;
-                        case 22:
-                            phase = 0;
-                            break;
-                        case 23:
-                            phase = 1;
-                            break;
-                    }
-
-                    NPC.ai[1] = phase;
+                    NPC.ai[1] = GetNextAttackPhase();
                     NPC.ai[2] = 0f;
                     NPC.ai[3] = 0f;
                 }
@@ -3120,6 +2942,100 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 dashVisualCounter = 0;
             }
             #endregion
+        }
+
+        private int GetNextAttackPhase()
+        {
+            phaseChange++;
+            if (phaseChange > 23)
+                phaseChange = 0;
+
+            int phase = 0; // 0 = shots above, 1 = charge, 2 = nothing, 3 = hellblasts, 4 = fireblasts
+            switch (phaseChange)
+            {
+                case 0:
+                    phase = 0;
+                    willCharge = false;
+                    break; //0341
+                case 1:
+                    phase = 3;
+                    break;
+                case 2:
+                    phase = 4;
+                    willCharge = true;
+                    break;
+                case 3:
+                    phase = 1;
+                    break;
+                case 4:
+                    phase = 1;
+                    break; //1430
+                case 5:
+                    phase = 4;
+                    willCharge = false;
+                    break;
+                case 6:
+                    phase = 3;
+                    break;
+                case 7:
+                    phase = 0;
+                    willCharge = true;
+                    break;
+                case 8:
+                    phase = 1;
+                    break; //1034
+                case 9:
+                    phase = 0;
+                    willCharge = false;
+                    break;
+                case 10:
+                    phase = 3;
+                    break;
+                case 11:
+                    phase = 4;
+                    break;
+                case 12:
+                    phase = 4;
+                    break; //4310
+                case 13:
+                    phase = 3;
+                    willCharge = true;
+                    break;
+                case 14:
+                    phase = 1;
+                    break;
+                case 15:
+                    phase = 0;
+                    willCharge = false;
+                    break;
+                case 16:
+                    phase = 4;
+                    break; //4411
+                case 17:
+                    phase = 4;
+                    willCharge = true;
+                    break;
+                case 18:
+                    phase = 1;
+                    break;
+                case 19:
+                    phase = 1;
+                    break;
+                case 20:
+                    phase = 0;
+                    break; //0101
+                case 21:
+                    phase = 1;
+                    break;
+                case 22:
+                    phase = 0;
+                    break;
+                case 23:
+                    phase = 1;
+                    break;
+            }
+
+            return phase;
         }
 
         private static void DespawnProjectiles(bool despawnMaelstrom = false)

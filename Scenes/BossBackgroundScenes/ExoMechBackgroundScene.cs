@@ -5,15 +5,17 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Systems
 {
-    public class ExoMechBackgroundScene : ModSceneEffect
+    public class ExoMechBackgroundScene : BaseBiomeVisualSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
+
+        protected override string BiomeVisualKey => "CalamityMod:ExoMechs";
 
         public override bool IsSceneEffectActive(Player player) => ExoMechsSky.CanSkyBeActive || player.Calamity().monolithExoShader > 0;
 
         public override void SpecialVisuals(Player player, bool isActive)
         {
-            player.ManageSpecialBiomeVisuals("CalamityMod:ExoMechs", isActive);
+            base.SpecialVisuals(player, isActive);
             if (isActive)
                 SkyManager.Instance.Activate("CalamityMod:ExoMechs", player.Center);
             else

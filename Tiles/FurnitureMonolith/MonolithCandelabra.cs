@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureMonolith
 {
-    public class MonolithCandelabra : ModTile
+    public class MonolithCandelabra : BaseBlueWhiteFrameLightTile
     {
         public Asset<Texture2D> GlowTexture;
         public Asset<Texture2D> FlameTexture;
@@ -41,22 +41,6 @@ namespace CalamityMod.Tiles.FurnitureMonolith
 
             FlameTexture ??= ModContent.Request<Texture2D>("CalamityMod/Tiles/FurnitureMonolith/MonolithCandelabraFlame");
             Main.spriteBatch.Draw(FlameTexture.Value, drawOffset, new Rectangle?(new Rectangle(xPos, yPos, 18, 18)), Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
-        }
-
-        public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
-        {
-            if (Main.tile[i, j].TileFrameX < 18)
-            {
-                r = 0.8f;
-                g = 0.9f;
-                b = 1f;
-            }
-            else
-            {
-                r = 0f;
-                g = 0f;
-                b = 0f;
-            }
         }
 
         public override void HitWire(int i, int j)

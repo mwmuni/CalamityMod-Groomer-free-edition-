@@ -11,7 +11,17 @@ namespace CalamityMod.Balancing
         void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers);
     }
 
-    public class ClassResistBalancingRule : IBalancingRule
+    public abstract class SourceDamageBalancingRule
+    {
+        protected abstract float SourceDamageMultiplier { get; }
+
+        protected void ApplySourceDamageBalancingChange(ref NPC.HitModifiers modifiers)
+        {
+            modifiers.SourceDamage *= SourceDamageMultiplier;
+        }
+    }
+
+    public class ClassResistBalancingRule : SourceDamageBalancingRule, IBalancingRule
     {
         public float DamageMultiplier;
         public DamageClass ApplicableClass;
@@ -27,16 +37,9 @@ namespace CalamityMod.Balancing
             return modifiers.DamageType.CountsAsClass(ApplicableClass);
         }
 
-        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            // Changed from FinalDamage to SourceDamage to ensure that resists will also apply to on-hit effects.
-            // See this message in the Calamity Dev Discord for full rationale.
-            // https://discord.com/channels/458428222061936650/459003706575421440/1128002932000960592
-            //
-            // There is one limitation to this approach. Flat bonus damage, aka whip tags, won't be reduced.
-            // In the case that summons or whips need to be resisted, the best move is to consider them entirely separately.
-            modifiers.SourceDamage *= DamageMultiplier;
-        }
+        protected override float SourceDamageMultiplier => DamageMultiplier;
+
+        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers) => ApplySourceDamageBalancingChange(ref modifiers);
     }
 
     public class NPCSpecificRequirementBalancingRule : IBalancingRule
@@ -55,7 +58,7 @@ namespace CalamityMod.Balancing
         public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers) { }
     }
 
-    public class PierceResistBalancingRule : IBalancingRule
+    public class PierceResistBalancingRule : SourceDamageBalancingRule, IBalancingRule
     {
         public float DamageMultiplier;
         public PierceResistBalancingRule(float damageMultiplier) => DamageMultiplier = damageMultiplier;
@@ -65,19 +68,12 @@ namespace CalamityMod.Balancing
             return projectile is not null && (projectile.maxPenetrate > 1 || projectile.maxPenetrate == -1);
         }
 
-        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            // Changed from FinalDamage to SourceDamage to ensure that resists will also apply to on-hit effects.
-            // See this message in the Calamity Dev Discord for full rationale.
-            // https://discord.com/channels/458428222061936650/459003706575421440/1128002932000960592
-            //
-            // There is one limitation to this approach. Flat bonus damage, aka whip tags, won't be reduced.
-            // In the case that summons or whips need to be resisted, the best move is to consider them entirely separately.
-            modifiers.SourceDamage *= DamageMultiplier;
-        }
+        protected override float SourceDamageMultiplier => DamageMultiplier;
+
+        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers) => ApplySourceDamageBalancingChange(ref modifiers);
     }
 
-    public class ProjectileResistBalancingRule : IBalancingRule
+    public class ProjectileResistBalancingRule : SourceDamageBalancingRule, IBalancingRule
     {
         public float DamageMultiplier;
         public int[] ApplicableProjectileTypes;
@@ -92,19 +88,12 @@ namespace CalamityMod.Balancing
             return projectile is not null && ApplicableProjectileTypes.Contains(projectile.type);
         }
 
-        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            // Changed from FinalDamage to SourceDamage to ensure that resists will also apply to on-hit effects.
-            // See this message in the Calamity Dev Discord for full rationale.
-            // https://discord.com/channels/458428222061936650/459003706575421440/1128002932000960592
-            //
-            // There is one limitation to this approach. Flat bonus damage, aka whip tags, won't be reduced.
-            // In the case that summons or whips need to be resisted, the best move is to consider them entirely separately.
-            modifiers.SourceDamage *= DamageMultiplier;
-        }
+        protected override float SourceDamageMultiplier => DamageMultiplier;
+
+        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers) => ApplySourceDamageBalancingChange(ref modifiers);
     }
 
-    public class ProjectileSpecificRequirementBalancingRule : IBalancingRule
+    public class ProjectileSpecificRequirementBalancingRule : SourceDamageBalancingRule, IBalancingRule
     {
         public float DamageMultiplier;
         public ProjectileApplicationRequirement Requirement;
@@ -120,20 +109,13 @@ namespace CalamityMod.Balancing
             return projectile is not null && Requirement(projectile);
         }
 
-        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            // Changed from FinalDamage to SourceDamage to ensure that resists will also apply to on-hit effects.
-            // See this message in the Calamity Dev Discord for full rationale.
-            // https://discord.com/channels/458428222061936650/459003706575421440/1128002932000960592
-            //
-            // There is one limitation to this approach. Flat bonus damage, aka whip tags, won't be reduced.
-            // In the case that summons or whips need to be resisted, the best move is to consider them entirely separately.
-            modifiers.SourceDamage *= DamageMultiplier;
-        }
+        protected override float SourceDamageMultiplier => DamageMultiplier;
+
+        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers) => ApplySourceDamageBalancingChange(ref modifiers);
     }
 
     // TODO -- this rule type should be deleted once stealth is finished as its own class
-    public class StealthStrikeBalancingRule : IBalancingRule
+    public class StealthStrikeBalancingRule : SourceDamageBalancingRule, IBalancingRule
     {
         public float DamageMultiplier;
         public int[] ApplicableProjectileTypes;
@@ -148,15 +130,8 @@ namespace CalamityMod.Balancing
             return projectile is not null && (modifiers.DamageType == StealthDamageClass.Instance || projectile.Calamity().stealthStrike);
         }
 
-        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers)
-        {
-            // Changed from FinalDamage to SourceDamage to ensure that resists will also apply to on-hit effects.
-            // See this message in the Calamity Dev Discord for full rationale.
-            // https://discord.com/channels/458428222061936650/459003706575421440/1128002932000960592
-            //
-            // There is one limitation to this approach. Flat bonus damage, aka whip tags, won't be reduced.
-            // In the case that summons or whips need to be resisted, the best move is to consider them entirely separately.
-            modifiers.SourceDamage *= DamageMultiplier;
-        }
+        protected override float SourceDamageMultiplier => DamageMultiplier;
+
+        public void ApplyBalancingChange(NPC npc, ref NPC.HitModifiers modifiers) => ApplySourceDamageBalancingChange(ref modifiers);
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using Terraria;
 
 namespace CalamityMod.Particles
 {
@@ -141,6 +142,29 @@ namespace CalamityMod.Particles
         /// The particle's velocity gets automatically added to its position, and its time automatically increases.
         /// </summary>
         public virtual void Update() { }
+
+        internal void UpdateMediumMist(ref float opacity, Color colorFire, Color colorFade, float spin)
+        {
+            Rotation += spin * ((Velocity.X > 0) ? 1f : -1f);
+            Velocity *= 0.85f;
+
+            if (opacity > 90)
+            {
+                Lighting.AddLight(Position, Color.ToVector3() * 0.1f);
+                Scale += 0.01f;
+                opacity -= 3;
+            }
+            else
+            {
+                Scale *= 0.975f;
+                opacity -= 2;
+            }
+
+            if (opacity < 0)
+                Kill();
+
+            Color = Color.Lerp(colorFire, colorFade, MathHelper.Clamp((float)((255 - opacity) - 100) / 80, 0f, 1f)) * (opacity / 255f);
+        }
 
         /// <summary>
         /// Removes the particle from the handler

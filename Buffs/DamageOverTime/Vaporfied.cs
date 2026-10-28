@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Buffs.DamageOverTime
 {
-    public class Vaporfied : ModBuff
+    public class Vaporfied : DamageOverTimeDebuffBase
     {
         public static DebuffData debuffData = new DebuffData()
         {
@@ -18,10 +18,7 @@ namespace CalamityMod.Buffs.DamageOverTime
         };
         public override void SetStaticDefaults()
         {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = true;
-            BuffID.Sets.LongerExpertDebuff[Type] = true;
+            base.SetStaticDefaults();
             CalamityBuffSets.DebuffDataset[Type] = debuffData;
         }
 

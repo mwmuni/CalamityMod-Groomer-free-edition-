@@ -19,6 +19,55 @@ using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace CalamityMod.Projectiles.Summon
 {
+    internal static class ProfanedSoulCrystalProjectileUtils
+    {
+        internal static bool TryFindTarget(Projectile projectile, float maxDistance, int npcCount, out NPC target, out Vector2 targetCenter)
+        {
+            target = null;
+            targetCenter = projectile.position;
+            float closestDistance = maxDistance;
+            bool foundTarget = false;
+
+            NPC ownerMinionAttackTarget = projectile.OwnerMinionAttackTargetNPC;
+            if (ownerMinionAttackTarget != null && ownerMinionAttackTarget.CanBeChasedBy(projectile, false))
+            {
+                float targetX = ownerMinionAttackTarget.position.X + (float)(ownerMinionAttackTarget.width / 2);
+                float targetY = ownerMinionAttackTarget.position.Y + (float)(ownerMinionAttackTarget.height / 2);
+                float distance = Math.Abs(projectile.position.X + (float)(projectile.width / 2) - targetX) + Math.Abs(projectile.position.Y + (float)(projectile.height / 2) - targetY);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    targetCenter = new Vector2(targetX, targetY);
+                    target = ownerMinionAttackTarget;
+                    foundTarget = true;
+                }
+            }
+
+            if (!foundTarget)
+            {
+                for (int i = 0; i < npcCount; i++)
+                {
+                    NPC candidate = Main.npc[i];
+                    if (candidate.CanBeChasedBy(projectile, false))
+                    {
+                        float targetX = candidate.position.X + (float)(candidate.width / 2);
+                        float targetY = candidate.position.Y + (float)(candidate.height / 2);
+                        float distance = Math.Abs(projectile.position.X + (float)(projectile.width / 2) - targetX) + Math.Abs(projectile.position.Y + (float)(projectile.height / 2) - targetY);
+                        if (distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            targetCenter = new Vector2(targetX, targetY);
+                            target = candidate;
+                            foundTarget = true;
+                        }
+                    }
+                }
+            }
+
+            return foundTarget;
+        }
+    }
+
     #region Mage Projectiles
 
     #region Main Fireball
@@ -258,55 +307,15 @@ namespace CalamityMod.Projectiles.Summon
                 Projectile.penetrate = 1;
                 if (Projectile.timeLeft > 500)
                     Projectile.velocity *= 1.06f;
-                float num535 = Projectile.position.X;
-                float num536 = Projectile.position.Y;
-                float num537 = 3000f;
-                bool flag19 = false;
-                NPC ownerMinionAttackTargetNPC2 = Projectile.OwnerMinionAttackTargetNPC;
-                if (ownerMinionAttackTargetNPC2 != null && ownerMinionAttackTargetNPC2.CanBeChasedBy(Projectile, false))
+                if (ProfanedSoulCrystalProjectileUtils.TryFindTarget(Projectile, 3000f, Main.npc.Length, out NPC foundTarget, out Vector2 targetPosition))
                 {
-                    float num539 = ownerMinionAttackTargetNPC2.position.X + (float)(ownerMinionAttackTargetNPC2.width / 2);
-                    float num540 = ownerMinionAttackTargetNPC2.position.Y + (float)(ownerMinionAttackTargetNPC2.height / 2);
-                    float num541 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num539) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num540);
-                    if (num541 < num537)
-                    {
-                        num537 = num541;
-                        num535 = num539;
-                        num536 = num540;
-                        flag19 = true;
-                        target = ownerMinionAttackTargetNPC2;
-                    }
-                }
-                if (!flag19)
-                {
-                    int num3;
-                    for (int num542 = 0; num542 < Main.npc.Length; num542 = num3 + 1)
-                    {
-                        if (Main.npc[num542].CanBeChasedBy(Projectile, false))
-                        {
-                            float num543 = Main.npc[num542].position.X + (float)(Main.npc[num542].width / 2);
-                            float num544 = Main.npc[num542].position.Y + (float)(Main.npc[num542].height / 2);
-                            float num545 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num543) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num544);
-                            if (num545 < num537)
-                            {
-                                num537 = num545;
-                                num535 = num543;
-                                num536 = num544;
-                                flag19 = true;
-                                target = Main.npc[num542];
-                            }
-                        }
-                        num3 = num542;
-                    }
-                }
-                if (flag19)
-                {
+                    target = foundTarget;
                     if (Projectile.ai[1] == 0f)
                     {
                         float num550 = 24f; //12
                         Vector2 vector43 = Projectile.Center;
-                        float num551 = num535 - vector43.X;
-                        float num552 = num536 - vector43.Y;
+                        float num551 = targetPosition.X - vector43.X;
+                        float num552 = targetPosition.Y - vector43.Y;
                         float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
                         if (num553 < 100f)
                         {
@@ -561,47 +570,9 @@ namespace CalamityMod.Projectiles.Summon
 
         private void swarmAI()
         {
-            float num535 = Projectile.position.X;
-            float num536 = Projectile.position.Y;
-            float num537 = 2000f;
-            bool flag19 = false;
-            NPC ownerMinionAttackTargetNPC2 = Projectile.OwnerMinionAttackTargetNPC;
-            if (ownerMinionAttackTargetNPC2 != null && ownerMinionAttackTargetNPC2.CanBeChasedBy(Projectile, false))
+            if (ProfanedSoulCrystalProjectileUtils.TryFindTarget(Projectile, 2000f, Main.npc.Length, out NPC foundTarget, out Vector2 targetPosition))
             {
-                float num539 = ownerMinionAttackTargetNPC2.position.X + (float)(ownerMinionAttackTargetNPC2.width / 2);
-                float num540 = ownerMinionAttackTargetNPC2.position.Y + (float)(ownerMinionAttackTargetNPC2.height / 2);
-                float num541 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num539) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num540);
-                if (num541 < num537)
-                {
-                    num537 = num541;
-                    num535 = num539;
-                    num536 = num540;
-                    flag19 = true;
-                    target = ownerMinionAttackTargetNPC2;
-                }
-            }
-            if (!flag19)
-            {
-                for (int num542 = 0; num542 < Main.npc.Length; num542++)
-                {
-                    if (Main.npc[num542].CanBeChasedBy(Projectile, false))
-                    {
-                        float num543 = Main.npc[num542].position.X + (float)(Main.npc[num542].width / 2);
-                        float num544 = Main.npc[num542].position.Y + (float)(Main.npc[num542].height / 2);
-                        float num545 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num543) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num544);
-                        if (num545 < num537)
-                        {
-                            num537 = num545;
-                            num535 = num543;
-                            num536 = num544;
-                            flag19 = true;
-                            target = Main.npc[num542];
-                        }
-                    }
-                }
-            }
-            if (flag19)
-            {
+                target = foundTarget;
                 Projectile.tileCollide = false;
                 if (Projectile.timeLeft < 20)
                 {
@@ -611,8 +582,8 @@ namespace CalamityMod.Projectiles.Summon
 
                 float num550 = 40f;
                 Vector2 vector43 = Projectile.Center;
-                float num551 = num535 - vector43.X;
-                float num552 = num536 - vector43.Y;
+                float num551 = targetPosition.X - vector43.X;
+                float num552 = targetPosition.Y - vector43.Y;
                 float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
                 if (num553 < 100f)
                 {
@@ -1002,54 +973,15 @@ namespace CalamityMod.Projectiles.Summon
                     Projectile.rotation -= MathHelper.PiOver2;
                 }
 
-                float num535 = Projectile.position.X;
-                float num536 = Projectile.position.Y;
-                float num537 = 2000f;
-                bool flag19 = false;
-                NPC ownerMinionAttackTargetNPC2 = Projectile.OwnerMinionAttackTargetNPC;
-                if (ownerMinionAttackTargetNPC2 != null && ownerMinionAttackTargetNPC2.CanBeChasedBy(Projectile, false))
-                {
-                    float num539 = ownerMinionAttackTargetNPC2.position.X + (float)(ownerMinionAttackTargetNPC2.width / 2);
-                    float num540 = ownerMinionAttackTargetNPC2.position.Y + (float)(ownerMinionAttackTargetNPC2.height / 2);
-                    float num541 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num539) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num540);
-                    if (num541 < num537)
-                    {
-                        num537 = num541;
-                        num535 = num539;
-                        num536 = num540;
-                        flag19 = true;
-                    }
-                }
-                if (!flag19)
-                {
-                    int num3;
-                    for (int num542 = 0; num542 < Main.maxNPCs; num542 = num3 + 1)
-                    {
-                        if (Main.npc[num542].CanBeChasedBy(Projectile, false))
-                        {
-                            float num543 = Main.npc[num542].position.X + (float)(Main.npc[num542].width / 2);
-                            float num544 = Main.npc[num542].position.Y + (float)(Main.npc[num542].height / 2);
-                            float num545 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num543) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num544);
-                            if (num545 < num537)
-                            {
-                                num537 = num545;
-                                num535 = num543;
-                                num536 = num544;
-                                flag19 = true;
-                            }
-                        }
-                        num3 = num542;
-                    }
-                }
-                if (flag19) //target found
+                if (ProfanedSoulCrystalProjectileUtils.TryFindTarget(Projectile, 2000f, Main.maxNPCs, out _, out Vector2 targetPosition)) //target found
                 {
                     if (Main.rand.NextBool())
                         Projectile.timeLeft++;
                     Projectile.tileCollide = false;
                     float num550 = 40f;
                     Vector2 vector43 = Projectile.Center;
-                    float num551 = num535 - vector43.X;
-                    float num552 = num536 - vector43.Y;
+                    float num551 = targetPosition.X - vector43.X;
+                    float num552 = targetPosition.Y - vector43.Y;
                     float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
                     if (num553 < 100f)
                     {
@@ -1704,51 +1636,14 @@ namespace CalamityMod.Projectiles.Summon
                 }
                 if (Projectile.timeLeft <= 250)
                 {
-                    float num535 = Projectile.position.X;
-                    float num536 = Projectile.position.Y;
-                    float num537 = 3000f;
-                    bool flag19 = false;
-                    NPC ownerMinionAttackTargetNPC2 = Projectile.OwnerMinionAttackTargetNPC;
-                    if (ownerMinionAttackTargetNPC2 != null && ownerMinionAttackTargetNPC2.CanBeChasedBy(Projectile, false))
-                    {
-                        float num539 = ownerMinionAttackTargetNPC2.position.X + (float)(ownerMinionAttackTargetNPC2.width / 2);
-                        float num540 = ownerMinionAttackTargetNPC2.position.Y + (float)(ownerMinionAttackTargetNPC2.height / 2);
-                        float num541 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num539) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num540);
-                        if (num541 < num537)
-                        {
-                            num537 = num541;
-                            num535 = num539;
-                            num536 = num540;
-                            flag19 = true;
-                        }
-                    }
-                    if (!flag19)
-                    {
-                        for (int num542 = 0; num542 < Main.npc.Length; num542++)
-                        {
-                            if (Main.npc[num542].CanBeChasedBy(Projectile, false))
-                            {
-                                float num543 = Main.npc[num542].position.X + (float)(Main.npc[num542].width / 2);
-                                float num544 = Main.npc[num542].position.Y + (float)(Main.npc[num542].height / 2);
-                                float num545 = Math.Abs(Projectile.position.X + (float)(Projectile.width / 2) - num543) + Math.Abs(Projectile.position.Y + (float)(Projectile.height / 2) - num544);
-                                if (num545 < num537)
-                                {
-                                    num537 = num545;
-                                    num535 = num543;
-                                    num536 = num544;
-                                    flag19 = true;
-                                }
-                            }
-                        }
-                    }
-                    if (flag19)
+                    if (ProfanedSoulCrystalProjectileUtils.TryFindTarget(Projectile, 3000f, Main.npc.Length, out _, out Vector2 targetPosition))
                     {
                         if (Projectile.ai[1] == 0f)
                         {
                             float num550 = 24f; //12
                             Vector2 vector43 = Projectile.Center;
-                            float num551 = num535 - vector43.X;
-                            float num552 = num536 - vector43.Y;
+                            float num551 = targetPosition.X - vector43.X;
+                            float num552 = targetPosition.Y - vector43.Y;
                             float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
                             if (num553 < 100f)
                             {

@@ -2337,13 +2337,6 @@ namespace CalamityMod.NPCs
                 // Reduce prehardmode desert enemy stats
                 case NPCID.WalkingAntlion:
                 case NPCID.GiantWalkingAntlion:
-                    npc.lifeMax = (int)Math.Round(npc.lifeMax * DesertEnemyStatMultiplier);
-                    npc.damage = (int)Math.Round(npc.damage * DesertEnemyStatMultiplier);
-                    npc.defDamage = npc.damage;
-                    npc.defense /= 2;
-                    npc.defDefense = npc.defense;
-                    break;
-
                 case NPCID.Antlion:
                 case NPCID.FlyingAntlion:
                 case NPCID.GiantFlyingAntlion:
@@ -3739,18 +3732,7 @@ namespace CalamityMod.NPCs
             if (projectile.type == ProjectileType<HyperiusDamage>() || projectile.type == ProjectileType<HyperiusBleed>())
             {
                 float rate = Main.GlobalTimeWrappedHourly * 3f;
-                List<Color> eColors =
-                [
-                    Color.Yellow,
-                    Color.Magenta,
-                    Color.Red,
-                    Color.Cyan,
-                    Color.Lime
-                ];
-                int colorIndex = (int)(rate / 2 % eColors.Count);
-                Color currentColor = eColors[colorIndex];
-                Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
-                Color usedColor = Color.Lerp(currentColor, nextColor, rate % 2f > 1f ? 1f : rate % 1f);
+                Color usedColor = GetHyperiusColor(rate);
 
                 CombatText.NewText(npc.Hitbox, usedColor, damagedone, hit.Crit, true);
             }
@@ -4579,18 +4561,7 @@ namespace CalamityMod.NPCs
             if (hyperiusFxTimer > 0)
             {
                 float rate = (Main.GlobalTimeWrappedHourly * 5);
-                List<Color> eColors =
-                [
-                    Color.Yellow,
-                    Color.Magenta,
-                    Color.Red,
-                    Color.Cyan,
-                    Color.Lime
-                ];
-                int colorIndex = (int)(rate / 2 % eColors.Count);
-                Color currentColor = eColors[colorIndex];
-                Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
-                Color usedColor = Color.Lerp(currentColor, nextColor, rate % 2f > 1f ? 1f : rate % 1f);
+                Color usedColor = GetHyperiusColor(rate);
 
                 Texture2D tex2 = Request<Texture2D>("CalamityMod/Particles/BloomCircle").Value;
                 Texture2D sparkle = Request<Texture2D>("CalamityMod/Particles/BloomLineSoftEdge").Value;
@@ -4844,33 +4815,38 @@ namespace CalamityMod.NPCs
             ("CalamityMod/Buffs/StatDebuffs/WitherDebuff", NPC => NPC.Calamity().wither),
         };
 
+        private static bool IsVanillaBestiaryWorm(int npcNetID)
+        {
+            switch (npcNetID)
+            {
+                case NPCID.DiggerHead:
+                case NPCID.GiantWormHead:
+                case NPCID.EaterofWorldsHead:
+                case NPCID.WyvernHead:
+                case NPCID.StardustWormHead:
+                case NPCID.SolarCrawltipedeHead:
+                case NPCID.CultistDragonHead:
+                case NPCID.TheDestroyer:
+                case NPCID.LeechHead:
+                case NPCID.DevourerHead:
+                case NPCID.TombCrawlerHead:
+                case NPCID.DuneSplicerHead:
+                case NPCID.BloodEelHead:
+                case NPCID.BoneSerpentHead:
+                case NPCID.SeekerHead:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public override bool PreDraw(NPC npc, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             // This is used so that NPCs with specific PreDraws can still draw everything in this hook.
             bool shouldDrawBool = true;
 
-            if (npc.IsABestiaryIconDummy)
-            {
-                switch (npc.netID)
-                {
-                    case NPCID.DiggerHead:
-                    case NPCID.GiantWormHead:
-                    case NPCID.EaterofWorldsHead:
-                    case NPCID.WyvernHead:
-                    case NPCID.StardustWormHead:
-                    case NPCID.SolarCrawltipedeHead:
-                    case NPCID.CultistDragonHead:
-                    case NPCID.TheDestroyer:
-                    case NPCID.LeechHead:
-                    case NPCID.DevourerHead:
-                    case NPCID.TombCrawlerHead:
-                    case NPCID.DuneSplicerHead:
-                    case NPCID.BloodEelHead:
-                    case NPCID.BoneSerpentHead:
-                    case NPCID.SeekerHead:
-                        return DrawVanillaBestiaryWorms(spriteBatch, npc, drawColor);
-                }
-            }
+            if (npc.IsABestiaryIconDummy && IsVanillaBestiaryWorm(npc.netID))
+                return DrawVanillaBestiaryWorms(spriteBatch, npc, drawColor);
 
             if (caneInsanityTimer > 0)
             {
@@ -5090,6 +5066,22 @@ namespace CalamityMod.NPCs
             newColor.B = (byte)((float)newColor.B * B);
             newColor.A = (byte)((float)newColor.A * A);
             return newColor;
+        }
+
+        private static Color GetHyperiusColor(float rate)
+        {
+            List<Color> eColors =
+            [
+                Color.Yellow,
+                Color.Magenta,
+                Color.Red,
+                Color.Cyan,
+                Color.Lime
+            ];
+            int colorIndex = (int)(rate / 2 % eColors.Count);
+            Color currentColor = eColors[colorIndex];
+            Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
+            return Color.Lerp(currentColor, nextColor, rate % 2f > 1f ? 1f : rate % 1f);
         }
 
         public static bool DrawVanillaBestiaryWorms(SpriteBatch spriteBatch, NPC npc, Color drawColor)
@@ -5977,26 +5969,8 @@ namespace CalamityMod.NPCs
                 bestiaryEntry.AddTags(BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.SurfaceMushroom);
 
             // Remove the static portraits from vanilla worms so that Calamity's worm movement can be added in PreDraw
-            switch (npc.netID)
-            {
-                case NPCID.DiggerHead:
-                case NPCID.GiantWormHead:
-                case NPCID.EaterofWorldsHead:
-                case NPCID.WyvernHead:
-                case NPCID.StardustWormHead:
-                case NPCID.SolarCrawltipedeHead:
-                case NPCID.CultistDragonHead:
-                case NPCID.TheDestroyer:
-                case NPCID.LeechHead:
-                case NPCID.DevourerHead:
-                case NPCID.TombCrawlerHead:
-                case NPCID.DuneSplicerHead:
-                case NPCID.BloodEelHead:
-                case NPCID.BoneSerpentHead:
-                case NPCID.SeekerHead:
-                    NPCID.Sets.NPCBestiaryDrawOffset[npc.type] = NPCID.Sets.NPCBestiaryDrawOffset[npc.type] with { CustomTexturePath = null };
-                    break;
-            }
+            if (IsVanillaBestiaryWorm(npc.netID))
+                NPCID.Sets.NPCBestiaryDrawOffset[npc.type] = NPCID.Sets.NPCBestiaryDrawOffset[npc.type] with { CustomTexturePath = null };
         }
 
         public static string NPCDebuffResistText(bool? effectiveness, string name)

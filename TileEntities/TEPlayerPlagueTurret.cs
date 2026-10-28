@@ -1,5 +1,4 @@
-﻿using System.IO;
-using CalamityMod.Projectiles.Turret;
+﻿using CalamityMod.Projectiles.Turret;
 using CalamityMod.Tiles.PlayerTurrets;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -8,7 +7,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.TileEntities
 {
-    public class TEPlayerPlagueTurret : TEBaseTurret
+    public class TEPlayerPlagueTurret : TENPCTargetingTurret
     {
         // Tile which hosts this tile entity
         public override int TileType => ModContent.TileType<PlayerPlagueTurret>();
@@ -33,20 +32,6 @@ namespace CalamityMod.TileEntities
         protected override float MaxDeltaAnglePerFrame => MathHelper.ToRadians(6f);
         protected override float CloseAimThreshold => MathHelper.ToRadians(12f);
         protected override float CloseAimLerpFactor => 0.08f;
-
-        // Variables specific to this turret subclass
-        private int _npcTargetIndex = -1;
-        public int NPCTargetIndex
-        {
-            get => _npcTargetIndex;
-            set
-            {
-                bool sync = _npcTargetIndex != value;
-                _npcTargetIndex = value;
-                if (sync)
-                    SendSyncPacket();
-            }
-        }
 
         // Lab turrets specifically must be placed on the top left corner of their host tile.
         // This restriction is not shared by general turrets for flexibility reasons.
@@ -89,33 +74,5 @@ namespace CalamityMod.TileEntities
             return ret;
         }
 
-        // Makes turrets track their targeted player correctly client side.
-        // This doesn't improve their actual accuracy, because they only fire server side.
-        // However, it makes them rotate much more smoothly.
-        // Any targeting and rotation data derived from this update will be overridden by the turret's next sync.
-        public override void UpdateClient()
-        {
-            if (NPCTargetIndex != -1)
-            {
-                NPC npc = Main.npc[NPCTargetIndex];
-                if (npc.active)
-                    TargetPos = npc.Center;
-            }
-        }
-
-        // This type of turret syncs extra data: its player target index.
-        // This only takes 2 bytes so a junk array is written for the remainder of the space.
-        private const int BytesUsed = 2;
-        private static readonly byte[] JunkData = new byte[NumExtraBytes - BytesUsed];
-        public override void WriteExtraTurretData(BinaryWriter writer)
-        {
-            writer.Write((short)_npcTargetIndex);
-            writer.Write(JunkData);
-        }
-        public override void ReadExtraTurretData(BinaryReader reader)
-        {
-            _npcTargetIndex = reader.ReadInt16();
-            _ = reader.ReadBytes(NumExtraBytes - BytesUsed);
-        }
     }
 }

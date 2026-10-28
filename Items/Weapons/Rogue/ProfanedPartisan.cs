@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Weapons.Rogue
 {
-    public class ProfanedPartisan : RogueWeapon
+    public class ProfanedPartisan : ConditionalStealthStrikeRogueWeapon
     {
         public static int SpearBaseDamage => 125;
         public static int StarBaseDamage => 80;
@@ -40,18 +40,6 @@ namespace CalamityMod.Items.Weapons.Rogue
             Item.autoReuse = true;
             Item.shootSpeed = 6f;
             Item.shoot = ModContent.ProjectileType<ProfanedPartisanProj>();
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            if (player.Calamity().StealthStrikeAvailable()) //setting the stealth strike
-            {
-                int stealth = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-                if (stealth.WithinBounds(Main.maxProjectiles))
-                    Main.projectile[stealth].Calamity().stealthStrike = true;
-                return false;
-            }
-            return true;
         }
 
         public override void AddRecipes()

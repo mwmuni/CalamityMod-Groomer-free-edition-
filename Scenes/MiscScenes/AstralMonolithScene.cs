@@ -3,15 +3,12 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Systems
 {
-    public class AstralMonolithScene : ModSceneEffect
+    public class AstralMonolithScene : BaseBiomeVisualSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.Environment;
 
-        public override bool IsSceneEffectActive(Player player) => Main.LocalPlayer.Calamity().monolithAstralShader > 0;
+        protected override string BiomeVisualKey => "CalamityMod:Astral";
 
-        public override void SpecialVisuals(Player player, bool isActive)
-        {
-            player.ManageSpecialBiomeVisuals("CalamityMod:Astral", isActive);
-        }
+        public override bool IsSceneEffectActive(Player player) => Main.LocalPlayer.Calamity().monolithAstralShader > 0;
     }
 }

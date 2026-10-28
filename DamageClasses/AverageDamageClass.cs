@@ -2,14 +2,9 @@
 
 namespace CalamityMod
 {
-    public class AverageDamageClass : DamageClass
+    public class AverageDamageClass : CalamityDamageClass<AverageDamageClass>
     {
-        internal static AverageDamageClass Instance;
-
         internal static readonly StatInheritanceData TwentyPercentBoost = new(0.2f, 0.2f, 0.2f, 0.2f, 0.2f);
-
-        public override void Load() => Instance = this;
-        public override void Unload() => Instance = null;
 
         public override StatInheritanceData GetModifierInheritance(DamageClass damageClass)
         {

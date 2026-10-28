@@ -1,5 +1,4 @@
-﻿using System.IO;
-using CalamityMod.Projectiles.Turret;
+﻿using CalamityMod.Projectiles.Turret;
 using CalamityMod.Tiles.DraedonStructures;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -7,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.TileEntities
 {
-    public class TEHostilePlagueTurret : TEBaseTurret
+    public class TEHostilePlagueTurret : TEHostileTargetingTurret
     {
         // Tile which hosts this tile entity
         public override int TileType => ModContent.TileType<HostilePlagueTurret>();
@@ -33,20 +32,6 @@ namespace CalamityMod.TileEntities
         protected override float CloseAimThreshold => MathHelper.ToRadians(12f);
         protected override float CloseAimLerpFactor => 0.08f;
 
-        // Variables specific to this turret subclass
-        private int _playerTargetIndex = -1;
-        public int PlayerTargetIndex
-        {
-            get => _playerTargetIndex;
-            set
-            {
-                bool sync = _playerTargetIndex != value;
-                _playerTargetIndex = value;
-                if (sync)
-                    SendSyncPacket();
-            }
-        }
-
         // Lab turrets specifically must be placed on the top left corner of their host tile.
         // This restriction is not shared by general turrets for flexibility reasons.
         public override bool IsTileValidForEntity(int x, int y)
@@ -55,82 +40,5 @@ namespace CalamityMod.TileEntities
             return tile.HasTile && tile.TileType == TileType && tile.TileFrameX == 0 && tile.TileFrameY == 0;
         }
 
-        protected override Vector2 ChooseTarget(Vector2 targetingCenter)
-        {
-            // Store the value that will be set into PlayerTargetIndex here.
-            // This local is used because changing the actual field will trigger a netcode auto-sync.
-            int indexToSet = PlayerTargetIndex;
-
-            // If a player is already targeted, make sure they still exist and aren't dead.
-            if (indexToSet != -1)
-            {
-                Player p = Main.player[PlayerTargetIndex];
-
-                // If they don't exist, are dead, or are using an invis pot then unmark them as a target and search for a new one.
-                if (!p.active || p.dead || p.invis)
-                    indexToSet = -1;
-                else
-                {
-                    // If the existing target player is close enough, return their position. Otherwise unmark them as a target.
-                    Vector2 playerPos = p.Center;
-                    float distSQ = Vector2.DistanceSquared(targetingCenter, playerPos);
-                    if (distSQ <= MaxRange * MaxRange)
-                        return playerPos;
-                    else
-                        indexToSet = -1;
-                }
-            }
-
-            // No valid target currently exists. Loop through players (efficiently!) to look for the closest new target.
-            Vector2 ret = InvalidTarget;
-            float distSQToBeat = MaxRange * MaxRange;
-
-            foreach (Player p in Main.ActivePlayers)
-            {
-                if (p.dead || p.invis)
-                    continue;
-
-                float distSQ = p.DistanceSQ(targetingCenter);
-                if (distSQ < distSQToBeat)
-                {
-                    distSQToBeat = distSQ;
-                    ret = p.Center;
-                    indexToSet = p.whoAmI;
-                }
-            }
-
-            // Set PlayerTargetIndex now that we're sure what we're targeting. This triggers a netcode sync if the value is different.
-            PlayerTargetIndex = indexToSet;
-            return ret;
-        }
-
-        // Makes turrets track their targeted player correctly client side.
-        // This doesn't improve their actual accuracy, because they only fire server side.
-        // However, it makes them rotate much more smoothly.
-        // Any targeting and rotation data derived from this update will be overridden by the turret's next sync.
-        public override void UpdateClient()
-        {
-            if (PlayerTargetIndex != -1)
-            {
-                Player p = Main.player[PlayerTargetIndex];
-                if (p.active && !p.dead)
-                    TargetPos = p.Center;
-            }
-        }
-
-        // This type of turret syncs extra data: its player target index.
-        // This only takes 2 bytes so a junk array is written for the remainder of the space.
-        private const int BytesUsed = 2;
-        private static readonly byte[] JunkData = new byte[NumExtraBytes - BytesUsed];
-        public override void WriteExtraTurretData(BinaryWriter writer)
-        {
-            writer.Write((short)_playerTargetIndex);
-            writer.Write(JunkData);
-        }
-        public override void ReadExtraTurretData(BinaryReader reader)
-        {
-            _playerTargetIndex = reader.ReadInt16();
-            _ = reader.ReadBytes(NumExtraBytes - BytesUsed);
-        }
     }
 }

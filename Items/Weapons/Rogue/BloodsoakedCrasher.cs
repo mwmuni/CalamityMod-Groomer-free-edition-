@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Weapons.Rogue
 {
-    public class BloodsoakedCrasher : RogueWeapon //This weapon has been coded by Ben || Termi
+    public class BloodsoakedCrasher : StealthStrikeRogueWeapon //This weapon has been coded by Ben || Termi
     {
         public override void SetStaticDefaults()
         {
@@ -35,14 +35,6 @@ namespace CalamityMod.Items.Weapons.Rogue
             Item.UseSound = SoundID.Item1;
             Item.value = CalamityGlobalItem.RarityTurquoiseBuyPrice;
             Item.rare = ModContent.RarityType<Turquoise>();
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-            if (proj.WithinBounds(Main.maxProjectiles))
-                Main.projectile[proj].Calamity().stealthStrike = player.Calamity().StealthStrikeAvailable();
-            return false;
         }
 
         public override void AddRecipes()

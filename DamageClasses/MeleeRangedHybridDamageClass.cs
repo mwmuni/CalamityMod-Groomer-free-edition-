@@ -2,14 +2,9 @@
 
 namespace CalamityMod
 {
-    public class MeleeRangedHybridDamageClass : DamageClass
+    public class MeleeRangedHybridDamageClass : CalamityDamageClass<MeleeRangedHybridDamageClass>
     {
-        internal static MeleeRangedHybridDamageClass Instance;
-
         internal static readonly StatInheritanceData FiftyPercentBoost = new(0.5f, 0.5f, 0.5f, 0.5f, 0.5f);
-
-        public override void Load() => Instance = this;
-        public override void Unload() => Instance = null;
 
         public override StatInheritanceData GetModifierInheritance(DamageClass damageClass)
         {

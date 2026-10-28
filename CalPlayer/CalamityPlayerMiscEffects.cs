@@ -2490,21 +2490,7 @@ namespace CalamityMod.CalPlayer
             {
                 persecutedEnchantSummonTimer = 0;
                 if (Main.myPlayer == Player.whoAmI && persecutedEnchant)
-                {
-                    if (NPC.CountNPCS(ModContent.NPCType<DemonPortal>()) < 2)
-                    {
-                        int tries = 0;
-                        Vector2 spawnPosition;
-                        Vector2 spawnPositionOffset = Vector2.One * 24f;
-                        do
-                        {
-                            spawnPosition = Player.Center + Main.rand.NextVector2Unit() * Main.rand.NextFloat(270f, 420f);
-                            tries++;
-                        }
-                        while (Collision.SolidCollision(spawnPosition - spawnPositionOffset, 48, 24) && tries < 100);
-                        CalamityNetcode.NewNPC_ClientSide(spawnPosition, ModContent.NPCType<DemonPortal>(), Player);
-                    }
-                }
+                    SpawnPersecutedDemonPortalIfNeeded();
             }
             if (Player.miscCounter % HydrothermicHeadRanged.FlareCooldown == 0)
                 canFireAtaxiaRangedProjectile = true;
@@ -3168,6 +3154,23 @@ namespace CalamityMod.CalPlayer
             {
                 if (Player.shadowDodgeTimer < 2)
                     Player.shadowDodgeTimer = 2;
+            }
+        }
+
+        private void SpawnPersecutedDemonPortalIfNeeded()
+        {
+            if (NPC.CountNPCS(ModContent.NPCType<DemonPortal>()) < 2)
+            {
+                int tries = 0;
+                Vector2 spawnPosition;
+                Vector2 spawnPositionOffset = Vector2.One * 24f;
+                do
+                {
+                    spawnPosition = Player.Center + Main.rand.NextVector2Unit() * Main.rand.NextFloat(270f, 420f);
+                    tries++;
+                }
+                while (Collision.SolidCollision(spawnPosition - spawnPositionOffset, 48, 24) && tries < 100);
+                CalamityNetcode.NewNPC_ClientSide(spawnPosition, ModContent.NPCType<DemonPortal>(), Player);
             }
         }
         #endregion

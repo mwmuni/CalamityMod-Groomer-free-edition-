@@ -10,7 +10,7 @@ using CalamityMod.Systems.Collections;
 
 namespace CalamityMod.Buffs.DamageOverTime
 {
-    public class HeavyBleeding : ModBuff
+    public class HeavyBleeding : DamageOverTimeDebuffBase
     {
         public static DebuffData debuffData = new DebuffData()
         {
@@ -18,10 +18,7 @@ namespace CalamityMod.Buffs.DamageOverTime
         };
         public override void SetStaticDefaults()
         {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = true;
-            BuffID.Sets.LongerExpertDebuff[Type] = true;
+            base.SetStaticDefaults();
             CalamityBuffSets.DebuffDataset[Type] = debuffData;
         }
 

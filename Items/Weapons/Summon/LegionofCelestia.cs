@@ -13,7 +13,7 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Weapons.Summon
 {
     [LegacyName("ElementalAxe")]
-    public class LegionofCelestia : ModItem, ILocalizedModType
+    public class LegionofCelestia : SummonStaff, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Weapons.Summon";
         public override void SetStaticDefaults()
@@ -42,14 +42,6 @@ namespace CalamityMod.Items.Weapons.Summon
         public override void UseStyle(Player player, Rectangle heldItemFrame)
         {
             player.itemLocation += new Vector2(-20f * player.direction, 34f * player.gravDir).RotatedBy(player.itemRotation);
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            player.AddBuff(Item.buffType, 2);
-            var minion = Projectile.NewProjectileDirect(source, player.ClampedMouseWorld(), Vector2.Zero, type, damage, knockback, player.whoAmI);
-            minion.originalDamage = Item.damage;
-            return false;
         }
 
         public override void PostDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, float rotation, float scale, int whoAmI) => Item.DrawItemGlowmaskSingleFrame(spriteBatch, rotation, ModContent.Request<Texture2D>("CalamityMod/Items/Weapons/Summon/LegionofCelestiaGlow").Value);

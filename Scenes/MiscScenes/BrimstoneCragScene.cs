@@ -3,15 +3,12 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Systems
 {
-    public class BrimstoneCragScene : ModSceneEffect
+    public class BrimstoneCragScene : BaseBiomeVisualSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.Environment;
 
-        public override bool IsSceneEffectActive(Player player) => player.Calamity().ZoneCalamity;
+        protected override string BiomeVisualKey => "CalamityMod:BrimstoneCrag";
 
-        public override void SpecialVisuals(Player player, bool isActive)
-        {
-            player.ManageSpecialBiomeVisuals("CalamityMod:BrimstoneCrag", isActive);
-        }
+        public override bool IsSceneEffectActive(Player player) => player.Calamity().ZoneCalamity;
     }
 }

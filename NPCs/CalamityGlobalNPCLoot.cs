@@ -72,6 +72,12 @@ namespace CalamityMod.NPCs
             // Convenient shortcut for all Master drops moved to Revengeance
             LeadingConditionRule rev = npcLoot.DefineConditionalDropSet(DropHelper.RevNoMaster);
 
+            void AddRevengeanceMasterBossDrops(int trophyItemId, int petOrMountItemId)
+            {
+                rev.Add(trophyItemId);
+                rev.Add(petOrMountItemId, 4);
+            }
+
             // Convenient shortcut for all GFB drops
             LeadingConditionRule GFB = npcLoot.DefineConditionalDropSet(DropHelper.GFB);
 
@@ -714,15 +720,13 @@ namespace CalamityMod.NPCs
                 // Dark Mage T3
                 // Master items drop in Revengeance
                 case NPCID.DD2DarkMageT3:
-                    rev.Add(ItemID.DarkMageMasterTrophy);
-                    rev.Add(ItemID.DarkMageBookMountItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.DarkMageMasterTrophy, ItemID.DarkMageBookMountItem);
                     break;
 
                 // Ogre T3
                 // Master items drop in Revengeance
                 case NPCID.DD2OgreT3:
-                    rev.Add(ItemID.OgreMasterTrophy);
-                    rev.Add(ItemID.DD2OgrePetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.OgreMasterTrophy, ItemID.DD2OgrePetItem);
                     break;
                 #endregion
 
@@ -746,8 +750,7 @@ namespace CalamityMod.NPCs
                 // Flying Dutchman
                 // Master items drop in Revengeance
                 case NPCID.PirateShip:
-                    rev.Add(ItemID.FlyingDutchmanMasterTrophy);
-                    rev.Add(ItemID.PirateShipMountItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.FlyingDutchmanMasterTrophy, ItemID.PirateShipMountItem);
                     break;
                 #endregion
 
@@ -983,8 +986,7 @@ namespace CalamityMod.NPCs
                     catch (ArgumentNullException) { }
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.UFOMasterTrophy);
-                    rev.Add(ItemID.MartianPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.UFOMasterTrophy, ItemID.MartianPetItem);
                     break;
                 #endregion
 
@@ -1089,8 +1091,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.KingSlimeMasterTrophy);
-                    rev.Add(ItemID.KingSlimePetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.KingSlimeMasterTrophy, ItemID.KingSlimePetItem);
 
                     // GFB Aureus Cell drop
                     GFB.Add(DropHelper.PerPlayer(ModContent.ItemType<AureusCell>(), 1, 45, 55));
@@ -1109,8 +1110,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.EyeofCthulhuMasterTrophy);
-                    rev.Add(ItemID.EyeOfCthulhuPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.EyeofCthulhuMasterTrophy, ItemID.EyeOfCthulhuPetItem);
 
                     // GFB Optic Staff drop
                     GFB.Add(DropHelper.PerPlayer(ItemID.OpticStaff), hideLootReport: true);
@@ -1158,8 +1158,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.BrainofCthulhuMasterTrophy);
-                    rev.Add(ItemID.BrainOfCthulhuPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.BrainofCthulhuMasterTrophy, ItemID.BrainOfCthulhuPetItem);
 
                     // GFB Occult Skull Crown drop
                     GFB.Add(DropHelper.PerPlayer(ModContent.ItemType<OccultSkullCrown>()), hideLootReport: true);
@@ -1209,8 +1208,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.DeerclopsMasterTrophy);
-                    rev.Add(ItemID.DeerclopsPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.DeerclopsMasterTrophy, ItemID.DeerclopsPetItem);
                     break;
 
                 case NPCID.QueenBee:
@@ -1237,8 +1235,7 @@ namespace CalamityMod.NPCs
                     npcLoot.Add(ItemID.Stinger, 1, 8, 12);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.QueenBeeMasterTrophy);
-                    rev.Add(ItemID.QueenBeePetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.QueenBeeMasterTrophy, ItemID.QueenBeePetItem);
 
                     // GFB Lavaproof Bug Net and Alchemical Flask drop
                     GFB.Add(DropHelper.PerPlayer(ItemID.FireproofBugNet), hideLootReport: true);
@@ -1268,8 +1265,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.SkeletronMasterTrophy);
-                    rev.Add(ItemID.SkeletronPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.SkeletronMasterTrophy, ItemID.SkeletronPetItem);
 
                     // GFB Flamethrower drop
                     GFB.Add(DropHelper.PerPlayer(ItemID.Flamethrower), hideLootReport: true);
@@ -1348,8 +1344,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.WallofFleshMasterTrophy);
-                    rev.Add(ItemID.WallOfFleshGoatMountItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.WallofFleshMasterTrophy, ItemID.WallOfFleshGoatMountItem);
 
                     // GFB Eye of Magnus and Flesh Wall drops
                     GFB.Add(DropHelper.PerPlayer(ModContent.ItemType<EyeofMagnus>()), hideLootReport: true);
@@ -1370,8 +1365,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.QueenSlimeMasterTrophy);
-                    rev.Add(ItemID.QueenSlimePetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.QueenSlimeMasterTrophy, ItemID.QueenSlimePetItem);
 
                     // GFB Bottomless Shimmer Bucket drop
                     GFB.Add(DropHelper.PerPlayer(ItemID.BottomlessShimmerBucket), hideLootReport: true);
@@ -1395,8 +1389,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.DestroyerMasterTrophy);
-                    rev.Add(ItemID.DestroyerPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.DestroyerMasterTrophy, ItemID.DestroyerPetItem);
 
                     // GFB Bloodworm drop
                     GFB.Add(DropHelper.PerPlayer(ModContent.ItemType<BloodwormItem>()), hideLootReport: true);
@@ -1464,8 +1457,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.SkeletronPrimeMasterTrophy);
-                    rev.Add(ItemID.SkeletronPrimePetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.SkeletronPrimeMasterTrophy, ItemID.SkeletronPrimePetItem);
 
                     // GFB Bone Wings drop
                     GFB.Add(DropHelper.PerPlayer(ItemID.BoneWings), hideLootReport: true);
@@ -1525,8 +1517,7 @@ namespace CalamityMod.NPCs
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.PlanteraMasterTrophy);
-                    rev.Add(ItemID.PlanteraPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.PlanteraMasterTrophy, ItemID.PlanteraPetItem);
 
                     // GFB Life Fruit drop
                     GFB.Add(DropHelper.PerPlayer(ItemID.LifeFruit, 1, 1, 9999), true);
@@ -1584,8 +1575,7 @@ namespace CalamityMod.NPCs
                     npcLoot.Add(firstGolemKill);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.GolemMasterTrophy);
-                    rev.Add(ItemID.GolemPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.GolemMasterTrophy, ItemID.GolemPetItem);
 
                     // GFB Vision Potion drop
                     GFB.Add(DropHelper.PerPlayer(ItemID.NightOwlPotion, 1, 1, 9999), true);
@@ -1624,8 +1614,7 @@ namespace CalamityMod.NPCs
                     catch (ArgumentNullException) { }
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.BetsyMasterTrophy);
-                    rev.Add(ItemID.DD2BetsyPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.BetsyMasterTrophy, ItemID.DD2BetsyPetItem);
 
                     break;
 
@@ -1674,8 +1663,7 @@ DukeEditFailed:
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.DukeFishronMasterTrophy);
-                    rev.Add(ItemID.DukeFishronPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.DukeFishronMasterTrophy, ItemID.DukeFishronPetItem);
 
                     // GFB Old Die and Fish drop
                     GFB.Add(DropHelper.PerPlayer(ModContent.ItemType<OldDie>()), hideLootReport: true);
@@ -1744,8 +1732,7 @@ DukeEditFailed:
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.FairyQueenMasterTrophy);
-                    rev.Add(ItemID.FairyQueenPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.FairyQueenMasterTrophy, ItemID.FairyQueenPetItem);
 
                     // GFB Purple Haze and Terraformer drop
                     GFB.Add(DropHelper.PerPlayer(ModContent.ItemType<PurpleHaze>(), 1, 1, 9999), true);
@@ -1758,8 +1745,7 @@ DukeEditFailed:
 
                 case NPCID.CultistBoss:
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.LunaticCultistMasterTrophy);
-                    rev.Add(ItemID.LunaticCultistPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.LunaticCultistMasterTrophy, ItemID.LunaticCultistPetItem);
 
                     npcLoot.Add(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
@@ -1811,8 +1797,7 @@ DukeEditFailed:
                     npcLoot.AddNormalOnly(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
 
                     // Master items drop in Revengeance
-                    rev.Add(ItemID.MoonLordMasterTrophy);
-                    rev.Add(ItemID.MoonLordPetItem, 4);
+                    AddRevengeanceMasterBossDrops(ItemID.MoonLordMasterTrophy, ItemID.MoonLordPetItem);
 
                     // GFB Calamari's Lament drop
                     GFB.Add(DropHelper.PerPlayer(ModContent.ItemType<CalamarisLament>()), hideLootReport: true);

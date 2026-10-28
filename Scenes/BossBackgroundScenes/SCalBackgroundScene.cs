@@ -5,15 +5,12 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Systems
 {
-    public class SCalBackgroundScene : ModSceneEffect
+    public class SCalBackgroundScene : BaseBiomeVisualSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
 
-        public override bool IsSceneEffectActive(Player player) => NPC.AnyNPCs(ModContent.NPCType<SupremeCalamitas>()) || SCalSky.OverridingIntensity > 0f;
+        protected override string BiomeVisualKey => "CalamityMod:SupremeCalamitas";
 
-        public override void SpecialVisuals(Player player, bool isActive)
-        {
-            player.ManageSpecialBiomeVisuals("CalamityMod:SupremeCalamitas", isActive);
-        }
+        public override bool IsSceneEffectActive(Player player) => NPC.AnyNPCs(ModContent.NPCType<SupremeCalamitas>()) || SCalSky.OverridingIntensity > 0f;
     }
 }

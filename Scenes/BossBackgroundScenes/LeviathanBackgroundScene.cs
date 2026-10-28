@@ -4,15 +4,12 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Systems
 {
-    public class LeviathanBackgroundScene : ModSceneEffect
+    public class LeviathanBackgroundScene : BaseBiomeVisualSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossMedium;
 
-        public override bool IsSceneEffectActive(Player player) => (Main.zenithWorld ? NPC.AnyNPCs(ModContent.NPCType<Anahita>()) : NPC.AnyNPCs(ModContent.NPCType<Leviathan>())) || Main.LocalPlayer.Calamity().monolithLeviathanShader > 0;
+        protected override string BiomeVisualKey => "CalamityMod:Leviathan";
 
-        public override void SpecialVisuals(Player player, bool isActive)
-        {
-            player.ManageSpecialBiomeVisuals("CalamityMod:Leviathan", isActive);
-        }
+        public override bool IsSceneEffectActive(Player player) => (Main.zenithWorld ? NPC.AnyNPCs(ModContent.NPCType<Anahita>()) : NPC.AnyNPCs(ModContent.NPCType<Leviathan>())) || Main.LocalPlayer.Calamity().monolithLeviathanShader > 0;
     }
 }

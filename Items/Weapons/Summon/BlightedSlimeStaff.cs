@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Weapons.Summon
 {
     [LegacyName("CorroslimeStaff", "CrimslimeStaff")]
-    public class BlightedSlimeStaff : ModItem, ILocalizedModType
+    public class BlightedSlimeStaff : SummonStaff, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Weapons.Summon";
         public override void SetDefaults()
@@ -31,12 +31,5 @@ namespace CalamityMod.Items.Weapons.Summon
             Item.DamageType = DamageClass.Summon;
         }
 
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            player.AddBuff(Item.buffType, 2);
-            var minion = Projectile.NewProjectileDirect(source, player.ClampedMouseWorld(), Vector2.Zero, type, damage, knockback, player.whoAmI);
-            minion.originalDamage = Item.damage;
-            return false;
-        }
     }
 }

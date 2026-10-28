@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Buffs.DamageOverTime
 {
-    public class WindChilled : ModBuff
+    public class WindChilled : DamageOverTimeDebuffBase
     {
         public static DebuffData debuffData = new DebuffData()
         {
@@ -22,10 +22,7 @@ namespace CalamityMod.Buffs.DamageOverTime
         };
         public override void SetStaticDefaults()
         {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = true;
-            BuffID.Sets.LongerExpertDebuff[Type] = true;
+            base.SetStaticDefaults();
             CalamityBuffSets.DebuffDataset[Type] = debuffData;
         }
         public static void WindChilledNPCLifeRegen(NPC npc, int buffType, ref int buffIndex, ref int damage)

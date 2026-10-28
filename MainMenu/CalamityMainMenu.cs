@@ -56,79 +56,28 @@ namespace CalamityMod.MainMenu
         {
             Texture2D texture = ModContent.Request<Texture2D>("CalamityMod/MainMenu/ModernMenuBackground").Value;
 
-            // Calculate the draw position offset and scale in the event that someone is using a non-16:9 monitor
-            Vector2 drawOffset = Vector2.Zero;
-            float xScale = (float)Main.screenWidth / texture.Width;
-            float yScale = (float)Main.screenHeight / texture.Height;
-            float scale = xScale;
-
-            // if someone's monitor isn't in wacky dimensions, no calculations need to be performed at all
-            if (xScale != yScale)
-            {
-                // If someone's monitor is tall, it needs to be shifted to the left so that it's still centered on screen
-                // Additionally the Y scale is used so that it still covers the entire screen
-                if (yScale > xScale)
-                {
-                    scale = yScale;
-                    drawOffset.X -= (texture.Width * scale - Main.screenWidth) * 0.5f;
-                }
-                else
-                    // The opposite is true if someone's monitor is widescreen
-                    drawOffset.Y -= (texture.Height * scale - Main.screenHeight) * 0.5f;
-            }
-
             spriteBatch.End();
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, Main.Rasterizer, null, Main.UIScaleMatrix);
-            spriteBatch.Draw(texture, drawOffset, null, Color.White, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 
             static Color selectCinderColor()
             {
                 return Color.Lerp(Color.Lerp(Color.Crimson, Color.PaleVioletRed, 0.3f), Color.Lerp(Color.PaleGoldenrod, Color.LightSalmon, Main.rand.NextFloat()), Main.rand.NextFloat());
             }
 
-            // Randomly add cinders.
-            for (int i = 0; i < 5; i++)
-            {
-                if (Main.rand.NextBool(4))
+            MainMenuRenderingHelper.DrawBackgroundAndCinders(
+                spriteBatch,
+                texture,
+                Cinders,
+                static (lifetime, identity, depth, color, position, velocity) => new Cinder(lifetime, identity, depth, color, position, velocity),
+                static cinder => new MainMenuCinderState(cinder.Time, cinder.Lifetime, cinder.IdentityIndex, cinder.Scale, cinder.Depth, cinder.DrawColor, cinder.Velocity, cinder.Center),
+                static (cinder, state) =>
                 {
-                    int lifetime = Main.rand.Next(200, 300);
-                    float depth = Main.rand.NextFloat(1.8f, 5f);
-                    Vector2 startingPosition = new Vector2(Main.screenWidth * Main.rand.NextFloat(-0.1f, 1.1f), Main.screenHeight * 1.05f);
-                    Vector2 startingVelocity = -Vector2.UnitY.RotatedBy(Main.rand.NextFloat(-0.9f, 0.9f)) * 4f;
-                    Color cinderColor = selectCinderColor();
-                    Cinders.Add(new Cinder(lifetime, Cinders.Count, depth, cinderColor, startingPosition, startingVelocity));
-                }
-            }
-
-            // Update all cinders.
-            for (int i = 0; i < Cinders.Count; i++)
-            {
-                Cinders[i].Scale = Utils.GetLerpValue(Cinders[i].Lifetime, Cinders[i].Lifetime / 3, Cinders[i].Time, true);
-                Cinders[i].Scale *= MathHelper.Lerp(0.6f, 0.9f, Cinders[i].IdentityIndex % 6f / 6f);
-                if (Cinders[i].IdentityIndex % 13 == 12)
-                    Cinders[i].Scale *= 2f;
-
-                float flySpeed = MathHelper.Lerp(3.2f, 14f, Cinders[i].IdentityIndex % 21f / 21f);
-                Vector2 idealVelocity = -Vector2.UnitY.RotatedBy(MathHelper.Lerp(-0.44f, 0.44f, (float)Math.Sin(Cinders[i].Time / 16f + Cinders[i].IdentityIndex) * 0.5f + 0.5f));
-                idealVelocity = (idealVelocity + Vector2.UnitX).SafeNormalize(Vector2.UnitY) * flySpeed;
-
-                float movementInterpolant = MathHelper.Lerp(0.01f, 0.08f, Utils.GetLerpValue(45f, 145f, Cinders[i].Time, true));
-                Cinders[i].Velocity = Vector2.Lerp(Cinders[i].Velocity, idealVelocity, movementInterpolant);
-
-                Cinders[i].Time++;
-                Cinders[i].Center += Cinders[i].Velocity;
-            }
-
-            // Clear away all dead cinders.
-            Cinders.RemoveAll(c => c.Time >= c.Lifetime);
-
-            // Draw cinders.
-            Texture2D cinderTexture = ModContent.Request<Texture2D>("CalamityMod/Skies/CalamitasCinder").Value;
-            for (int i = 0; i < Cinders.Count; i++)
-            {
-                Vector2 drawPosition = Cinders[i].Center;
-                spriteBatch.Draw(cinderTexture, drawPosition, null, Cinders[i].DrawColor, 0f, cinderTexture.Size() * 0.5f, Cinders[i].Scale, 0, 0f);
-            }
+                    cinder.Time = state.Time;
+                    cinder.Scale = state.Scale;
+                    cinder.Velocity = state.Velocity;
+                    cinder.Center = state.Center;
+                },
+                selectCinderColor);
 
             // Set the logo draw color to be white and the time to be noon
             // This is because there is not a day/night cycle in this menu, and changing colors would look bad

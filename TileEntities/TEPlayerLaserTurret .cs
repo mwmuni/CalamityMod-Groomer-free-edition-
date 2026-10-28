@@ -1,14 +1,12 @@
-﻿using System.IO;
-using CalamityMod.Projectiles.Turret;
+﻿using CalamityMod.Projectiles.Turret;
 using CalamityMod.Tiles.PlayerTurrets;
 using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityMod.TileEntities
 {
-    public class TEPlayerLaserTurret : TEBaseTurret
+    public class TEPlayerLaserTurret : TENPCTargetingTurret
     {
         // Tile which hosts this tile entity
         public override int TileType => ModContent.TileType<PlayerLaserTurret>();
@@ -34,20 +32,6 @@ namespace CalamityMod.TileEntities
         protected override float CloseAimThreshold => MathHelper.ToRadians(1f);
         protected override float CloseAimLerpFactor => 1f;
 
-        // Variables specific to this turret subclass
-        private int _npcTargetIndex = -1;
-        public int NPCTargetIndex
-        {
-            get => _npcTargetIndex;
-            set
-            {
-                bool sync = _npcTargetIndex != value;
-                _npcTargetIndex = value;
-                if (sync)
-                    SendSyncPacket();
-            }
-        }
-
         // Lab turrets specifically must be placed on the top left corner of their host tile.
         // This restriction is not shared by general turrets for flexibility reasons.
         public override bool IsTileValidForEntity(int x, int y)
@@ -56,85 +40,5 @@ namespace CalamityMod.TileEntities
             return tile.HasTile && tile.TileType == TileType && tile.TileFrameX == 0 && tile.TileFrameY == 0;
         }
 
-        protected override Vector2 ChooseTarget(Vector2 targetingCenter)
-        {
-            if (CalamityUtils.AnyBossNPCS())
-            {
-                NPCTargetIndex = -1;
-                return InvalidTarget;
-            }
-
-            int indexToSet = NPCTargetIndex;
-            // If a npc is already targeted, make sure they still exist and aren't dead.
-            if (indexToSet != -1)
-            {
-                NPC npc = Main.npc[NPCTargetIndex];
-
-                // If they don't exist, or are dead, then unmark them as a target and search for a new one.
-                if (!npc.active)
-                    indexToSet = -1;
-                else
-                {
-                    // If the existing target npc is close enough, return their position. Otherwise unmark them as a target.
-                    Vector2 npcPos = npc.Center;
-                    float distSQ = Vector2.DistanceSquared(targetingCenter, npcPos);
-                    if (distSQ <= MaxRange * MaxRange)
-                        return npcPos;
-                    else
-                        indexToSet = -1;
-                }
-            }
-
-            // No valid target currently exists. Loop through npcs (efficiently!) to look for the closest new target.
-            Vector2 ret = InvalidTarget;
-            float distSQToBeat = MaxRange * MaxRange;
-
-            foreach (NPC npc in Main.ActiveNPCs)
-            {
-                if (npc.friendly || npc.CountsAsACritter || NPCID.Sets.CountsAsCritter[npc.type])
-                    continue;
-
-                float distSQ = npc.DistanceSQ(targetingCenter);
-                if (distSQ < distSQToBeat)
-                {
-                    distSQToBeat = distSQ;
-                    ret = npc.Center;
-                    indexToSet = npc.whoAmI;
-                }
-            }
-
-            // Set NPCTargetIndex now that we're sure what we're targeting. This triggers a netcode sync if the value is different.
-            NPCTargetIndex = indexToSet;
-            return ret;
-        }
-
-        // Makes turrets track their targeted player correctly client side.
-        // This doesn't improve their actual accuracy, because they only fire server side.
-        // However, it makes them rotate much more smoothly.
-        // Any targeting and rotation data derived from this update will be overridden by the turret's next sync.
-        public override void UpdateClient()
-        {
-            if (NPCTargetIndex != -1)
-            {
-                NPC npc = Main.npc[NPCTargetIndex];
-                if (npc.active)
-                    TargetPos = npc.Center;
-            }
-        }
-
-        // This type of turret syncs extra data: its player target index.
-        // This only takes 2 bytes so a junk array is written for the remainder of the space.
-        private const int BytesUsed = 2;
-        private static readonly byte[] JunkData = new byte[NumExtraBytes - BytesUsed];
-        public override void WriteExtraTurretData(BinaryWriter writer)
-        {
-            writer.Write((short)_npcTargetIndex);
-            writer.Write(JunkData);
-        }
-        public override void ReadExtraTurretData(BinaryReader reader)
-        {
-            _npcTargetIndex = reader.ReadInt16();
-            _ = reader.ReadBytes(NumExtraBytes - BytesUsed);
-        }
     }
 }

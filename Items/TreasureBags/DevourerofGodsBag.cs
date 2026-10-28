@@ -20,48 +20,20 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.TreasureBags
 {
-    public class DevourerofGodsBag : ModItem, ILocalizedModType
+    public class DevourerofGodsBag : BossTreasureBag, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.TreasureBags";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-            ItemID.Sets.BossBag[Type] = true;
-        }
-
-        public override void SetDefaults()
-        {
-            Item.width = 36;
-            Item.height = 34;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.consumable = true;
-            Item.rare = ItemRarityID.Cyan;
-            Item.expert = true;
-        }
-
+        protected override bool ForceIntoWorld => true;
+        protected override int BagWidth => 36;
+        protected override int BagHeight => 34;
         public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
         {
             itemGroup = ContentSamples.CreativeHelper.ItemGroup.BossBags;
         }
 
-        public override bool PreDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)
-        {
-            return CalamityUtils.DrawTreasureBagInWorld(Item, spriteBatch, ref rotation, ref scale, whoAmI);
-        }
-
         public override void PostDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, float rotation, float scale, int whoAmI)
         {
             Item.DrawItemGlowmaskSingleFrame(spriteBatch, rotation, ModContent.Request<Texture2D>("CalamityMod/Items/TreasureBags/DevourerofGodsBagGlow").Value);
-        }
-
-        public override bool CanRightClick() => true;
-
-        public override Color? GetAlpha(Color lightColor) => Color.Lerp(lightColor, Color.White, 0.4f);
-
-        public override void PostUpdate()
-        {
-            CalamityUtils.ForceItemIntoWorld(Item);
-            Item.TreasureBagLightAndDust();
         }
 
         public override void ModifyItemLoot(ItemLoot itemLoot)

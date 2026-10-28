@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Weapons.Rogue
 {
-    public class TarragonThrowingDart : RogueWeapon
+    public class TarragonThrowingDart : ConditionalStealthStrikeRogueWeapon
     {
         public override void SetDefaults()
         {
@@ -29,18 +29,6 @@ namespace CalamityMod.Items.Weapons.Rogue
             Item.shootSpeed = 15f;
             Item.DamageType = RogueDamageClass.Instance;
             Item.rare = ModContent.RarityType<Turquoise>();
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            if (player.Calamity().StealthStrikeAvailable()) //setting the stealth strike
-            {
-                int stealth = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-                if (stealth.WithinBounds(Main.maxProjectiles))
-                    Main.projectile[stealth].Calamity().stealthStrike = true;
-                return false;
-            }
-            return true;
         }
 
         public override void AddRecipes()

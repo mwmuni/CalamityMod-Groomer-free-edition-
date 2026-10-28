@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Weapons.Summon
 {
-    public class ScabRipper : ModItem, ILocalizedModType
+    public class ScabRipper : SummonStaff, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Weapons.Summon";
 
@@ -34,14 +34,6 @@ namespace CalamityMod.Items.Weapons.Summon
 
             // This doesn't do anything, it's just so the item is held like a staff.
             Item.shootSpeed = 1f;
-        }
-
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            player.AddBuff(Item.buffType, 2);
-            var minion = Projectile.NewProjectileDirect(source, player.ClampedMouseWorld(), Vector2.Zero, type, damage, knockback, player.whoAmI);
-            minion.originalDamage = Item.damage;
-            return false;
         }
 
         public override void AddRecipes()

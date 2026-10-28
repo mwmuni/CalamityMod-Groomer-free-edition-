@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureVoid
 {
-    public class VoidCandelabra : ModTile
+    public class VoidCandelabra : BaseBlueWhiteFrameLightTile
     {
         public override void SetStaticDefaults() => this.SetUpCandelabra(ModContent.ItemType<Items.Placeables.FurnitureVoid.VoidCandelabra>(), true);
 
@@ -18,22 +18,6 @@ namespace CalamityMod.Tiles.FurnitureVoid
         public override void NumDust(int i, int j, bool fail, ref int num)
         {
             num = fail ? 1 : 3;
-        }
-
-        public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
-        {
-            if (Main.tile[i, j].TileFrameX < 18)
-            {
-                r = 0.8f;
-                g = 0.9f;
-                b = 1f;
-            }
-            else
-            {
-                r = 0f;
-                g = 0f;
-                b = 0f;
-            }
         }
 
         public override void HitWire(int i, int j)

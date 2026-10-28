@@ -6,7 +6,7 @@ using CalamityMod.Systems.Collections;
 
 namespace CalamityMod.Buffs.DamageOverTime
 {
-    public class BanishingFire : ModBuff
+    public class BanishingFire : DamageOverTimeDebuffBase
     {
         public static DebuffData debuffData = new DebuffData()
         {
@@ -21,10 +21,7 @@ namespace CalamityMod.Buffs.DamageOverTime
         }
         public override void SetStaticDefaults()
         {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = true;
-            BuffID.Sets.LongerExpertDebuff[Type] = true;
+            base.SetStaticDefaults();
             CalamityBuffSets.DebuffDataset[Type] = debuffData;
         }
 

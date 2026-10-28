@@ -11,7 +11,7 @@ using CalamityMod.Systems.Collections;
 
 namespace CalamityMod.Buffs.DamageOverTime
 {
-    public class Bane : ModBuff
+    public class Bane : DamageOverTimeDebuffBase
     {
         public static Color baneColor1 = new Color(217, 115, 0);
         public static Color baneColor2 = new Color(0, 232, 146);
@@ -22,10 +22,7 @@ namespace CalamityMod.Buffs.DamageOverTime
         };
         public override void SetStaticDefaults()
         {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = true;
-            BuffID.Sets.LongerExpertDebuff[Type] = true;
+            base.SetStaticDefaults();
             CalamityBuffSets.DebuffDataset[Type] = debuffData;
         }
         public static void BaneNPCLifeRegen(NPC npc, int buffType, ref int buffIndex, ref int damage)

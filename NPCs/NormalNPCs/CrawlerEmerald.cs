@@ -1,7 +1,4 @@
-﻿using System.IO;
-using CalamityMod.Items.Accessories;
-using CalamityMod.Items.Accessories.Vanity;
-using CalamityMod.Items.Placeables.Banners;
+﻿using CalamityMod.Items.Placeables.Banners;
 using Terraria;
 using Terraria.GameContent.Bestiary;
 using Terraria.ID;
@@ -9,124 +6,21 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Utilities;
 namespace CalamityMod.NPCs.NormalNPCs
 {
-    public class CrawlerEmerald : ModNPC
+    public class CrawlerEmerald : GemCrawlerBase
     {
-        private bool detected = false;
+        protected override int Damage => 20;
+        protected override int Defense => 6;
+        protected override int LifeMax => 135;
+        protected override float KnockBackResist => 0.55f;
+        protected override int NPCValue => Item.buyPrice(silver: 1, copper: 20);
+        protected override int BannerItemType => ModContent.ItemType<EmeraldCrawlerBanner>();
+        protected override int GemItemID => ItemID.Emerald;
+        protected override int DustType => DustID.GemEmerald;
+        protected override string GoreName => "CrawlerEmerald";
+        protected override float SpeedDetect => 5.5f;
+        protected override float SpeedAdditive => 0.055f;
+        protected override IBestiaryInfoElement BiomeBestiaryTag => BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Caverns;
 
-        public override void SetStaticDefaults()
-        {
-            Main.npcFrameCount[Type] = 5;
-        }
-
-        public override void SetDefaults()
-        {
-            NPC.npcSlots = 0.3f;
-            NPC.aiStyle = -1;
-            NPC.damage = 20;
-            NPC.width = 44;
-            NPC.height = 34;
-            NPC.defense = 6;
-            NPC.lifeMax = 135;
-            NPC.knockBackResist = 0.55f;
-            AIType = -1;
-            NPC.value = Item.buyPrice(silver: 1, copper: 20);
-            NPC.HitSound = SoundID.NPCHit33;
-            NPC.DeathSound = SoundID.NPCDeath36;
-            Banner = NPC.type;
-            BannerItem = ModContent.ItemType<EmeraldCrawlerBanner>();
-            NPC.Calamity().VulnerableToHeat = true;
-            NPC.Calamity().VulnerableToCold = true;
-            NPC.Calamity().VulnerableToSickness = true;
-        }
-
-        public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
-        {
-            bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
-            {
-                BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Caverns,
-                new FlavorTextBestiaryInfoElement("Mods.CalamityMod.Bestiary.GemCrawler")
-            });
-        }
-
-        public override void SendExtraAI(BinaryWriter writer)
-        {
-            writer.Write(detected);
-        }
-
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            detected = reader.ReadBoolean();
-        }
-
-        public override void FindFrame(int frameHeight)
-        {
-            if (!detected)
-            {
-                NPC.frame.Y = frameHeight * 4;
-                NPC.frameCounter = 0.0;
-                return;
-            }
-            NPC.spriteDirection = -NPC.direction;
-            NPC.frameCounter += (double)(NPC.velocity.Length() / 8f);
-            if (NPC.frameCounter > 2.0)
-            {
-                NPC.frame.Y = NPC.frame.Y + frameHeight;
-                NPC.frameCounter = 0.0;
-            }
-            if (NPC.frame.Y >= frameHeight * 3)
-            {
-                NPC.frame.Y = 0;
-            }
-        }
-
-        public override void AI()
-        {
-            if (!detected)
-                NPC.TargetClosest();
-            if (((Main.player[NPC.target].Center - NPC.Center).Length() < 100f && Collision.CanHit(NPC.position, NPC.width, NPC.height, Main.player[NPC.target].position,
-                    Main.player[NPC.target].width, Main.player[NPC.target].height)) || NPC.justHit)
-                detected = true;
-            if (!detected)
-                return;
-            CalamityRegularEnemyAI.GemCrawlerAI(NPC, Mod, 5.5f, 0.055f);
-        }
-
-        public override float SpawnChance(NPCSpawnInfo spawnInfo)
-        {
-            if (spawnInfo.PlayerSafe || spawnInfo.Player.Calamity().InAnyCalamityBiome)
-            {
-                return 0f;
-            }
-            return SpawnCondition.Cavern.Chance * 0.0325f;
-        }
-
-        public override void HitEffect(NPC.HitInfo hit)
-        {
-            for (int k = 0; k < 5; k++)
-            {
-                Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GemEmerald, hit.HitDirection, -1f, 0, default, 1f);
-            }
-            if (NPC.life <= 0)
-            {
-                for (int k = 0; k < 20; k++)
-                {
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GemEmerald, hit.HitDirection, -1f, 0, default, 1f);
-                }
-                if (!Main.dedServ)
-                {
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("CrawlerEmerald").Type, 1f);
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("CrawlerEmerald2").Type, 1f);
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Crawler").Type, 1f);
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Crawler2").Type, 1f);
-                }
-            }
-        }
-
-        public override void ModifyNPCLoot(NPCLoot npcLoot)
-        {
-            npcLoot.Add(ItemID.Emerald, 1, 2, 4);
-            npcLoot.Add(ModContent.ItemType<ScuttlersJewel>(), 6);
-            npcLoot.Add(ModContent.ItemType<XyksBlessingBlue>(), 25);
-        }
+        protected override float GetBiomeSpawnChance(NPCSpawnInfo spawnInfo) => SpawnCondition.Cavern.Chance * 0.0325f;
     }
 }

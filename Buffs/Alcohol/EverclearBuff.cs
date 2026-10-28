@@ -4,19 +4,12 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Buffs.Alcohol
 {
-    public class EverclearBuff : ModBuff
+    public class EverclearBuff : AlcoholBuffBase
     {
         public static DebuffData debuffData = new DebuffData()
         {
             AlcoholLevel = 2
         };
-        public override void SetStaticDefaults()
-        {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = false;
-            Main.persistentBuff[Type] = true;
-        }
 
         public override void Update(Player player, ref int buffIndex)
         {

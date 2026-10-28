@@ -30,7 +30,7 @@ using Terraria.UI.Chat;
 #region Item
 namespace CalamityMod.Items.Weapons.Rogue
 {
-    public class EclipsesFall : RogueWeapon
+    public class EclipsesFall : StealthStrikeRogueWeapon
     {
         /// <summary>
         /// Base damage of the spear, dynamically updated to match rogue stats.
@@ -70,13 +70,6 @@ namespace CalamityMod.Items.Weapons.Rogue
             Item.rare = ModContent.RarityType<BurnishedAuric>();
         }
 
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            int proj = Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI);
-            if (proj.WithinBounds(Main.maxProjectiles))
-                Main.projectile[proj].Calamity().stealthStrike = player.Calamity().StealthStrikeAvailable();
-            return false;
-        }
         public override void PostDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, float rotation, float scale, int whoAmI) => Item.DrawItemGlowmaskSingleFrame(spriteBatch, rotation, ModContent.Request<Texture2D>(Texture + "Glow").Value);
 
         public override void AddRecipes()

@@ -5,9 +5,11 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Systems
 {
-    public class DoGBackgroundScene : ModSceneEffect
+    public class DoGBackgroundScene : BaseBiomeVisualSceneEffect
     {
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
+
+        protected override string BiomeVisualKey => "CalamityMod:DevourerofGodsHead";
 
         public override bool IsSceneEffectActive(Player player)
         {
@@ -19,7 +21,7 @@ namespace CalamityMod.Systems
 
         public override void SpecialVisuals(Player player, bool isActive)
         {
-            player.ManageSpecialBiomeVisuals("CalamityMod:DevourerofGodsHead", isActive);
+            base.SpecialVisuals(player, isActive);
             if (isActive)
                 SkyManager.Instance.Activate("CalamityMod:DevourerofGodsHead");
             else

@@ -11,7 +11,7 @@ using CalamityMod.Systems.Collections;
 
 namespace CalamityMod.Buffs.DamageOverTime
 {
-    public class DemonicFlames : ModBuff
+    public class DemonicFlames : DamageOverTimeDebuffBase
     {
         public static DebuffData debuffData = new DebuffData()
         {
@@ -26,10 +26,7 @@ namespace CalamityMod.Buffs.DamageOverTime
         }
         public override void SetStaticDefaults()
         {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = true;
-            BuffID.Sets.LongerExpertDebuff[Type] = true;
+            base.SetStaticDefaults();
             CalamityBuffSets.DebuffDataset[Type] = debuffData;
         }
 

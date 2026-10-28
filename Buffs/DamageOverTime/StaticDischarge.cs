@@ -8,7 +8,7 @@ using CalamityMod.Systems.Collections;
 
 namespace CalamityMod.Buffs.DamageOverTime
 {
-    public class StaticDischarge : ModBuff
+    public class StaticDischarge : DamageOverTimeDebuffBase
     {
         public static DebuffData debuffData = new DebuffData(DebuffData.DebuffBehavior.Electric)
         {
@@ -17,10 +17,7 @@ namespace CalamityMod.Buffs.DamageOverTime
         };
         public override void SetStaticDefaults()
         {
-            Main.debuff[Type] = true;
-            Main.pvpBuff[Type] = true;
-            Main.buffNoSave[Type] = true;
-            BuffID.Sets.LongerExpertDebuff[Type] = true;
+            base.SetStaticDefaults();
             CalamityBuffSets.DebuffDataset[Type] = debuffData;
         }
 

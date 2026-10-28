@@ -4781,6 +4781,14 @@ namespace CalamityMod.Projectiles
         #endregion
 
         #region Modify Hit NPC
+        private static void ApplyProjectileDamageFalloff(Projectile projectile, float multiplier, float divisor)
+        {
+            if (projectile.numHits > 0)
+                projectile.damage = (int)(projectile.damage * multiplier / divisor);
+            if (projectile.damage < 1)
+                projectile.damage = 1;
+        }
+
         public override void ModifyHitNPC(Projectile projectile, NPC target, ref NPC.HitModifiers modifiers)
         {
             Player player = Main.player[projectile.owner];
@@ -4827,38 +4835,18 @@ namespace CalamityMod.Projectiles
             }
 
             if (projectile.type == ProjectileID.UnholyArrow) // damage falloff
-            {
-                if (projectile.numHits > 0)
-                    projectile.damage = (int)(projectile.damage * 0.75f / 0.95f); // Vanilla gives it 5% falloff, this cancels that out
-                if (projectile.damage < 1)
-                    projectile.damage = 1;
-            }
+                ApplyProjectileDamageFalloff(projectile, 0.75f, 0.95f); // Vanilla gives it 5% falloff, this cancels that out
 
             if (projectile.type == ProjectileID.HellfireArrow) // damage falloff
-            {
-                if (projectile.numHits > 0)
-                    projectile.damage = (int)(projectile.damage * 0.8f);
-                if (projectile.damage < 1)
-                    projectile.damage = 1;
-            }
+                ApplyProjectileDamageFalloff(projectile, 0.8f, 1f);
 
             // Adamantite Throwing Axe's lightning has damage falloff
             if (projectile.type == ProjectileID.CultistBossLightningOrbArc && projectile.ai[2] == 1f)
-            {
-                if (projectile.numHits > 0)
-                    projectile.damage = (int)(projectile.damage * 0.8f);
-                if (projectile.damage < 1)
-                    projectile.damage = 1;
-            }
+                ApplyProjectileDamageFalloff(projectile, 0.8f, 1f);
 
             // Super Star Shooter has damage falloff
             if (projectile.type == ProjectileID.SuperStar)
-            {
-                if (projectile.numHits > 0)
-                    projectile.damage = (int)(projectile.damage * 0.95f);
-                if (projectile.damage < 1)
-                    projectile.damage = 1;
-            }
+                ApplyProjectileDamageFalloff(projectile, 0.95f, 1f);
 
             // Stardust Wings buff the Stardust Guardian's damage
             if (player.wingsLogic == (int)VanillaWingID.WingsStardust && player.wingTime > 0f && projectile.type == ProjectileID.StardustGuardian)

@@ -5,7 +5,7 @@ using Terraria.ID;
 
 namespace CalamityMod.Tiles.FurnitureAshen
 {
-    public class SmoothBrimstoneSlag : GlowMaskTile
+    public class SmoothBrimstoneSlag : BaseGlowMaskRedTorchStoneDustTile
     {
         public override void SetupStatic()
         {
@@ -21,13 +21,6 @@ namespace CalamityMod.Tiles.FurnitureAshen
             HitSound = SoundID.Tink;
             MineResist = 1f;
             AddMapEntry(new Color(61, 40, 61));
-        }
-
-        public override bool CreateDust(int i, int j, ref int type)
-        {
-            Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.RedTorch, 0f, 0f, 1, new Color(255, 255, 255), 1f);
-            Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.Stone, 0f, 0f, 1, new Color(100, 100, 100), 1f);
-            return false;
         }
 
         public override Color GetGlowMaskColor(int i, int j, TileDrawInfo drawData)

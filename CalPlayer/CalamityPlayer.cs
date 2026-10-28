@@ -2629,45 +2629,7 @@ namespace CalamityMod.CalPlayer
             if (DemonAltarDialogueCooldown > 0)
                 DemonAltarDialogueCooldown--;
 
-            alcoholPoisoning = false;
-            shadowflame = false;
-            daybroken = false;
-            whisperingDeath = false;
-            dragonFire = false;
-            vermillionFlux = false;
-            auricRebuke = false;
-            staticDischarge = false;
-            miracleBlight = false;
-            armorCrunch = false;
-            irradiated = false;
-            bane = false;
-            brimstoneFlames = false;
-            witheredDebuff = false;
-            absorberAffliction = false;
-            weakBrimstoneFlames = false;
-            demonicFlames = false;
-            godSlayerInferno = false;
-            astralInfection = false;
-            plague = false;
-            holyFlames = false;
-            holyInferno = false;
-            burningBlood = false;
-            brainRot = false;
-            heavybleeding = false;
-            laceration = false;
-            elementalMix = false;
-            icarusFolly = false;
-            vHex = false;
-            trueVHex = false;
-            DoGExtremeGravity = false;
-            warped = false;
-            crushDepth = false;
-            riptide = false;
-            hadopelagicPressure = false;
-            fishAlert = false;
-            malnourished = false;
-            clamity = false;
-            NOU = false;
+            ResetDebuffFlags();
             enraged = false;
             snowmanNoseless = false;
             sulphurPoison = false;
@@ -2963,6 +2925,49 @@ namespace CalamityMod.CalPlayer
 
                 EnchantHeldItemEffects(Player, Player.Calamity(), Player.HeldItem);
         }
+
+        private void ResetDebuffFlags()
+        {
+            alcoholPoisoning = false;
+            shadowflame = false;
+            daybroken = false;
+            whisperingDeath = false;
+            dragonFire = false;
+            vermillionFlux = false;
+            auricRebuke = false;
+            staticDischarge = false;
+            miracleBlight = false;
+            armorCrunch = false;
+            irradiated = false;
+            bane = false;
+            brimstoneFlames = false;
+            witheredDebuff = false;
+            absorberAffliction = false;
+            weakBrimstoneFlames = false;
+            demonicFlames = false;
+            godSlayerInferno = false;
+            astralInfection = false;
+            plague = false;
+            holyFlames = false;
+            holyInferno = false;
+            burningBlood = false;
+            brainRot = false;
+            heavybleeding = false;
+            laceration = false;
+            elementalMix = false;
+            icarusFolly = false;
+            vHex = false;
+            trueVHex = false;
+            DoGExtremeGravity = false;
+            warped = false;
+            crushDepth = false;
+            riptide = false;
+            hadopelagicPressure = false;
+            fishAlert = false;
+            malnourished = false;
+            clamity = false;
+            NOU = false;
+        }
         #endregion
 
         #region Modify Max Health and Mana
@@ -3125,45 +3130,7 @@ namespace CalamityMod.CalPlayer
             angelicActivate = -1;
             resetHeightandWidth = false;
             noLifeRegen = false;
-            alcoholPoisoning = false;
-            shadowflame = false;
-            daybroken = false;
-            whisperingDeath = false;
-            dragonFire = false;
-            vermillionFlux = false;
-            auricRebuke = false;
-            staticDischarge = false;
-            miracleBlight = false;
-            armorCrunch = false;
-            irradiated = false;
-            bane = false;
-            brimstoneFlames = false;
-            witheredDebuff = false;
-            absorberAffliction = false;
-            weakBrimstoneFlames = false;
-            demonicFlames = false;
-            godSlayerInferno = false;
-            astralInfection = false;
-            plague = false;
-            holyFlames = false;
-            holyInferno = false;
-            burningBlood = false;
-            brainRot = false;
-            heavybleeding = false;
-            laceration = false;
-            elementalMix = false;
-            icarusFolly = false;
-            vHex = false;
-            trueVHex = false;
-            DoGExtremeGravity = false;
-            warped = false;
-            crushDepth = false;
-            riptide = false;
-            hadopelagicPressure = false;
-            fishAlert = false;
-            malnourished = false;
-            clamity = false;
-            NOU = false;
+            ResetDebuffFlags();
             snowmanNoseless = false;
             sulphurPoison = false;
             nightwither = false;

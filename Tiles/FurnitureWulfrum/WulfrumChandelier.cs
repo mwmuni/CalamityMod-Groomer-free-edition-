@@ -12,7 +12,7 @@ using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.FurnitureWulfrum
 {
-    public class WulfrumChandelier : ModTile
+    public class WulfrumChandelier : BaseBlueWhiteFrameLightTile
     {
         public Asset<Texture2D> FlameTexture;
         public Asset<Texture2D> GlowTexture;
@@ -61,22 +61,6 @@ namespace CalamityMod.Tiles.FurnitureWulfrum
         }
 
         public override void AdjustMultiTileVineParameters(int i, int j, ref float? overrideWindCycle, ref float windPushPowerX, ref float windPushPowerY, ref bool dontRotateTopTiles, ref float totalWindMultiplier, ref Texture2D glowTexture, ref Color glowColor) => glowTexture = GlowTexture.Value;
-
-        public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
-        {
-            if (Main.tile[i, j].TileFrameX < 18)
-            {
-                r = 0.8f;
-                g = 0.9f;
-                b = 1f;
-            }
-            else
-            {
-                r = 0f;
-                g = 0f;
-                b = 0f;
-            }
-        }
 
         public override void GetTileFlameData(int i, int j, ref TileDrawing.TileFlameData tileFlameData)
         {
