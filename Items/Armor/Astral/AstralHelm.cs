@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
+using CalamityMod.Items.BaseItems;
 using CalamityMod.Items.Materials;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,12 +7,11 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace CalamityMod.Items.Armor.Astral
 {
     [AutoloadEquip(EquipType.Head)]
-    public class AstralHelm : ModItem, ILocalizedModType
+    public class AstralHelm : BaseToggleableItem, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.Hardmode";
 
@@ -36,35 +35,6 @@ namespace CalamityMod.Items.Armor.Astral
             Item.defense = 17; //63
         }
         #region Toggleable Omniscience effect
-
-        bool toggleEnabled = true;
-
-        public override bool CanRightClick() => Main.keyState.PressingShift();
-        public override void RightClick(Player player)
-        {
-            toggleEnabled = !toggleEnabled;
-            Item.NetStateChanged();
-        }
-        public override bool ConsumeItem(Player player) => false;
-        public override void SaveData(TagCompound tag)
-        {
-            tag.Add("toggleEffect", toggleEnabled);
-        }
-
-        public override void LoadData(TagCompound tag)
-        {
-            toggleEnabled = tag.GetBool("toggleEffect");
-        }
-
-        public override void NetSend(BinaryWriter writer)
-        {
-            writer.Write(toggleEnabled);
-        }
-
-        public override void NetReceive(BinaryReader reader)
-        {
-            toggleEnabled = reader.ReadBoolean();
-        }
 
         public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {

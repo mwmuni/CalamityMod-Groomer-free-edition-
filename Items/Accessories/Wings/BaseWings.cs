@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using CalamityMod.Balancing;
+using CalamityMod.Items.BaseItems;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -12,9 +13,11 @@ using static CalamityMod.CalamityUtils;
 
 namespace CalamityMod.Items.Accessories.Wings
 {
-    public abstract class BaseWings : ModItem, ILocalizedModType
+    public abstract class BaseWings : BaseToggleableItem, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Accessories.Wings";
+
+        protected override bool IsToggleable => false;
 
         /// <summary>
         /// Bonus vertical acceleration per frame while player velocity is below 0.<br/>

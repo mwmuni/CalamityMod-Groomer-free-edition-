@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+using System.Collections.Generic;
 using CalamityMod.CalPlayer;
 using CalamityMod.Items.Materials;
 using CalamityMod.Rarities;
@@ -11,7 +10,6 @@ using Terraria.DataStructures;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace CalamityMod.Items.Accessories.Wings
 {
@@ -19,6 +17,8 @@ namespace CalamityMod.Items.Accessories.Wings
     [LegacyName("CelestialTracers", "TracersSeraph")]
     public class SeraphTracers : BaseWings
     {
+        protected override bool IsToggleable => true;
+
         public override float BonusAscentWhileFalling => 0.95f;
         public override float BonusAscentWhileRising => 0.16f;
         public override float RisingSpeedThreshold => 1.2f;
@@ -41,7 +41,7 @@ namespace CalamityMod.Items.Accessories.Wings
             Item.rare = ModContent.RarityType<BurnishedAuric>();
         }
         #region Toggleable Wings
-        bool toggleEnabled
+        protected override bool toggleEnabled
         {
             get { return Item.wingSlot != -1; }
             set
@@ -57,29 +57,6 @@ namespace CalamityMod.Items.Accessories.Wings
             if (!toggleEnabled)
                 tooltips.RemoveAll(x => x.Name == "Tooltip0");
             base.ModifyTooltips(tooltips);
-        }
-        public override bool CanRightClick() => Main.keyState.PressingShift();
-        public override void RightClick(Player player)
-        {
-            toggleEnabled = !toggleEnabled;
-            Item.NetStateChanged();
-        }
-        public override bool ConsumeItem(Player player) => false;
-        public override void SaveData(TagCompound tag)
-        {
-            tag.Add("toggleEffect", toggleEnabled);
-        }
-        public override void LoadData(TagCompound tag)
-        {
-            toggleEnabled = tag.GetBool("toggleEffect");
-        }
-        public override void NetSend(BinaryWriter writer)
-        {
-            writer.Write(toggleEnabled);
-        }
-        public override void NetReceive(BinaryReader reader)
-        {
-            toggleEnabled = reader.ReadBoolean();
         }
         public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using CalamityMod.CalPlayer;
 using CalamityMod.CalPlayer.Dashes;
+using CalamityMod.Items.BaseItems;
 using CalamityMod.Items.Materials;
 using CalamityMod.Rarities;
 using CalamityMod.Tiles.Furniture.CraftingStations;
@@ -13,12 +13,11 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace CalamityMod.Items.Accessories
 {
     [LegacyName("StatisBeltOfCurses")]
-    public class StatisVoidSash : ModItem, ILocalizedModType, IHoldShiftTooltipItem
+    public class StatisVoidSash : BaseToggleableItem, ILocalizedModType, IHoldShiftTooltipItem
     {
         public new string LocalizationCategory => "Items.Accessories";
 
@@ -39,35 +38,6 @@ namespace CalamityMod.Items.Accessories
             Item.rare = ModContent.RarityType<CosmicPurple>();
         }
         #region Toggleable Tiger Gear
-
-        bool toggleEnabled = true;
-
-        public override bool CanRightClick() => Main.keyState.PressingShift();
-        public override void RightClick(Player player)
-        {
-            toggleEnabled = !toggleEnabled;
-            Item.NetStateChanged();
-        }
-        public override bool ConsumeItem(Player player) => false;
-        public override void SaveData(TagCompound tag)
-        {
-            tag.Add("toggleEffect", toggleEnabled);
-        }
-
-        public override void LoadData(TagCompound tag)
-        {
-            toggleEnabled = tag.GetBool("toggleEffect");
-        }
-
-        public override void NetSend(BinaryWriter writer)
-        {
-            writer.Write(toggleEnabled);
-        }
-
-        public override void NetReceive(BinaryReader reader)
-        {
-            toggleEnabled = reader.ReadBoolean();
-        }
 
         public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {

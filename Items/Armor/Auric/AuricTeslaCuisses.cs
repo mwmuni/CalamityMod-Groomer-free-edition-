@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using CalamityMod.Items.Armor.Bloodflare;
+using CalamityMod.Items.BaseItems;
 using CalamityMod.Items.Armor.GodSlayer;
 using CalamityMod.Items.Armor.Silva;
 using CalamityMod.Items.Armor.Tarragon;
@@ -13,12 +13,11 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace CalamityMod.Items.Armor.Auric
 {
     [AutoloadEquip(EquipType.Legs)]
-    public class AuricTeslaCuisses : ModItem, ILocalizedModType
+    public class AuricTeslaCuisses : BaseToggleableItem, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.PostMoonLord";
 
@@ -36,35 +35,6 @@ namespace CalamityMod.Items.Armor.Auric
             Item.rare = ModContent.RarityType<BurnishedAuric>();
         }
         #region Toggleable Magic Carpet
-
-        bool toggleEnabled = true;
-
-        public override bool CanRightClick() => Main.keyState.PressingShift();
-        public override void RightClick(Player player)
-        {
-            toggleEnabled = !toggleEnabled;
-            Item.NetStateChanged();
-        }
-        public override bool ConsumeItem(Player player) => false;
-        public override void SaveData(TagCompound tag)
-        {
-            tag.Add("toggleEffect", toggleEnabled);
-        }
-
-        public override void LoadData(TagCompound tag)
-        {
-            toggleEnabled = tag.GetBool("toggleEffect");
-        }
-
-        public override void NetSend(BinaryWriter writer)
-        {
-            writer.Write(toggleEnabled);
-        }
-
-        public override void NetReceive(BinaryReader reader)
-        {
-            toggleEnabled = reader.ReadBoolean();
-        }
 
         public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {

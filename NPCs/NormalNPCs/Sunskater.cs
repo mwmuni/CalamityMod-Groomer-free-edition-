@@ -1,5 +1,3 @@
-﻿using System;
-using System.IO;
 using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Items.Materials;
 using CalamityMod.Items.Placeables.Banners;
@@ -14,11 +12,21 @@ using Terraria.ModLoader.Utilities;
 
 namespace CalamityMod.NPCs.NormalNPCs
 {
-    public class Sunskater : ModNPC
+    public class Sunskater : HostileFlyingEnemyBase
     {
         public static readonly SoundStyle DeathSound = new("CalamityMod/Sounds/NPCKilled/Sunskater") { Volume = 0.9f };
 
         private bool hasBeenHit = false;
+
+        protected override bool HasBeenHit
+        {
+            get => hasBeenHit;
+            set => hasBeenHit = value;
+        }
+
+        protected override float IdleHorizontalSpeedThreshold => 2f;
+        protected override float FrameIncrementAfterHit => 0.15f;
+        protected override float FrameIncrementBeforeHit => 0.075f;
 
         public override void SetStaticDefaults()
         {
@@ -57,158 +65,12 @@ namespace CalamityMod.NPCs.NormalNPCs
             });
         }
 
-        public override void SendExtraAI(BinaryWriter writer)
+        protected override void UpdateAttackMovement()
         {
-            writer.Write(hasBeenHit);
-            writer.Write(NPC.chaseable);
-        }
-
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            hasBeenHit = reader.ReadBoolean();
-            NPC.chaseable = reader.ReadBoolean();
-        }
-
-        public override void AI()
-        {
-            NPC.spriteDirection = (NPC.direction > 0) ? 1 : -1;
-            NPC.noGravity = true;
-            if (NPC.direction == 0)
-            {
-                NPC.TargetClosest(true);
-            }
-            if (NPC.justHit)
-            {
-                hasBeenHit = true;
-            }
-            NPC.chaseable = hasBeenHit;
-            if (!NPC.wet)
-            {
-                bool canAttack = hasBeenHit;
-                NPC.TargetClosest(false);
-                if ((Main.player[NPC.target].wet || Main.player[NPC.target].dead) && canAttack)
-                {
-                    canAttack = false;
-                }
-                if (!canAttack)
-                {
-                    if (NPC.collideX)
-                    {
-                        NPC.velocity.X = NPC.velocity.X * -1f;
-                        NPC.direction *= -1;
-                        NPC.netUpdate = true;
-                    }
-                    if (NPC.collideY)
-                    {
-                        NPC.netUpdate = true;
-                        if (NPC.velocity.Y > 0f)
-                        {
-                            NPC.velocity.Y = Math.Abs(NPC.velocity.Y) * -1f;
-                            NPC.directionY = -1;
-                            NPC.ai[0] = -1f;
-                        }
-                        else if (NPC.velocity.Y < 0f)
-                        {
-                            NPC.velocity.Y = Math.Abs(NPC.velocity.Y);
-                            NPC.directionY = 1;
-                            NPC.ai[0] = 1f;
-                        }
-                    }
-                }
-                if (canAttack)
-                {
-                    NPC.TargetClosest(true);
-                    NPC.velocity.X = NPC.velocity.X + (float)NPC.direction * 0.15f;
-                    NPC.velocity.Y = NPC.velocity.Y + (float)NPC.directionY * 0.15f;
-                    NPC.velocity.X = MathHelper.Clamp(NPC.velocity.X, -10f, 10f);
-                    NPC.velocity.Y = MathHelper.Clamp(NPC.velocity.Y, -10f, 10f);
-                }
-                else
-                {
-                    NPC.velocity.X += (float)NPC.direction * 0.1f;
-                    if (NPC.velocity.X < -2f || NPC.velocity.X > 2f)
-                    {
-                        NPC.velocity.X *= 0.95f;
-                    }
-                    if (NPC.ai[0] == -1f)
-                    {
-                        NPC.velocity.Y -= 0.01f;
-                        if (NPC.velocity.Y < -0.3f)
-                        {
-                            NPC.ai[0] = 1f;
-                        }
-                    }
-                    else
-                    {
-                        NPC.velocity.Y += 0.01f;
-                        if (NPC.velocity.Y > 0.3f)
-                        {
-                            NPC.ai[0] = -1f;
-                        }
-                    }
-                }
-                int npcTileX = (int)(NPC.position.X + (float)(NPC.width / 2)) / 16;
-                int npcTileY = (int)(NPC.position.Y + (float)(NPC.height / 2)) / 16;
-                if (Main.tile[npcTileX, npcTileY - 1].LiquidAmount < 128) //problem?
-                {
-                    if (Main.tile[npcTileX, npcTileY + 1].HasTile)
-                    {
-                        NPC.ai[0] = -1f;
-                    }
-                    else if (Main.tile[npcTileX, npcTileY + 2].HasTile)
-                    {
-                        NPC.ai[0] = -1f;
-                    }
-                }
-                if (NPC.velocity.Y > 0.4f || NPC.velocity.Y < -0.4f)
-                {
-                    NPC.velocity.Y *= 0.95f;
-                }
-            }
-            else
-            {
-                if (NPC.velocity.Y == 0f)
-                {
-                    NPC.velocity.X *= 0.94f;
-                    if (NPC.velocity.X > -0.2f && NPC.velocity.X < 0.2f)
-                    {
-                        NPC.velocity.X = 0f;
-                    }
-                }
-                NPC.velocity.Y = NPC.velocity.Y + 0.3f;
-                if (NPC.velocity.Y > 5f)
-                {
-                    NPC.velocity.Y = 5f;
-                }
-                NPC.ai[0] = 1f;
-            }
-            NPC.rotation = NPC.velocity.Y * (float)NPC.direction * 0.1f;
-            if ((double)NPC.rotation < -0.1)
-            {
-                NPC.rotation = -0.1f;
-            }
-            if ((double)NPC.rotation > 0.1)
-            {
-                NPC.rotation = 0.1f;
-                return;
-            }
-        }
-
-        public override bool? CanBeHitByProjectile(Projectile projectile)
-        {
-            if (projectile.minion && !projectile.Calamity().overridesMinionDamagePrevention)
-            {
-                return hasBeenHit;
-            }
-            return null;
-        }
-
-        public override void FindFrame(int frameHeight)
-        {
-            NPC.frameCounter += hasBeenHit ? 0.15f : 0.075f;
-            NPC.frameCounter %= Main.npcFrameCount[Type];
-            int frame = (int)NPC.frameCounter;
-            NPC.frame.Y = frame * frameHeight;
+            NPC.velocity.X = NPC.velocity.X + (float)NPC.direction * 0.15f;
+            NPC.velocity.Y = NPC.velocity.Y + (float)NPC.directionY * 0.15f;
+            NPC.velocity.X = MathHelper.Clamp(NPC.velocity.X, -10f, 10f);
+            NPC.velocity.Y = MathHelper.Clamp(NPC.velocity.Y, -10f, 10f);
         }
 
         public override float SpawnChance(NPCSpawnInfo spawnInfo)

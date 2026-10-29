@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using CalamityMod.Dusts;
 using CalamityMod.Items.Materials;
 using CalamityMod.Items.Placeables.Banners;
@@ -15,9 +14,19 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Utilities;
 namespace CalamityMod.NPCs.NormalNPCs
 {
-    public class ImpiousImmolator : ModNPC
+    public class ImpiousImmolator : HostileFlyingEnemyBase
     {
         public bool hasBeenHit = false;
+
+        protected override bool HasBeenHit
+        {
+            get => hasBeenHit;
+            set => hasBeenHit = value;
+        }
+
+        protected override float IdleHorizontalSpeedThreshold => 3f;
+        protected override float FrameIncrementAfterHit => 0.25f;
+        protected override float FrameIncrementBeforeHit => 0.125f;
 
         public override void SetStaticDefaults()
         {
@@ -58,195 +67,50 @@ namespace CalamityMod.NPCs.NormalNPCs
             });
         }
 
-        public override void SendExtraAI(BinaryWriter writer)
+        protected override void UpdateAttackMovement()
         {
-            writer.Write(hasBeenHit);
-            writer.Write(NPC.chaseable);
-        }
-
-        public override void ReceiveExtraAI(BinaryReader reader)
-        {
-            hasBeenHit = reader.ReadBoolean();
-            NPC.chaseable = reader.ReadBoolean();
-        }
-
-        public override void AI()
-        {
-            NPC.spriteDirection = (NPC.direction > 0) ? 1 : -1;
-            NPC.noGravity = true;
-            if (NPC.direction == 0)
+            NPC.velocity.X = NPC.velocity.X + (float)NPC.direction * 0.2f;
+            NPC.velocity.Y = NPC.velocity.Y + (float)NPC.directionY * 0.2f;
+            float velocityMax = CalamityWorld.death ? 16f : CalamityWorld.revenge ? 14f : 12f;
+            if (NPC.velocity.X > velocityMax)
             {
-                NPC.TargetClosest(true);
+                NPC.velocity.X = velocityMax;
             }
+            if (NPC.velocity.X < -velocityMax)
+            {
+                NPC.velocity.X = -velocityMax;
+            }
+            if (NPC.velocity.Y > velocityMax)
+            {
+                NPC.velocity.Y = velocityMax;
+            }
+            if (NPC.velocity.Y < -velocityMax)
+            {
+                NPC.velocity.Y = -velocityMax;
+            }
+
             if (NPC.justHit)
-            {
-                hasBeenHit = true;
-            }
-            NPC.chaseable = hasBeenHit;
-            if (!NPC.wet)
-            {
-                bool canAttack = hasBeenHit;
-                NPC.TargetClosest(false);
-                if ((Main.player[NPC.target].wet || Main.player[NPC.target].dead) && canAttack)
-                {
-                    canAttack = false;
-                }
-                if (!canAttack)
-                {
-                    if (NPC.collideX)
-                    {
-                        NPC.velocity.X = NPC.velocity.X * -1f;
-                        NPC.direction *= -1;
-                        NPC.netUpdate = true;
-                    }
-                    if (NPC.collideY)
-                    {
-                        NPC.netUpdate = true;
-                        if (NPC.velocity.Y > 0f)
-                        {
-                            NPC.velocity.Y = Math.Abs(NPC.velocity.Y) * -1f;
-                            NPC.directionY = -1;
-                            NPC.ai[0] = -1f;
-                        }
-                        else if (NPC.velocity.Y < 0f)
-                        {
-                            NPC.velocity.Y = Math.Abs(NPC.velocity.Y);
-                            NPC.directionY = 1;
-                            NPC.ai[0] = 1f;
-                        }
-                    }
-                }
-                if (canAttack)
-                {
-                    NPC.TargetClosest(true);
-                    NPC.velocity.X = NPC.velocity.X + (float)NPC.direction * 0.2f;
-                    NPC.velocity.Y = NPC.velocity.Y + (float)NPC.directionY * 0.2f;
-                    float velocityMax = CalamityWorld.death ? 16f : CalamityWorld.revenge ? 14f : 12f;
-                    if (NPC.velocity.X > velocityMax)
-                    {
-                        NPC.velocity.X = velocityMax;
-                    }
-                    if (NPC.velocity.X < -velocityMax)
-                    {
-                        NPC.velocity.X = -velocityMax;
-                    }
-                    if (NPC.velocity.Y > velocityMax)
-                    {
-                        NPC.velocity.Y = velocityMax;
-                    }
-                    if (NPC.velocity.Y < -velocityMax)
-                    {
-                        NPC.velocity.Y = -velocityMax;
-                    }
+                NPC.localAI[0] = 0f;
 
-                    if (NPC.justHit)
-                        NPC.localAI[0] = 0f;
-
-                    NPC.localAI[0] += 1f;
-                    if (Main.netMode != NetmodeID.MultiplayerClient && NPC.localAI[0] >= (CalamityWorld.death ? 50f : CalamityWorld.revenge ? 70f : 90f))
-                    {
-                        NPC.localAI[0] = 0f;
-                        if (Collision.CanHit(NPC.position, NPC.width, NPC.height, Main.player[NPC.target].position, Main.player[NPC.target].width, Main.player[NPC.target].height))
-                        {
-                            float speed = 12f;
-                            Vector2 beamPosition = new Vector2(NPC.position.X + (float)NPC.width * 0.5f, NPC.position.Y + (float)(NPC.height / 2));
-                            float targetXDist = Main.player[NPC.target].position.X + (float)Main.player[NPC.target].width * 0.5f - beamPosition.X + (float)Main.rand.Next(-20, 21);
-                            float targetYDist = Main.player[NPC.target].position.Y + (float)Main.player[NPC.target].height * 0.5f - beamPosition.Y + (float)Main.rand.Next(-20, 21);
-                            float targetDistance = (float)Math.Sqrt((double)(targetXDist * targetXDist + targetYDist * targetYDist));
-                            targetDistance = speed / targetDistance;
-                            targetXDist *= targetDistance;
-                            targetYDist *= targetDistance;
-                            int damage = Main.masterMode ? 35 : Main.expertMode ? 42 : 55;
-                            int beam = Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, targetXDist, targetYDist, ModContent.ProjectileType<FlameBurstHostile>(), damage, 0f, Main.myPlayer, 0f, 0f);
-                            Main.projectile[beam].tileCollide = true;
-                        }
-                    }
-                }
-                else
-                {
-                    NPC.velocity.X = NPC.velocity.X + (float)NPC.direction * 0.1f;
-                    if (NPC.velocity.X < -3f || NPC.velocity.X > 3f)
-                    {
-                        NPC.velocity.X = NPC.velocity.X * 0.95f;
-                    }
-                    if (NPC.ai[0] == -1f)
-                    {
-                        NPC.velocity.Y = NPC.velocity.Y - 0.01f;
-                        if ((double)NPC.velocity.Y < -0.3)
-                        {
-                            NPC.ai[0] = 1f;
-                        }
-                    }
-                    else
-                    {
-                        NPC.velocity.Y = NPC.velocity.Y + 0.01f;
-                        if ((double)NPC.velocity.Y > 0.3)
-                        {
-                            NPC.ai[0] = -1f;
-                        }
-                    }
-                }
-                int tileCheckX = (int)(NPC.position.X + (float)(NPC.width / 2)) / 16;
-                int tileCheckY = (int)(NPC.position.Y + (float)(NPC.height / 2)) / 16;
-                if (Main.tile[tileCheckX, tileCheckY - 1].LiquidAmount < 128) //problem?
-                {
-                    if (Main.tile[tileCheckX, tileCheckY + 1].HasTile)
-                    {
-                        NPC.ai[0] = -1f;
-                    }
-                    else if (Main.tile[tileCheckX, tileCheckY + 2].HasTile)
-                    {
-                        NPC.ai[0] = -1f;
-                    }
-                }
-                if ((double)NPC.velocity.Y > 0.4 || (double)NPC.velocity.Y < -0.4)
-                {
-                    NPC.velocity.Y = NPC.velocity.Y * 0.95f;
-                }
-            }
-            else
+            NPC.localAI[0] += 1f;
+            if (Main.netMode != NetmodeID.MultiplayerClient && NPC.localAI[0] >= (CalamityWorld.death ? 50f : CalamityWorld.revenge ? 70f : 90f))
             {
-                if (NPC.velocity.Y == 0f)
+                NPC.localAI[0] = 0f;
+                if (Collision.CanHit(NPC.position, NPC.width, NPC.height, Main.player[NPC.target].position, Main.player[NPC.target].width, Main.player[NPC.target].height))
                 {
-                    NPC.velocity.X = NPC.velocity.X * 0.94f;
-                    if ((double)NPC.velocity.X > -0.2 && (double)NPC.velocity.X < 0.2)
-                    {
-                        NPC.velocity.X = 0f;
-                    }
+                    float speed = 12f;
+                    Vector2 beamPosition = new Vector2(NPC.position.X + (float)NPC.width * 0.5f, NPC.position.Y + (float)(NPC.height / 2));
+                    float targetXDist = Main.player[NPC.target].position.X + (float)Main.player[NPC.target].width * 0.5f - beamPosition.X + (float)Main.rand.Next(-20, 21);
+                    float targetYDist = Main.player[NPC.target].position.Y + (float)Main.player[NPC.target].height * 0.5f - beamPosition.Y + (float)Main.rand.Next(-20, 21);
+                    float targetDistance = (float)Math.Sqrt((double)(targetXDist * targetXDist + targetYDist * targetYDist));
+                    targetDistance = speed / targetDistance;
+                    targetXDist *= targetDistance;
+                    targetYDist *= targetDistance;
+                    int damage = Main.masterMode ? 35 : Main.expertMode ? 42 : 55;
+                    int beam = Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, targetXDist, targetYDist, ModContent.ProjectileType<FlameBurstHostile>(), damage, 0f, Main.myPlayer, 0f, 0f);
+                    Main.projectile[beam].tileCollide = true;
                 }
-                NPC.velocity.Y = NPC.velocity.Y + 0.3f;
-                if (NPC.velocity.Y > 5f)
-                {
-                    NPC.velocity.Y = 5f;
-                }
-                NPC.ai[0] = 1f;
             }
-            NPC.rotation = NPC.velocity.Y * (float)NPC.direction * 0.1f;
-            if ((double)NPC.rotation < -0.1)
-            {
-                NPC.rotation = -0.1f;
-            }
-            if ((double)NPC.rotation > 0.1)
-            {
-                NPC.rotation = 0.1f;
-            }
-        }
-
-        public override bool? CanBeHitByProjectile(Projectile projectile)
-        {
-            if (projectile.minion && !projectile.Calamity().overridesMinionDamagePrevention)
-            {
-                return hasBeenHit;
-            }
-            return null;
-        }
-
-        public override void FindFrame(int frameHeight)
-        {
-            NPC.frameCounter += hasBeenHit ? 0.25f : 0.125f;
-            NPC.frameCounter %= Main.npcFrameCount[Type];
-            int frame = (int)NPC.frameCounter;
-            NPC.frame.Y = frame * frameHeight;
         }
 
         public override float SpawnChance(NPCSpawnInfo spawnInfo)
