@@ -22,39 +22,8 @@ namespace CalamityMod.Systems
 
         public override void UpdateUI(GameTime gameTime)
         {
-            // Decrement timers
-            if (remainingPlaytime > 0)
-                --remainingPlaytime;
-            if (timeUntilReset > 0)
-                --timeUntilReset;
-
-            if (currentlyPlaying)
-            {
-                // If the reset timer has run out, stop the active sound instance entirely.
-                // The next bullet hit will start the song from the beginning.
-                if (timeUntilReset <= 0f)
-                {
-                    currentlyPlaying = false;
-                    if (SoundEngine.TryGetActiveSound(gungeonSoundSlot, out var activeSound))
-                        activeSound.Stop();
-                    gungeonSoundSlot = SlotId.Invalid;
-                }
-
-                // Otherwise, set the volume of the active sound instance appropriately.
-                else
-                {
-                    bool foundTheGun = SoundEngine.TryGetActiveSound(gungeonSoundSlot, out var activeSound);
-                    if (!foundTheGun)
-                    {
-                        currentlyPlaying = false;
-                        return;
-                    }
-
-                    float newVolume = MathHelper.Clamp(remainingPlaytime / DefaultMusicTime, 0f, 0.8f);
-                    activeSound.Volume = newVolume;
-                    activeSound.Update();
-                }
-            }
+            // The next bullet hit will start the song from the beginning after the reset timer expires.
+            SoundInstanceUpdateHelper.Update(ref gungeonSoundSlot, ref remainingPlaytime, ref timeUntilReset, ref currentlyPlaying, DefaultMusicTime, 0.8f);
         }
 
         // EEEEEEEEEEEEEEEEEEEEEEENTER THE GUNGEON, ENTER THE GUNGEON

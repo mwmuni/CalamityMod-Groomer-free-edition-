@@ -34,11 +34,7 @@ namespace CalamityMod.Items.Weapons.Melee
             Item.useTime = 25;
             Item.useAnimation = 25;
 
-            Item.useStyle = ItemUseStyleID.Shoot;
-            Item.UseSound = SoundID.Item1;
-            Item.channel = true;
-            Item.noUseGraphic = true;
-            Item.noMelee = true;
+            YoyoDefaults.ApplyUseDefaults(Item);
 
             Item.shoot = ModContent.ProjectileType<SulphurousGrabberYoyo>();
             Item.shootSpeed = 12f;

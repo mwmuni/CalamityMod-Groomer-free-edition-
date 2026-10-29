@@ -35,11 +35,7 @@ namespace CalamityMod.Items.Weapons.Melee
             Item.useAnimation = 20;
             Item.autoReuse = true;
 
-            Item.useStyle = ItemUseStyleID.Shoot;
-            Item.UseSound = SoundID.Item1;
-            Item.channel = true;
-            Item.noUseGraphic = true;
-            Item.noMelee = true;
+            YoyoDefaults.ApplyUseDefaults(Item);
 
             Item.shoot = ModContent.ProjectileType<OzzathothYoyo>();
             Item.shootSpeed = 16f;

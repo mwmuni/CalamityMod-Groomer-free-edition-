@@ -1,9 +1,8 @@
 ﻿using System;
-using CalamityMod.Particles;
+using CalamityMod.Projectiles.BaseProjectiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using static CalamityMod.CalamityUtils;
@@ -12,16 +11,9 @@ using static Terraria.ModLoader.ModContent;
 
 namespace CalamityMod.Projectiles.Melee
 {
-    public class TrueAncientBeam : ModProjectile, ILocalizedModType //The boring plain one
+    public class TrueAncientBeam : BaseEnergyNeedleProjectile //The boring plain one
     {
-        public new string LocalizationCategory => "Projectiles.Melee";
         public override string Texture => "CalamityMod/Items/Weapons/Melee/TrueArkoftheAncientsGlow";
-
-        public override void SetStaticDefaults()
-        {
-            ProjectileID.Sets.TrailCacheLength[Type] = 5;
-            ProjectileID.Sets.TrailingMode[Type] = 2;
-        }
 
         const float MaxTime = 75;
         public float Timer => MaxTime - Projectile.timeLeft;
@@ -34,15 +26,6 @@ namespace CalamityMod.Projectiles.Melee
             Projectile.timeLeft = (int)MaxTime;
             Projectile.DamageType = DamageClass.Melee;
             Projectile.tileCollide = false;
-        }
-
-        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
-        {
-            float collisionPoint = 0f;
-            float bladeLength = 44f * Projectile.scale;
-            Vector2 start = -Utils.SafeNormalize(Projectile.velocity, Vector2.Zero) * 16f;
-
-            return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center + start, Projectile.Center + start + Utils.SafeNormalize(Projectile.velocity, Vector2.Zero) * bladeLength, 24, ref collisionPoint);
         }
 
         public override void AI()
@@ -108,26 +91,5 @@ namespace CalamityMod.Projectiles.Melee
             return false;
         }
 
-        public override void OnKill(int timeLeft)
-        {
-            SoundEngine.PlaySound(SoundID.DD2_WitherBeastDeath, Projectile.Center);
-            for (int i = 0; i < 10; i++)
-            {
-                Vector2 particleSpeed = Main.rand.NextVector2CircularEdge(1, 1) * Main.rand.NextFloat(1.2f, 2.3f);
-                Particle energyLeak = new SquishyLightParticle(Projectile.Center + Utils.SafeNormalize(Projectile.velocity, Vector2.Zero) * 40f, particleSpeed, Main.rand.NextFloat(0.3f, 0.6f), Color.Cyan, 60, 1, 1.5f, hueShift: 0.02f);
-                GeneralParticleHandler.SpawnParticle(energyLeak);
-            }
-        }
-
-        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            Vector2 particleOrigin = target.Hitbox.Size().Length() < 140 ? target.Center : Projectile.Center + Projectile.rotation.ToRotationVector2() * 60f;
-            for (int i = 0; i < 10; i++)
-            {
-                Vector2 particleSpeed = Main.rand.NextVector2CircularEdge(1, 1) * Main.rand.NextFloat(2.6f, 4f);
-                Particle energyLeak = new SquishyLightParticle(particleOrigin, particleSpeed, Main.rand.NextFloat(0.3f, 0.6f), Color.Cyan, 60, 1, 1.5f, hueShift: 0.02f);
-                GeneralParticleHandler.SpawnParticle(energyLeak);
-            }
-        }
     }
 }

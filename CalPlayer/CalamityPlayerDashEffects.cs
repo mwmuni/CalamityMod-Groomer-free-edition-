@@ -86,32 +86,28 @@ namespace CalamityMod.CalPlayer
                 Rectangle hitArea = new Rectangle((int)(Player.position.X + Player.velocity.X * 0.5 - 4f), (int)(Player.position.Y + Player.velocity.Y * 0.5 - 4), Player.width + 8, Player.height + 8);
                 foreach (NPC n in Main.ActiveNPCs)
                 {
-                    // Ignore critters with the Guide to Critter Companionship
-                    if (Player.dontHurtCritters && NPCID.Sets.CountsAsCritter[n.type])
+                    if (!IsValidDashHitTarget(n))
                         continue;
 
-                    if (!n.dontTakeDamage && !n.friendly && n.Calamity().dashImmunityTime[Player.whoAmI] <= 0)
+                    if (hitArea.Intersects(n.getRect()) && (n.noTileCollide || Player.CanHit(n)))
                     {
-                        if (hitArea.Intersects(n.getRect()) && (n.noTileCollide || Player.CanHit(n)))
-                        {
-                            DashHitContext hitContext = default;
-                            UsedDash.OnHitEffects(Player, n, source, ref hitContext);
+                        DashHitContext hitContext = default;
+                        UsedDash.OnHitEffects(Player, n, source, ref hitContext);
 
-                            // Don't bother doing anything if no damage is done.
-                            if (hitContext.damageClass is null || hitContext.BaseDamage <= 0)
-                                continue;
+                        // Don't bother doing anything if no damage is done.
+                        if (hitContext.damageClass is null || hitContext.BaseDamage <= 0)
+                            continue;
 
-                            // Duplicated from the way TML edits vanilla ram dash damage (and Shield of Cthulhu)
-                            int dashDamage = (int)Player.GetTotalDamage(hitContext.damageClass).ApplyTo(hitContext.BaseDamage);
+                        // Duplicated from the way TML edits vanilla ram dash damage (and Shield of Cthulhu)
+                        int dashDamage = (int)Player.GetTotalDamage(hitContext.damageClass).ApplyTo(hitContext.BaseDamage);
 
-                            Projectile ram = Projectile.NewProjectileDirect(Player.GetSource_FromThis(), n.Center, Vector2.Zero, ModContent.ProjectileType<DirectStrike>(), dashDamage, 0f, Player.whoAmI, n.whoAmI);
-                            ram.DamageType = hitContext.damageClass;
+                        Projectile ram = Projectile.NewProjectileDirect(Player.GetSource_FromThis(), n.Center, Vector2.Zero, ModContent.ProjectileType<DirectStrike>(), dashDamage, 0f, Player.whoAmI, n.whoAmI);
+                        ram.DamageType = hitContext.damageClass;
 
-                            if (n.Calamity().dashImmunityTime[Player.whoAmI] < 12)
-                                n.Calamity().dashImmunityTime[Player.whoAmI] = 12;
+                        if (n.Calamity().dashImmunityTime[Player.whoAmI] < 12)
+                            n.Calamity().dashImmunityTime[Player.whoAmI] = 12;
 
-                            Player.GiveImmuneTimeForCollisionAttack(hitContext.PlayerImmunityFrames);
-                        }
+                        Player.GiveImmuneTimeForCollisionAttack(hitContext.PlayerImmunityFrames);
                     }
                 }
                 UsedDash.dashTime++;
@@ -583,39 +579,44 @@ namespace CalamityMod.CalPlayer
             int totalHurtNPCs = 0;
             foreach (NPC n in Main.ActiveNPCs)
             {
-                // Ignore critters with the Guide to Critter Companionship
-                if (Player.dontHurtCritters && NPCID.Sets.CountsAsCritter[n.type])
+                if (!IsValidDashHitTarget(n))
                     continue;
 
-                if (!n.dontTakeDamage && !n.friendly && n.Calamity().dashImmunityTime[Player.whoAmI] <= 0)
+                Rectangle npcHitbox = n.getRect();
+                if (myRect.Intersects(npcHitbox) && (n.noTileCollide || Collision.CanHit(Player.position, Player.width, Player.height, n.position, n.width, n.height)))
                 {
-                    Rectangle npcHitbox = n.getRect();
-                    if (myRect.Intersects(npcHitbox) && (n.noTileCollide || Collision.CanHit(Player.position, Player.width, Player.height, n.position, n.width, n.height)))
+                    int hitDirection = Math.Sign(Player.velocity.X);
+
+                    // Use the player's facing direction as a fallback if they are not making any horizontal movement.
+                    if (hitDirection == 0)
+                        hitDirection = Player.direction;
+
+                    Vector2 hitVelocity = new Vector2(2 * hitDirection, 0); // Projectile velocity will determine the hit directon of direct strikes
+
+                    if (Player.whoAmI == Main.myPlayer)
                     {
-                        int hitDirection = Math.Sign(Player.velocity.X);
-
-                        // Use the player's facing direction as a fallback if they are not making any horizontal movement.
-                        if (hitDirection == 0)
-                            hitDirection = Player.direction;
-
-                        Vector2 hitVelocity = new Vector2(2 * hitDirection, 0); // Projectile velocity will determine the hit directon of direct strikes
-
-                        if (Player.whoAmI == Main.myPlayer)
-                        {
-                            Projectile ram = Projectile.NewProjectileDirect(Player.GetSource_FromThis(), n.Center, hitVelocity, ModContent.ProjectileType<DirectStrike>(), (int)Damage, Knockback, Player.whoAmI, n.whoAmI);
-                            ram.DamageType = DamageClass.Summon;
-                        }
-
-                        // 17APR2024: Ozzatron: Dash iframes are not boosted by Cross Necklace at all and are fixed.
-                        n.Calamity().dashImmunityTime[Player.whoAmI] = NPCImmuneTime;
-                        Player.GiveUniversalIFrames(PlayerImmuneTime, false);
-
-                        totalHurtNPCs++;
-                        break;
+                        Projectile ram = Projectile.NewProjectileDirect(Player.GetSource_FromThis(), n.Center, hitVelocity, ModContent.ProjectileType<DirectStrike>(), (int)Damage, Knockback, Player.whoAmI, n.whoAmI);
+                        ram.DamageType = DamageClass.Summon;
                     }
+
+                    // 17APR2024: Ozzatron: Dash iframes are not boosted by Cross Necklace at all and are fixed.
+                    n.Calamity().dashImmunityTime[Player.whoAmI] = NPCImmuneTime;
+                    Player.GiveUniversalIFrames(PlayerImmuneTime, false);
+
+                    totalHurtNPCs++;
+                    break;
                 }
             }
             return totalHurtNPCs;
+        }
+
+        private bool IsValidDashHitTarget(NPC npc)
+        {
+            // Ignore critters with the Guide to Critter Companionship
+            if (Player.dontHurtCritters && NPCID.Sets.CountsAsCritter[npc.type])
+                return false;
+
+            return !npc.dontTakeDamage && !npc.friendly && npc.Calamity().dashImmunityTime[Player.whoAmI] <= 0;
         }
     }
 }

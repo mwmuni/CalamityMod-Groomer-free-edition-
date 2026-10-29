@@ -20,39 +20,8 @@ namespace CalamityMod.Systems
 
         public override void UpdateUI(GameTime gameTime)
         {
-            // Decrement timers
-            if (remainingPlaytime > 0)
-                --remainingPlaytime;
-            if (timeUntilReset > 0)
-                --timeUntilReset;
-
-            if (currentlyPlaying)
-            {
-                // If the reset timer has run out, stop the active sound instance entirely.
-                // The next Ricoshot will start the song from the beginning.
-                if (timeUntilReset <= 0f)
-                {
-                    currentlyPlaying = false;
-                    if (SoundEngine.TryGetActiveSound(orderSoundSlot, out var activeSound))
-                        activeSound.Stop();
-                    orderSoundSlot = SlotId.Invalid;
-                }
-
-                // Otherwise, set the volume of the active sound instance appropriately.
-                else
-                {
-                    bool foundOrder = SoundEngine.TryGetActiveSound(orderSoundSlot, out var activeSound);
-                    if (!foundOrder)
-                    {
-                        currentlyPlaying = false;
-                        return;
-                    }
-
-                    float newVolume = MathHelper.Clamp(remainingPlaytime / DefaultOrderTime, 0f, 1f);
-                    activeSound.Volume = newVolume;
-                    activeSound.Update();
-                }
-            }
+            // The next Ricoshot will start the song from the beginning after the reset timer expires.
+            SoundInstanceUpdateHelper.Update(ref orderSoundSlot, ref remainingPlaytime, ref timeUntilReset, ref currentlyPlaying, DefaultOrderTime, 1f);
         }
 
         // DIE!

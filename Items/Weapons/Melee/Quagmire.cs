@@ -34,11 +34,7 @@ namespace CalamityMod.Items.Weapons.Melee
             Item.useAnimation = 22;
             Item.autoReuse = true;
 
-            Item.useStyle = ItemUseStyleID.Shoot;
-            Item.UseSound = SoundID.Item1;
-            Item.channel = true;
-            Item.noUseGraphic = true;
-            Item.noMelee = true;
+            YoyoDefaults.ApplyUseDefaults(Item);
 
             Item.shoot = ModContent.ProjectileType<QuagmireYoyo>();
             Item.shootSpeed = 10f;

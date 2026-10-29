@@ -1292,26 +1292,22 @@ namespace CalamityMod.CalPlayer
             {
                 foreach (NPC n in Main.ActiveNPCs)
                 {
-                    // Ignore critters with the Guide to Critter Companionship
-                    if (Player.dontHurtCritters && NPCID.Sets.CountsAsCritter[n.type])
+                    if (!IsValidDashHitTarget(n))
                         continue;
 
-                    if (!n.dontTakeDamage && !n.friendly && n.Calamity().dashImmunityTime[Player.whoAmI] <= 0)
+                    Rectangle npcHitbox = n.getRect();
+                    if (Player.getRect().Intersects(npcHitbox) && (n.noTileCollide || Collision.CanHit(Player.position, Player.width, Player.height, n.position, n.width, n.height)))
                     {
-                        Rectangle npcHitbox = n.getRect();
-                        if ((Player.getRect()).Intersects(npcHitbox) && (n.noTileCollide || Collision.CanHit(Player.position, Player.width, Player.height, n.position, n.width, n.height)))
-                        {
-                            int damage = Player.CalcIntDamage<MeleeDamageClass>(InterstellarStompers.PassthroughDamage);
+                        int damage = Player.CalcIntDamage<MeleeDamageClass>(InterstellarStompers.PassthroughDamage);
 
-                            Projectile.NewProjectile(Player.GetSource_Accessory(FindAccessory<InterstellarStompers>()), n.Center, Vector2.Zero, ModContent.ProjectileType<DirectStrike>(), damage, 0, Main.myPlayer);
+                        Projectile.NewProjectile(Player.GetSource_Accessory(FindAccessory<InterstellarStompers>()), n.Center, Vector2.Zero, ModContent.ProjectileType<DirectStrike>(), damage, 0, Main.myPlayer);
 
-                            // 17APR2024: Ozzatron: Gravistar Sabaton gives iframes when passing through enemies for projectile safety.
-                            // This is a fixed and intentionally very low number of iframes, and is not boosted by Cross Necklace.
-                            n.Calamity().dashImmunityTime[Player.whoAmI] = 4;
-                            Player.GiveUniversalIFrames(InterstellarStompers.PassthroughIFrames, false);
+                        // 17APR2024: Ozzatron: Gravistar Sabaton gives iframes when passing through enemies for projectile safety.
+                        // This is a fixed and intentionally very low number of iframes, and is not boosted by Cross Necklace.
+                        n.Calamity().dashImmunityTime[Player.whoAmI] = 4;
+                        Player.GiveUniversalIFrames(InterstellarStompers.PassthroughIFrames, false);
 
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -1320,22 +1316,18 @@ namespace CalamityMod.CalPlayer
             {
                 foreach (NPC n in Main.ActiveNPCs)
                 {
-                    // Ignore critters with the Guide to Critter Companionship
-                    if (Player.dontHurtCritters && NPCID.Sets.CountsAsCritter[n.type])
+                    if (!IsValidDashHitTarget(n))
                         continue;
 
-                    if (!n.dontTakeDamage && !n.friendly && n.Calamity().dashImmunityTime[Player.whoAmI] <= 0)
+                    Rectangle npcHitbox = n.getRect();
+                    if (Player.getRect().Intersects(npcHitbox) && (n.noTileCollide || Collision.CanHit(Player.position, Player.width, Player.height, n.position, n.width, n.height)))
                     {
-                        Rectangle npcHitbox = n.getRect();
-                        if ((Player.getRect()).Intersects(npcHitbox) && (n.noTileCollide || Collision.CanHit(Player.position, Player.width, Player.height, n.position, n.width, n.height)))
-                        {
-                            // 17APR2024: Ozzatron: This item gives iframes when passing through enemies for projectile safety.
-                            // This is a fixed and intentionally very low number of iframes, and is not boosted by Cross Necklace.
-                            n.Calamity().dashImmunityTime[Player.whoAmI] = 4;
-                            Player.GiveUniversalIFrames(InterstellarStompers.PassthroughIFrames, false);
+                        // 17APR2024: Ozzatron: This item gives iframes when passing through enemies for projectile safety.
+                        // This is a fixed and intentionally very low number of iframes, and is not boosted by Cross Necklace.
+                        n.Calamity().dashImmunityTime[Player.whoAmI] = 4;
+                        Player.GiveUniversalIFrames(InterstellarStompers.PassthroughIFrames, false);
 
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
