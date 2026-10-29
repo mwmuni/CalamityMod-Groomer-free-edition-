@@ -88,34 +88,8 @@ public static class SanePrimitiveRenderer
             }
 
             int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.Indices.Length);
-            bool usesTexture = mesh.UsesTexture;
 
-            foreach (var pass in _effect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                if (usesTexture)
-                {
-                    _device.DrawUserIndexedPrimitives(
-                        mesh.PrimitiveType,
-                        mesh.TexturedVertices,
-                        0,
-                        mesh.VertexCount,
-                        mesh.Indices,
-                        0,
-                        primitiveCount);
-                }
-                else
-                {
-                    _device.DrawUserIndexedPrimitives(
-                        mesh.PrimitiveType,
-                        mesh.ColorVertices,
-                        0,
-                        mesh.VertexCount,
-                        mesh.Indices,
-                        0,
-                        primitiveCount);
-                }
-            }
+            DrawMeshCore(_device, _effect, mesh.AsView(), primitiveCount);
         }
 
         public void Draw(in PrimitiveMeshView mesh)
@@ -132,34 +106,8 @@ public static class SanePrimitiveRenderer
             }
 
             int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.IndexCount);
-            bool usesTexture = mesh.UsesTexture;
 
-            foreach (var pass in _effect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                if (usesTexture)
-                {
-                    _device.DrawUserIndexedPrimitives(
-                        mesh.PrimitiveType,
-                        mesh.TexturedVertices,
-                        mesh.VertexOffset,
-                        mesh.VertexCount,
-                        mesh.Indices,
-                        mesh.IndexOffset,
-                        primitiveCount);
-                }
-                else
-                {
-                    _device.DrawUserIndexedPrimitives(
-                        mesh.PrimitiveType,
-                        mesh.ColorVertices,
-                        mesh.VertexOffset,
-                        mesh.VertexCount,
-                        mesh.Indices,
-                        mesh.IndexOffset,
-                        primitiveCount);
-                }
-            }
+            DrawMeshCore(_device, _effect, mesh, primitiveCount);
         }
 
         public void Dispose()
@@ -254,32 +202,7 @@ public static class SanePrimitiveRenderer
 
         int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.Indices.Length);
 
-        foreach (var pass in _effect.CurrentTechnique.Passes)
-        {
-            pass.Apply();
-            if (textured)
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.TexturedVertices,
-                    0,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    0,
-                    primitiveCount);
-            }
-            else
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.ColorVertices,
-                    0,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    0,
-                    primitiveCount);
-            }
-        }
+        DrawMeshCore(device, _effect, mesh.AsView(), primitiveCount);
 
         device.RasterizerState = previousRasterizer;
         device.DepthStencilState = previousDepth;
@@ -341,34 +264,7 @@ public static class SanePrimitiveRenderer
 
         int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.Indices.Length);
 
-        bool textured = mesh.UsesTexture;
-
-        foreach (var pass in effect.CurrentTechnique.Passes)
-        {
-            pass.Apply();
-            if (textured)
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.TexturedVertices,
-                    0,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    0,
-                    primitiveCount);
-            }
-            else
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.ColorVertices,
-                    0,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    0,
-                    primitiveCount);
-            }
-        }
+        DrawMeshCore(device, effect, mesh.AsView(), primitiveCount);
 
         device.RasterizerState = previousRasterizer;
         device.DepthStencilState = previousDepth;
@@ -553,32 +449,7 @@ public static class SanePrimitiveRenderer
 
         int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.IndexCount);
 
-        foreach (var pass in _effect.CurrentTechnique.Passes)
-        {
-            pass.Apply();
-            if (textured)
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.TexturedVertices,
-                    mesh.VertexOffset,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    mesh.IndexOffset,
-                    primitiveCount);
-            }
-            else
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.ColorVertices,
-                    mesh.VertexOffset,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    mesh.IndexOffset,
-                    primitiveCount);
-            }
-        }
+        DrawMeshCore(device, _effect, mesh, primitiveCount);
 
         device.RasterizerState = previousRasterizer;
         device.DepthStencilState = previousDepth;
@@ -620,34 +491,7 @@ public static class SanePrimitiveRenderer
 
         int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.IndexCount);
 
-        bool textured = mesh.UsesTexture;
-
-        foreach (var pass in effect.CurrentTechnique.Passes)
-        {
-            pass.Apply();
-            if (textured)
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.TexturedVertices,
-                    mesh.VertexOffset,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    mesh.IndexOffset,
-                    primitiveCount);
-            }
-            else
-            {
-                device.DrawUserIndexedPrimitives(
-                    mesh.PrimitiveType,
-                    mesh.ColorVertices,
-                    mesh.VertexOffset,
-                    mesh.VertexCount,
-                    mesh.Indices,
-                    mesh.IndexOffset,
-                    primitiveCount);
-            }
-        }
+        DrawMeshCore(device, effect, mesh, primitiveCount);
 
         device.RasterizerState = previousRasterizer;
         device.DepthStencilState = previousDepth;
@@ -788,6 +632,42 @@ public static class SanePrimitiveRenderer
         using var scope = BeginShaderScope(effect, world, view, projection, transformMatrixParam, rasterizerState, depthState, blendState, samplerState);
         for (int i = 0; i < meshes.Count; i++)
             scope.Draw(meshes[i]);
+    }
+
+    private static void DrawMeshCore(
+        GraphicsDevice device,
+        Effect effect,
+        PrimitiveMeshView mesh,
+        int primitiveCount)
+    {
+        bool usesTexture = mesh.UsesTexture;
+
+        foreach (var pass in effect.CurrentTechnique.Passes)
+        {
+            pass.Apply();
+            if (usesTexture)
+            {
+                device.DrawUserIndexedPrimitives(
+                    mesh.PrimitiveType,
+                    mesh.TexturedVertices,
+                    mesh.VertexOffset,
+                    mesh.VertexCount,
+                    mesh.Indices,
+                    mesh.IndexOffset,
+                    primitiveCount);
+            }
+            else
+            {
+                device.DrawUserIndexedPrimitives(
+                    mesh.PrimitiveType,
+                    mesh.ColorVertices,
+                    mesh.VertexOffset,
+                    mesh.VertexCount,
+                    mesh.Indices,
+                    mesh.IndexOffset,
+                    primitiveCount);
+            }
+        }
     }
 
     private static int GetPrimitiveCount(PrimitiveType primitiveType, int indexCount)
