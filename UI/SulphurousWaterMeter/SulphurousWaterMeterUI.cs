@@ -1,4 +1,3 @@
-﻿using System;
 using CalamityMod.CalPlayer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,8 +13,6 @@ namespace CalamityMod.UI.SulphurousWaterMeter
         // These values were decided relative to the stealth meter positions, and are by default slightly below them.
         internal const float DefaultPosX = StealthUI.DefaultStealthPosX;
         internal const float DefaultPosY = StealthUI.DefaultStealthPosY + 2.286282f;
-        private const float MouseDragEpsilon = 0.05f; // 0.05%
-
         private static Vector2? dragOffset = null;
         private static Texture2D edgeTexture, barTexture;
 
@@ -37,18 +34,12 @@ namespace CalamityMod.UI.SulphurousWaterMeter
         public static void Draw(SpriteBatch spriteBatch, Player player)
         {
             // Sanity check the planned position before drawing. This is done relative.
-            Vector2 screenRatioPosition = new Vector2(CalamityClientConfig.Instance.SulphuricWaterMeterPosX, CalamityClientConfig.Instance.SulphuricWaterMeterPosY);
-            if (screenRatioPosition.X < 0f || screenRatioPosition.X > 100f)
-                screenRatioPosition.X = DefaultPosX;
-            if (screenRatioPosition.Y < 0f || screenRatioPosition.Y > 100f)
-                screenRatioPosition.Y = DefaultPosY;
+            Vector2 screenRatioPosition = MeterUIHelper.GetScreenPosition(
+                new Vector2(CalamityClientConfig.Instance.SulphuricWaterMeterPosX, CalamityClientConfig.Instance.SulphuricWaterMeterPosY),
+                new Vector2(DefaultPosX, DefaultPosY),
+                out Vector2 screenPos);
 
-            // Convert the screen ratio position to an absolute position in pixels
-            // Cast to integer to prevent blurriness which results from decimal pixel positions
             float uiScale = Main.UIScale;
-            Vector2 screenPos = screenRatioPosition;
-            screenPos.X = (int)(screenPos.X * 0.01f * Main.screenWidth);
-            screenPos.Y = (int)(screenPos.Y * 0.01f * Main.screenHeight);
 
             CalamityPlayer modPlayer = player.Calamity();
 
@@ -94,37 +85,11 @@ namespace CalamityMod.UI.SulphurousWaterMeter
                     modPlayer.SulphWaterUIOpacity = MathHelper.Lerp(modPlayer.SulphWaterUIOpacity, 0.25f, 0.035f);
                 }
 
-                Vector2 newScreenRatioPosition = screenRatioPosition;
-
-                // As long as the mouse button is held down, drag the meter along with an offset.
-                if (!CalamityClientConfig.Instance.MeterPosLock && ms.LeftButton == ButtonState.Pressed)
+                MeterUIHelper.HandleDragging(screenRatioPosition, screenPos, ms, mousePos, ref dragOffset, static newPosition =>
                 {
-                    // If the drag offset doesn't exist yet, create it.
-                    if (!dragOffset.HasValue)
-                        dragOffset = mousePos - screenPos;
-
-                    // Given the mouse's absolute current position, compute where the corner of the water bar should be based on the original drag offset.
-                    Vector2 newCorner = mousePos - dragOffset.GetValueOrDefault(Vector2.Zero);
-
-                    // Convert the new corner position into a screen ratio position.
-                    newScreenRatioPosition.X = (100f * newCorner.X) / Main.screenWidth;
-                    newScreenRatioPosition.Y = (100f * newCorner.Y) / Main.screenHeight;
-                }
-
-                // Compute the change in position. If it is large enough, actually move the meter
-                Vector2 delta = newScreenRatioPosition - screenRatioPosition;
-                if (Math.Abs(delta.X) >= MouseDragEpsilon || Math.Abs(delta.Y) >= MouseDragEpsilon)
-                {
-                    CalamityClientConfig.Instance.SulphuricWaterMeterPosX = newScreenRatioPosition.X;
-                    CalamityClientConfig.Instance.SulphuricWaterMeterPosY = newScreenRatioPosition.Y;
-                }
-
-                // When the mouse is released, save the config and destroy the drag offset.
-                if (dragOffset.HasValue && ms.LeftButton == ButtonState.Released)
-                {
-                    dragOffset = null;
-                    CalamityClientConfig.Instance.SaveChanges();
-                }
+                    CalamityClientConfig.Instance.SulphuricWaterMeterPosX = newPosition.X;
+                    CalamityClientConfig.Instance.SulphuricWaterMeterPosY = newPosition.Y;
+                });
             }
             else
                 modPlayer.SulphWaterUIOpacity = MathHelper.Clamp(modPlayer.SulphWaterUIOpacity + (modPlayer.SulphWaterPoisoningLevel > 0f).ToDirectionInt() * 0.06f, 0f, 1f);

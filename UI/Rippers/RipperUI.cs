@@ -19,8 +19,6 @@ namespace CalamityMod.UI.Rippers
         public const float DefaultRagePosY = 4.5761431f;
         public const float DefaultAdrenPosX = 35.77406f;
         public const float DefaultAdrenPosY = 8.846918f;
-        private const float MouseDragEpsilon = 0.05f; // 0.05%
-
         private const int RageAnimFrameDelay = 6;
         private const int RageAnimFrames = 10;
         private const int AdrenAnimFrameDelay = 5;
@@ -105,27 +103,16 @@ namespace CalamityMod.UI.Rippers
         public static void Draw(SpriteBatch spriteBatch, Player player)
         {
             // Sanity check the planned Rage Meter position
-            Vector2 rageScreenRatioPos = new Vector2(CalamityClientConfig.Instance.RageMeterPosX, CalamityClientConfig.Instance.RageMeterPosY);
-            if (rageScreenRatioPos.X < 0f || rageScreenRatioPos.X > 100f)
-                rageScreenRatioPos.X = DefaultRagePosX;
-            if (rageScreenRatioPos.Y < 0f || rageScreenRatioPos.Y > 100f)
-                rageScreenRatioPos.Y = DefaultRagePosY;
-
-            // Sanity check the planned Adrenaline Meter position
-            Vector2 adrenScreenRatioPos = new Vector2(CalamityClientConfig.Instance.AdrenalineMeterPosX, CalamityClientConfig.Instance.AdrenalineMeterPosY);
-            if (adrenScreenRatioPos.X < 0f || adrenScreenRatioPos.X > 100f)
-                adrenScreenRatioPos.X = DefaultAdrenPosX;
-            if (adrenScreenRatioPos.Y < 0f || adrenScreenRatioPos.Y > 100f)
-                adrenScreenRatioPos.Y = DefaultAdrenPosY;
-
             // Convert the screen ratio position to an absolute position in pixels
             // Cast to integer to prevent blurriness which results from decimal pixel positions
-            Vector2 rageScreenPos = rageScreenRatioPos;
-            rageScreenPos.X = (int)(rageScreenPos.X * 0.01f * Main.screenWidth);
-            rageScreenPos.Y = (int)(rageScreenPos.Y * 0.01f * Main.screenHeight);
-            Vector2 adrenScreenPos = adrenScreenRatioPos;
-            adrenScreenPos.X = (int)(adrenScreenPos.X * 0.01f * Main.screenWidth);
-            adrenScreenPos.Y = (int)(adrenScreenPos.Y * 0.01f * Main.screenHeight);
+            Vector2 rageScreenRatioPos = MeterUIHelper.GetScreenPosition(
+                new Vector2(CalamityClientConfig.Instance.RageMeterPosX, CalamityClientConfig.Instance.RageMeterPosY),
+                new Vector2(DefaultRagePosX, DefaultRagePosY),
+                out Vector2 rageScreenPos);
+            Vector2 adrenScreenRatioPos = MeterUIHelper.GetScreenPosition(
+                new Vector2(CalamityClientConfig.Instance.AdrenalineMeterPosX, CalamityClientConfig.Instance.AdrenalineMeterPosY),
+                new Vector2(DefaultAdrenPosX, DefaultAdrenPosY),
+                out Vector2 adrenScreenPos);
 
             // Grab the ModPlayer object and draw if applicable. If not applicable, save positions to config.
             CalamityPlayer modPlayer = player.Calamity();
@@ -197,36 +184,11 @@ namespace CalamityMod.UI.Rippers
                 string rageStr = MakeRipperPercentString(modPlayer.rage, modPlayer.rageMax);
                 Main.instance.MouseText($"{CalamityUtils.GetTextValue("UI.Rage")}: {rageStr}");
 
-                // The bar is draggable if enabled in config.
-                Vector2 newScreenRatioPosition = rageScreenRatioPos;
-                if (!CalamityClientConfig.Instance.MeterPosLock && ms.LeftButton == ButtonState.Pressed)
+                MeterUIHelper.HandleDragging(rageScreenRatioPos, rageScreenPos, ms, mousePos, ref rageDragOffset, static newPosition =>
                 {
-                    // If the drag offset doesn't exist yet, create it.
-                    if (!rageDragOffset.HasValue)
-                        rageDragOffset = mousePos - rageScreenPos;
-
-                    // Given the mouse's absolute current position, compute where the corner of the stealth bar should be based on the original drag offset.
-                    Vector2 newCorner = mousePos - rageDragOffset.GetValueOrDefault(Vector2.Zero);
-
-                    // Convert the new corner position into a screen ratio position.
-                    newScreenRatioPosition.X = (100f * newCorner.X) / Main.screenWidth;
-                    newScreenRatioPosition.Y = (100f * newCorner.Y) / Main.screenHeight;
-                }
-
-                // Compute the change in position. If it is large enough, actually move the meter
-                Vector2 delta = newScreenRatioPosition - rageScreenRatioPos;
-                if (Math.Abs(delta.X) >= MouseDragEpsilon || Math.Abs(delta.Y) >= MouseDragEpsilon)
-                {
-                    CalamityClientConfig.Instance.RageMeterPosX = newScreenRatioPosition.X;
-                    CalamityClientConfig.Instance.RageMeterPosY = newScreenRatioPosition.Y;
-                }
-
-                // When the mouse is released, save the config and destroy the drag offset.
-                if (rageDragOffset.HasValue && ms.LeftButton == ButtonState.Released)
-                {
-                    rageDragOffset = null;
-                    CalamityClientConfig.Instance.SaveChanges();
-                }
+                    CalamityClientConfig.Instance.RageMeterPosX = newPosition.X;
+                    CalamityClientConfig.Instance.RageMeterPosY = newPosition.Y;
+                });
             }
             else if (adrenHover)
             {
@@ -239,36 +201,11 @@ namespace CalamityMod.UI.Rippers
                 string adrenAmountStr = MakeRipperPercentString(modPlayer.adrenaline, modPlayer.adrenalineMax);
                 Main.instance.MouseText($"{adrenNameStr}: {adrenAmountStr}");
 
-                // The bar is draggable if enabled in config.
-                Vector2 newScreenRatioPosition = adrenScreenRatioPos;
-                if (!CalamityClientConfig.Instance.MeterPosLock && ms.LeftButton == ButtonState.Pressed)
+                MeterUIHelper.HandleDragging(adrenScreenRatioPos, adrenScreenPos, ms, mousePos, ref adrenDragOffset, static newPosition =>
                 {
-                    // If the drag offset doesn't exist yet, create it.
-                    if (!adrenDragOffset.HasValue)
-                        adrenDragOffset = mousePos - adrenScreenPos;
-
-                    // Given the mouse's absolute current position, compute where the corner of the stealth bar should be based on the original drag offset.
-                    Vector2 newCorner = mousePos - adrenDragOffset.GetValueOrDefault(Vector2.Zero);
-
-                    // Convert the new corner position into a screen ratio position.
-                    newScreenRatioPosition.X = (100f * newCorner.X) / Main.screenWidth;
-                    newScreenRatioPosition.Y = (100f * newCorner.Y) / Main.screenHeight;
-                }
-
-                // Compute the change in position. If it is large enough, actually move the meter
-                Vector2 delta = newScreenRatioPosition - adrenScreenRatioPos;
-                if (Math.Abs(delta.X) >= MouseDragEpsilon || Math.Abs(delta.Y) >= MouseDragEpsilon)
-                {
-                    CalamityClientConfig.Instance.AdrenalineMeterPosX = newScreenRatioPosition.X;
-                    CalamityClientConfig.Instance.AdrenalineMeterPosY = newScreenRatioPosition.Y;
-                }
-
-                // When the mouse is released, save the config and destroy the drag offset.
-                if (adrenDragOffset.HasValue && ms.LeftButton == ButtonState.Released)
-                {
-                    adrenDragOffset = null;
-                    CalamityClientConfig.Instance.SaveChanges();
-                }
+                    CalamityClientConfig.Instance.AdrenalineMeterPosX = newPosition.X;
+                    CalamityClientConfig.Instance.AdrenalineMeterPosY = newPosition.Y;
+                });
             }
             #endregion
         }

@@ -17,7 +17,6 @@ namespace CalamityMod.UI
         // These values were handpicked on a 1080p screen by Amber. Please disregard the bizarre precision.
         internal const float DefaultFlightPosX = 40.9375f;
         internal const float DefaultFlightPosY = 7.2222223f; //yes really, that many twos were handpicked, how? your guess is as good as mine lmao
-        private const float MouseDragEpsilon = 0.05f; // 0.05%
         private const int FlightAnimFrameDelay = 5;
         private const int FlightAnimFrames = 17;
 
@@ -89,18 +88,12 @@ namespace CalamityMod.UI
         public static void Draw(SpriteBatch spriteBatch, Player player)
         {
             // Sanity check the planned position before drawing
-            Vector2 screenRatioPosition = new Vector2(CalamityClientConfig.Instance.FlightBarPosX, CalamityClientConfig.Instance.FlightBarPosY);
-            if (screenRatioPosition.X < 0f || screenRatioPosition.X > 100f)
-                screenRatioPosition.X = DefaultFlightPosX;
-            if (screenRatioPosition.Y < 0f || screenRatioPosition.Y > 100f)
-                screenRatioPosition.Y = DefaultFlightPosY;
+            Vector2 screenRatioPosition = MeterUIHelper.GetScreenPosition(
+                new Vector2(CalamityClientConfig.Instance.FlightBarPosX, CalamityClientConfig.Instance.FlightBarPosY),
+                new Vector2(DefaultFlightPosX, DefaultFlightPosY),
+                out Vector2 screenPos);
 
-            // Convert the screen ratio position to an absolute position in pixels
-            // Cast to integer to prevent blurriness which results from decimal pixel positions
             float uiScale = Main.UIScale;
-            Vector2 screenPos = screenRatioPosition;
-            screenPos.X = (int)(screenPos.X * 0.01f * Main.screenWidth);
-            screenPos.Y = (int)(screenPos.Y * 0.01f * Main.screenHeight);
 
             CalamityPlayer modPlayer = player.Calamity();
 
@@ -146,36 +139,11 @@ namespace CalamityMod.UI
                     Main.instance.MouseText(textToDisplay, 0, 0, -1, -1, -1, -1);
                 }
 
-                Vector2 newScreenRatioPosition = screenRatioPosition;
-                // As long as the mouse button is held down, drag the meter along with an offset.
-                if (!CalamityClientConfig.Instance.MeterPosLock && ms.LeftButton == ButtonState.Pressed)
+                MeterUIHelper.HandleDragging(screenRatioPosition, screenPos, ms, mousePos, ref dragOffset, static newPosition =>
                 {
-                    // If the drag offset doesn't exist yet, create it.
-                    if (!dragOffset.HasValue)
-                        dragOffset = mousePos - screenPos;
-
-                    // Given the mouse's absolute current position, compute where the corner of the flight bar should be based on the original drag offset.
-                    Vector2 newCorner = mousePos - dragOffset.GetValueOrDefault(Vector2.Zero);
-
-                    // Convert the new corner position into a screen ratio position.
-                    newScreenRatioPosition.X = (100f * newCorner.X) / Main.screenWidth;
-                    newScreenRatioPosition.Y = (100f * newCorner.Y) / Main.screenHeight;
-                }
-
-                // Compute the change in position. If it is large enough, actually move the meter
-                Vector2 delta = newScreenRatioPosition - screenRatioPosition;
-                if (Math.Abs(delta.X) >= MouseDragEpsilon || Math.Abs(delta.Y) >= MouseDragEpsilon)
-                {
-                    CalamityClientConfig.Instance.FlightBarPosX = newScreenRatioPosition.X;
-                    CalamityClientConfig.Instance.FlightBarPosY = newScreenRatioPosition.Y;
-                }
-
-                // When the mouse is released, save the config and destroy the drag offset.
-                if (dragOffset.HasValue && ms.LeftButton == ButtonState.Released)
-                {
-                    dragOffset = null;
-                    CalamityClientConfig.Instance.SaveChanges();
-                }
+                    CalamityClientConfig.Instance.FlightBarPosX = newPosition.X;
+                    CalamityClientConfig.Instance.FlightBarPosY = newPosition.Y;
+                });
             }
         }
 

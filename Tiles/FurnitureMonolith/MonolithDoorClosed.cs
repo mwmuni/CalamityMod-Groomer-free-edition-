@@ -1,15 +1,15 @@
 ﻿using CalamityMod.Dusts;
 using Microsoft.Xna.Framework;
+using CalamityMod.Tiles.BaseTiles;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
-using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureMonolith
 {
-    public class MonolithDoorClosed : ModTile
+    public class MonolithDoorClosed : BaseFurnitureDoorTile
     {
         public Asset<Texture2D> GlowTexture;
 
@@ -25,11 +25,6 @@ namespace CalamityMod.Tiles.FurnitureMonolith
             return false;
         }
 
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
-
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
         {
             if (Main.tile[i, j].IsTileActuallyInvisible())
@@ -43,8 +38,6 @@ namespace CalamityMod.Tiles.FurnitureMonolith
             Vector2 drawOffset = new Vector2(i * 16 - Main.screenPosition.X, j * 16 - Main.screenPosition.Y) + zero;
             Main.spriteBatch.Draw(GlowTexture.Value, drawOffset, new Rectangle?(new Rectangle(xPos, yPos, 18, 18)), drawColour, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
         }
-
-        public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
 
         public override void MouseOver(int i, int j)
         {

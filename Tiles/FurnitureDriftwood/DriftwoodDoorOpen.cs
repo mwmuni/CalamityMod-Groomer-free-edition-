@@ -1,13 +1,13 @@
 ﻿using CalamityMod.Items.Placeables.FurnitureDriftwood;
 using Microsoft.Xna.Framework;
+using CalamityMod.Tiles.BaseTiles;
 using Terraria;
-using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureDriftwood
 {
-    public class DriftwoodDoorOpen : ModTile
+    public class DriftwoodDoorOpen : BaseFurnitureDoorTile
     {
         public override void SetStaticDefaults()
         {
@@ -19,13 +19,6 @@ namespace CalamityMod.Tiles.FurnitureDriftwood
         {
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.LifeDrain, 0f, 0f, 1, new Color(255, 255, 255), 1f);
             return false;
-        }
-
-        public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
         }
 
         public override void MouseOver(int i, int j)

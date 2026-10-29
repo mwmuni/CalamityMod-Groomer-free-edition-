@@ -1,24 +1,16 @@
 ﻿using CalamityMod.NPCs.NormalNPCs;
 using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Critters
 {
-    public class PiggyItem : ModItem, ILocalizedModType
+    public class PiggyItem : BaseCapturedCritterItem<Piggy>
     {
-        public new string LocalizationCategory => "Items.Misc";
+        protected override int SellPrice => Item.sellPrice(silver: 5);
+        protected override int? Rarity => ItemRarityID.Blue;
 
-        public override void SetStaticDefaults()
+        protected override void SetAdditionalDefaults()
         {
-            Item.ResearchUnlockCount = 5;
-        }
-
-        public override void SetDefaults()
-        {
-            Item.DefaultToCapturedCritter(ModContent.NPCType<Piggy>());
-            Item.value = Item.sellPrice(silver: 5);
-            Item.rare = ItemRarityID.Blue;
             Item.Calamity().donorItem = true;
         }
     }
