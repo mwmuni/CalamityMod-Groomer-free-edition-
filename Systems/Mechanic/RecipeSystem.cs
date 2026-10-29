@@ -10,9 +10,9 @@ using CalamityMod.Items.Materials;
 using CalamityMod.Items.Placeables;
 using CalamityMod.Items.Placeables.Abyss;
 using CalamityMod.Items.Placeables.Astral;
-using CalamityMod.Items.Placeables.FurnitureDriftwood;
-using CalamityMod.Items.Placeables.FurnitureAcidwood;
 using CalamityMod.Items.Placeables.Crags;
+using CalamityMod.Items.Placeables.FurnitureAcidwood;
+using CalamityMod.Items.Placeables.FurnitureDriftwood;
 using CalamityMod.Items.Placeables.SunkenSea;
 using CalamityMod.Items.Potions.Food;
 using CalamityMod.Items.Tools;
@@ -531,145 +531,16 @@ namespace CalamityMod.Systems
                 Register();
 
             // Alternative Evil Biome items
-            Recipe.Create(ItemID.CrimsonRod).
-                AddIngredient(ItemID.Vilethorn).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.Vilethorn).
-                AddIngredient(ItemID.CrimsonRod).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.TheRottedFork).
-                AddIngredient(ItemID.BallOHurt).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.BallOHurt).
-                AddIngredient(ItemID.TheRottedFork).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.TheUndertaker).
-                AddIngredient(ItemID.Musket).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.Musket).
-                AddIngredient(ItemID.TheUndertaker).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.CrimsonHeart).
-                AddIngredient(ItemID.ShadowOrb).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.ShadowOrb).
-                AddIngredient(ItemID.CrimsonHeart).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.BrainOfConfusion).
-                AddIngredient(ItemID.WormScarf).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.WormScarf).
-                AddIngredient(ItemID.BrainOfConfusion).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.TendonHook).
-                AddIngredient(ItemID.WormHook).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.WormHook).
-                AddIngredient(ItemID.TendonHook).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.DartPistol).
-                AddIngredient(ItemID.DartRifle).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.DartRifle).
-                AddIngredient(ItemID.DartPistol).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.ChainGuillotines).
-                AddIngredient(ItemID.FetidBaghnakhs).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.FetidBaghnakhs).
-                AddIngredient(ItemID.ChainGuillotines).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.ClingerStaff).
-                AddIngredient(ItemID.SoulDrain).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.SoulDrain).
-                AddIngredient(ItemID.ClingerStaff).
-                AddTile(TileID.Anvils).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.PutridScent).
-                AddIngredient(ItemID.FleshKnuckles).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
-
-            Recipe.Create(ItemID.FleshKnuckles).
-                AddIngredient(ItemID.PutridScent).
-                AddTile(TileID.TinkerersWorkbench).
-                AddCondition(Condition.InGraveyard).
-                Register()
-                .DisableDecraft();
+            AddGraveyardRecipePair(ItemID.CrimsonRod, ItemID.Vilethorn, TileID.Anvils);
+            AddGraveyardRecipePair(ItemID.TheRottedFork, ItemID.BallOHurt, TileID.Anvils);
+            AddGraveyardRecipePair(ItemID.TheUndertaker, ItemID.Musket, TileID.Anvils);
+            AddGraveyardRecipePair(ItemID.CrimsonHeart, ItemID.ShadowOrb, TileID.TinkerersWorkbench);
+            AddGraveyardRecipePair(ItemID.BrainOfConfusion, ItemID.WormScarf, TileID.TinkerersWorkbench);
+            AddGraveyardRecipePair(ItemID.TendonHook, ItemID.WormHook, TileID.TinkerersWorkbench);
+            AddGraveyardRecipePair(ItemID.DartPistol, ItemID.DartRifle, TileID.Anvils);
+            AddGraveyardRecipePair(ItemID.ChainGuillotines, ItemID.FetidBaghnakhs, TileID.Anvils);
+            AddGraveyardRecipePair(ItemID.ClingerStaff, ItemID.SoulDrain, TileID.Anvils);
+            AddGraveyardRecipePair(ItemID.PutridScent, ItemID.FleshKnuckles, TileID.TinkerersWorkbench);
 
             AddAstralRecipeVariants();
             AddBloodOrbPotionRecipes();
@@ -680,6 +551,12 @@ namespace CalamityMod.Systems
             AddEarlyGameAccessoryRecipes();
             AddHardmodeItemRecipes();
             AddArmorRecipes();
+        }
+
+        private static void AddGraveyardRecipePair(int firstItem, int secondItem, int tile)
+        {
+            Recipe.Create(firstItem).AddIngredient(secondItem).AddTile(tile).AddCondition(Condition.InGraveyard).Register().DisableDecraft();
+            Recipe.Create(secondItem).AddIngredient(firstItem).AddTile(tile).AddCondition(Condition.InGraveyard).Register().DisableDecraft();
         }
         #endregion
 

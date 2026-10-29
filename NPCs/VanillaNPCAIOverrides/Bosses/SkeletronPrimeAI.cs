@@ -649,6 +649,54 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             return true;
         }
 
+        private static void MoveArm(NPC arm, float acceleration, bool death, float verticalDownThreshold, float verticalUpThreshold, float horizontalRightThreshold, float horizontalLeftThreshold, float horizontalAccelerationMultiplier = 1f)
+        {
+            float topVelocity = acceleration * 100f;
+            float deceleration = death ? 0.6f : 0.8f;
+
+            if (arm.position.Y > verticalDownThreshold)
+            {
+                if (arm.velocity.Y > 0f)
+                    arm.velocity.Y *= deceleration;
+
+                arm.velocity.Y -= acceleration;
+
+                if (arm.velocity.Y > topVelocity)
+                    arm.velocity.Y = topVelocity;
+            }
+            else if (arm.position.Y < verticalUpThreshold)
+            {
+                if (arm.velocity.Y < 0f)
+                    arm.velocity.Y *= deceleration;
+
+                arm.velocity.Y += acceleration;
+
+                if (arm.velocity.Y < -topVelocity)
+                    arm.velocity.Y = -topVelocity;
+            }
+
+            if (arm.Center.X > horizontalRightThreshold)
+            {
+                if (arm.velocity.X > 0f)
+                    arm.velocity.X *= deceleration;
+
+                arm.velocity.X -= acceleration * horizontalAccelerationMultiplier;
+
+                if (arm.velocity.X > topVelocity)
+                    arm.velocity.X = topVelocity;
+            }
+            if (arm.Center.X < horizontalLeftThreshold)
+            {
+                if (arm.velocity.X < 0f)
+                    arm.velocity.X *= deceleration;
+
+                arm.velocity.X += acceleration * horizontalAccelerationMultiplier;
+
+                if (arm.velocity.X < -topVelocity)
+                    arm.velocity.X = -topVelocity;
+            }
+        }
+
         public class PrimeLaserAI : VanillaAIOverride
         {
             public override bool AI(Mod mod)
@@ -723,50 +771,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if (death)
                     acceleration *= accelerationMult;
 
-                float topVelocity = acceleration * 100f;
-                float deceleration = death ? 0.6f : 0.8f;
-
-                if (NPC.position.Y > Main.npc[(int)NPC.ai[1]].position.Y - 70f)
-                {
-                    if (NPC.velocity.Y > 0f)
-                        NPC.velocity.Y *= deceleration;
-
-                    NPC.velocity.Y -= acceleration;
-
-                    if (NPC.velocity.Y > topVelocity)
-                        NPC.velocity.Y = topVelocity;
-                }
-                else if (NPC.position.Y < Main.npc[(int)NPC.ai[1]].position.Y - 100f)
-                {
-                    if (NPC.velocity.Y < 0f)
-                        NPC.velocity.Y *= deceleration;
-
-                    NPC.velocity.Y += acceleration;
-
-                    if (NPC.velocity.Y < -topVelocity)
-                        NPC.velocity.Y = -topVelocity;
-                }
-
-                if (NPC.Center.X > Main.npc[(int)NPC.ai[1]].Center.X - 130f * NPC.ai[0])
-                {
-                    if (NPC.velocity.X > 0f)
-                        NPC.velocity.X *= deceleration;
-
-                    NPC.velocity.X -= acceleration;
-
-                    if (NPC.velocity.X > topVelocity)
-                        NPC.velocity.X = topVelocity;
-                }
-                if (NPC.Center.X < Main.npc[(int)NPC.ai[1]].Center.X - 160f * NPC.ai[0])
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X *= deceleration;
-
-                    NPC.velocity.X += acceleration;
-
-                    if (NPC.velocity.X < -topVelocity)
-                        NPC.velocity.X = -topVelocity;
-                }
+                MoveArm(NPC, acceleration, death,
+                    Main.npc[(int)NPC.ai[1]].position.Y - 70f,
+                    Main.npc[(int)NPC.ai[1]].position.Y - 100f,
+                    Main.npc[(int)NPC.ai[1]].Center.X - 130f * NPC.ai[0],
+                    Main.npc[(int)NPC.ai[1]].Center.X - 160f * NPC.ai[0]);
 
                 // Phase 1
                 if (NPC.ai[2] == 0f)
@@ -1020,50 +1029,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if (death)
                     acceleration *= accelerationMult;
 
-                float topVelocity = acceleration * 100f;
-                float deceleration = death ? 0.6f : 0.8f;
-
-                if (NPC.position.Y > Main.npc[(int)NPC.ai[1]].position.Y - 70f)
-                {
-                    if (NPC.velocity.Y > 0f)
-                        NPC.velocity.Y *= deceleration;
-
-                    NPC.velocity.Y -= acceleration;
-
-                    if (NPC.velocity.Y > topVelocity)
-                        NPC.velocity.Y = topVelocity;
-                }
-                else if (NPC.position.Y < Main.npc[(int)NPC.ai[1]].position.Y - 100f)
-                {
-                    if (NPC.velocity.Y < 0f)
-                        NPC.velocity.Y *= deceleration;
-
-                    NPC.velocity.Y += acceleration;
-
-                    if (NPC.velocity.Y < -topVelocity)
-                        NPC.velocity.Y = -topVelocity;
-                }
-
-                if (NPC.Center.X > Main.npc[(int)NPC.ai[1]].Center.X + 130f)
-                {
-                    if (NPC.velocity.X > 0f)
-                        NPC.velocity.X *= deceleration;
-
-                    NPC.velocity.X -= acceleration;
-
-                    if (NPC.velocity.X > topVelocity)
-                        NPC.velocity.X = topVelocity;
-                }
-                if (NPC.Center.X < Main.npc[(int)NPC.ai[1]].Center.X + 160f)
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X *= deceleration;
-
-                    NPC.velocity.X += acceleration;
-
-                    if (NPC.velocity.X < -topVelocity)
-                        NPC.velocity.X = -topVelocity;
-                }
+                MoveArm(NPC, acceleration, death,
+                    Main.npc[(int)NPC.ai[1]].position.Y - 70f,
+                    Main.npc[(int)NPC.ai[1]].position.Y - 100f,
+                    Main.npc[(int)NPC.ai[1]].Center.X + 130f,
+                    Main.npc[(int)NPC.ai[1]].Center.X + 160f);
 
                 if (fireSlower)
                 {
@@ -1228,50 +1198,12 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if (death)
                         acceleration *= accelerationMult;
 
-                    float topVelocity = acceleration * 100f;
-                    float deceleration = death ? 0.6f : 0.8f;
-
-                    if (NPC.position.Y > Main.npc[(int)NPC.ai[1]].position.Y + 20f)
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y *= deceleration;
-
-                        NPC.velocity.Y -= acceleration;
-
-                        if (NPC.velocity.Y > topVelocity)
-                            NPC.velocity.Y = topVelocity;
-                    }
-                    else if (NPC.position.Y < Main.npc[(int)NPC.ai[1]].position.Y - 20f)
-                    {
-                        if (NPC.velocity.Y < 0f)
-                            NPC.velocity.Y *= deceleration;
-
-                        NPC.velocity.Y += acceleration;
-
-                        if (NPC.velocity.Y < -topVelocity)
-                            NPC.velocity.Y = -topVelocity;
-                    }
-
-                    if (NPC.Center.X > Main.npc[(int)NPC.ai[1]].Center.X + 20f)
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X *= deceleration;
-
-                        NPC.velocity.X -= acceleration * 2f;
-
-                        if (NPC.velocity.X > topVelocity)
-                            NPC.velocity.X = topVelocity;
-                    }
-                    if (NPC.Center.X < Main.npc[(int)NPC.ai[1]].Center.X - 20f)
-                    {
-                        if (NPC.velocity.X < 0f)
-                            NPC.velocity.X *= deceleration;
-
-                        NPC.velocity.X += acceleration * 2f;
-
-                        if (NPC.velocity.X < -topVelocity)
-                            NPC.velocity.X = -topVelocity;
-                    }
+                    MoveArm(NPC, acceleration, death,
+                        Main.npc[(int)NPC.ai[1]].position.Y + 20f,
+                        Main.npc[(int)NPC.ai[1]].position.Y - 20f,
+                        Main.npc[(int)NPC.ai[1]].Center.X + 20f,
+                        Main.npc[(int)NPC.ai[1]].Center.X - 20f,
+                        2f);
                 }
 
                 // Other phases
@@ -1318,50 +1250,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         if (death)
                             acceleration *= accelerationMult;
 
-                        float topVelocity = acceleration * 100f;
-                        float deceleration = death ? 0.6f : 0.8f;
-
-                        if (NPC.position.Y > Main.npc[(int)NPC.ai[1]].position.Y + 100f)
-                        {
-                            if (NPC.velocity.Y > 0f)
-                                NPC.velocity.Y *= deceleration;
-
-                            NPC.velocity.Y -= acceleration;
-
-                            if (NPC.velocity.Y > topVelocity)
-                                NPC.velocity.Y = topVelocity;
-                        }
-                        else if (NPC.position.Y < Main.npc[(int)NPC.ai[1]].position.Y + 70f)
-                        {
-                            if (NPC.velocity.Y < 0f)
-                                NPC.velocity.Y *= deceleration;
-
-                            NPC.velocity.Y += acceleration;
-
-                            if (NPC.velocity.Y < -topVelocity)
-                                NPC.velocity.Y = -topVelocity;
-                        }
-
-                        if (NPC.Center.X > Main.npc[(int)NPC.ai[1]].Center.X + 160f)
-                        {
-                            if (NPC.velocity.X > 0f)
-                                NPC.velocity.X *= deceleration;
-
-                            NPC.velocity.X -= acceleration;
-
-                            if (NPC.velocity.X > topVelocity)
-                                NPC.velocity.X = topVelocity;
-                        }
-                        if (NPC.Center.X < Main.npc[(int)NPC.ai[1]].Center.X + 130f)
-                        {
-                            if (NPC.velocity.X < 0f)
-                                NPC.velocity.X *= deceleration;
-
-                            NPC.velocity.X += acceleration;
-
-                            if (NPC.velocity.X < -topVelocity)
-                                NPC.velocity.X = -topVelocity;
-                        }
+                        MoveArm(NPC, acceleration, death,
+                            Main.npc[(int)NPC.ai[1]].position.Y + 100f,
+                            Main.npc[(int)NPC.ai[1]].position.Y + 70f,
+                            Main.npc[(int)NPC.ai[1]].Center.X + 160f,
+                            Main.npc[(int)NPC.ai[1]].Center.X + 130f);
 
                         Vector2 viceArmReelbackCurrentPos = NPC.Center;
                         float viceArmReelbackXDest = Main.npc[(int)NPC.ai[1]].Center.X - 200f * NPC.ai[0] - viceArmReelbackCurrentPos.X;
@@ -1578,50 +1471,12 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if (death)
                         acceleration *= accelerationMult;
 
-                    float topVelocity = acceleration * 100f;
-                    float deceleration = death ? 0.6f : 0.8f;
-
-                    if (NPC.position.Y > Main.npc[(int)NPC.ai[1]].position.Y + 20f)
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y *= deceleration;
-
-                        NPC.velocity.Y -= acceleration;
-
-                        if (NPC.velocity.Y > topVelocity)
-                            NPC.velocity.Y = topVelocity;
-                    }
-                    else if (NPC.position.Y < Main.npc[(int)NPC.ai[1]].position.Y - 20f)
-                    {
-                        if (NPC.velocity.Y < 0f)
-                            NPC.velocity.Y *= deceleration;
-
-                        NPC.velocity.Y += acceleration;
-
-                        if (NPC.velocity.Y < -topVelocity)
-                            NPC.velocity.Y = -topVelocity;
-                    }
-
-                    if (NPC.Center.X > Main.npc[(int)NPC.ai[1]].Center.X + 20f)
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X *= deceleration;
-
-                        NPC.velocity.X -= acceleration * 2f;
-
-                        if (NPC.velocity.X > topVelocity)
-                            NPC.velocity.X = topVelocity;
-                    }
-                    if (NPC.Center.X < Main.npc[(int)NPC.ai[1]].Center.X - 20f)
-                    {
-                        if (NPC.velocity.X < 0f)
-                            NPC.velocity.X *= deceleration;
-
-                        NPC.velocity.X += acceleration * 2f;
-
-                        if (NPC.velocity.X < -topVelocity)
-                            NPC.velocity.X = -topVelocity;
-                    }
+                    MoveArm(NPC, acceleration, death,
+                        Main.npc[(int)NPC.ai[1]].position.Y + 20f,
+                        Main.npc[(int)NPC.ai[1]].position.Y - 20f,
+                        Main.npc[(int)NPC.ai[1]].Center.X + 20f,
+                        Main.npc[(int)NPC.ai[1]].Center.X - 20f,
+                        2f);
                 }
                 else
                 {
@@ -1664,50 +1519,12 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         if (death)
                             acceleration *= accelerationMult;
 
-                        float topVelocity = acceleration * 100f;
-                        float deceleration = death ? 0.6f : 0.8f;
-
-                        if (NPC.position.Y > Main.npc[(int)NPC.ai[1]].position.Y + 100f)
-                        {
-                            if (NPC.velocity.Y > 0f)
-                                NPC.velocity.Y *= deceleration;
-
-                            NPC.velocity.Y -= acceleration;
-
-                            if (NPC.velocity.Y > topVelocity)
-                                NPC.velocity.Y = topVelocity;
-                        }
-                        else if (NPC.position.Y < Main.npc[(int)NPC.ai[1]].position.Y + 70f)
-                        {
-                            if (NPC.velocity.Y < 0f)
-                                NPC.velocity.Y *= deceleration;
-
-                            NPC.velocity.Y += acceleration;
-
-                            if (NPC.velocity.Y < -topVelocity)
-                                NPC.velocity.Y = -topVelocity;
-                        }
-
-                        if (NPC.Center.X > Main.npc[(int)NPC.ai[1]].Center.X - 130f)
-                        {
-                            if (NPC.velocity.X > 0f)
-                                NPC.velocity.X *= deceleration;
-
-                            NPC.velocity.X -= acceleration * 1.5f;
-
-                            if (NPC.velocity.X > topVelocity)
-                                NPC.velocity.X = topVelocity;
-                        }
-                        if (NPC.Center.X < Main.npc[(int)NPC.ai[1]].Center.X - 160f)
-                        {
-                            if (NPC.velocity.X < 0f)
-                                NPC.velocity.X *= deceleration;
-
-                            NPC.velocity.X += acceleration * 1.5f;
-
-                            if (NPC.velocity.X < -topVelocity)
-                                NPC.velocity.X = -topVelocity;
-                        }
+                        MoveArm(NPC, acceleration, death,
+                            Main.npc[(int)NPC.ai[1]].position.Y + 100f,
+                            Main.npc[(int)NPC.ai[1]].position.Y + 70f,
+                            Main.npc[(int)NPC.ai[1]].Center.X - 130f,
+                            Main.npc[(int)NPC.ai[1]].Center.X - 160f,
+                            1.5f);
 
                         Vector2 sawArmReelbackCurrentPos = NPC.Center;
                         float sawArmReelbackXDest = Main.npc[(int)NPC.ai[1]].Center.X - 200f * NPC.ai[0] - sawArmReelbackCurrentPos.X;
