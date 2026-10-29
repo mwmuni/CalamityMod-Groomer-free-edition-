@@ -201,12 +201,20 @@ namespace CalamityMod.Backgrounds
         public static float Transparency;
         public static float TransitionSpeed => 0.02f;
 
-        private static void DrawShoresBG()
+        private static readonly int[] ShoresLayerOffsets = { 200, 0, 0, 0, 0 };
+        private static readonly int[] BurrowsLayerOffsets = { 800, 200, 450, 45, 45 };
+
+        private static void DrawShoresBG() =>
+            DrawBackgroundLayers(Main.LocalPlayer.InModBiome(ModContent.GetInstance<BiomeManagers.TimelessShoresBiome>()), "SunkenSeaShoresBG", ShoresLayerOffsets);
+
+        private static void DrawBurrowsBG() =>
+            DrawBackgroundLayers(Main.LocalPlayer.InModBiome(ModContent.GetInstance<BiomeManagers.GleamingBurrowsBiome>()), "SunkenSeaBurrowsBG", BurrowsLayerOffsets);
+
+        private static void DrawBackgroundLayers(bool inBiome, string backgroundName, int[] layerOffsets)
         {
-            if (Main.LocalPlayer.InModBiome(ModContent.GetInstance<BiomeManagers.TimelessShoresBiome>()))
+            if (inBiome)
             {
                 Transparency += 1f;
-
                 if (Transparency > 1f)
                     Transparency = 1f;
             }
@@ -214,169 +222,42 @@ namespace CalamityMod.Backgrounds
             {
                 // Make transparency immediately go down so it doesnt look weird, since vanilla underground backgrounds dont have the fade-in effect this background has.
                 Transparency -= 1f;
-
                 if (Transparency < 0f)
                     Transparency = 0f;
             }
 
-            // Don't bother running any of the background drawing if the transparency is zero (meaning the background isnt actually active).
-            // Also do not run any of the background drawing if you have the vanilla background config option turned off.
-            if (Transparency > 0f && Main.BackgroundEnabled)
-            {
-                Vector2 vector = Main.screenPosition + new Vector2((Main.screenWidth >> 1), (Main.screenHeight >> 1));
-                float num = (Main.GameViewMatrix.Zoom.Y - 1f) * 0.5f * 200f;
-                float Scale = 1.5f;
-                float playerDrawPosition = ((Main.LocalPlayer.Center.Y / 16f) - 90) * 16f;
+            // Don't bother drawing when the background is inactive or the vanilla background option is disabled.
+            if (!(Transparency > 0f && Main.BackgroundEnabled))
+                return;
 
-                for (int Layers = 4; Layers >= 0; Layers--)
+            Vector2 vector = Main.screenPosition + new Vector2((Main.screenWidth >> 1), (Main.screenHeight >> 1));
+            float num = (Main.GameViewMatrix.Zoom.Y - 1f) * 0.5f * 200f;
+            float scale = 1.5f;
+            float playerDrawPosition = ((Main.LocalPlayer.Center.Y / 16f) - 90) * 16f;
+
+            for (int layers = 4; layers >= 0; layers--)
+            {
+                Texture2D backgroundTexture = ModContent.Request<Texture2D>("CalamityMod/Backgrounds/" + backgroundName + layers).Value;
+                Vector2 vector2 = new Vector2(backgroundTexture.Width, backgroundTexture.Height) * 0.5f;
+                float num2 = layers * 2 + 3f;
+                Vector2 vector3 = new Vector2(1f / num2);
+                Rectangle rectangle = new Rectangle(0, 0, backgroundTexture.Width, backgroundTexture.Height);
+                Vector2 zero = Vector2.Zero;
+                zero.Y += layerOffsets[layers];
+
+                vector2 *= scale;
+                zero.Y -= num;
+                float loopWidth = scale * rectangle.Width;
+                float loopHeight = scale * rectangle.Height;
+                int loopX = (int)((vector.X * vector3.X - vector2.X + zero.X - (Main.screenWidth >> 1)) / loopWidth);
+                int loopY = (int)((vector.Y * vector3.Y - vector2.Y + zero.Y - (Main.screenWidth >> 1)) / loopWidth);
+
+                for (int i = loopY - 2; i < loopY + 4 + (int)(Main.screenWidth / loopHeight); i++)
                 {
-                    // Get each background texture.
-                    Texture2D BGTexture = ModContent.Request<Texture2D>("CalamityMod/Backgrounds/SunkenSeaShoresBG" + Layers).Value;
-
-                    Vector2 vector2 = new Vector2(BGTexture.Width, BGTexture.Height) * 0.5f;
-                    float num2 = (Layers * 2 + 3f);
-                    Vector2 vector3 = new Vector2(1f / num2);
-                    Rectangle rectangle = new Rectangle(0, 0, BGTexture.Width, BGTexture.Height);
-                    Vector2 zero = Vector2.Zero;
-
-                    switch (Layers)
+                    for (int j = loopX - 2; j < loopX + 4 + (int)(Main.screenWidth / loopWidth); j++)
                     {
-                        case 0:
-                            {
-                                zero.Y += 200f;
-                                break;
-                            }
-                        case 1:
-                            {
-                                zero.Y += 0f;
-                                break;
-                            }
-                        case 2:
-                            {
-                                zero.Y += 0f;
-                                break;
-                            }
-                        case 3:
-                            {
-                                zero.Y += 0f;
-                                break;
-                            }
-                        case 4:
-                            {
-                                zero.Y += 0f;
-                                break;
-                            }
-                    }
-
-                    vector2 *= Scale;
-
-                    zero.Y -= num;
-                    float LoopWidth = Scale * rectangle.Width;
-                    float LoopHeight = Scale * rectangle.Height;
-                    int LoopX = (int)((vector.X * vector3.X - vector2.X + zero.X - (Main.screenWidth >> 1)) / LoopWidth);
-                    int LoopY = (int)((vector.Y * vector3.Y - vector2.Y + zero.Y - (Main.screenWidth >> 1)) / LoopWidth);
-
-                    for (int i = LoopY - 2; i < LoopY + 4 + (int)(Main.screenWidth / LoopHeight); i++)
-                    {
-                        for (int j = LoopX - 2; j < LoopX + 4 + (int)(Main.screenWidth / LoopWidth); j++)
-                        {
-                            Vector2 drawPosition = (new Vector2(j * Scale * (rectangle.Width / vector3.X), playerDrawPosition) + vector2 - vector) * vector3 + vector - Main.screenPosition - vector2 + zero;
-
-                            var frame = rectangle;
-                            var color = Color.White * Transparency;
-
-                            Main.spriteBatch.Draw(BGTexture, drawPosition, frame, color, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
-                        }
-                    }
-                }
-            }
-        }
-        private static void DrawBurrowsBG()
-        {
-            if (Main.LocalPlayer.InModBiome(ModContent.GetInstance<BiomeManagers.GleamingBurrowsBiome>()))
-            {
-                Transparency += 1f;
-
-                if (Transparency > 1f)
-                    Transparency = 1f;
-            }
-            else
-            {
-                // Make transparency immediately go down so it doesnt look weird, since vanilla underground backgrounds dont have the fade-in effect this background has.
-                Transparency -= 1f;
-
-                if (Transparency < 0f)
-                    Transparency = 0f;
-            }
-
-            // Don't bother running any of the background drawing if the transparency is zero (meaning the background isnt actually active).
-            // Also do not run any of the background drawing if you have the vanilla background config option turned off.
-            if (Transparency > 0f && Main.BackgroundEnabled)
-            {
-                Vector2 vector = Main.screenPosition + new Vector2((Main.screenWidth >> 1), (Main.screenHeight >> 1));
-                float num = (Main.GameViewMatrix.Zoom.Y - 1f) * 0.5f * 200f;
-                float Scale = 1.5f;
-                float playerDrawPosition = ((Main.LocalPlayer.Center.Y / 16f) - 90) * 16f;
-
-                for (int Layers = 4; Layers >= 0; Layers--)
-                {
-                    // Get each background texture.
-                    Texture2D BGTexture = ModContent.Request<Texture2D>("CalamityMod/Backgrounds/SunkenSeaBurrowsBG" + Layers).Value;
-
-                    Vector2 vector2 = new Vector2(BGTexture.Width, BGTexture.Height) * 0.5f;
-                    float num2 = (Layers * 2 + 3f);
-                    Vector2 vector3 = new Vector2(1f / num2);
-                    Rectangle rectangle = new Rectangle(0, 0, BGTexture.Width, BGTexture.Height);
-                    Vector2 zero = Vector2.Zero;
-
-                    switch (Layers)
-                    {
-                        case 0:
-                            {
-                                zero.Y += 800f;
-                                break;
-                            }
-                        case 1:
-                            {
-                                zero.Y += 200f;
-                                break;
-                            }
-                        case 2:
-                            {
-                                zero.Y += 450f;
-                                break;
-                            }
-                        case 3:
-                            {
-                                zero.Y += 45f;
-                                break;
-                            }
-                        case 4:
-                            {
-                                zero.Y += 45f;
-                                break;
-                            }
-                    }
-
-                    vector2 *= Scale;
-
-                    zero.Y -= num;
-                    float LoopWidth = Scale * rectangle.Width;
-                    float LoopHeight = Scale * rectangle.Height;
-                    int LoopX = (int)((vector.X * vector3.X - vector2.X + zero.X - (Main.screenWidth >> 1)) / LoopWidth);
-                    int LoopY = (int)((vector.Y * vector3.Y - vector2.Y + zero.Y - (Main.screenWidth >> 1)) / LoopWidth);
-
-                    for (int i = LoopY - 2; i < LoopY + 4 + (int)(Main.screenWidth / LoopHeight); i++)
-                    {
-                        for (int j = LoopX - 2; j < LoopX + 4 + (int)(Main.screenWidth / LoopWidth); j++)
-                        {
-                            Vector2 drawPosition = (new Vector2(j * Scale * (rectangle.Width / vector3.X), playerDrawPosition) + vector2 - vector) * vector3 + vector - Main.screenPosition - vector2 + zero;
-
-                            var frame = rectangle;
-                            var color = Color.White * Transparency;
-
-                            Main.spriteBatch.Draw(BGTexture, drawPosition, frame, color, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
-                        }
+                        Vector2 drawPosition = (new Vector2(j * scale * (rectangle.Width / vector3.X), playerDrawPosition) + vector2 - vector) * vector3 + vector - Main.screenPosition - vector2 + zero;
+                        Main.spriteBatch.Draw(backgroundTexture, drawPosition, rectangle, Color.White * Transparency, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
                     }
                 }
             }
