@@ -16,21 +16,11 @@ namespace CalamityMod.Items.Ammo
             CalamityItemSets.ExtraDebuffTooltip_Enemy[Type] = [BuffID.Frostburn2, BuffID.Frozen];
             Item.ResearchUnlockCount = 99;
         }
-        public override void SetDefaults()
-        {
-            Item.width = 14;
-            Item.height = 20;
-            Item.damage = 9;
-            Item.DamageType = DamageClass.Ranged;
-            Item.consumable = true;
-            Item.knockBack = 2f;
-            Item.value = Item.sellPrice(copper: 16);
-            Item.rare = ItemRarityID.Yellow;
-            Item.shoot = ModContent.ProjectileType<HailstormBulletProj>();
-            Item.shootSpeed = 0.3f;
-            Item.ammo = AmmoID.Bullet;
-            Item.maxStack = Item.CommonMaxStack;
-        }
+        public override void SetDefaults() =>
+            RangedAmmoDefaults.SetDefaults(
+                Item, 14, 20, 9, 2f,
+                Item.sellPrice(copper: 16), ItemRarityID.Yellow,
+                ModContent.ProjectileType<HailstormBulletProj>(), 0.3f, AmmoID.Bullet);
         public override void AddRecipes()
         {
             CreateRecipe(333).

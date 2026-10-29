@@ -165,48 +165,10 @@ namespace CalamityMod.NPCs.SlimeGod
                     NPC.TargetClosest(false);
                     player = Main.player[NPC.target];
 
-                    float distanceAhead = 960f;
-                    Vector2 randomDefault = Main.rand.NextBool() ? Vector2.UnitX : -Vector2.UnitX;
-                    Vector2 vectorAimedAheadOfTarget = player.Center + new Vector2((float)Math.Round(player.velocity.X), 0f).SafeNormalize(randomDefault) * distanceAhead;
-                    Point predictiveTeleportPoint = vectorAimedAheadOfTarget.ToTileCoordinates();
-                    int randomPredictiveTeleportOffset = 5;
-                    int teleportTries = 0;
-                    while (teleportTries < 100)
-                    {
-                        teleportTries++;
-                        int teleportTileX = Main.rand.Next(predictiveTeleportPoint.X - randomPredictiveTeleportOffset, predictiveTeleportPoint.X + randomPredictiveTeleportOffset + 1);
-                        int teleportTileY = Main.rand.Next(predictiveTeleportPoint.Y - randomPredictiveTeleportOffset, predictiveTeleportPoint.Y);
-
-                        if (!Main.tile[teleportTileX, teleportTileY].HasUnactuatedTile)
-                        {
-                            bool canTeleportToTile = true;
-                            if (canTeleportToTile && Main.tile[teleportTileX, teleportTileY].LiquidType == LiquidID.Lava)
-                                canTeleportToTile = false;
-                            if (canTeleportToTile && !Collision.CanHitLine(NPC.Center, 0, 0, predictiveTeleportPoint.ToVector2() * 16, 0, 0))
-                                canTeleportToTile = false;
-
-                            if (canTeleportToTile)
-                            {
-                                NPC.localAI[0] = teleportTileX * 16 + 8;
-                                NPC.localAI[3] = teleportTileY * 16 + 16;
-                                NPC.ai[3] = 0f;
-                                break;
-                            }
-                            else
-                                predictiveTeleportPoint.X += predictiveTeleportPoint.X < 0f ? 1 : -1;
-                        }
-                        else
-                            predictiveTeleportPoint.X += predictiveTeleportPoint.X < 0f ? 1 : -1;
-                    }
-
-                    // Default teleport if the above conditions aren't met in 100 iterations
-                    if (teleportTries >= 100)
-                    {
-                        Vector2 bottom = Main.player[Player.FindClosest(NPC.position, NPC.width, NPC.height)].Bottom;
-                        NPC.localAI[0] = bottom.X;
-                        NPC.localAI[3] = bottom.Y;
-                        NPC.ai[3] = 0f;
-                    }
+                    Vector2 teleportDestination = SlimeGodPaladinTeleport.FindDestination(NPC, player, 960f);
+                    NPC.localAI[0] = teleportDestination.X;
+                    NPC.localAI[3] = teleportDestination.Y;
+                    NPC.ai[3] = 0f;
                 }
             }
 

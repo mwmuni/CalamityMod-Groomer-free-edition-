@@ -15,21 +15,11 @@ namespace CalamityMod.Items.Ammo
             Item.ResearchUnlockCount = 99;
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 8;
-            Item.height = 8;
-            Item.damage = 15;
-            Item.DamageType = DamageClass.Ranged;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.consumable = true;
-            Item.knockBack = 1.25f;
-            Item.value = Item.sellPrice(copper: 12);
-            Item.rare = ItemRarityID.Pink;
-            Item.shoot = ModContent.ProjectileType<VeriumBoltProj>();
-            Item.shootSpeed = 16f;
-            Item.ammo = AmmoID.Arrow;
-        }
+        public override void SetDefaults() =>
+            RangedAmmoDefaults.SetDefaults(
+                Item, 8, 8, 15, 1.25f,
+                Item.sellPrice(copper: 12), ItemRarityID.Pink,
+                ModContent.ProjectileType<VeriumBoltProj>(), 16f, AmmoID.Arrow);
 
         public override void AddRecipes()
         {

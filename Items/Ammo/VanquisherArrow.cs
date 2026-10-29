@@ -21,21 +21,11 @@ namespace CalamityMod.Items.Ammo
             Item.ResearchUnlockCount = 99;
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 22;
-            Item.height = 46;
-            Item.damage = 16;
-            Item.DamageType = DamageClass.Ranged;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.consumable = true;
-            Item.knockBack = 3.5f;
-            Item.value = Item.sellPrice(copper: 28);
-            Item.shoot = ModContent.ProjectileType<VanquisherArrowProj>();
-            Item.shootSpeed = 0.1f;
-            Item.ammo = AmmoID.Arrow;
-            Item.rare = ModContent.RarityType<CosmicPurple>();
-        }
+        public override void SetDefaults() =>
+            RangedAmmoDefaults.SetDefaults(
+                Item, 22, 46, 16, 3.5f,
+                Item.sellPrice(copper: 28), ModContent.RarityType<CosmicPurple>(),
+                ModContent.ProjectileType<VanquisherArrowProj>(), 0.1f, AmmoID.Arrow);
 
         public override void PostDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, float rotation, float scale, int whoAmI)
         {
