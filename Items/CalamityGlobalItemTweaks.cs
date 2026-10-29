@@ -973,194 +973,89 @@ namespace CalamityMod.Items
         #endregion
 
         #region Use Time and Use Animation
-        internal class UseDeltaRule : IItemTweak
+        private enum UseStat
         {
-            internal readonly int delta = 0;
+            Both,
+            Animation,
+            Time,
+            ReuseDelay
+        }
 
-            public UseDeltaRule(int d) => delta = d;
+        private enum UseStatOperation
+        {
+            Delta,
+            Exact,
+            Ratio
+        }
+
+        private sealed class UseStatRule : IItemTweak
+        {
+            private readonly UseStat stat;
+            private readonly UseStatOperation operation;
+            private readonly int value;
+            private readonly float ratio;
+
+            public UseStatRule(UseStat s, UseStatOperation o, int v = 0, float r = 1f)
+            {
+                stat = s;
+                operation = o;
+                value = v;
+                ratio = r;
+            }
+
             public bool AppliesTo(Item it) => IsUsable(it);
+
             public void ApplyTweak(Item it)
             {
-                it.useAnimation += delta;
-                it.useTime += delta;
-                if (it.useAnimation < 1)
-                    it.useAnimation = 1;
-                if (it.useTime < 1)
-                    it.useTime = 1;
+                switch (stat)
+                {
+                    case UseStat.Both:
+                        it.useAnimation = Apply(it.useAnimation, 1);
+                        it.useTime = Apply(it.useTime, 1);
+                        break;
+                    case UseStat.Animation:
+                        it.useAnimation = Apply(it.useAnimation, 1);
+                        break;
+                    case UseStat.Time:
+                        it.useTime = Apply(it.useTime, 1);
+                        break;
+                    case UseStat.ReuseDelay:
+                        it.reuseDelay = Apply(it.reuseDelay, 0);
+                        break;
+                }
             }
-        }
-        internal static IItemTweak UseDelta(int d) => new UseDeltaRule(d);
 
-        internal class UseExactRule : IItemTweak
-        {
-            internal readonly int newUseTime = 0;
-
-            public UseExactRule(int ut) => newUseTime = ut;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
+            private int Apply(int current, int minimum)
             {
-                it.useAnimation = newUseTime;
-                it.useTime = newUseTime;
-                if (it.useAnimation < 1)
-                    it.useAnimation = 1;
-                if (it.useTime < 1)
-                    it.useTime = 1;
+                switch (operation)
+                {
+                    case UseStatOperation.Delta:
+                        current += value;
+                        break;
+                    case UseStatOperation.Exact:
+                        current = value;
+                        break;
+                    case UseStatOperation.Ratio:
+                        current = (int)(current * ratio);
+                        break;
+                }
+
+                return current < minimum ? minimum : current;
             }
         }
-        internal static IItemTweak UseExact(int ut) => new UseExactRule(ut);
 
-        internal class UseRatioRule : IItemTweak
-        {
-            internal readonly float ratio = 1f;
-
-            public UseRatioRule(float f) => ratio = f;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.useAnimation = (int)(it.useAnimation * ratio);
-                it.useTime = (int)(it.useTime * ratio);
-                if (it.useAnimation < 1)
-                    it.useAnimation = 1;
-                if (it.useTime < 1)
-                    it.useTime = 1;
-            }
-        }
-        internal static IItemTweak UseRatio(float f) => new UseRatioRule(f);
-
-        internal class UseAnimationDeltaRule : IItemTweak
-        {
-            internal readonly int delta = 0;
-
-            public UseAnimationDeltaRule(int d) => delta = d;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.useAnimation += delta;
-                if (it.useAnimation < 1)
-                    it.useAnimation = 1;
-            }
-        }
-        internal static IItemTweak UseAnimationDelta(int d) => new UseAnimationDeltaRule(d);
-
-        internal class UseAnimationExactRule : IItemTweak
-        {
-            internal readonly int newUseAnimation = 0;
-
-            public UseAnimationExactRule(int ua) => newUseAnimation = ua;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.useAnimation = newUseAnimation;
-                if (it.useAnimation < 1)
-                    it.useAnimation = 1;
-            }
-        }
-        internal static IItemTweak UseAnimationExact(int ua) => new UseAnimationExactRule(ua);
-
-        internal class UseAnimationRatioRule : IItemTweak
-        {
-            internal readonly float ratio = 1f;
-
-            public UseAnimationRatioRule(float f) => ratio = f;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.useAnimation = (int)(it.useAnimation * ratio);
-                if (it.useAnimation < 1)
-                    it.useAnimation = 1;
-            }
-        }
-        internal static IItemTweak UseAnimationRatio(float f) => new UseAnimationRatioRule(f);
-
-        internal class UseTimeDeltaRule : IItemTweak
-        {
-            internal readonly int delta = 0;
-
-            public UseTimeDeltaRule(int d) => delta = d;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.useTime += delta;
-                if (it.useTime < 1)
-                    it.useTime = 1;
-            }
-        }
-        internal static IItemTweak UseTimeDelta(int d) => new UseTimeDeltaRule(d);
-
-        internal class UseTimeExactRule : IItemTweak
-        {
-            internal readonly int newUseTime = 0;
-
-            public UseTimeExactRule(int ut) => newUseTime = ut;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.useTime = newUseTime;
-                if (it.useTime < 1)
-                    it.useTime = 1;
-            }
-        }
-        internal static IItemTweak UseTimeExact(int ut) => new UseTimeExactRule(ut);
-
-        internal class UseTimeRatioRule : IItemTweak
-        {
-            internal readonly float ratio = 1f;
-
-            public UseTimeRatioRule(float f) => ratio = f;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.useTime = (int)(it.useTime * ratio);
-                if (it.useTime < 1)
-                    it.useTime = 1;
-            }
-        }
-        internal static IItemTweak UseTimeRatio(float f) => new UseTimeRatioRule(f);
-
-        internal class ReuseDelayDeltaRule : IItemTweak
-        {
-            internal readonly int delta = 0;
-
-            public ReuseDelayDeltaRule(int d) => delta = d;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.reuseDelay += delta;
-                if (it.reuseDelay < 0)
-                    it.reuseDelay = 0;
-            }
-        }
-        internal static IItemTweak ReuseDelayDelta(int d) => new ReuseDelayDeltaRule(d);
-
-        internal class ReuseDelayExactRule : IItemTweak
-        {
-            internal readonly int newReuseDelay = 0;
-
-            public ReuseDelayExactRule(int rd) => newReuseDelay = rd;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.reuseDelay = newReuseDelay;
-                if (it.reuseDelay < 0)
-                    it.reuseDelay = 0;
-            }
-        }
-        internal static IItemTweak ReuseDelayExact(int rd) => new ReuseDelayExactRule(rd);
-
-        internal class ReuseDelayRatioRule : IItemTweak
-        {
-            internal readonly float ratio = 1f;
-
-            public ReuseDelayRatioRule(float f) => ratio = f;
-            public bool AppliesTo(Item it) => IsUsable(it);
-            public void ApplyTweak(Item it)
-            {
-                it.reuseDelay = (int)(it.reuseDelay * ratio);
-                if (it.reuseDelay < 0)
-                    it.reuseDelay = 0;
-            }
-        }
-        internal static IItemTweak ReuseDelayRatio(float f) => new ReuseDelayRatioRule(f);
+        internal static IItemTweak UseDelta(int d) => new UseStatRule(UseStat.Both, UseStatOperation.Delta, d);
+        internal static IItemTweak UseExact(int ut) => new UseStatRule(UseStat.Both, UseStatOperation.Exact, ut);
+        internal static IItemTweak UseRatio(float f) => new UseStatRule(UseStat.Both, UseStatOperation.Ratio, r: f);
+        internal static IItemTweak UseAnimationDelta(int d) => new UseStatRule(UseStat.Animation, UseStatOperation.Delta, d);
+        internal static IItemTweak UseAnimationExact(int ua) => new UseStatRule(UseStat.Animation, UseStatOperation.Exact, ua);
+        internal static IItemTweak UseAnimationRatio(float f) => new UseStatRule(UseStat.Animation, UseStatOperation.Ratio, r: f);
+        internal static IItemTweak UseTimeDelta(int d) => new UseStatRule(UseStat.Time, UseStatOperation.Delta, d);
+        internal static IItemTweak UseTimeExact(int ut) => new UseStatRule(UseStat.Time, UseStatOperation.Exact, ut);
+        internal static IItemTweak UseTimeRatio(float f) => new UseStatRule(UseStat.Time, UseStatOperation.Ratio, r: f);
+        internal static IItemTweak ReuseDelayDelta(int d) => new UseStatRule(UseStat.ReuseDelay, UseStatOperation.Delta, d);
+        internal static IItemTweak ReuseDelayExact(int rd) => new UseStatRule(UseStat.ReuseDelay, UseStatOperation.Exact, rd);
+        internal static IItemTweak ReuseDelayRatio(float f) => new UseStatRule(UseStat.ReuseDelay, UseStatOperation.Ratio, r: f);
         #endregion
 
         #region Use Turn
