@@ -31,6 +31,27 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         // Vanilla values (GFB)
         public static int MoonBoulderDamage = 70; // 280
 
+        private static float AdjustForAggressionLevel(float value, int aggressionLevel, float level6Adjustment, float level5Adjustment, float level3Adjustment, float level2Adjustment, float level1Adjustment)
+        {
+            switch (aggressionLevel)
+            {
+                case 6:
+                    return value + level6Adjustment;
+                case 5:
+                    return value + level5Adjustment;
+                case 4:
+                    return value;
+                case 3:
+                    return value + level3Adjustment;
+                case 2:
+                    return value + level2Adjustment;
+                case 1:
+                    return value + level1Adjustment;
+                default:
+                    return value;
+            }
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -190,28 +211,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if (targetDistance.Length() > 20f)
                 {
                     float velocity = 9.25f;
-                    switch (aggressionLevel)
-                    {
-                        case 6:
-                            velocity += 3f;
-                            break;
-                        case 5:
-                            velocity += 1.5f;
-                            break;
-                        case 4:
-                            break;
-                        case 3:
-                            velocity -= 0.25f;
-                            break;
-                        case 2:
-                            velocity -= 0.5f;
-                            break;
-                        case 1:
-                            velocity -= 0.75f;
-                            break;
-                        default:
-                            break;
-                    }
+                    velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -0.25f, -0.5f, -0.75f);
                     // Move slower if the head is doing the phantasmal deathray
                     if (Main.npc[(int)NPC.localAI[2]].ai[0] == 1f)
                         velocity -= 2.25f;
@@ -270,28 +270,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if (targetDistanceVulnerable.Length() > 20f)
                 {
                     float velocity = 9.25f;
-                    switch (aggressionLevel)
-                    {
-                        case 6:
-                            velocity += 3f;
-                            break;
-                        case 5:
-                            velocity += 1.5f;
-                            break;
-                        case 4:
-                            break;
-                        case 3:
-                            velocity -= 0.25f;
-                            break;
-                        case 2:
-                            velocity -= 0.5f;
-                            break;
-                        case 1:
-                            velocity -= 0.75f;
-                            break;
-                        default:
-                            break;
-                    }
+                    velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -0.25f, -0.5f, -0.75f);
                     // Move slower if the head is doing the phantasmal deathray
                     if (Main.npc[(int)NPC.localAI[2]].ai[0] == 1f)
                         velocity -= 2f;
@@ -707,29 +686,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if (calamityGlobalNPC.newAI[1] == 0f)
                     {
                         calamityGlobalNPC.newAI[1] = 420f;
-
-                        switch (aggressionLevel)
-                        {
-                            case 6:
-                                calamityGlobalNPC.newAI[1] -= 120f;
-                                break;
-                            case 5:
-                                calamityGlobalNPC.newAI[1] -= 60f;
-                                break;
-                            case 4:
-                                break;
-                            case 3:
-                                calamityGlobalNPC.newAI[1] += 120f;
-                                break;
-                            case 2:
-                                calamityGlobalNPC.newAI[1] += 240f;
-                                break;
-                            case 1:
-                                calamityGlobalNPC.newAI[1] += 360f;
-                                break;
-                            default:
-                                break;
-                        }
+                        calamityGlobalNPC.newAI[1] = AdjustForAggressionLevel(calamityGlobalNPC.newAI[1], aggressionLevel, -120f, -60f, 120f, 240f, 360f);
                     }
 
                     // Fire the deathray
@@ -867,30 +824,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     Vector2 boltDirection = Utils.Vector2FromElipse(NPC.localAI[0].ToRotationVector2(), eyeSizeVector * NPC.localAI[1]);
 
                     float velocity = 6.25f;
-                    switch (aggressionLevel)
-                    {
-                        // Higher aggression increases the speed of phantasmal bolts
-                        case 6:
-                            velocity += 1.5f;
-                            break;
-                        case 5:
-                            velocity += 0.75f;
-                            break;
-                        case 4:
-                            break;
-                        // Lower aggression reduces the speed of phantasmal bolts
-                        case 3:
-                            velocity -= 0.25f;
-                            break;
-                        case 2:
-                            velocity -= 0.5f;
-                            break;
-                        case 1:
-                            velocity -= 0.75f;
-                            break;
-                        default:
-                            break;
-                    }
+                    // Higher aggression increases and lower aggression reduces phantasmal bolt speed.
+                    velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 1.5f, 0.75f, -0.25f, -0.5f, -0.75f);
 
                     Vector2 boltVelocity = Vector2.Normalize(aimDirection) * velocity;
                     int type = ProjectileID.PhantasmalBolt;
@@ -1035,28 +970,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     handMovementDirection.Normalize();
 
                     float velocity = 7.5f;
-                    switch (aggressionLevel)
-                    {
-                        case 6:
-                            velocity += 3f;
-                            break;
-                        case 5:
-                            velocity += 1.5f;
-                            break;
-                        case 4:
-                            break;
-                        case 3:
-                            velocity -= 0.4f;
-                            break;
-                        case 2:
-                            velocity -= 0.8f;
-                            break;
-                        case 1:
-                            velocity -= 1.2f;
-                            break;
-                        default:
-                            break;
-                    }
+                    velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -0.4f, -0.8f, -1.2f);
 
                     handMovementDirection *= velocity;
                     Vector2 currentVelocity = NPC.velocity;
@@ -1071,28 +985,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             {
                 handFrameCheck = 0;
                 float divisor = 6f;
-                switch (aggressionLevel)
-                {
-                    case 6:
-                        divisor = 4f;
-                        break;
-                    case 5:
-                        divisor = 5f;
-                        break;
-                    case 4:
-                        break;
-                    case 3:
-                        divisor = 8f;
-                        break;
-                    case 2:
-                        divisor = 10f;
-                        break;
-                    case 1:
-                        divisor = 12f;
-                        break;
-                    default:
-                        break;
-                }
+                divisor = AdjustForAggressionLevel(divisor, aggressionLevel, -2f, -1f, 2f, 4f, 6f);
 
                 if (handAttackTimer >= 56)
                 {
@@ -1115,24 +1008,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if (handAttackTimer % divisor == 0f)
                     {
                         float velocity = 3f;
-                        switch (aggressionLevel)
-                        {
-                            case 6:
-                            case 5:
-                            case 4:
-                                break;
-                            case 3:
-                                velocity += 0.5f;
-                                break;
-                            case 2:
-                                velocity += 1f;
-                                break;
-                            case 1:
-                                velocity += 1.5f;
-                                break;
-                            default:
-                                break;
-                        }
+                        velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 0f, 0f, 0.5f, 1f, 1.5f);
 
                         Vector2 eyeDirection = Utils.Vector2FromElipse(NPC.localAI[0].ToRotationVector2(), eyeSizeVector * NPC.localAI[1]);
                         Vector2 eyeSpawn = NPC.Center + Vector2.Normalize(eyeDirection) * eyeSizeVector.Length() * 0.4f + new Vector2(-handFaceDirection, 3f);
@@ -1165,28 +1041,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 Vector2 sphereHandDirectionMaxBound = new Vector2(400f * handFaceDirection, -60f);
 
                 float velocityMultiplier = 0.885f;
-                switch (aggressionLevel)
-                {
-                    case 6:
-                        velocityMultiplier -= 0.04f;
-                        break;
-                    case 5:
-                        velocityMultiplier -= 0.02f;
-                        break;
-                    case 4:
-                        break;
-                    case 3:
-                        velocityMultiplier += 0.004f;
-                        break;
-                    case 2:
-                        velocityMultiplier += 0.008f;
-                        break;
-                    case 1:
-                        velocityMultiplier += 0.012f;
-                        break;
-                    default:
-                        break;
-                }
+                velocityMultiplier = AdjustForAggressionLevel(velocityMultiplier, aggressionLevel, -0.04f, -0.02f, 0.004f, 0.008f, 0.012f);
 
                 if (handAttackTimer < 30f)
                 {
@@ -1197,28 +1052,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         Vector2 sphereHandTravelDist = Vector2.Normalize(sphereHandTravelVelocity);
 
                         float velocity = 10f;
-                        switch (aggressionLevel)
-                        {
-                            case 6:
-                                velocity += 3f;
-                                break;
-                            case 5:
-                                velocity += 1.5f;
-                                break;
-                            case 4:
-                                break;
-                            case 3:
-                                velocity -= 0.5f;
-                                break;
-                            case 2:
-                                velocity -= 1f;
-                                break;
-                            case 1:
-                                velocity -= 1.5f;
-                                break;
-                            default:
-                                break;
-                        }
+                        velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -0.5f, -1f, -1.5f);
 
                         NPC.velocity = Vector2.SmoothStep(NPC.velocity, sphereHandTravelDist * Math.Min(velocity, sphereHandTravelVelocity.Length()), 0.2f);
                     }
@@ -1230,28 +1064,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     int sphereHandSpeed = (int)handAttackTimer - 30;
 
                     int divisor = 30;
-                    switch (aggressionLevel)
-                    {
-                        case 6:
-                            divisor = 20;
-                            break;
-                        case 5:
-                            divisor = 25;
-                            break;
-                        case 4:
-                            break;
-                        case 3:
-                            divisor = 45;
-                            break;
-                        case 2:
-                            divisor = 60;
-                            break;
-                        case 1:
-                            divisor = 90;
-                            break;
-                        default:
-                            break;
-                    }
+                    divisor = (int)AdjustForAggressionLevel(divisor, aggressionLevel, -10f, -5f, 15f, 30f, 60f);
 
                     // Spawn the phantasmal spheres
                     if (sphereHandSpeed % divisor == 0 && Main.netMode != NetmodeID.MultiplayerClient)
@@ -1273,28 +1086,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         handSmoothMoveNormalize.Normalize();
 
                         float velocity = 24f;
-                        switch (aggressionLevel)
-                        {
-                            case 6:
-                                velocity += 3f;
-                                break;
-                            case 5:
-                                velocity += 1.5f;
-                                break;
-                            case 4:
-                                break;
-                            case 3:
-                                velocity -= 1f;
-                                break;
-                            case 2:
-                                velocity -= 2f;
-                                break;
-                            case 1:
-                                velocity -= 3f;
-                                break;
-                            default:
-                                break;
-                        }
+                        velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -1f, -2f, -3f);
 
                         NPC.velocity = Vector2.Lerp(NPC.velocity, handSmoothMoveNormalize * Math.Min(velocity, handSmoothMovement.Length()), 0.5f);
                     }
@@ -1327,28 +1119,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         Vector2 sphereVelocity = Utils.SafeNormalize(Main.player[closestPlayer].Center - (NPC.Center + Vector2.UnitY * -350f), Vector2.UnitY);
 
                         float velocity = 2f;
-                        switch (aggressionLevel)
-                        {
-                            case 6:
-                                velocity += 3f;
-                                break;
-                            case 5:
-                                velocity += 1.5f;
-                                break;
-                            case 4:
-                                break;
-                            case 3:
-                                velocity -= 0.25f;
-                                break;
-                            case 2:
-                                velocity -= 0.5f;
-                                break;
-                            case 1:
-                                velocity -= 0.75f;
-                                break;
-                            default:
-                                break;
-                        }
+                        velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -0.25f, -0.5f, -0.75f);
 
                         sphereVelocity *= velocity;
                         foreach (Projectile sp in Main.ActiveProjectiles)
@@ -1369,28 +1140,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         handPauseDirection.Normalize();
 
                         float velocity = 17.5f;
-                        switch (aggressionLevel)
-                        {
-                            case 6:
-                                velocity += 3f;
-                                break;
-                            case 5:
-                                velocity += 1.5f;
-                                break;
-                            case 4:
-                                break;
-                            case 3:
-                                velocity -= 1f;
-                                break;
-                            case 2:
-                                velocity -= 2f;
-                                break;
-                            case 1:
-                                velocity -= 3f;
-                                break;
-                            default:
-                                break;
-                        }
+                        velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -1f, -2f, -3f);
 
                         NPC.velocity = Vector2.Lerp(NPC.velocity, handPauseDirection * Math.Min(velocity, handPauseSmoothSpeed.Length()), 0.1f);
                     }
@@ -1407,28 +1157,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         handReturnDirection.Normalize();
 
                         float velocity = 10f;
-                        switch (aggressionLevel)
-                        {
-                            case 6:
-                                velocity += 3f;
-                                break;
-                            case 5:
-                                velocity += 1.5f;
-                                break;
-                            case 4:
-                                break;
-                            case 3:
-                                velocity -= 0.5f;
-                                break;
-                            case 2:
-                                velocity -= 1f;
-                                break;
-                            case 1:
-                                velocity -= 1.5f;
-                                break;
-                            default:
-                                break;
-                        }
+                        velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 3f, 1.5f, -0.5f, -1f, -1.5f);
 
                         NPC.velocity = Vector2.SmoothStep(NPC.velocity, handReturnDirection * Math.Min(velocity, handReturnSmoothSpeed.Length()), 0.2f);
                     }
@@ -1482,30 +1211,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     Vector2 boltShootDirection = Utils.Vector2FromElipse(NPC.localAI[0].ToRotationVector2(), eyeSizeVector * NPC.localAI[1]);
 
                     float velocity = 6.25f;
-                    switch (aggressionLevel)
-                    {
-                        // Higher aggression increases the speed of phantasmal bolts
-                        case 6:
-                            velocity += 1.5f;
-                            break;
-                        case 5:
-                            velocity += 0.75f;
-                            break;
-                        case 4:
-                            break;
-                        // Lower aggression reduces the speed of phantasmal bolts
-                        case 3:
-                            velocity -= 0.25f;
-                            break;
-                        case 2:
-                            velocity -= 0.5f;
-                            break;
-                        case 1:
-                            velocity -= 0.75f;
-                            break;
-                        default:
-                            break;
-                    }
+                    // Higher aggression increases and lower aggression reduces phantasmal bolt speed.
+                    velocity = AdjustForAggressionLevel(velocity, aggressionLevel, 1.5f, 0.75f, -0.25f, -0.5f, -0.75f);
 
                     Vector2 boltShootSpeed = Vector2.Normalize(aimDirection) * velocity;
                     Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + boltShootDirection, boltShootSpeed, ProjectileID.PhantasmalBolt, BoltDamage, 0f, Main.myPlayer);

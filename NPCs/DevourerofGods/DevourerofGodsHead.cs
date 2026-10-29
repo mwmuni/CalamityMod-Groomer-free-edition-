@@ -419,6 +419,121 @@ namespace CalamityMod.NPCs.DevourerofGods
                 NPC.frame = frame;
         }
 
+        private void UpdateHomingFlightMovement(Vector2 npcCenter, float targetX, float targetY, Vector2 destination,
+            float speedCopy, float turnSpeedCopy, bool death, CalamityGlobalNPC calamityGlobalNPC)
+        {
+            float fasterSpeedMult = speedCopy * 1.3f;
+            float slowerSpeedMult = speedCopy * 0.7f;
+            float npcSpeed = NPC.velocity.Length();
+            if (npcSpeed > 0f)
+            {
+                if (npcSpeed > fasterSpeedMult)
+                {
+                    NPC.velocity.Normalize();
+                    NPC.velocity *= fasterSpeedMult;
+                }
+                else if (npcSpeed < slowerSpeedMult)
+                {
+                    NPC.velocity.Normalize();
+                    NPC.velocity *= slowerSpeedMult;
+                }
+            }
+            targetX = (int)(targetX / 16f) * 16;
+            targetY = (int)(targetY / 16f) * 16;
+            npcCenter.X = (int)(npcCenter.X / 16f) * 16;
+            npcCenter.Y = (int)(npcCenter.Y / 16f) * 16;
+            targetX -= npcCenter.X;
+            targetY -= npcCenter.Y;
+            float targetDistance = (float)Math.Sqrt(targetX * targetX + targetY * targetY);
+            float absoluteTargetX = Math.Abs(targetX);
+            float absoluteTargetY = Math.Abs(targetY);
+            float timeToReachTarget = speedCopy / targetDistance;
+            targetX *= timeToReachTarget;
+            targetY *= timeToReachTarget;
+
+            turnSpeedCopy *= NPC.Distance(destination) / (death ? 800 : 1000f);
+            if ((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f) || (NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f))
+            {
+                if (NPC.velocity.X < targetX)
+                    NPC.velocity.X += turnSpeedCopy;
+                else
+                {
+                    if (NPC.velocity.X > targetX)
+                        NPC.velocity.X -= turnSpeedCopy;
+                }
+
+                if (NPC.velocity.Y < targetY)
+                    NPC.velocity.Y += turnSpeedCopy;
+                else
+                {
+                    if (NPC.velocity.Y > targetY)
+                        NPC.velocity.Y -= turnSpeedCopy;
+                }
+
+                if (Math.Abs(targetY) < speedCopy * 0.2 && ((NPC.velocity.X > 0f && targetX < 0f) || (NPC.velocity.X < 0f && targetX > 0f)))
+                {
+                    if (NPC.velocity.Y > 0f)
+                        NPC.velocity.Y += turnSpeedCopy * 2f;
+                    else
+                        NPC.velocity.Y -= turnSpeedCopy * 2f;
+                }
+
+                if (Math.Abs(targetX) < speedCopy * 0.2 && ((NPC.velocity.Y > 0f && targetY < 0f) || (NPC.velocity.Y < 0f && targetY > 0f)))
+                {
+                    if (NPC.velocity.X > 0f)
+                        NPC.velocity.X += turnSpeedCopy * 2f;
+                    else
+                        NPC.velocity.X -= turnSpeedCopy * 2f;
+                }
+            }
+            else
+            {
+                if (absoluteTargetX > absoluteTargetY)
+                {
+                    if (NPC.velocity.X < targetX)
+                        NPC.velocity.X += turnSpeedCopy * 1.1f;
+                    else if (NPC.velocity.X > targetX)
+                        NPC.velocity.X -= turnSpeedCopy * 1.1f;
+
+                    if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < speedCopy * 0.5)
+                    {
+                        if (NPC.velocity.Y > 0f)
+                            NPC.velocity.Y += turnSpeedCopy;
+                        else
+                            NPC.velocity.Y -= turnSpeedCopy;
+                    }
+                }
+                else
+                {
+                    if (NPC.velocity.Y < targetY)
+                        NPC.velocity.Y += turnSpeedCopy * 1.1f;
+                    else if (NPC.velocity.Y > targetY)
+                        NPC.velocity.Y -= turnSpeedCopy * 1.1f;
+
+                    if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < speedCopy * 0.5)
+                    {
+                        if (NPC.velocity.X > 0f)
+                            NPC.velocity.X += turnSpeedCopy;
+                        else
+                            NPC.velocity.X -= turnSpeedCopy;
+                    }
+                }
+            }
+
+            // Set velocity so that DoG cannot speed burst instantly at the start of a phase swap
+            if (calamityGlobalNPC.velocityPriorToPhaseSwap > 0f)
+            {
+                if (NPC.velocity.Length() > calamityGlobalNPC.velocityPriorToPhaseSwap)
+                {
+                    NPC.velocity.Normalize();
+                    NPC.velocity *= calamityGlobalNPC.velocityPriorToPhaseSwap;
+                    calamityGlobalNPC.velocityPriorToPhaseSwap += CalamityGlobalNPC.velocityPriorToPhaseSwapIncrement;
+                }
+            }
+
+            NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
+        }
+
         public override void AI()
         {
 
@@ -997,116 +1112,7 @@ namespace CalamityMod.NPCs.DevourerofGods
                         speedCopy += Vector2.Distance(destination, NPC.Center) * 0.005f;
                         turnSpeedCopy += Vector2.Distance(destination, NPC.Center) * 0.00025f;
 
-                        float fasterSpeedMult = speedCopy * 1.3f;
-                        float slowerSpeedMult = speedCopy * 0.7f;
-                        float npcSpeed = NPC.velocity.Length();
-                        if (npcSpeed > 0f)
-                        {
-                            if (npcSpeed > fasterSpeedMult)
-                            {
-                                NPC.velocity.Normalize();
-                                NPC.velocity *= fasterSpeedMult;
-                            }
-                            else if (npcSpeed < slowerSpeedMult)
-                            {
-                                NPC.velocity.Normalize();
-                                NPC.velocity *= slowerSpeedMult;
-                            }
-                        }
-                        targetX = (int)(targetX / 16f) * 16;
-                        targetY = (int)(targetY / 16f) * 16;
-                        npcCenter.X = (int)(npcCenter.X / 16f) * 16;
-                        npcCenter.Y = (int)(npcCenter.Y / 16f) * 16;
-                        targetX -= npcCenter.X;
-                        targetY -= npcCenter.Y;
-                        float targetDistance = (float)Math.Sqrt(targetX * targetX + targetY * targetY);
-                        float absoluteTargetX = Math.Abs(targetX);
-                        float absoluteTargetY = Math.Abs(targetY);
-                        float timeToReachTarget = speedCopy / targetDistance;
-                        targetX *= timeToReachTarget;
-                        targetY *= timeToReachTarget;
-
-                        turnSpeedCopy *= NPC.Distance(destination) / (death ? 800 : 1000f);
-                        if ((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f) || (NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f))
-                        {
-                            if (NPC.velocity.X < targetX)
-                                NPC.velocity.X += turnSpeedCopy;
-                            else
-                            {
-                                if (NPC.velocity.X > targetX)
-                                    NPC.velocity.X -= turnSpeedCopy;
-                            }
-
-                            if (NPC.velocity.Y < targetY)
-                                NPC.velocity.Y += turnSpeedCopy;
-                            else
-                            {
-                                if (NPC.velocity.Y > targetY)
-                                    NPC.velocity.Y -= turnSpeedCopy;
-                            }
-
-                            if (Math.Abs(targetY) < speedCopy * 0.2 && ((NPC.velocity.X > 0f && targetX < 0f) || (NPC.velocity.X < 0f && targetX > 0f)))
-                            {
-                                if (NPC.velocity.Y > 0f)
-                                    NPC.velocity.Y += turnSpeedCopy * 2f;
-                                else
-                                    NPC.velocity.Y -= turnSpeedCopy * 2f;
-                            }
-
-                            if (Math.Abs(targetX) < speedCopy * 0.2 && ((NPC.velocity.Y > 0f && targetY < 0f) || (NPC.velocity.Y < 0f && targetY > 0f)))
-                            {
-                                if (NPC.velocity.X > 0f)
-                                    NPC.velocity.X += turnSpeedCopy * 2f;
-                                else
-                                    NPC.velocity.X -= turnSpeedCopy * 2f;
-                            }
-                        }
-                        else
-                        {
-                            if (absoluteTargetX > absoluteTargetY)
-                            {
-                                if (NPC.velocity.X < targetX)
-                                    NPC.velocity.X += turnSpeedCopy * 1.1f;
-                                else if (NPC.velocity.X > targetX)
-                                    NPC.velocity.X -= turnSpeedCopy * 1.1f;
-
-                                if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < speedCopy * 0.5)
-                                {
-                                    if (NPC.velocity.Y > 0f)
-                                        NPC.velocity.Y += turnSpeedCopy;
-                                    else
-                                        NPC.velocity.Y -= turnSpeedCopy;
-                                }
-                            }
-                            else
-                            {
-                                if (NPC.velocity.Y < targetY)
-                                    NPC.velocity.Y += turnSpeedCopy * 1.1f;
-                                else if (NPC.velocity.Y > targetY)
-                                    NPC.velocity.Y -= turnSpeedCopy * 1.1f;
-
-                                if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < speedCopy * 0.5)
-                                {
-                                    if (NPC.velocity.X > 0f)
-                                        NPC.velocity.X += turnSpeedCopy;
-                                    else
-                                        NPC.velocity.X -= turnSpeedCopy;
-                                }
-                            }
-                        }
-
-                        // Set velocity so that DoG cannot speed burst instantly at the start of a phase swap
-                        if (calamityGlobalNPC.velocityPriorToPhaseSwap > 0f)
-                        {
-                            if (NPC.velocity.Length() > calamityGlobalNPC.velocityPriorToPhaseSwap)
-                            {
-                                NPC.velocity.Normalize();
-                                NPC.velocity *= calamityGlobalNPC.velocityPriorToPhaseSwap;
-                                calamityGlobalNPC.velocityPriorToPhaseSwap += CalamityGlobalNPC.velocityPriorToPhaseSwapIncrement;
-                            }
-                        }
-
-                        NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
+                        UpdateHomingFlightMovement(npcCenter, targetX, targetY, destination, speedCopy, turnSpeedCopy, death, calamityGlobalNPC);
 
                         if (calamityGlobalNPC.newAI[2] > phaseLimit)
                         {
@@ -1641,117 +1647,7 @@ namespace CalamityMod.NPCs.DevourerofGods
                         speedCopy += distanceFromTarget * 0.005f * (1f - lifeRatio);
                         turnSpeedCopy += distanceFromTarget * 0.0001f * (1f - lifeRatio);
                     }
-                    float fasterSpeedMult = speedCopy * 1.3f;
-                    float slowerSpeedMult = speedCopy * 0.7f;
-                    float npcSpeed = NPC.velocity.Length();
-                    if (npcSpeed > 0f)
-                    {
-                        if (npcSpeed > fasterSpeedMult)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= fasterSpeedMult;
-                        }
-                        else if (npcSpeed < slowerSpeedMult)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= slowerSpeedMult;
-                        }
-                    }
-
-                    targetX = (int)(targetX / 16f) * 16;
-                    targetY = (int)(targetY / 16f) * 16;
-                    npcCenter.X = (int)(npcCenter.X / 16f) * 16;
-                    npcCenter.Y = (int)(npcCenter.Y / 16f) * 16;
-                    targetX -= npcCenter.X;
-                    targetY -= npcCenter.Y;
-                    float targetDistance = (float)Math.Sqrt(targetX * targetX + targetY * targetY);
-                    float absoluteTargetX = Math.Abs(targetX);
-                    float absoluteTargetY = Math.Abs(targetY);
-                    float timeToReachTarget = speedCopy / targetDistance;
-                    targetX *= timeToReachTarget;
-                    targetY *= timeToReachTarget;
-
-                    turnSpeedCopy *= NPC.Distance(destination) / (death ? 800 : 1000);
-                    if ((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f) || (NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f))
-                    {
-                        if (NPC.velocity.X < targetX)
-                            NPC.velocity.X += turnSpeedCopy;
-                        else
-                        {
-                            if (NPC.velocity.X > targetX)
-                                NPC.velocity.X -= turnSpeedCopy;
-                        }
-
-                        if (NPC.velocity.Y < targetY)
-                            NPC.velocity.Y += turnSpeedCopy;
-                        else
-                        {
-                            if (NPC.velocity.Y > targetY)
-                                NPC.velocity.Y -= turnSpeedCopy;
-                        }
-
-                        if (Math.Abs(targetY) < speedCopy * 0.2 && ((NPC.velocity.X > 0f && targetX < 0f) || (NPC.velocity.X < 0f && targetX > 0f)))
-                        {
-                            if (NPC.velocity.Y > 0f)
-                                NPC.velocity.Y += turnSpeedCopy * 2f;
-                            else
-                                NPC.velocity.Y -= turnSpeedCopy * 2f;
-                        }
-
-                        if (Math.Abs(targetX) < speedCopy * 0.2 && ((NPC.velocity.Y > 0f && targetY < 0f) || (NPC.velocity.Y < 0f && targetY > 0f)))
-                        {
-                            if (NPC.velocity.X > 0f)
-                                NPC.velocity.X += turnSpeedCopy * 2f;
-                            else
-                                NPC.velocity.X -= turnSpeedCopy * 2f;
-                        }
-                    }
-                    else
-                    {
-                        if (absoluteTargetX > absoluteTargetY)
-                        {
-                            if (NPC.velocity.X < targetX)
-                                NPC.velocity.X += turnSpeedCopy * 1.1f;
-                            else if (NPC.velocity.X > targetX)
-                                NPC.velocity.X -= turnSpeedCopy * 1.1f;
-
-                            if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < speedCopy * 0.5)
-                            {
-                                if (NPC.velocity.Y > 0f)
-                                    NPC.velocity.Y += turnSpeedCopy;
-                                else
-                                    NPC.velocity.Y -= turnSpeedCopy;
-                            }
-                        }
-                        else
-                        {
-                            if (NPC.velocity.Y < targetY)
-                                NPC.velocity.Y += turnSpeedCopy * 1.1f;
-                            else if (NPC.velocity.Y > targetY)
-                                NPC.velocity.Y -= turnSpeedCopy * 1.1f;
-
-                            if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < speedCopy * 0.5)
-                            {
-                                if (NPC.velocity.X > 0f)
-                                    NPC.velocity.X += turnSpeedCopy;
-                                else
-                                    NPC.velocity.X -= turnSpeedCopy;
-                            }
-                        }
-                    }
-
-                    // Set velocity so that DoG cannot speed burst instantly at the start of a phase swap
-                    if (calamityGlobalNPC.velocityPriorToPhaseSwap > 0f)
-                    {
-                        if (NPC.velocity.Length() > calamityGlobalNPC.velocityPriorToPhaseSwap)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= calamityGlobalNPC.velocityPriorToPhaseSwap;
-                            calamityGlobalNPC.velocityPriorToPhaseSwap += CalamityGlobalNPC.velocityPriorToPhaseSwapIncrement;
-                        }
-                    }
-
-                    NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
+                    UpdateHomingFlightMovement(npcCenter, targetX, targetY, destination, speedCopy, turnSpeedCopy, death, calamityGlobalNPC);
 
                     if (calamityGlobalNPC.newAI[2] > phaseLimit)
                     {
