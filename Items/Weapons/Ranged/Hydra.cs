@@ -123,13 +123,7 @@ namespace CalamityMod.Items.Weapons.Ranged
 
         public override void UseStyle(Player player, Rectangle heldItemFrame)
         {
-            player.ChangeDir(Math.Sign((player.Calamity().mouseWorld - player.Center).X));
-            float itemRotation = player.compositeFrontArm.rotation + MathHelper.PiOver2 * player.gravDir;
-
-            Vector2 itemPosition = player.MountedCenter + itemRotation.ToRotationVector2() * 7f;
-            Vector2 itemSize = new Vector2(Item.width, Item.height);
-            Vector2 itemOrigin = new Vector2(-17, 3);
-            CalamityUtils.CleanHoldStyle(player, itemRotation, itemPosition, itemSize, itemOrigin);
+            CalamityUtils.CleanHoldStyle(player, new Vector2(Item.width, Item.height), new Vector2(-17, 3), 7f);
             base.UseStyle(player, heldItemFrame);
         }
 

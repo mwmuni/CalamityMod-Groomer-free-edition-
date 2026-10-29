@@ -80,11 +80,7 @@ namespace CalamityMod.Items.Weapons.Ranged
             if (animProgress < 0.4f)
                 pullback -= (2.75f) * (float)Math.Pow((0.6f - animProgress) / 0.6f, 2);
 
-            Vector2 itemPosition = player.MountedCenter + itemRotation.ToRotationVector2() * pullback;
-            Vector2 itemSize = new Vector2(46, 24);
-            Vector2 itemOrigin = new Vector2(-24, 4);
-
-            CalamityUtils.CleanHoldStyle(player, itemRotation, itemPosition, itemSize, itemOrigin);
+            CalamityUtils.CleanHoldStyle(player, itemRotation, new Vector2(46, 24), new Vector2(-24, 4), pullback);
 
             base.UseStyle(player, heldItemFrame);
         }

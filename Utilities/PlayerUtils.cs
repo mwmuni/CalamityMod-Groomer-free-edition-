@@ -885,6 +885,19 @@ namespace CalamityMod
             return position;
         }
 
+        internal static void CleanHoldStyle(Player player, Vector2 spriteSize, Vector2? rotationOriginFromCenter, float mountedCenterOffset)
+        {
+            player.ChangeDir(Math.Sign((player.Calamity().mouseWorld - player.Center).X));
+            float desiredRotation = player.compositeFrontArm.rotation + MathHelper.PiOver2 * player.gravDir;
+            CleanHoldStyle(player, desiredRotation, spriteSize, rotationOriginFromCenter, mountedCenterOffset);
+        }
+
+        internal static void CleanHoldStyle(Player player, float desiredRotation, Vector2 spriteSize, Vector2? rotationOriginFromCenter, float mountedCenterOffset)
+        {
+            Vector2 desiredPosition = player.MountedCenter + desiredRotation.ToRotationVector2() * mountedCenterOffset;
+            CleanHoldStyle(player, desiredRotation, desiredPosition, spriteSize, rotationOriginFromCenter);
+        }
+
         /// <summary>
         /// Properly sets the player's held item rotation and position by doing the annoying math for you, since vanilla decided to be wholly inconsistent about it!
         /// This all assumes the player is facing right. All the flip stuff is automatically handled in here

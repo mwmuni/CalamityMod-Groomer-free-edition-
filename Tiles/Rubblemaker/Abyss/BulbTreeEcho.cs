@@ -1,7 +1,5 @@
 ﻿using CalamityMod.Items.Placeables.Abyss;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
@@ -12,9 +10,8 @@ using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.Rubblemaker.Abyss
 {
-    public class BulbTree1Echo : ModTile
+    public class BulbTree1Echo : BaseRubblemakerGlowEcho
     {
-        public Asset<Texture2D> GlowTexture;
         public override string Texture => "CalamityMod/Tiles/Abyss/AbyssAmbient/BulbTree1";
         public override void SetStaticDefaults()
         {
@@ -52,52 +49,15 @@ namespace CalamityMod.Tiles.Rubblemaker.Abyss
         {
             num = fail ? 1 : 2;
         }
-
-        public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
-        {
-            Tile tile = Framing.GetTileSafely(i, j);
-            if (tile.IsTileActuallyInvisible())
-                return;
-
-            GlowTexture ??= ModContent.Request<Texture2D>("CalamityMod/Tiles/Abyss/AbyssAmbient/BulbTree1Glow");
-            Texture2D tex = GlowTexture.Value;
-            Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange, Main.offScreenRange);
-
-            spriteBatch.Draw(tex, new Vector2(i * 16, j * 16 + 2) - Main.screenPosition + zero, new Rectangle(tile.TileFrameX, tile.TileFrameY, 16, 16), Color.White);
-        }
     }
 
     public class BulbTree2Echo : BulbTree1Echo
     {
         public override string Texture => "CalamityMod/Tiles/Abyss/AbyssAmbient/BulbTree2";
-        public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
-        {
-            Tile tile = Framing.GetTileSafely(i, j);
-            if (tile.IsTileActuallyInvisible())
-                return;
-
-            GlowTexture ??= ModContent.Request<Texture2D>("CalamityMod/Tiles/Abyss/AbyssAmbient/BulbTree2Glow");
-            Texture2D tex = GlowTexture.Value;
-            Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange, Main.offScreenRange);
-
-            spriteBatch.Draw(tex, new Vector2(i * 16, j * 16 + 2) - Main.screenPosition + zero, new Rectangle(tile.TileFrameX, tile.TileFrameY, 16, 16), Color.White);
-        }
     }
 
     public class BulbTree3Echo : BulbTree1Echo
     {
         public override string Texture => "CalamityMod/Tiles/Abyss/AbyssAmbient/BulbTree3";
-        public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
-        {
-            Tile tile = Framing.GetTileSafely(i, j);
-            if (tile.IsTileActuallyInvisible())
-                return;
-
-            GlowTexture ??= ModContent.Request<Texture2D>("CalamityMod/Tiles/Abyss/AbyssAmbient/BulbTree3Glow");
-            Texture2D tex = GlowTexture.Value;
-            Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange, Main.offScreenRange);
-
-            spriteBatch.Draw(tex, new Vector2(i * 16, j * 16 + 2) - Main.screenPosition + zero, new Rectangle(tile.TileFrameX, tile.TileFrameY, 16, 16), Color.White);
-        }
     }
 }

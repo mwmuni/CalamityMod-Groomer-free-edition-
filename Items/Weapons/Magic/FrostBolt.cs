@@ -40,15 +40,7 @@ namespace CalamityMod.Items.Weapons.Magic
         }
         public override void UseStyle(Player player, Rectangle heldItemFrame)
         {
-            player.ChangeDir(Math.Sign((player.Calamity().mouseWorld - player.Center).X));
-            float itemRotation = player.compositeFrontArm.rotation + MathHelper.PiOver2 * player.gravDir;
-
-            Vector2 itemPosition = player.MountedCenter + itemRotation.ToRotationVector2() * 4f;
-            Vector2 itemSize = new Vector2(34, 38);
-            Vector2 itemOrigin = new Vector2(-24, 4);
-
-            CalamityUtils.CleanHoldStyle(player, itemRotation, itemPosition, itemSize, itemOrigin);
-
+            CalamityUtils.CleanHoldStyle(player, new Vector2(34, 38), new Vector2(-24, 4), 4f);
             base.UseStyle(player, heldItemFrame);
         }
         public override void UseItemFrame(Player player)

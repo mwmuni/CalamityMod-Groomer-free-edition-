@@ -62,11 +62,7 @@ namespace CalamityMod.Items.Weapons.DraedonsArsenal
             if (animProgress < 0.8f)
                 pullback -= (5.75f) * (float)Math.Pow((0.85f - animProgress) / 0.85f, 2);
 
-            Vector2 itemPosition = player.MountedCenter + itemRotation.ToRotationVector2() * pullback;
-            Vector2 itemSize = new Vector2(100, 32);
-            Vector2 itemOrigin = new Vector2(-44, 4);
-
-            CalamityUtils.CleanHoldStyle(player, itemRotation, itemPosition, itemSize, itemOrigin);
+            CalamityUtils.CleanHoldStyle(player, itemRotation, new Vector2(100, 32), new Vector2(-44, 4), pullback);
 
             base.UseStyle(player, heldItemFrame);
         }
