@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Items.Weapons.Melee;
+using CalamityMod.Projectiles.BaseProjectiles;
 using CalamityMod.Particles;
 using CalamityMod.Projectiles.Typeless;
 using Microsoft.Xna.Framework;
@@ -13,7 +14,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Projectiles.Melee.Yoyos
 {
-    public class OracleYoyo : ModProjectile
+    public class OracleYoyo : BaseYoyoProjectile
     {
         public override LocalizedText DisplayName => CalamityUtils.GetItemName<TheOracle>();
         public int AuraFrame;
@@ -74,14 +75,10 @@ namespace CalamityMod.Projectiles.Melee.Yoyos
 
         public override void SetDefaults()
         {
-            Projectile.aiStyle = ProjAIStyleID.Yoyo;
+            base.SetDefaults();
             Projectile.width = Projectile.height = 20;
-            Projectile.friendly = true;
-            Projectile.DamageType = DamageClass.MeleeNoSpeed;
-            Projectile.penetrate = -1;
             Projectile.MaxUpdates = UpdatesPerFrame;
             Projectile.tileCollide = false;
-            Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 5 * UpdatesPerFrame;
         }
 

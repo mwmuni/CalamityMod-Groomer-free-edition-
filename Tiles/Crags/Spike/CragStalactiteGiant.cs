@@ -1,34 +1,14 @@
-﻿using Microsoft.Xna.Framework;
-using Terraria;
-using Terraria.DataStructures;
-using Terraria.Enums;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.ObjectData;
+﻿using Terraria.DataStructures;
 
 namespace CalamityMod.Tiles.Crags.Spike
 {
-    public class CragStalactiteGiant1 : ModTile
+    public class CragStalactiteGiant1 : CragSpikeBase
     {
-        public override void SetStaticDefaults()
-        {
-            Main.tileFrameImportant[Type] = true;
-            Main.tileSolid[Type] = false;
-            TileObjectData.newTile.Width = 4;
-            TileObjectData.newTile.Height = 8;
-            TileObjectData.newTile.Origin = new Point16(2, 1);
-            TileObjectData.newTile.CoordinateHeights = new int[] { 16, 16, 16, 16, 16, 16, 16, 16 };
-            TileObjectData.newTile.StyleWrapLimit = 36;
-            TileObjectData.newTile.AnchorTop = new AnchorData(AnchorType.SolidTile, TileObjectData.newTile.Width, 0);
-            TileObjectData.newTile.AnchorBottom = default(AnchorData);
-            TileObjectData.newTile.CoordinateWidth = 16;
-            TileObjectData.newTile.CoordinatePadding = 2;
-            TileObjectData.newTile.DrawYOffset = -3;
-            TileObjectData.addTile(Type);
-            AddMapEntry(new Color(43, 23, 46));
-            DustType = DustID.Ambient_DarkBrown;
-            HitSound = SoundID.Tink;
-        }
+        protected override int SpikeWidth => 4;
+        protected override int SpikeHeight => 8;
+        protected override Point16 SpikeOrigin => new Point16(2, 1);
+        protected override int DrawOffset => -3;
+        protected override bool HangsFromCeiling => true;
     }
 
     public class CragStalactiteGiant2 : CragStalactiteGiant1

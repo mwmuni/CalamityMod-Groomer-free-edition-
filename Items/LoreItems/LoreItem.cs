@@ -26,6 +26,13 @@ namespace CalamityMod.Items.LoreItems
             ItemID.Sets.ItemNoGravity[Type] = true;
         }
 
+        public override void SetDefaults()
+        {
+            Item.width = 20;
+            Item.height = 20;
+            Item.consumable = false;
+        }
+
         public override bool CanUseItem(Player player) => false;
 
         public override Color? GetAlpha(Color lightColor) => Color.White;

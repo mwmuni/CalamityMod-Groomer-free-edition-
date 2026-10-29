@@ -5,6 +5,7 @@ using System.Linq;
 using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Buffs.StatDebuffs;
 using CalamityMod.Items.Weapons.Melee;
+using CalamityMod.Projectiles.BaseProjectiles;
 using CalamityMod.Particles;
 using CalamityMod.Projectiles.Summon;
 using Microsoft.Xna.Framework;
@@ -18,7 +19,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Projectiles.Melee.Yoyos
 {
-    public class ObliteratorYoyo : ModProjectile
+    public class ObliteratorYoyo : BaseYoyoProjectile
     {
         public override LocalizedText DisplayName => CalamityUtils.GetItemName<TheObliterator>();
         private static int DashStartup => 90;
@@ -42,13 +43,9 @@ namespace CalamityMod.Projectiles.Melee.Yoyos
 
         public override void SetDefaults()
         {
-            Projectile.aiStyle = ProjAIStyleID.Yoyo;
+            base.SetDefaults();
             Projectile.width = Projectile.height = 16;
-            Projectile.friendly = true;
-            Projectile.DamageType = DamageClass.MeleeNoSpeed;
-            Projectile.penetrate = -1;
             Projectile.MaxUpdates = 3;
-            Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 7 * Projectile.MaxUpdates;
         }
 

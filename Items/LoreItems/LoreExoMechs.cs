@@ -8,16 +8,9 @@ namespace CalamityMod.Items.LoreItems
     [LegacyName("KnowledgeExoMechs")]
     public class LoreExoMechs : LoreItem
     {
-        public override void SetStaticDefaults()
-        {
-            base.SetStaticDefaults();
-        }
-
         public override void SetDefaults()
         {
-            Item.width = 20;
-            Item.height = 20;
-            Item.consumable = false;
+            base.SetDefaults();
             Item.rare = ModContent.RarityType<ExoticRainbow>();
         }
 

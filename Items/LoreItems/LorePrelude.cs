@@ -6,17 +6,10 @@ namespace CalamityMod.Items.LoreItems
     [LegacyName("KnowledgeLunaticCultist")]
     public class LorePrelude : LoreItem
     {
-        public override void SetStaticDefaults()
-        {
-            base.SetStaticDefaults();
-        }
-
         public override void SetDefaults()
         {
-            Item.width = 20;
-            Item.height = 20;
+            base.SetDefaults();
             Item.rare = ItemRarityID.Cyan;
-            Item.consumable = false;
         }
 
         public override void AddRecipes()

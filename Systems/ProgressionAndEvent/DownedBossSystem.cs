@@ -66,399 +66,191 @@ namespace CalamityMod
         public static bool downedDesertScourge
         {
             get => _downedDesertScourge;
-            set
-            {
-                if (!value)
-                    _downedDesertScourge = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedDesertScourge, -1);
-            }
+            set => SetLanternNightFlag(ref _downedDesertScourge, value);
         }
         public static bool downedCrabulon
         {
             get => _downedCrabulon;
-            set
-            {
-                if (!value)
-                    _downedCrabulon = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCrabulon, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCrabulon, value);
         }
         public static bool downedHiveMind
         {
             get => _downedHiveMind;
-            set
-            {
-                if (!value)
-                    _downedHiveMind = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedHiveMind, -1);
-            }
+            set => SetLanternNightFlag(ref _downedHiveMind, value);
         }
         public static bool downedPerforator
         {
             get => _downedPerforator;
-            set
-            {
-                if (!value)
-                    _downedPerforator = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedPerforator, -1);
-            }
+            set => SetLanternNightFlag(ref _downedPerforator, value);
         }
         public static bool downedSlimeGod
         {
             get => _downedSlimeGod;
-            set
-            {
-                if (!value)
-                    _downedSlimeGod = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedSlimeGod, -1);
-            }
+            set => SetLanternNightFlag(ref _downedSlimeGod, value);
         }
         public static bool downedDreadnautilus
         {
             get => _downedDreadnautilus;
-            set
-            {
-                if (!value)
-                    _downedDreadnautilus = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedDreadnautilus, -1);
-            }
+            set => SetLanternNightFlag(ref _downedDreadnautilus, value);
         }
         public static bool downedCryogen
         {
             get => _downedCryogen;
-            set
-            {
-                if (!value)
-                    _downedCryogen = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCryogen, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCryogen, value);
         }
         public static bool downedAquaticScourge
         {
             get => _downedAquaticScourge;
-            set
-            {
-                if (!value)
-                    _downedAquaticScourge = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedAquaticScourge, -1);
-            }
+            set => SetLanternNightFlag(ref _downedAquaticScourge, value);
         }
         public static bool downedBrimstoneElemental
         {
             get => _downedBrimstoneElemental;
-            set
-            {
-                if (!value)
-                    _downedBrimstoneElemental = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedBrimstoneElemental, -1);
-            }
+            set => SetLanternNightFlag(ref _downedBrimstoneElemental, value);
         }
         public static bool downedCalamitasClone
         {
             get => _downedCalamitasClone;
-            set
-            {
-                if (!value)
-                    _downedCalamitasClone = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCalamitasClone, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCalamitasClone, value);
         }
         public static bool downedLeviathan
         {
             get => _downedLeviathan;
-            set
-            {
-                if (!value)
-                    _downedLeviathan = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedLeviathan, -1);
-            }
+            set => SetLanternNightFlag(ref _downedLeviathan, value);
         }
         public static bool downedAstrumAureus
         {
             get => _downedAstrumAureus;
-            set
-            {
-                if (!value)
-                    _downedAstrumAureus = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedAstrumAureus, -1);
-            }
+            set => SetLanternNightFlag(ref _downedAstrumAureus, value);
         }
         public static bool downedBetsy
         {
             get => _downedBetsy;
-            set
-            {
-                if (!value)
-                    _downedBetsy = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedBetsy, -1);
-            }
+            set => SetLanternNightFlag(ref _downedBetsy, value);
         }
         public static bool downedPlaguebringer
         {
             get => _downedPlaguebringer;
-            set
-            {
-                if (!value)
-                    _downedPlaguebringer = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedPlaguebringer, -1);
-            }
+            set => SetLanternNightFlag(ref _downedPlaguebringer, value);
         }
         public static bool downedRavager
         {
             get => _downedRavager;
-            set
-            {
-                if (!value)
-                    _downedRavager = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedRavager, -1);
-            }
+            set => SetLanternNightFlag(ref _downedRavager, value);
         }
         public static bool downedAstrumDeus
         {
             get => _downedAstrumDeus;
-            set
-            {
-                if (!value)
-                    _downedAstrumDeus = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedAstrumDeus, -1);
-            }
+            set => SetLanternNightFlag(ref _downedAstrumDeus, value);
         }
         public static bool downedGuardians
         {
             get => _downedGuardians;
-            set
-            {
-                if (!value)
-                    _downedGuardians = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedGuardians, -1);
-            }
+            set => SetLanternNightFlag(ref _downedGuardians, value);
         }
         public static bool downedDragonfolly
         {
             get => _downedDragonfolly;
-            set
-            {
-                if (!value)
-                    _downedDragonfolly = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedDragonfolly, -1);
-            }
+            set => SetLanternNightFlag(ref _downedDragonfolly, value);
         }
         public static bool downedProvidence
         {
             get => _downedProvidence;
-            set
-            {
-                if (!value)
-                    _downedProvidence = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedProvidence, -1);
-            }
+            set => SetLanternNightFlag(ref _downedProvidence, value);
         }
         public static bool downedCeaselessVoid
         {
             get => _downedCeaselessVoid;
-            set
-            {
-                if (!value)
-                    _downedCeaselessVoid = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCeaselessVoid, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCeaselessVoid, value);
         }
         public static bool downedStormWeaver
         {
             get => _downedStormWeaver;
-            set
-            {
-                if (!value)
-                    _downedStormWeaver = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedStormWeaver, -1);
-            }
+            set => SetLanternNightFlag(ref _downedStormWeaver, value);
         }
         public static bool downedSignus
         {
             get => _downedSignus;
-            set
-            {
-                if (!value)
-                    _downedSignus = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedSignus, -1);
-            }
+            set => SetLanternNightFlag(ref _downedSignus, value);
         }
         public static bool downedPolterghast
         {
             get => _downedPolterghast;
-            set
-            {
-                if (!value)
-                    _downedPolterghast = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedPolterghast, -1);
-            }
+            set => SetLanternNightFlag(ref _downedPolterghast, value);
         }
         public static bool downedBoomerDuke
         {
             get => _downedBoomerDuke;
-            set
-            {
-                if (!value)
-                    _downedBoomerDuke = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedBoomerDuke, -1);
-            }
+            set => SetLanternNightFlag(ref _downedBoomerDuke, value);
         }
         public static bool downedDoG
         {
             get => _downedDoG;
-            set
-            {
-                if (!value)
-                    _downedDoG = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedDoG, -1);
-            }
+            set => SetLanternNightFlag(ref _downedDoG, value);
         }
         public static bool downedYharon
         {
             get => _downedYharon;
-            set
-            {
-                if (!value)
-                    _downedYharon = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedYharon, -1);
-            }
+            set => SetLanternNightFlag(ref _downedYharon, value);
         }
         public static bool downedExoMechs
         {
             get => _downedExoMechs;
-            set
-            {
-                if (!value)
-                    _downedExoMechs = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedExoMechs, -1);
-            }
+            set => SetLanternNightFlag(ref _downedExoMechs, value);
         }
         public static bool downedCalamitas
         {
             get => _downedCalamitas;
-            set
-            {
-                if (!value)
-                    _downedCalamitas = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCalamitas, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCalamitas, value);
         }
         public static bool downedPrimordialWyrm
         {
             get => _downedPrimordialWyrm;
-            set
-            {
-                if (!value)
-                    _downedPrimordialWyrm = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedPrimordialWyrm, -1);
-            }
+            set => SetLanternNightFlag(ref _downedPrimordialWyrm, value);
         }
         public static bool downedHorribleHog
         {
             get => _downedHorribleHog;
-            set
-            {
-                if (!value)
-                    _downedHorribleHog = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedHorribleHog, -1);
-            }
+            set => SetLanternNightFlag(ref _downedHorribleHog, value);
         }
         public static bool downedCLAM
         {
             get => _downedCLAM;
-            set
-            {
-                if (!value)
-                    _downedCLAM = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCLAM, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCLAM, value);
         }
         public static bool downedCLAMHardMode
         {
             get => _downedCLAMHardMode;
-            set
-            {
-                if (!value)
-                    _downedCLAMHardMode = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCLAMHardMode, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCLAMHardMode, value);
         }
         public static bool downedCragmawMire
         {
             get => _downedCragmawMire;
-            set
-            {
-                if (!value)
-                    _downedCragmawMire = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedCragmawMire, -1);
-            }
+            set => SetLanternNightFlag(ref _downedCragmawMire, value);
         }
         public static bool downedGSS
         {
             get => _downedGSS;
-            set
-            {
-                if (!value)
-                    _downedGSS = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedGSS, -1);
-            }
+            set => SetLanternNightFlag(ref _downedGSS, value);
         }
         public static bool downedMauler
         {
             get => _downedMauler;
-            set
-            {
-                if (!value)
-                    _downedMauler = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedMauler, -1);
-            }
+            set => SetLanternNightFlag(ref _downedMauler, value);
         }
         public static bool downedNuclearTerror
         {
             get => _downedNuclearTerror;
-            set
-            {
-                if (!value)
-                    _downedNuclearTerror = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedNuclearTerror, -1);
-            }
+            set => SetLanternNightFlag(ref _downedNuclearTerror, value);
         }
+        private static void SetLanternNightFlag(ref bool flag, bool value)
+        {
+            if (!value)
+                flag = false;
+            else
+                NPC.SetEventFlagCleared(ref flag, -1);
+        }
+
         #endregion
 
         // These are purely used for loot drops, nothing else
@@ -487,24 +279,12 @@ namespace CalamityMod
         public static bool downedEoCAcidRain
         {
             get => _downedEoCAcidRain;
-            set
-            {
-                if (!value)
-                    _downedEoCAcidRain = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedEoCAcidRain, -1);
-            }
+            set => SetLanternNightFlag(ref _downedEoCAcidRain, value);
         }
         public static bool downedAquaticScourgeAcidRain
         {
             get => _downedAquaticScourgeAcidRain;
-            set
-            {
-                if (!value)
-                    _downedAquaticScourgeAcidRain = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedAquaticScourgeAcidRain, -1);
-            }
+            set => SetLanternNightFlag(ref _downedAquaticScourgeAcidRain, value);
         }
         public static bool startedBossRushAtLeastOnce
         {
@@ -514,13 +294,7 @@ namespace CalamityMod
         public static bool downedBossRush
         {
             get => _downedBossRush;
-            set
-            {
-                if (!value)
-                    _downedBossRush = false;
-                else
-                    NPC.SetEventFlagCleared(ref _downedBossRush, -1);
-            }
+            set => SetLanternNightFlag(ref _downedBossRush, value);
         }
 
         internal static void ResetAllFlags()

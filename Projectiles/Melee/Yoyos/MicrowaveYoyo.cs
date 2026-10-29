@@ -2,6 +2,7 @@
 using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Dusts;
 using CalamityMod.Items.Weapons.Melee;
+using CalamityMod.Projectiles.BaseProjectiles;
 using CalamityMod.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,7 +14,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Projectiles.Melee.Yoyos
 {
-    public class MicrowaveYoyo : ModProjectile
+    public class MicrowaveYoyo : BaseYoyoProjectile
     {
         public override LocalizedText DisplayName => CalamityUtils.GetItemName<TheMicrowave>();
         public const int MaxUpdates = 3;
@@ -33,13 +34,9 @@ namespace CalamityMod.Projectiles.Melee.Yoyos
 
         public override void SetDefaults()
         {
-            Projectile.aiStyle = ProjAIStyleID.Yoyo;
+            base.SetDefaults();
             Projectile.width = Projectile.height = 16;
-            Projectile.friendly = true;
-            Projectile.DamageType = DamageClass.MeleeNoSpeed;
-            Projectile.penetrate = -1;
             Projectile.MaxUpdates = MaxUpdates;
-            Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 10 * MaxUpdates;
         }
 

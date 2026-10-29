@@ -1,6 +1,7 @@
 ﻿using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Dusts;
 using CalamityMod.Items.Weapons.Melee;
+using CalamityMod.Projectiles.BaseProjectiles;
 using CalamityMod.Particles;
 using CalamityMod.Projectiles.Typeless;
 using Microsoft.Xna.Framework;
@@ -14,7 +15,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Projectiles.Melee.Yoyos
 {
-    public class BurningRevelationYoyo : ModProjectile
+    public class BurningRevelationYoyo : BaseYoyoProjectile
     {
         public override LocalizedText DisplayName => CalamityUtils.GetItemName<BurningRevelation>();
         public const int MaxUpdates = 3;
@@ -43,15 +44,11 @@ namespace CalamityMod.Projectiles.Melee.Yoyos
 
         public override void SetDefaults()
         {
-            Projectile.aiStyle = ProjAIStyleID.Yoyo;
+            base.SetDefaults();
             Projectile.width = 30;
             Projectile.height = 32;
-            Projectile.friendly = true;
             Projectile.tileCollide = false;
-            Projectile.DamageType = DamageClass.MeleeNoSpeed;
-            Projectile.penetrate = -1;
             Projectile.MaxUpdates = MaxUpdates;
-            Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 18 * MaxUpdates;
         }
 

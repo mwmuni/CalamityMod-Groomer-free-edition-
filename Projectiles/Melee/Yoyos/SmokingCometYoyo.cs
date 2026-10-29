@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using CalamityMod.Items.Weapons.Melee;
+using CalamityMod.Projectiles.BaseProjectiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -10,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Projectiles.Melee.Yoyos
 {
-    public class SmokingCometYoyo : ModProjectile
+    public class SmokingCometYoyo : BaseYoyoProjectile
     {
         public override LocalizedText DisplayName => CalamityUtils.GetItemName<SmokingComet>();
 
@@ -26,12 +27,8 @@ namespace CalamityMod.Projectiles.Melee.Yoyos
 
         public override void SetDefaults()
         {
-            Projectile.aiStyle = ProjAIStyleID.Yoyo;
+            base.SetDefaults();
             Projectile.width = Projectile.height = 16;
-            Projectile.friendly = true;
-            Projectile.DamageType = DamageClass.MeleeNoSpeed;
-            Projectile.penetrate = -1;
-            Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 15;
         }
 

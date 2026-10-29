@@ -2,6 +2,7 @@
 using System.Linq;
 using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Items.Weapons.Melee;
+using CalamityMod.Projectiles.BaseProjectiles;
 using CalamityMod.NPCs;
 using CalamityMod.Projectiles.Healing;
 using Microsoft.Xna.Framework;
@@ -18,7 +19,7 @@ namespace CalamityMod.Projectiles.Melee.Yoyos
     // Although normally yoyos are automatically exempted from pierce resist,
     // the damage logic for the buzzsaw briefly clobbers aiStyle, necessitating a manual pierce resist exception.
     [PierceResistException]
-    public class LaceratorYoyo : ModProjectile
+    public class LaceratorYoyo : BaseYoyoProjectile
     {
         public override LocalizedText DisplayName => CalamityUtils.GetItemName<Lacerator>();
         public const int MaxUpdates = 3;
@@ -40,13 +41,9 @@ namespace CalamityMod.Projectiles.Melee.Yoyos
 
         public override void SetDefaults()
         {
-            Projectile.aiStyle = ProjAIStyleID.Yoyo;
+            base.SetDefaults();
             Projectile.width = Projectile.height = 16;
-            Projectile.friendly = true;
-            Projectile.DamageType = DamageClass.MeleeNoSpeed;
-            Projectile.penetrate = -1;
             Projectile.MaxUpdates = MaxUpdates;
-            Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 6 * MaxUpdates;
         }
 

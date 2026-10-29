@@ -7,17 +7,10 @@ namespace CalamityMod.Items.LoreItems
     [LegacyName("KnowledgeBumblebirb", "KnowledgeDragonfolly")]
     public class LoreDragonfolly : LoreItem
     {
-        public override void SetStaticDefaults()
-        {
-            base.SetStaticDefaults();
-        }
-
         public override void SetDefaults()
         {
-            Item.width = 20;
-            Item.height = 20;
+            base.SetDefaults();
             Item.rare = ItemRarityID.Purple;
-            Item.consumable = false;
         }
 
         public override void AddRecipes()

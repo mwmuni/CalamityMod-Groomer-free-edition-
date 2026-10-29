@@ -6,17 +6,10 @@ namespace CalamityMod.Items.LoreItems
     [LegacyName("KnowledgeEyeofCthulhu")]
     public class LoreEyeofCthulhu : LoreItem
     {
-        public override void SetStaticDefaults()
-        {
-            base.SetStaticDefaults();
-        }
-
         public override void SetDefaults()
         {
-            Item.width = 20;
-            Item.height = 20;
+            base.SetDefaults();
             Item.rare = ItemRarityID.Blue;
-            Item.consumable = false;
         }
 
         public override void AddRecipes()
