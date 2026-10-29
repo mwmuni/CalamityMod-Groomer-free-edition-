@@ -173,4 +173,33 @@ namespace CalamityMod.UI.DraedonLogs
             spriteBatch.Draw(texture, drawPosition, null, Color.White, 0f, new Vector2(texture.Width * 0.5f, 0f), scale, SpriteEffects.None, 0f);
         }
     }
+
+    public abstract class DraedonsLogGUI<TItem> : DraedonsLogGUI where TItem : ModItem
+    {
+        public override int TotalPages => 3;
+        public override string GetTextByPage() =>
+            CalamityUtils.GetTextValueFromModItem<TItem>("ContentPage" + (Page + 1));
+
+        protected Texture2D GetTextureByPage(string firstPageTexture, string secondPageTexture, string thirdPageTexture)
+        {
+            string textureName = Page switch
+            {
+                0 => firstPageTexture,
+                1 => secondPageTexture,
+                _ => thirdPageTexture
+            };
+
+            return textureName is null ? null : ModContent.Request<Texture2D>($"CalamityMod/UI/DraedonLogs/{textureName}").Value;
+        }
+    }
+
+    public abstract class DraedonSchematicGUI<TItem> : DraedonsLogGUI<TItem> where TItem : ModItem
+    {
+        protected abstract string TextureName { get; }
+        public override int TotalPages => 1;
+        public override string GetTextByPage() =>
+            CalamityUtils.GetTextValueFromModItem<TItem>("Content");
+        public override Texture2D GetTextureByPage() =>
+            ModContent.Request<Texture2D>($"CalamityMod/UI/DraedonLogs/{TextureName}").Value;
+    }
 }
