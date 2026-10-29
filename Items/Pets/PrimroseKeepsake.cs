@@ -9,24 +9,18 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class PrimroseKeepsake : ModItem, ILocalizedModType
+    public class PrimroseKeepsake : VanityPetItem<PrimroseKeepsakeDisplay, FurtasticDuoBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
+        protected override int PetBuffDuration => 15;
+
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<PrimroseKeepsakeDisplay>(), ModContent.BuffType<FurtasticDuoBuff>());
+            base.SetDefaults();
             Item.UseSound = SoundID.Item44;
             Item.value = Item.sellPrice(platinum: 1);
             Item.rare = ItemRarityID.Purple;
             Item.Calamity().devItem = true;
-        }
-
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 15, true);
-            }
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)

@@ -1,16 +1,15 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureDriftwood
 {
-    public class DriftwoodPlatform : ModItem, ILocalizedModType
+    public class DriftwoodPlatform : PlaceableTileItem<Tiles.FurnitureDriftwood.DriftwoodPlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureDriftwood.DriftwoodPlatform>());
 
         public override void AddRecipes()
         {

@@ -2,13 +2,13 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.Astral
 {
     [LegacyName("AstralSilt")]
-    public class NovaeSlag : ModItem, ILocalizedModType
+    public class NovaeSlag : PlaceableTileItem<Tiles.Astral.NovaeSlag>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
@@ -16,7 +16,6 @@ namespace CalamityMod.Items.Placeables.Astral
             ItemID.Sets.SortingPriorityExtractibles[Type] = 1; // Silt Block
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.Astral.NovaeSlag>());
 
         public override void ExtractinatorUse(int extractinatorBlockType, ref int resultType, ref int resultStack)
         {

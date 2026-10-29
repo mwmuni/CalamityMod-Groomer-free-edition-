@@ -5,15 +5,13 @@ using WallTiles = CalamityMod.Walls;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class BrimstoneSlagWall : ModItem, ILocalizedModType
+    public class BrimstoneSlagWall : PlaceableWallItem<WallTiles.BrimstoneSlagWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.BrimstoneSlagWall>());
 
         public override void AddRecipes()
         {

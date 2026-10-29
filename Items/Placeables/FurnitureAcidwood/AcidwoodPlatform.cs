@@ -1,17 +1,16 @@
 ﻿using CalamityMod.Tiles.FurnitureAcidwood;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureAcidwood
 {
-    public class AcidwoodPlatform : ModItem, ILocalizedModType
+    public class AcidwoodPlatform : PlaceableTileItem<AcidwoodPlatformTile>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<AcidwoodPlatformTile>());
 
         public override void AddRecipes()
         {

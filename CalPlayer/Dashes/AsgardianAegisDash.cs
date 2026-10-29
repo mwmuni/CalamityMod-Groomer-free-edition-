@@ -90,22 +90,25 @@ namespace CalamityMod.CalPlayer.Dashes
             Particle explosion2 = new DetailedExplosion(npc.Center, Vector2.Zero, Color.Magenta, Vector2.One, Main.rand.NextFloat(-5, 5), 0f, 0.65f, 26);
             GeneralParticleHandler.SpawnParticle(explosion2);
 
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = AsgardianAegis.ShieldSlamIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = DamageClass.Melee;
-            hitContext.BaseDamage = AsgardianAegis.ShieldSlamDamage;
-            hitContext.BaseKnockback = AsgardianAegis.ShieldSlamKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, AsgardianAegis.ShieldSlamIFrames, DamageClass.Melee, AsgardianAegis.ShieldSlamDamage, AsgardianAegis.ShieldSlamKnockback);
 
             // On-hit Cosmic Dash Explosion
             int explosionDamage = (int)player.GetBestClassDamage().ApplyTo(AsgardianAegis.RamExplosionDamage);
             Projectile.NewProjectile(source, player.Center, Vector2.Zero, ModContent.ProjectileType<CosmicDashExplosion>(), explosionDamage, AsgardianAegis.RamExplosionKnockback, Main.myPlayer, 3f, 0f);
             npc.AddBuff(ModContent.BuffType<GodSlayerInferno>(), 300);
+        }
+    }
+
+    internal static class DashHitContextHelper
+    {
+        internal static void Set(Player player, ref DashHitContext hitContext, int immunityFrames, DamageClass damageClass, int damage, float knockback)
+        {
+            int hitDirection = player.velocity.X != 0f ? Math.Sign(player.velocity.X) : player.direction;
+            hitContext.HitDirection = hitDirection;
+            hitContext.PlayerImmunityFrames = immunityFrames;
+            hitContext.damageClass = damageClass;
+            hitContext.BaseDamage = damage;
+            hitContext.BaseKnockback = knockback;
         }
     }
 }

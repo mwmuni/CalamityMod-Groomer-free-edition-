@@ -2,19 +2,18 @@
 using Terraria.ID;
 using Terraria.ModLoader;
 using CalamityMod.Tiles.FurnitureAcidwood;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureAcidwood
 {
-    public class Acidwood : ModItem, ILocalizedModType
+    public class Acidwood : PlaceableTileItem<AcidwoodTile>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
             ItemID.Sets.ShimmerTransformToItem[Type] = ItemID.Wood;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<AcidwoodTile>());
 
         public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
         {

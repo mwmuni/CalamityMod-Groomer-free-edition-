@@ -7,24 +7,17 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class BloodyVein : ModItem, ILocalizedModType
+    public class BloodyVein : VanityPetItem<PerforaMini, BloodBound>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<PerforaMini>(), ModContent.BuffType<BloodBound>());
+            base.SetDefaults();
             Item.UseSound = SoundID.NPCHit9;
             Item.value = Item.sellPrice(gold: 2);
             Item.rare = ItemRarityID.Orange;
             Item.Calamity().donorItem = true;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
-        }
     }
 }

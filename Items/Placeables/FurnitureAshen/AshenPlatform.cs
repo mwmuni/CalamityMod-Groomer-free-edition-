@@ -1,16 +1,15 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureAshen
 {
-    public class AshenPlatform : ModItem, ILocalizedModType
+    public class AshenPlatform : PlaceableTileItem<Tiles.FurnitureAshen.AshenPlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureAshen.AshenPlatform>());
 
         public override void AddRecipes()
         {

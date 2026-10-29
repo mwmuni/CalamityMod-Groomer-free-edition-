@@ -10,24 +10,17 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class BurrowerController : ModItem, ILocalizedModType
+    public class BurrowerController : VanityPetItem<BurrowerPet, BurrowerBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<BurrowerPet>(), ModContent.BuffType<BurrowerBuff>());
+            base.SetDefaults();
             Item.rare = ItemRarityID.Green;
             Item.value = Item.sellPrice(gold: 3);
             Item.UseSound = ThanatosHead.ThanatosHitSoundClosed;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
-        }
         public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {
             CalamityUtils.DrawInventoryCustomScale(

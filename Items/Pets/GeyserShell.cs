@@ -7,23 +7,16 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class GeyserShell : ModItem, ILocalizedModType
+    public class GeyserShell : VanityPetItem<FlakPet, FlakHermitBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
+        protected override int PetBuffDuration => 15;
 
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<FlakPet>(), ModContent.BuffType<FlakHermitBuff>());
+            base.SetDefaults();
             Item.value = Item.sellPrice(gold: 2);
             Item.rare = ItemRarityID.Orange;
-        }
-
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 15, true);
-            }
         }
     }
 }

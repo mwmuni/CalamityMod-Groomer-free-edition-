@@ -3,15 +3,13 @@ using Terraria.ModLoader;
 using WallTiles = CalamityMod.Walls;
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class PerennialBrickWall : ModItem, ILocalizedModType
+    public class PerennialBrickWall : PlaceableWallItem<WallTiles.PerennialBrickWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.PerennialBrickWall>());
 
         public override void AddRecipes()
         {

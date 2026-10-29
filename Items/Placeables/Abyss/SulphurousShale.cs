@@ -1,17 +1,16 @@
 ﻿using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.Abyss
 {
-    public class SulphurousShale : ModItem, ILocalizedModType
+    public class SulphurousShale : PlaceableTileItem<Tiles.Abyss.SulphurousShale>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<SulphurousSand>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.Abyss.SulphurousShale>());
 
         public override void AddRecipes()
         {

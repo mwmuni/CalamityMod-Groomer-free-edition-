@@ -7,24 +7,17 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class FoxDrive : ModItem, ILocalizedModType
+    public class FoxDrive : VanityPetItem<FoxPet, FoxPetBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<FoxPet>(), ModContent.BuffType<FoxPetBuff>());
+            base.SetDefaults();
             Item.expert = true;
             Item.value = Item.sellPrice(gold: 20);
             Item.rare = ModContent.RarityType<BurnishedAuric>();
             Item.Calamity().devItem = true;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
-        }
     }
 }

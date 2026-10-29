@@ -7,24 +7,17 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class JoyfulHeart : ModItem, ILocalizedModType
+    public class JoyfulHeart : VanityPetItem<LadShark, LadBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
+        protected override int PetBuffDuration => 15;
 
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<LadShark>(), ModContent.BuffType<LadBuff>());
+            base.SetDefaults();
             Item.value = Item.sellPrice(gold: 1); // "Common drop" pet price (Monster Meat)
             Item.rare = ItemRarityID.Orange;
             Item.Calamity().devItem = true;
-        }
-
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 15, true);
-            }
         }
     }
 }

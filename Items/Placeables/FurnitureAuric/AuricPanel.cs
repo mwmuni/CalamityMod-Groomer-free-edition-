@@ -2,16 +2,15 @@
 using CalamityMod.Tiles.Furniture.CraftingStations;
 using CalamityMod.Tiles.FurnitureAuric;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureAuric
 {
-    public class AuricPanel : ModItem, ILocalizedModType
+    public class AuricPanel : PlaceableTileItem<AuricPanelTile>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<AuricPanelTile>());
 
         public override void AddRecipes()
         {

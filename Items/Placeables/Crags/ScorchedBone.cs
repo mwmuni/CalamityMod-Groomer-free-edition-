@@ -1,18 +1,17 @@
 ﻿using CalamityMod.Items.Placeables.Walls;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.Crags
 {
-    public class ScorchedBone : ModItem, ILocalizedModType
+    public class ScorchedBone : PlaceableTileItem<Tiles.Crags.ScorchedBone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.Crags.ScorchedBone>());
 
         public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
         {

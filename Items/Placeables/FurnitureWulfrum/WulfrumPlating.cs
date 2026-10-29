@@ -2,18 +2,17 @@
 using CalamityMod.Items.Placeables.Walls;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureWulfrum
 {
-    public class WulfrumPlating : ModItem, ILocalizedModType
+    public class WulfrumPlating : PlaceableTileItem<Tiles.FurnitureWulfrum.WulfrumPlating>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureWulfrum.WulfrumPlating>());
 
         public override void AddRecipes()
         {

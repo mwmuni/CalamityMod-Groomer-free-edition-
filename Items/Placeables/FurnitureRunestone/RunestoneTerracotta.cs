@@ -1,17 +1,16 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureRunestone
 {
-    public class RunestoneTerracotta : ModItem, ILocalizedModType
+    public class RunestoneTerracotta : PlaceableTileItem<Tiles.FurnitureRunestone.RunestoneTerracotta>
     {
-        public new string LocalizationCategory => "Items.Placeables";
 
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureRunestone.RunestoneTerracotta>());
 
         //public override void AddRecipes()
         //{

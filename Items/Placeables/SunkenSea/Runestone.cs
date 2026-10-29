@@ -1,12 +1,12 @@
 ﻿using CalamityMod.Items.Placeables.Walls;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.SunkenSea
 {
-    public class Runestone : ModItem, ILocalizedModType
+    public class Runestone : PlaceableTileItem<Tiles.SunkenSea.Runestone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
 
         public override void SetStaticDefaults()
         {
@@ -14,7 +14,6 @@ namespace CalamityMod.Items.Placeables.SunkenSea
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<Shellstone>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.SunkenSea.Runestone>());
 
         public override void AddRecipes()
         {

@@ -4,15 +4,13 @@ using Terraria.ModLoader;
 using WallTiles = CalamityMod.Walls;
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class VoidstoneWall : ModItem, ILocalizedModType
+    public class VoidstoneWall : PlaceableWallItem<WallTiles.VoidstoneWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.VoidstoneWall>());
 
         public override void AddRecipes()
         {

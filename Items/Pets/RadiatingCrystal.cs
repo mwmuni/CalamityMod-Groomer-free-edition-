@@ -7,22 +7,15 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class RadiatingCrystal : ModItem, ILocalizedModType
+    public class RadiatingCrystal : VanityPetItem<RadiatorPet, RadiatorBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<RadiatorPet>(), ModContent.BuffType<RadiatorBuff>());
+            base.SetDefaults();
             Item.value = Item.sellPrice(gold: 2);
             Item.rare = ItemRarityID.Orange;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
-        }
     }
 }

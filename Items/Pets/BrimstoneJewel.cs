@@ -7,23 +7,16 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class BrimstoneJewel : ModItem, ILocalizedModType
+    public class BrimstoneJewel : VanityPetItem<SCalPet, ClassicSCalPetBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<SCalPet>(), ModContent.BuffType<ClassicSCalPetBuff>());
+            base.SetDefaults();
             Item.value = Item.sellPrice(gold: 20);
             Item.rare = ModContent.RarityType<CalamityRed>();
             Item.Calamity().donorItem = true;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
-        }
     }
 }

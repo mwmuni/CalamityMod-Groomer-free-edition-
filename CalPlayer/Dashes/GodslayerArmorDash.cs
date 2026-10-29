@@ -155,17 +155,7 @@ namespace CalamityMod.CalPlayer.Dashes
                 dust.noGravity = false;
             }
 
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = AsgardianAegis.ShieldSlamIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = player.GetBestClass();
-            hitContext.BaseDamage = GodSlayerChestplate.DashDamage;
-            hitContext.BaseKnockback = GodSlayerChestplate.DashKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, AsgardianAegis.ShieldSlamIFrames, player.GetBestClass(), GodSlayerChestplate.DashDamage, GodSlayerChestplate.DashKnockback);
 
             // God Slayer Dash intentionally does not use the vanilla function for collision attack iframes.
             // This is because its immunity is meant to be completely consistent and not subject to vanilla anticheese.

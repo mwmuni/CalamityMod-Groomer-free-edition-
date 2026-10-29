@@ -9,23 +9,17 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class StarSwallowerUnit : ModItem, ILocalizedModType
+    public class StarSwallowerUnit : VanityPetItem<StarSwallowerPet, StarSwallowerPetBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
+        protected override int PetBuffDuration => 15;
+
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<StarSwallowerPet>(), ModContent.BuffType<StarSwallowerPetBuff>());
+            base.SetDefaults();
             Item.value = Item.sellPrice(gold: 1);
             Item.rare = ModContent.RarityType<DarkOrange>();
             Item.useStyle = ItemUseStyleID.HoldUp;
-        }
-
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 15, true);
-            }
         }
 
         public override void AddRecipes()

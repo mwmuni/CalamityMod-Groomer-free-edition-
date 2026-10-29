@@ -2,12 +2,12 @@
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.Astral
 {
-    public class AstralSandstone : ModItem, ILocalizedModType
+    public class AstralSandstone : PlaceableTileItem<Tiles.AstralDesert.AstralSandstone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
@@ -15,7 +15,6 @@ namespace CalamityMod.Items.Placeables.Astral
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<AstralSand>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.AstralDesert.AstralSandstone>());
 
         public override void AddRecipes()
         {

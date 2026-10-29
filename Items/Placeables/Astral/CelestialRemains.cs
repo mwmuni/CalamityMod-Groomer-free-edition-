@@ -3,13 +3,13 @@ using CalamityMod.Items.Placeables.Walls;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.Astral
 {
     [LegacyName("AstralFossil")]
-    public class CelestialRemains : ModItem, ILocalizedModType
+    public class CelestialRemains : PlaceableTileItem<Tiles.AstralDesert.CelestialRemains>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
@@ -17,7 +17,6 @@ namespace CalamityMod.Items.Placeables.Astral
             ItemID.Sets.SortingPriorityExtractibles[Type] = 3; // Desert Fossil
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.AstralDesert.CelestialRemains>());
 
         public override void ExtractinatorUse(int extractinatorBlockType, ref int resultType, ref int resultStack)
         {

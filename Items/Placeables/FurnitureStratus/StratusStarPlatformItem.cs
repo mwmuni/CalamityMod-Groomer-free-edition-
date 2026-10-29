@@ -1,17 +1,16 @@
 ﻿using CalamityMod.Tiles.FurnitureStratus;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureStratus
 {
-    public class StratusStarPlatformItem : ModItem, ILocalizedModType
+    public class StratusStarPlatformItem : PlaceableTileItem<StratusStarPlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<StratusStarPlatform>());
 
         public override void AddRecipes()
         {

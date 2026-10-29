@@ -51,17 +51,7 @@ namespace CalamityMod.CalPlayer.Dashes
         {
             if (DashTimeAdjustedForStartup > 12)
                 return;
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = OrnateShield.ShieldSlamIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = DamageClass.Melee;
-            hitContext.BaseDamage = OrnateShield.ShieldSlamDamage;
-            hitContext.BaseKnockback = OrnateShield.ShieldSlamKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, OrnateShield.ShieldSlamIFrames, DamageClass.Melee, OrnateShield.ShieldSlamDamage, OrnateShield.ShieldSlamKnockback);
 
             npc.AddBuff(BuffID.Frostburn2, 180); //Great, Frostbite is ACTUALLY called Frostburn 2
         }

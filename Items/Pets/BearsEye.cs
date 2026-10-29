@@ -8,25 +8,19 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Pets
 {
     [LegacyName("BearEye")]
-    public class BearsEye : ModItem, ILocalizedModType
+    public class BearsEye : VanityPetItem<Bear, BearBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
+        protected override int PetBuffDuration => 15;
 
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<Bear>(), ModContent.BuffType<BearBuff>());
+            base.SetDefaults();
             Item.UseSound = SoundID.Meowmere;
             Item.value = Item.buyPrice(platinum: 5); // Sold by Bandit
             Item.rare = ItemRarityID.Pink;
             Item.Calamity().devItem = true;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 15, true);
-            }
-        }
     }
 }

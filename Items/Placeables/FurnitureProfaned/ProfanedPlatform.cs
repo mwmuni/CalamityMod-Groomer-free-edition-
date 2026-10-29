@@ -1,15 +1,14 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureProfaned
 {
-    public class ProfanedPlatform : ModItem, ILocalizedModType
+    public class ProfanedPlatform : PlaceableTileItem<Tiles.FurnitureProfaned.ProfanedPlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureProfaned.ProfanedPlatform>());
 
         public override void AddRecipes()
         {

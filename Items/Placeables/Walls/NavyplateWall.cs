@@ -4,15 +4,13 @@ using WallTiles = CalamityMod.Walls;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class NavyplateWall : ModItem, ILocalizedModType
+    public class NavyplateWall : PlaceableWallItem<WallTiles.NavyplateWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.NavyplateWall>());
 
         public override void AddRecipes()
         {

@@ -1,16 +1,15 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureNavystone.FurnitureAncientNavystone
 {
-    public class AncientSmoothNavystone : ModItem, ILocalizedModType
+    public class AncientSmoothNavystone : PlaceableTileItem<Tiles.FurnitureNavystone.FurnitureAncientNavystone.AncientSmoothNavystone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureNavystone.FurnitureAncientNavystone.AncientSmoothNavystone>());
 
         /*public override void AddRecipes()
         {

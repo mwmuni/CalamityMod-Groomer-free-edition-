@@ -4,15 +4,13 @@ using Terraria.ID;
 using Terraria.ModLoader;
 namespace CalamityMod.Items.Placeables
 {
-    public class CryonicBrick : ModItem, ILocalizedModType
+    public class CryonicBrick : PlaceableTileItem<Tiles.CryonicBrick>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.CryonicBrick>());
 
         public override void AddRecipes()
         {

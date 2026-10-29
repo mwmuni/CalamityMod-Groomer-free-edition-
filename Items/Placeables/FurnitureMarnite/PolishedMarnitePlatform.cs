@@ -1,15 +1,14 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureMarnite
 {
-    public class PolishedMarnitePlatform : ModItem, ILocalizedModType
+    public class PolishedMarnitePlatform : PlaceableTileItem<Tiles.FurnitureMarnite.PolishedMarnitePlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureMarnite.PolishedMarnitePlatform>());
 
         public override void AddRecipes()
         {

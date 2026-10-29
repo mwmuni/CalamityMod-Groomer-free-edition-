@@ -5,15 +5,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class ExoPlatingWallItem : ModItem, ILocalizedModType
+    public class ExoPlatingWallItem : PlaceableWallItem<ExoPlatingWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<ExoPlatingWall>());
 
         public override void AddRecipes()
         {

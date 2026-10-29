@@ -2,18 +2,17 @@
 using Terraria.ModLoader;
 using TileItems = CalamityMod.Items.Placeables.DraedonStructures;
 using WallTiles = CalamityMod.Walls.DraedonStructures;
+using CalamityMod.Items.Placeables.Walls;
 
 namespace CalamityMod.Items.Placeables.Walls.DraedonStructures
 {
-    public class HazardChevronWall : ModItem, ILocalizedModType
+    public class HazardChevronWall : PlaceableWallItem<WallTiles.HazardChevronWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.HazardChevronWall>());
 
         public override void AddRecipes()
         {

@@ -2,18 +2,17 @@
 using CalamityMod.Items.Placeables.Walls;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.SunkenSea
 {
-    public class Navystone : ModItem, ILocalizedModType
+    public class Navystone : PlaceableTileItem<Tiles.SunkenSea.Navystone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<Runestone>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.SunkenSea.Navystone>());
 
         public override void AddRecipes()
         {

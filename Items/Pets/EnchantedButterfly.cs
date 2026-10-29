@@ -8,23 +8,15 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Pets
 {
     [LegacyName("SparksSummon")]
-    public class EnchantedButterfly : ModItem, ILocalizedModType
+    public class EnchantedButterfly : VanityPetItem<Sparks, SparksBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<Sparks>(), ModContent.BuffType<SparksBuff>());
+            base.SetDefaults();
             Item.value = Item.sellPrice(gold: 2);
             Item.rare = ItemRarityID.Orange;
             Item.Calamity().donorItem = true;
-        }
-
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
         }
 
         public override void AddRecipes()

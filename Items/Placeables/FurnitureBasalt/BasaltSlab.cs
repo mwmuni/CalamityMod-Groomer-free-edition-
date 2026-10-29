@@ -1,19 +1,18 @@
 ﻿using CalamityMod.Items.Placeables.SunkenSea;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureBasalt
 {
-    public class BasaltSlab : ModItem, ILocalizedModType
+    public class BasaltSlab : PlaceableTileItem<Tiles.FurnitureBasalt.BasaltSlab>
     {
-        public new string LocalizationCategory => "Items.Placeables";
 
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureBasalt.BasaltSlab>());
 
         public override void AddRecipes()
         {

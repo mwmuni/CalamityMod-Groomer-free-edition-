@@ -2,17 +2,16 @@
 using CalamityMod.Items.Placeables.Walls;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureAshen
 {
-    public class SmoothBrimstoneSlag : ModItem, ILocalizedModType
+    public class SmoothBrimstoneSlag : PlaceableTileItem<Tiles.FurnitureAshen.SmoothBrimstoneSlag>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureAshen.SmoothBrimstoneSlag>());
 
         public override void AddRecipes()
         {

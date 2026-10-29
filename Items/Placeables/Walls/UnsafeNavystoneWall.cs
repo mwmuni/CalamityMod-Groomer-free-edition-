@@ -4,9 +4,8 @@ using WallTiles = CalamityMod.Walls.UnsafeWalls;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class UnsafeNavystoneWall : ModItem, ILocalizedModType
+    public class UnsafeNavystoneWall : PlaceableWallItem<WallTiles.UnsafeNavystoneWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
@@ -14,6 +13,5 @@ namespace CalamityMod.Items.Placeables.Walls
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<Items.Placeables.Walls.NavystoneWall>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.UnsafeNavystoneWall>());
     }
 }

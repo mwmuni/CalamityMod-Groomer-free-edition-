@@ -1,15 +1,14 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurniturePlagued
 {
-    public class PlaguedPlatePlatform : ModItem, ILocalizedModType
+    public class PlaguedPlatePlatform : PlaceableTileItem<Tiles.FurniturePlaguedPlate.PlaguedPlatePlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurniturePlaguedPlate.PlaguedPlatePlatform>());
 
         public override void AddRecipes()
         {

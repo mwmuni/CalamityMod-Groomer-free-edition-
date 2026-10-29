@@ -4,15 +4,13 @@ using Terraria.ModLoader;
 using WallTiles = CalamityMod.Walls;
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class SmoothBrimstoneSlagWall : ModItem, ILocalizedModType
+    public class SmoothBrimstoneSlagWall : PlaceableWallItem<WallTiles.SmoothBrimstoneSlagWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.SmoothBrimstoneSlagWall>());
 
         public override void AddRecipes()
         {

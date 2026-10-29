@@ -174,17 +174,7 @@ namespace CalamityMod.CalPlayer.Dashes
                 GeneralParticleHandler.SpawnParticle(plasma);
             }
 
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = V8000Engine.ShieldSlamIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = DamageClass.Melee;
-            hitContext.BaseDamage = V8000Engine.ShieldSlamDamage;
-            hitContext.BaseKnockback = V8000Engine.ShieldSlamKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, V8000Engine.ShieldSlamIFrames, DamageClass.Melee, V8000Engine.ShieldSlamDamage, V8000Engine.ShieldSlamKnockback);
         }
     }
 }

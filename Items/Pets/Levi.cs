@@ -7,23 +7,16 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class Levi : ModItem, ILocalizedModType
+    public class Levi : VanityPetItem<LeviPet, LeviBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<LeviPet>(), ModContent.BuffType<LeviBuff>());
+            base.SetDefaults();
             Item.value = Item.sellPrice(gold: 20);
             Item.rare = ModContent.RarityType<BurnishedAuric>();
             Item.Calamity().devItem = true;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
-        }
     }
 }

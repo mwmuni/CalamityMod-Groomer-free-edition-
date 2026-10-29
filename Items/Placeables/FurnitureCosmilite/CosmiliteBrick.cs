@@ -3,17 +3,16 @@ using CalamityMod.Items.Placeables.Walls;
 using CalamityMod.Tiles.Furniture.CraftingStations;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureCosmilite
 {
-    public class CosmiliteBrick : ModItem, ILocalizedModType
+    public class CosmiliteBrick : PlaceableTileItem<Tiles.FurnitureCosmilite.CosmiliteBrick>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureCosmilite.CosmiliteBrick>());
 
         public override void AddRecipes()
         {

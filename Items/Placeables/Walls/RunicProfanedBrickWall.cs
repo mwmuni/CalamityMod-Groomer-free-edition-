@@ -4,15 +4,13 @@ using Terraria.ModLoader;
 using WallTiles = CalamityMod.Walls;
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class RunicProfanedBrickWall : ModItem, ILocalizedModType
+    public class RunicProfanedBrickWall : PlaceableWallItem<WallTiles.RunicProfanedBrickWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.RunicProfanedBrickWall>());
 
         public override void AddRecipes()
         {

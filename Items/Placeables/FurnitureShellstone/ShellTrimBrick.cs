@@ -1,16 +1,15 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureShellstone
 {
-    public class ShellTrimBrick : ModItem, ILocalizedModType
+    public class ShellTrimBrick : PlaceableTileItem<Tiles.FurnitureShellstone.ShellTrimBrick>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureShellstone.ShellTrimBrick>());
 
         //public override void AddRecipes()
         //{

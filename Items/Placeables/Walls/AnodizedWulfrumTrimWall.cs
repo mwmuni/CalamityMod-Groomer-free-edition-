@@ -5,15 +5,13 @@ using WallTiles = CalamityMod.Walls;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class AnodizedWulfrumTrimWall : ModItem, ILocalizedModType
+    public class AnodizedWulfrumTrimWall : PlaceableWallItem<WallTiles.AnodizedWulfrumTrimWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.AnodizedWulfrumTrimWall>());
 
         public override void AddRecipes()
         {

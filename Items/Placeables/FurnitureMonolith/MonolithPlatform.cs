@@ -1,15 +1,14 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureMonolith
 {
-    public class MonolithPlatform : ModItem, ILocalizedModType
+    public class MonolithPlatform : PlaceableTileItem<Tiles.FurnitureMonolith.MonolithPlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureMonolith.MonolithPlatform>());
 
         public override void AddRecipes()
         {

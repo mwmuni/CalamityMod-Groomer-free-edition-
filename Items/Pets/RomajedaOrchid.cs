@@ -7,24 +7,19 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class RomajedaOrchid : ModItem, ILocalizedModType
+    public class RomajedaOrchid : VanityPetItem<KendraPet, Kendra>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
+        protected override int PetBuffDuration => 15;
+
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<KendraPet>(), ModContent.BuffType<Kendra>());
+            base.SetDefaults();
             Item.UseSound = SoundID.Item44;
             Item.value = Item.buyPrice(gold: 40); // Sold by Dryad
             Item.rare = ItemRarityID.Pink;
             Item.Calamity().devItem = true;
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 15, true);
-            }
-        }
     }
 }

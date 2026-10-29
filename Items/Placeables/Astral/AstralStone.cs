@@ -2,19 +2,18 @@
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.Astral
 {
-    public class AstralStone : ModItem, ILocalizedModType
+    public class AstralStone : PlaceableTileItem<Tiles.Astral.AstralStone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
             ItemTrader.ChlorophyteExtractinator.AddOption_OneWay(Type, 1, ItemID.StoneBlock, 1);
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.Astral.AstralStone>());
 
         public override void AddRecipes()
         {

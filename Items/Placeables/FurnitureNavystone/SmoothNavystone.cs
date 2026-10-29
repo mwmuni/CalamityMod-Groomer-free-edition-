@@ -3,19 +3,18 @@ using CalamityMod.Items.Placeables.Walls;
 using CalamityMod.Items.Placeables.FurnitureNavystone.FurnitureAncientNavystone;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureNavystone
 {
-    public class SmoothNavystone : ModItem, ILocalizedModType
+    public class SmoothNavystone : PlaceableTileItem<Tiles.FurnitureNavystone.SmoothNavystone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<AncientSmoothNavystone>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureNavystone.SmoothNavystone>());
 
         public override void AddRecipes()
         {

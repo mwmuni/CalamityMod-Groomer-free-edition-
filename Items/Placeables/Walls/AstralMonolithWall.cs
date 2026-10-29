@@ -5,15 +5,13 @@ using WallTiles = CalamityMod.Walls;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class AstralMonolithWall : ModItem, ILocalizedModType
+    public class AstralMonolithWall : PlaceableWallItem<WallTiles.AstralMonolithWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.AstralMonolithWall>());
 
         public override void AddRecipes()
         {

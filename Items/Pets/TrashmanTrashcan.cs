@@ -7,25 +7,18 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class TrashmanTrashcan : ModItem, ILocalizedModType
+    public class TrashmanTrashcan : VanityPetItem<DannyDevitoPet, DannyDevito>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
+        protected override int PetBuffDuration => 15;
 
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<DannyDevitoPet>(), ModContent.BuffType<DannyDevito>());
+            base.SetDefaults();
             Item.UseSound = SoundID.NPCDeath13;
             Item.value = Item.sellPrice(gold: 1); // "Common drop" pet price (Monster Meat)
             Item.rare = ItemRarityID.Orange;
             Item.Calamity().devItem = true;
-        }
-
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 15, true);
-            }
         }
     }
 }

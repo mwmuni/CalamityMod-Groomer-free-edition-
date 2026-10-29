@@ -9,23 +9,16 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Pets
 {
-    public class FrostyBatBottle : ModItem, ILocalizedModType
+    public class FrostyBatBottle : VanityPetItem<FrostyBatPet, FrostyBatBuff>, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Pets";
         public override void SetDefaults()
         {
-            Item.DefaultToVanitypet(ModContent.ProjectileType<FrostyBatPet>(), ModContent.BuffType<FrostyBatBuff>());
+            base.SetDefaults();
             Item.rare = ItemRarityID.Green;
             Item.value = Item.sellPrice(gold: 3);
         }
 
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
-        {
-            if (player.whoAmI == Main.myPlayer && player.itemTime == 0)
-            {
-                player.AddBuff(Item.buffType, 3600, true);
-            }
-        }
         public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
         {
             CalamityUtils.DrawInventoryCustomScale(

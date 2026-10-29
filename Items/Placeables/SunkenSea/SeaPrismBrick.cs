@@ -1,17 +1,16 @@
 ﻿using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.SunkenSea
 {
-    public class SeaPrismBrick : ModItem, ILocalizedModType
+    public class SeaPrismBrick : PlaceableTileItem<Tiles.SunkenSea.SeaPrismBrick>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.SunkenSea.SeaPrismBrick>());
 
         public override void AddRecipes()
         {

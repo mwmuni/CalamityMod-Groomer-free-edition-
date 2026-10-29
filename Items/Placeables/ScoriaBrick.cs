@@ -5,12 +5,10 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Placeables
 {
     [LegacyName("ChaoticBrick")]
-    public class ScoriaBrick : ModItem, ILocalizedModType
+    public class ScoriaBrick : PlaceableTileItem<Tiles.ScoriaBrick>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults() => Item.ResearchUnlockCount = 100;
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.ScoriaBrick>());
 
         public override void AddRecipes()
         {

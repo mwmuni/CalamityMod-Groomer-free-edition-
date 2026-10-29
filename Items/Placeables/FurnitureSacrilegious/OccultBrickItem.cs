@@ -4,17 +4,16 @@ using CalamityMod.Tiles.Furniture.CraftingStations;
 using CalamityMod.Tiles.FurnitureSacrilegious;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureSacrilegious
 {
-    public class OccultBrickItem : ModItem, ILocalizedModType
+    public class OccultBrickItem : PlaceableTileItem<OccultBrickTile>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<OccultBrickTile>());
 
         public override void AddRecipes()
         {

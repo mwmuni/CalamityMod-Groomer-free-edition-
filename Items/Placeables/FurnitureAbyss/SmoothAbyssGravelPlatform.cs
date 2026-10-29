@@ -1,15 +1,14 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureAbyss
 {
-    public class SmoothAbyssGravelPlatform : ModItem, ILocalizedModType
+    public class SmoothAbyssGravelPlatform : PlaceableTileItem<Tiles.FurnitureAbyss.SmoothAbyssGravelPlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureAbyss.SmoothAbyssGravelPlatform>());
 
         public override void AddRecipes()
         {

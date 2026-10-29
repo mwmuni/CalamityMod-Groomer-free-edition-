@@ -11,13 +11,17 @@ using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.DraedonStructures
 {
-    public class LaboratoryDoorClosed : ModTile
+    public abstract class LaboratoryDoorDecorBase : LaboratoryDecorBase
     {
+        protected abstract bool IsOpen { get; }
+        protected abstract int DoorItemType { get; }
+        protected abstract int OppositeDoorType { get; }
+
         public override void SetStaticDefaults()
         {
             Main.tileFrameImportant[Type] = true;
             Main.tileBlockLight[Type] = true;
-            Main.tileSolid[Type] = true;
+            Main.tileSolid[Type] = !IsOpen;
             Main.tileNoAttach[Type] = true;
             Main.tileLavaDeath[Type] = false;
             Main.tileWaterDeath[Type] = false;
@@ -39,28 +43,34 @@ namespace CalamityMod.Tiles.DraedonStructures
 
             AddMapEntry(new Color(119, 105, 79), Language.GetText("MapObject.Door"));
             TileID.Sets.DisableSmartCursor[Type] = true;
-            AdjTiles = new int[] { TileID.ClosedDoor };
+            AdjTiles = new int[] { IsOpen ? TileID.OpenDoor : TileID.ClosedDoor };
             DustType = DustID.Iron;
-            TileID.Sets.OpenDoorID[Type] = ModContent.TileType<LaboratoryDoorOpen>();
+            if (IsOpen)
+            {
+                RegisterItemDrop(DoorItemType);
+                TileID.Sets.CloseDoorID[Type] = OppositeDoorType;
+            }
+            else
+                TileID.Sets.OpenDoorID[Type] = OppositeDoorType;
         }
 
         public override bool Slope(int i, int j) => false;
 
-        public override bool CanExplode(int i, int j) => false;
-
         public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
 
         public override void MouseOver(int i, int j)
         {
             Player player = Main.LocalPlayer;
             player.noThrow = 2;
             player.cursorItemIconEnabled = true;
-            player.cursorItemIconID = ModContent.ItemType<LaboratoryDoorItem>();
+            player.cursorItemIconID = DoorItemType;
         }
+    }
+
+    public class LaboratoryDoorClosed : LaboratoryDoorDecorBase
+    {
+        protected override bool IsOpen => false;
+        protected override int DoorItemType => ModContent.ItemType<LaboratoryDoorItem>();
+        protected override int OppositeDoorType => ModContent.TileType<LaboratoryDoorOpen>();
     }
 }

@@ -1,19 +1,18 @@
 ﻿using CalamityMod.Items.Placeables.Walls;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.SunkenSea
 {
-    public class Shellstone : ModItem, ILocalizedModType
+    public class Shellstone : PlaceableTileItem<Tiles.SunkenSea.Shellstone>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<AridSoil>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.SunkenSea.Shellstone>());
 
         public override void AddRecipes()
         {

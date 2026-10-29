@@ -61,17 +61,7 @@ namespace CalamityMod.CalPlayer.Dashes
 
         public override void OnHitEffects(Player player, NPC npc, IEntitySource source, ref DashHitContext hitContext)
         {
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = PlaguebringerVisor.PlagueDashIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = DamageClass.Summon;
-            hitContext.BaseDamage = PlaguebringerVisor.PlagueDashDamage;
-            hitContext.BaseKnockback = PlaguebringerVisor.PlagueDashKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, PlaguebringerVisor.PlagueDashIFrames, DamageClass.Summon, PlaguebringerVisor.PlagueDashDamage, PlaguebringerVisor.PlagueDashKnockback);
         }
     }
 }

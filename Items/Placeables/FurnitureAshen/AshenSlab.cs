@@ -2,17 +2,16 @@
 using CalamityMod.Tiles.Furniture.CraftingStations;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureAshen
 {
-    public class AshenSlab : ModItem, ILocalizedModType
+    public class AshenSlab : PlaceableTileItem<Tiles.FurnitureAshen.AshenSlab>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureAshen.AshenSlab>());
 
         public override void AddRecipes()
         {

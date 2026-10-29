@@ -86,17 +86,7 @@ namespace CalamityMod.CalPlayer.Dashes
             Particle explosion2 = new DetailedExplosion(npc.Center, Vector2.Zero, Color.Orange, Vector2.One, Main.rand.NextFloat(-5, 5), 0f, particleScale, 20);
             GeneralParticleHandler.SpawnParticle(explosion2);
 
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = ElysianAegis.ShieldSlamIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = DamageClass.Melee;
-            hitContext.BaseDamage = ElysianAegis.ShieldSlamDamage;
-            hitContext.BaseKnockback = ElysianAegis.ShieldSlamKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, ElysianAegis.ShieldSlamIFrames, DamageClass.Melee, ElysianAegis.ShieldSlamDamage, ElysianAegis.ShieldSlamKnockback);
 
             // On-hit Supreme Holy Explosion
             int supremeExplosionDamage = (int)player.GetBestClassDamage().ApplyTo(ElysianAegis.RamExplosionDamage);

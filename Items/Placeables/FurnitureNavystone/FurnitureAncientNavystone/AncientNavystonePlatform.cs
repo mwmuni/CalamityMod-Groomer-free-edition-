@@ -1,17 +1,16 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureNavystone.FurnitureAncientNavystone
 {
     [LegacyName("EutrophicPlatform")]
-    public class AncientNavystonePlatform : ModItem, ILocalizedModType
+    public class AncientNavystonePlatform : PlaceableTileItem<Tiles.FurnitureNavystone.FurnitureAncientNavystone.AncientNavystonePlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureNavystone.FurnitureAncientNavystone.AncientNavystonePlatform>());
 
         public override void AddRecipes()
         {

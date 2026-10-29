@@ -4,17 +4,16 @@ using CalamityMod.Items.Placeables.Walls;
 using CalamityMod.Tiles.Furniture.CraftingStations;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 namespace CalamityMod.Items.Placeables.FurnitureSilva
 {
-    public class SilvaCrystal : ModItem, ILocalizedModType
+    public class SilvaCrystal : PlaceableTileItem<Tiles.FurnitureSilva.SilvaCrystal>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureSilva.SilvaCrystal>());
 
         public override void AddRecipes()
         {

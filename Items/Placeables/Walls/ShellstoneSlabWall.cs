@@ -5,15 +5,13 @@ using CalamityMod.Items.Placeables.FurnitureShellstone;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class ShellstoneSlabWall : ModItem, ILocalizedModType
+    public class ShellstoneSlabWall : PlaceableWallItem<WallTiles.ShellstoneSlabWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.ShellstoneSlabWall>());
 
         public override void AddRecipes() 
         {

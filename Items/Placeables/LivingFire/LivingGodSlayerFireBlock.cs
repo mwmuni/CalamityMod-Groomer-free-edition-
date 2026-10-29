@@ -3,18 +3,17 @@ using CalamityMod.Tiles.LivingFire;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.LivingFire
 {
-    public class LivingGodSlayerFireBlock : ModItem, ILocalizedModType
+    public class LivingGodSlayerFireBlock : PlaceableTileItem<LivingGodSlayerFireBlockTile>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<LivingGodSlayerFireBlockTile>());
 
         public override void PostUpdate()
         {

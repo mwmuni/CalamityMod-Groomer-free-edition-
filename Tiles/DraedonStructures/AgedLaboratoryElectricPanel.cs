@@ -1,13 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Enums;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.DraedonStructures
 {
-    public class AgedLaboratoryElectricPanel : ModTile
+    public class AgedLaboratoryElectricPanel : LaboratoryDecorBase
     {
         public override void SetStaticDefaults()
         {
@@ -34,11 +33,5 @@ namespace CalamityMod.Tiles.DraedonStructures
             DustType = DustID.Iron;
         }
 
-        public override bool CanExplode(int i, int j) => false;
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

@@ -2,18 +2,17 @@
 using CalamityMod.Tiles.Furniture.CraftingStations;
 using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureVoid
 {
-    public class VoidstoneSlab : ModItem, ILocalizedModType
+    public class VoidstoneSlab : PlaceableTileItem<Tiles.FurnitureVoid.VoidstoneSlab>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureVoid.VoidstoneSlab>());
 
         public override void AddRecipes()
         {

@@ -1,17 +1,16 @@
 ﻿using Terraria.ID;
 using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.Abyss
 {
-    public class PyreMantleMolten : ModItem, ILocalizedModType
+    public class PyreMantleMolten : PlaceableTileItem<Tiles.Abyss.PyreMantleMolten>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.Abyss.PyreMantleMolten>());
 
         public override void AddRecipes()
         {

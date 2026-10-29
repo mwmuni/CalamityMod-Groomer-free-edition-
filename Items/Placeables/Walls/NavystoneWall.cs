@@ -6,16 +6,14 @@ using WallTiles = CalamityMod.Walls;
 namespace CalamityMod.Items.Placeables.Walls
 {
     [LegacyName("NavystoneWallSafe")]
-    public class NavystoneWall : ModItem, ILocalizedModType
+    public class NavystoneWall : PlaceableWallItem<WallTiles.NavystoneWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<UnsafeNavystoneWall>();
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.NavystoneWall>());
 
         public override void AddRecipes()
         {

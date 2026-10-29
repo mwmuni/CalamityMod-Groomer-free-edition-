@@ -96,17 +96,7 @@ namespace CalamityMod.CalPlayer.Dashes
                 dust.shader = GameShaders.Armor.GetSecondaryShader(player.cShield, player);
             }
 
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = DeepDiver.ShieldSlamIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = DamageClass.Melee;
-            hitContext.BaseDamage = DeepDiver.ShieldSlamDamage;
-            hitContext.BaseKnockback = DeepDiver.ShieldSlamKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, DeepDiver.ShieldSlamIFrames, DamageClass.Melee, DeepDiver.ShieldSlamDamage, DeepDiver.ShieldSlamKnockback);
         }
     }
 }

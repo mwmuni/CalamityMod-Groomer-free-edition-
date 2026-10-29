@@ -5,15 +5,13 @@ using Terraria.ID;
 using Terraria.ModLoader;
 namespace CalamityMod.Items.Placeables
 {
-    public class UelibloomBrick : ModItem, ILocalizedModType
+    public class UelibloomBrick : PlaceableTileItem<Tiles.UelibloomBrick>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 100;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.UelibloomBrick>());
 
         public override void AddRecipes()
         {

@@ -5,15 +5,13 @@ using WallTiles = CalamityMod.Walls;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class CosmiliteBrickWall : ModItem, ILocalizedModType
+    public class CosmiliteBrickWall : PlaceableWallItem<WallTiles.CosmiliteBrickWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.CosmiliteBrickWall>());
 
         public override void AddRecipes()
         {

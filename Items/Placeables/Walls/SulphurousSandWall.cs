@@ -4,15 +4,13 @@ using Terraria.ModLoader;
 using WallTiles = CalamityMod.Walls;
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class SulphurousSandWall : ModItem, ILocalizedModType
+    public class SulphurousSandWall : PlaceableWallItem<WallTiles.SulphurousSandWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.SulphurousSandWall>());
 
         public override void AddRecipes()
         {

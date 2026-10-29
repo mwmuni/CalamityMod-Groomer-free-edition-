@@ -3,15 +3,13 @@ using Terraria.ModLoader;
 using WallTiles = CalamityMod.Walls;
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class FloralWall : ModItem, ILocalizedModType
+    public class FloralWall : PlaceableWallItem<WallTiles.FloralWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.FloralWall>());
 
         public override void AddRecipes()
         {

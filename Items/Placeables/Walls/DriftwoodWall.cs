@@ -5,15 +5,13 @@ using CalamityMod.Items.Placeables.FurnitureDriftwood;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class DriftwoodWall : ModItem, ILocalizedModType
+    public class DriftwoodWall : PlaceableWallItem<WallTiles.DriftwoodWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.DriftwoodWall>());
 
         public override void AddRecipes()
         {

@@ -5,15 +5,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class OccultBrickWallItem : ModItem, ILocalizedModType
+    public class OccultBrickWallItem : PlaceableWallItem<OccultBrickWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<OccultBrickWall>());
 
         public override void AddRecipes()
         {

@@ -1,16 +1,15 @@
 ﻿using Terraria.ModLoader;
+using CalamityMod.Items.Placeables;
 
 namespace CalamityMod.Items.Placeables.FurnitureCosmilite
 {
-    public class CosmilitePlatform : ModItem, ILocalizedModType
+    public class CosmilitePlatform : PlaceableTileItem<Tiles.FurnitureCosmilite.CosmilitePlatform>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 200;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.FurnitureCosmilite.CosmilitePlatform>());
 
         public override void AddRecipes()
         {

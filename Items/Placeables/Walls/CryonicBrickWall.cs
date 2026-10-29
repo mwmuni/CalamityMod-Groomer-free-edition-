@@ -4,15 +4,13 @@ using WallTiles = CalamityMod.Walls;
 
 namespace CalamityMod.Items.Placeables.Walls
 {
-    public class CryonicBrickWall : ModItem, ILocalizedModType
+    public class CryonicBrickWall : PlaceableWallItem<WallTiles.CryonicBrickWall>
     {
-        public new string LocalizationCategory => "Items.Placeables";
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 400;
         }
 
-        public override void SetDefaults() => Item.DefaultToPlaceableWall(ModContent.WallType<WallTiles.CryonicBrickWall>());
 
         public override void AddRecipes()
         {

@@ -59,17 +59,7 @@ namespace CalamityMod.CalPlayer.Dashes
         {
             if (DashTimeAdjustedForStartup > 14)
                 return;
-            // Define hit context variables.
-            int hitDirection = player.direction;
-            if (player.velocity.X != 0f)
-                hitDirection = Math.Sign(player.velocity.X);
-            hitContext.HitDirection = hitDirection;
-            hitContext.PlayerImmunityFrames = AsgardsValor.ShieldSlamIFrames;
-
-            // Define damage parameters.
-            hitContext.damageClass = DamageClass.Melee;
-            hitContext.BaseDamage = AsgardsValor.ShieldSlamDamage;
-            hitContext.BaseKnockback = AsgardsValor.ShieldSlamKnockback;
+            DashHitContextHelper.Set(player, ref hitContext, AsgardsValor.ShieldSlamIFrames, DamageClass.Melee, AsgardsValor.ShieldSlamDamage, AsgardsValor.ShieldSlamKnockback);
 
             int Dusts = 12;
             float radians = MathHelper.TwoPi / Dusts;
