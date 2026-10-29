@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureAbyss
 {
-    public class SmoothAbyssGravelPlatform : ModTile
+    public class SmoothAbyssGravelPlatform : BasePlatformTile
     {
         public override void SetStaticDefaults()
         {
@@ -19,14 +19,5 @@ namespace CalamityMod.Tiles.FurnitureAbyss
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

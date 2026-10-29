@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureWulfrum
 {
-    public class WulfrumPlatform : ModTile
+    public class WulfrumPlatform : BasePlatformTile
     {
         internal static Texture2D GlowTexture;
 
@@ -28,15 +28,6 @@ namespace CalamityMod.Tiles.FurnitureWulfrum
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
         {
             // If the cached textures don't exist for some reason, don't bother using them.

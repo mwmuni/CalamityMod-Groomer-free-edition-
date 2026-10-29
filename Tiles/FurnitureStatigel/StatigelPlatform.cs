@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureStatigel
 {
-    public class StatigelPlatform : ModTile
+    public class StatigelPlatform : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<Items.Placeables.FurnitureStatigel.StatigelPlatform>());
 
@@ -15,14 +15,5 @@ namespace CalamityMod.Tiles.FurnitureStatigel
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

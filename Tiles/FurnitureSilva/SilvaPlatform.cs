@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureSilva
 {
-    public class SilvaPlatform : ModTile
+    public class SilvaPlatform : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<Items.Placeables.FurnitureSilva.SilvaPlatform>(), true);
 
@@ -17,14 +17,5 @@ namespace CalamityMod.Tiles.FurnitureSilva
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

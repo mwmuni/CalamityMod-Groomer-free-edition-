@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureStratus
 {
-    public class StratusStarPlatform : ModTile
+    public class StratusStarPlatform : BasePlatformTile
     {
         public Asset<Texture2D> GlowTexture;
 
@@ -19,11 +19,6 @@ namespace CalamityMod.Tiles.FurnitureStratus
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.Stone, 0f, 0f, 1, new Color(100, 130, 150), 1f);
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.Firework_Blue, 0f, 0f, 1, new Color(255, 255, 255), 1f);
             return false;
-        }
-
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
         }
 
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
@@ -46,9 +41,5 @@ namespace CalamityMod.Tiles.FurnitureStratus
                 spriteBatch.Draw(glowmask, drawPosition + new Vector2(0f, 8f), new Rectangle?(new Rectangle(xPos, yPos, 18, 8)), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
         }
 
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

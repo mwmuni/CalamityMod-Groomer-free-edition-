@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 namespace CalamityMod.Tiles.FurnitureSacrilegious
 {
     // TODO -- why does this one piece of Otherworldly furniture still use the old naming scheme
-    public class OccultPlatformTile : ModTile
+    public class OccultPlatformTile : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<OccultPlatformItem>(), true);
 
@@ -17,14 +17,5 @@ namespace CalamityMod.Tiles.FurnitureSacrilegious
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

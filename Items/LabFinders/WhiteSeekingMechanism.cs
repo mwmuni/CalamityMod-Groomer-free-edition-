@@ -1,5 +1,4 @@
 ﻿using CalamityMod.Projectiles.Typeless;
-using CalamityMod.Rarities;
 using CalamityMod.World;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -8,33 +7,12 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.LabFinders
 {
-    public class WhiteSeekingMechanism : ModItem, ILocalizedModType
+    public class WhiteSeekingMechanism : BaseLabSeekingMechanism
     {
-        public new string LocalizationCategory => "Items.DraedonItems";
-        public override void SetDefaults()
-        {
-            Item.width = 24;
-            Item.height = 26;
-            Item.noUseGraphic = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.useAnimation = Item.useTime = 36;
-            Item.shoot = ModContent.ProjectileType<WhiteLabSeeker>();
-            Item.Calamity().MaxCharge = 100;
-            Item.Calamity().ChargePerUse = 10;
-            Item.Calamity().UsesCharge = true;
-            Item.value = Item.sellPrice(silver: 50);
-            Item.rare = ModContent.RarityType<DarkOrange>();
-        }
+        protected override Vector2 LabCenter => CalamityWorld.IceLabCenter;
 
-        public override bool CanUseItem(Player player) => player.ownedProjectileCounts[Item.shoot] <= 0 && CalamityWorld.IceLabCenter != Vector2.Zero;
+        protected override int SeekerProjectileType => ModContent.ProjectileType<WhiteLabSeeker>();
 
-        public override void AddRecipes()
-        {
-            CreateRecipe().
-                AddIngredient<LabSeekingMechanism>().
-                AddRecipeGroup("AnyIceBlock", 50).
-                AddTile(TileID.Anvils).
-                Register();
-        }
+        protected override void AddRecipeIngredient(Recipe recipe) => recipe.AddRecipeGroup("AnyIceBlock", 50);
     }
 }

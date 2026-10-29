@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureDriftwood
 {
-    public class DriftwoodPlatform : ModTile
+    public class DriftwoodPlatform : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<Items.Placeables.FurnitureDriftwood.DriftwoodPlatform>(), true);
 
@@ -15,14 +15,5 @@ namespace CalamityMod.Tiles.FurnitureDriftwood
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

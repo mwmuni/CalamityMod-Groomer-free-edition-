@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureAuric
 {
-    public class AuricPlatformTile : ModTile
+    public class AuricPlatformTile : BasePlatformTile
     {
         internal static Texture2D GlowTexture;
         public override void SetStaticDefaults()
@@ -26,16 +26,6 @@ namespace CalamityMod.Tiles.FurnitureAuric
         {
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.Pixie, 0f, 0f, 1, new Color(255, 255, 255), 1f);
             return false;
-        }
-
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
         }
 
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)

@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureVoid
 {
-    public class SmoothVoidstonePlatform : ModTile
+    public class SmoothVoidstonePlatform : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<Items.Placeables.FurnitureVoid.SmoothVoidstonePlatform>(), true);
 
@@ -15,14 +15,5 @@ namespace CalamityMod.Tiles.FurnitureVoid
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

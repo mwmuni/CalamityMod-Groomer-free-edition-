@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureMarnite
 {
-    public class PolishedMarnitePlatform : ModTile
+    public class PolishedMarnitePlatform : BasePlatformTile
     {
         public override void SetStaticDefaults()
         {
@@ -19,14 +19,5 @@ namespace CalamityMod.Tiles.FurnitureMarnite
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

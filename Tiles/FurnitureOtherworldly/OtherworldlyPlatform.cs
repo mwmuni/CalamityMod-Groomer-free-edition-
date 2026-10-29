@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 namespace CalamityMod.Tiles.FurnitureOtherworldly
 {
     [LegacyName("OccultPlatform")]
-    public class OtherworldlyPlatform : ModTile
+    public class OtherworldlyPlatform : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<Items.Placeables.FurnitureOtherworldly.OtherworldlyPlatform>(), true);
 
@@ -18,14 +18,5 @@ namespace CalamityMod.Tiles.FurnitureOtherworldly
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

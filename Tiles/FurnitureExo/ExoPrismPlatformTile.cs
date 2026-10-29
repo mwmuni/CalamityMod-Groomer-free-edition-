@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureExo
 {
-    public class ExoPrismPlatformTile : ModTile
+    public class ExoPrismPlatformTile : BasePlatformTile
     {
         internal static Texture2D GlowTexture;
 
@@ -28,16 +28,6 @@ namespace CalamityMod.Tiles.FurnitureExo
         {
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.TerraBlade, 0f, 0f, 1, new Color(255, 255, 255), 1f);
             return false;
-        }
-
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
         }
 
         public override void AnimateIndividualTile(int type, int i, int j, ref int frameXOffset, ref int frameYOffset)

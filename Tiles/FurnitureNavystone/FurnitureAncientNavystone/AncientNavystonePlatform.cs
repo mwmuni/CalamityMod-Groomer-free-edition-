@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 namespace CalamityMod.Tiles.FurnitureNavystone.FurnitureAncientNavystone
 {
     [LegacyName("EutrophicPlatform")]
-    public class AncientNavystonePlatform : ModTile
+    public class AncientNavystonePlatform : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<Items.Placeables.FurnitureNavystone.FurnitureAncientNavystone.AncientNavystonePlatform>());
 
@@ -16,14 +16,5 @@ namespace CalamityMod.Tiles.FurnitureNavystone.FurnitureAncientNavystone
             return false;
         }
 
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
     }
 }

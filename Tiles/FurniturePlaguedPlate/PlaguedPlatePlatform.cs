@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurniturePlaguedPlate
 {
-    public class PlaguedPlatePlatform : ModTile
+    public class PlaguedPlatePlatform : BasePlatformTile
     {
         public override void SetStaticDefaults() => this.SetUpPlatform(ModContent.ItemType<Items.Placeables.FurniturePlagued.PlaguedPlatePlatform>(), true);
 
@@ -15,14 +15,5 @@ namespace CalamityMod.Tiles.FurniturePlaguedPlate
             return false;
         }
 
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
-
-        public override void PostSetDefaults()
-        {
-            Main.tileNoSunLight[Type] = false;
-        }
     }
 }
