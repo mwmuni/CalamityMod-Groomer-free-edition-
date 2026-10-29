@@ -1,106 +1,26 @@
-﻿using System;
-using CalamityMod.Dusts;
-using CalamityMod.Events;
 using CalamityMod.NPCs.ProfanedGuardians;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityMod.NPCs.Providence
 {
     [AutoloadBossHead]
-    public class ProvSpawnOffense : ModNPC
+    public class ProvSpawnOffense : ProvidenceSpawnBase
     {
-        private bool start = true;
         public override string Texture => "CalamityMod/NPCs/ProfanedGuardians/ProfanedGuardianCommander";
 
-        public override void SetStaticDefaults()
-        {
-            this.HideFromBestiary();
-            Main.npcFrameCount[Type] = 10;
-            NPCID.Sets.NeedsExpertScaling[Type] = true;
-            NPCID.Sets.TrailingMode[Type] = 1;
-        }
+        protected override int Defense => 40;
+        protected override float DamageReduction => 0.3f;
+        protected override int NormalLifeMax => 31875;
+        protected override int BossRushLifeMax => 40000;
+        protected override int Height => 186;
+        protected override string GoreNamePrefix => "A";
+        protected override int DeathDustCount => 30;
 
-        public override void SetDefaults()
-        {
-            NPC.BossBar = Main.BigBossProgressBar.NeverValid;
-            NPC.npcSlots = 1f;
-            NPC.aiStyle = -1;
-            NPC.damage = 0;
-            NPC.width = 228;
-            NPC.height = 186;
-            NPC.defense = 40;
-            NPC.DR_NERD(0.3f);
-            NPC.lifeMax = 31875;
-            if (BossRushEvent.BossRushActive)
-            {
-                NPC.lifeMax = 40000;
-            }
-            NPC.knockBackResist = 0f;
-            NPC.noGravity = true;
-            NPC.noTileCollide = true;
-            AIType = -1;
-            NPC.HitSound = SoundID.NPCHit52;
-            NPC.DeathSound = SoundID.NPCDeath55;
-            NPC.Calamity().VulnerableToHeat = false;
-            NPC.Calamity().VulnerableToCold = true;
-            NPC.Calamity().VulnerableToSickness = false;
-            NPC.Calamity().VulnerableToWater = true;
-        }
-
-        public override void FindFrame(int frameHeight)
-        {
-            if (CalamityGlobalNPC.holyBoss < 0 || !Main.npc[CalamityGlobalNPC.holyBoss].active)
-                NPC.frameCounter += 0.2f;
-            else
-                NPC.frameCounter += 0.12f + Main.npc[CalamityGlobalNPC.holyBoss].velocity.Length() / 120f;
-
-            NPC.frameCounter %= Main.npcFrameCount[Type];
-            int frame = (int)NPC.frameCounter;
-            NPC.frame.Y = frame * frameHeight;
-        }
-
-        public override void AI()
-        {
-            CalamityGlobalNPC.holyBossAttacker = NPC.whoAmI;
-
-            if (CalamityGlobalNPC.holyBoss < 0 || !Main.npc[CalamityGlobalNPC.holyBoss].active)
-            {
-                NPC.life = 0;
-                NPC.HitEffect();
-                NPC.active = false;
-                NPC.netUpdate = true;
-                return;
-            }
-
-            // Rotation
-            NPC.rotation = Main.npc[CalamityGlobalNPC.holyBoss].velocity.X * 0.005f;
-
-            NPC parent = Main.npc[CalamityGlobalNPC.holyBoss];
-            if (start)
-            {
-                for (int d = 0; d < 30; d++)
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.ProfanedFire, 0f, 0f, 100, default, 2f);
-
-                NPC.ai[1] = NPC.ai[0];
-                start = false;
-            }
-
-            float playerLocation = NPC.Center.X - Main.player[Main.npc[CalamityGlobalNPC.holyBoss].target].Center.X;
-            NPC.direction = playerLocation < 0 ? 1 : -1;
-            NPC.spriteDirection = NPC.direction;
-
-            double deg = NPC.ai[1];
-            double rad = deg * (Math.PI / 180);
-            double dist = 450;
-            NPC.position.X = parent.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
-            NPC.position.Y = parent.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
-            NPC.ai[1] += 1f;
-        }
+        protected override void RegisterWithGlobalNPC() => CalamityGlobalNPC.holyBossAttacker = NPC.whoAmI;
 
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
@@ -159,33 +79,5 @@ namespace CalamityMod.NPCs.Providence
             return false;
         }
 
-        public override void OnKill()
-        {
-            int heartAmt = Main.rand.Next(3) + 3;
-            for (int i = 0; i < heartAmt; i++)
-                Item.NewItem(NPC.GetSource_Loot(), (int)NPC.position.X, (int)NPC.position.Y, NPC.width, NPC.height, ItemID.Heart);
-        }
-
-        public override bool CheckActive() => false;
-
-        public override void HitEffect(NPC.HitInfo hit)
-        {
-            for (int k = 0; k < 3; k++)
-                Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.ProfanedFire, hit.HitDirection, -1f, 0, default, 1f);
-
-            if (NPC.life <= 0)
-            {
-                if (!Main.dedServ)
-                {
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("ProfanedGuardianBossA").Type, 1f);
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("ProfanedGuardianBossA2").Type, 1f);
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("ProfanedGuardianBossA3").Type, 1f);
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("ProfanedGuardianBossA4").Type, 1f);
-                }
-
-                for (int k = 0; k < 30; k++)
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.ProfanedFire, hit.HitDirection, -1f, 0, default, 1f);
-            }
-        }
     }
 }

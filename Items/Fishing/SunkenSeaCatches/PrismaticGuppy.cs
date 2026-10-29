@@ -1,30 +1,14 @@
-﻿using Terraria;
+﻿using CalamityMod.Items.Fishing;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Fishing.SunkenSeaCatches
 {
-    public class PrismaticGuppy : ModItem, ILocalizedModType
+    public class PrismaticGuppy : BaseFishingCatch
     {
-        public new string LocalizationCategory => "Items.Fishing";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-            ItemID.Sets.CanBePlacedOnWeaponRacks[Item.type] = true;
-        }
-
-        public override void SetDefaults()
-        {
-            Item.width = 30;
-            Item.height = 28;
-            Item.maxStack = 9999;
-            Item.value = Item.sellPrice(silver: 5);
-            Item.rare = ItemRarityID.Green;
-        }
-
-        public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
-        {
-            itemGroup = ContentSamples.CreativeHelper.ItemGroup.Fish;
-        }
+        protected override int CatchWidth => 30;
+        protected override int CatchHeight => 28;
+        protected override int CatchMaxStack => 9999;
+        protected override int CatchValue => Terraria.Item.sellPrice(silver: 5);
+        protected override int CatchRarity => ItemRarityID.Green;
     }
 }

@@ -111,62 +111,7 @@ namespace CalamityMod.Projectiles.Rogue
 
         public override bool PreDraw(ref Color lightColor)
         {
-            // This should never happen, but just in case-
-            if (Projectile.velocity == Vector2.Zero)
-                return false;
-
-            Color beamColor = LaserOverlayColor;
-            Rectangle startFrameArea = LaserBeginTexture.Frame(1, Main.projFrames[Type], 0, Projectile.frame);
-            Rectangle middleFrameArea = LaserMiddleTexture.Frame(1, Main.projFrames[Type], 0, Projectile.frame);
-            Rectangle endFrameArea = LaserEndTexture.Frame(1, Main.projFrames[Type], 0, Projectile.frame);
-
-            // Start texture drawing.
-            Vector2 centerOnLaser = Projectile.Center + Projectile.velocity * Projectile.scale * 116f;
-            Main.EntitySpriteDraw(LaserBeginTexture,
-                             centerOnLaser - Main.screenPosition,
-                             startFrameArea,
-                             beamColor,
-                             Projectile.rotation,
-                             LaserBeginTexture.Size() / 2f,
-                             Projectile.scale,
-                             SpriteEffects.None,
-                             0);
-
-            // Prepare things for body drawing.
-            float laserBodyLength = LaserLength + middleFrameArea.Height;
-
-            // Body drawing.
-            if (laserBodyLength > 0f)
-            {
-                float laserOffset = middleFrameArea.Height * Projectile.scale;
-                float incrementalBodyLength = 0f;
-                while (incrementalBodyLength + 1f < laserBodyLength)
-                {
-                    centerOnLaser += Projectile.velocity * laserOffset;
-                    incrementalBodyLength += laserOffset;
-                    Main.EntitySpriteDraw(LaserMiddleTexture,
-                                     centerOnLaser - Main.screenPosition,
-                                     middleFrameArea,
-                                     beamColor,
-                                     Projectile.rotation,
-                                     LaserMiddleTexture.Size() * 0.5f,
-                                     Projectile.scale,
-                                     SpriteEffects.None,
-                                     0);
-                }
-            }
-
-            Vector2 laserEndCenter = centerOnLaser + Projectile.velocity * endFrameArea.Height * Projectile.scale - Main.screenPosition;
-            Main.EntitySpriteDraw(LaserEndTexture,
-                             laserEndCenter,
-                             endFrameArea,
-                             beamColor,
-                             Projectile.rotation,
-                             LaserEndTexture.Size() * 0.5f,
-                             Projectile.scale,
-                             SpriteEffects.None,
-                             0);
-            return false;
+            return global::CalamityMod.Projectiles.LaserBeamRendering.DrawSeraphimStyleBeam(this);
         }
     }
 }

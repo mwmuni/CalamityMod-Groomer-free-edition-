@@ -1,30 +1,14 @@
-﻿using Terraria;
+﻿using CalamityMod.Items.Fishing;
+using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Fishing.BrimstoneCragCatches
 {
-    public class CharredLasher : ModItem, ILocalizedModType
+    public class CharredLasher : BaseFishingCatch
     {
-        public new string LocalizationCategory => "Items.Fishing";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-            ItemID.Sets.CanBePlacedOnWeaponRacks[Type] = true;
-        }
-
-        public override void SetDefaults()
-        {
-            Item.width = 44;
-            Item.height = 36;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(gold: 10);
-            Item.rare = ItemRarityID.Orange;
-        }
-
-        public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
-        {
-            itemGroup = ContentSamples.CreativeHelper.ItemGroup.Fish;
-        }
+        protected override int CatchWidth => 44;
+        protected override int CatchHeight => 36;
+        protected override int CatchValue => Item.sellPrice(gold: 10);
+        protected override int CatchRarity => ItemRarityID.Orange;
     }
 }

@@ -1,30 +1,13 @@
-﻿using Terraria;
+﻿using CalamityMod.Items.Fishing;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Fishing.SunkenSeaCatches
 {
-    public class GreenwaveLoach : ModItem, ILocalizedModType
+    public class GreenwaveLoach : BaseFishingCatch
     {
-        public new string LocalizationCategory => "Items.Fishing";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-            ItemID.Sets.CanBePlacedOnWeaponRacks[Type] = true;
-        }
-
-        public override void SetDefaults()
-        {
-            Item.width = 40;
-            Item.height = 38;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(gold: 10);
-            Item.rare = ItemRarityID.Orange;
-        }
-
-        public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
-        {
-            itemGroup = ContentSamples.CreativeHelper.ItemGroup.Fish;
-        }
+        protected override int CatchWidth => 40;
+        protected override int CatchHeight => 38;
+        protected override int CatchValue => Terraria.Item.sellPrice(gold: 10);
+        protected override int CatchRarity => ItemRarityID.Orange;
     }
 }
