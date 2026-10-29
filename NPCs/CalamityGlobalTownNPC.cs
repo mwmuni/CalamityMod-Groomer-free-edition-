@@ -676,204 +676,84 @@ namespace CalamityMod.NPCs
             }
         }
 
-        public override void ModifyNPCNameList(NPC npc, List<string> nameList)
-        {
-            switch (npc.type)
+        private static string[] GetTownNPCNames(int npcType) =>
+            npcType switch
             {
-                case NPCID.Angler:
-                    AddNewNames(nameList, AnglerNames);
-                    break;
-                case NPCID.ArmsDealer:
-                    AddNewNames(nameList, ArmsDealerNames);
-                    break;
-                case NPCID.Clothier:
-                    AddNewNames(nameList, ClothierNames);
-                    break;
-                case NPCID.Cyborg:
-                    AddNewNames(nameList, CyborgNames);
-                    break;
-                case NPCID.Demolitionist:
-                    AddNewNames(nameList, DemolitionistNames);
-                    break;
-                case NPCID.Dryad:
-                    AddNewNames(nameList, DryadNames);
-                    break;
-                case NPCID.DyeTrader:
-                    AddNewNames(nameList, DyeTraderNames);
-                    break;
-                case NPCID.GoblinTinkerer:
-                    AddNewNames(nameList, GoblinTinkererNames);
-                    break;
-                case NPCID.Golfer:
-                    AddNewNames(nameList, GolferNames);
-                    break;
-                case NPCID.Guide:
-                    AddNewNames(nameList, GuideNames);
-                    break;
-                case NPCID.Mechanic:
-                    AddNewNames(nameList, MechanicNames);
-                    break;
-                case NPCID.Merchant:
-                    AddNewNames(nameList, MerchantNames);
-                    break;
-                case NPCID.Nurse:
-                    AddNewNames(nameList, NurseNames);
-                    break;
-                case NPCID.Painter:
-                    AddNewNames(nameList, PainterNames);
-                    break;
-                case NPCID.PartyGirl:
-                    AddNewNames(nameList, PartyGirlNames);
-                    break;
-                case NPCID.Pirate:
-                    AddNewNames(nameList, PirateNames);
-                    break;
-                case NPCID.Princess:
-                    AddNewNames(nameList, PrincessNames);
-                    break;
-                case NPCID.SantaClaus:
-                    AddNewNames(nameList, SantaClausNames);
-                    break;
-                case NPCID.SkeletonMerchant:
-                    AddNewNames(nameList, SkeletonMerchantNames);
-                    break;
-                case NPCID.Steampunker:
-                    AddNewNames(nameList, SteampunkerNames);
-                    break;
-                case NPCID.Stylist:
-                    AddNewNames(nameList, StylistNames);
-                    break;
-                case NPCID.DD2Bartender: // Tavernkeep
-                    AddNewNames(nameList, TavernkeepNames);
-                    break;
-                case NPCID.TaxCollector:
-                    AddNewNames(nameList, TaxCollectorNames);
-                    break;
-                case NPCID.TravellingMerchant:
-                    AddNewNames(nameList, TravelingMerchantNames);
-                    break;
-                case NPCID.Truffle:
-                    AddNewNames(nameList, TruffleNames);
-                    break;
-                case NPCID.WitchDoctor:
-                    AddNewNames(nameList, WitchDoctorNames);
-                    break;
-                case NPCID.Wizard:
-                    AddNewNames(nameList, WizardNames);
-                    break;
-                case NPCID.BestiaryGirl: // Zoologist
-                    AddNewNames(nameList, ZoologistNames);
-                    break;
+                NPCID.Angler => AnglerNames,
+                NPCID.ArmsDealer => ArmsDealerNames,
+                NPCID.Clothier => ClothierNames,
+                NPCID.Cyborg => CyborgNames,
+                NPCID.Demolitionist => DemolitionistNames,
+                NPCID.Dryad => DryadNames,
+                NPCID.DyeTrader => DyeTraderNames,
+                NPCID.GoblinTinkerer => GoblinTinkererNames,
+                NPCID.Golfer => GolferNames,
+                NPCID.Guide => GuideNames,
+                NPCID.Mechanic => MechanicNames,
+                NPCID.Merchant => MerchantNames,
+                NPCID.Nurse => NurseNames,
+                NPCID.Painter => PainterNames,
+                NPCID.PartyGirl => PartyGirlNames,
+                NPCID.Pirate => PirateNames,
+                NPCID.Princess => PrincessNames,
+                NPCID.SantaClaus => SantaClausNames,
+                NPCID.SkeletonMerchant => SkeletonMerchantNames,
+                NPCID.Steampunker => SteampunkerNames,
+                NPCID.Stylist => StylistNames,
+                NPCID.DD2Bartender => TavernkeepNames, // Tavernkeep
+                NPCID.TaxCollector => TaxCollectorNames,
+                NPCID.TravellingMerchant => TravelingMerchantNames,
+                NPCID.Truffle => TruffleNames,
+                NPCID.WitchDoctor => WitchDoctorNames,
+                NPCID.Wizard => WizardNames,
+                NPCID.BestiaryGirl => ZoologistNames, // Zoologist
 
                 // Town Slimes
-                case NPCID.TownSlimePurple: // Clumsy Slime
-                    AddNewNames(nameList, ClumsySlimeNames);
-                    break;
-                case NPCID.TownSlimeGreen: // Cool Slime
-                    AddNewNames(nameList, CoolSlimeNames);
-                    break;
-                case NPCID.TownSlimeRainbow: // Diva Slime
-                    AddNewNames(nameList, DivaSlimeNames);
-                    break;
-                case NPCID.TownSlimeOld: // Elder Slime
-                    AddNewNames(nameList, ElderSlimeNames);
-                    break;
-                case NPCID.TownSlimeYellow: // Mystic Slime
-                    AddNewNames(nameList, MysticSlimeNames);
-                    break;
-                case NPCID.TownSlimeBlue: // Nerdy Slime
-                    AddNewNames(nameList, NerdySlimeNames);
-                    break;
-                case NPCID.TownSlimeCopper: // Squire Slime
-                    AddNewNames(nameList, SquireSlimeNames);
-                    break;
-                case NPCID.TownSlimeRed: // Surly Slime
-                    AddNewNames(nameList, SurlySlimeNames);
-                    break;
+                NPCID.TownSlimePurple => ClumsySlimeNames, // Clumsy Slime
+                NPCID.TownSlimeGreen => CoolSlimeNames, // Cool Slime
+                NPCID.TownSlimeRainbow => DivaSlimeNames, // Diva Slime
+                NPCID.TownSlimeOld => ElderSlimeNames, // Elder Slime
+                NPCID.TownSlimeYellow => MysticSlimeNames, // Mystic Slime
+                NPCID.TownSlimeBlue => NerdySlimeNames, // Nerdy Slime
+                NPCID.TownSlimeCopper => SquireSlimeNames, // Squire Slime
+                NPCID.TownSlimeRed => SurlySlimeNames, // Surly Slime
 
                 // This function doesn't work with Town Pets currently
-                case NPCID.TownCat:
-                    AddNewNames(nameList, TownCatNames);
-                    switch (npc.townNpcVariationIndex)
-                    {
-                        case 0:
-                            AddNewNames(nameList, TownCatSiameseNames);
-                            break;
-                        case 1:
-                            AddNewNames(nameList, TownCatBlackNames);
-                            break;
-                        case 2:
-                            AddNewNames(nameList, TownCatOrangeTabbyNames);
-                            break;
-                        case 3:
-                            AddNewNames(nameList, TownCatRussianBlueNames);
-                            break;
-                        case 4:
-                            AddNewNames(nameList, TownCatSilverNames);
-                            break;
-                        case 5:
-                            AddNewNames(nameList, TownCatWhiteNames);
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case NPCID.TownDog:
-                    AddNewNames(nameList, TownDogNames);
-                    switch (npc.townNpcVariationIndex)
-                    {
-                        case 0:
-                            AddNewNames(nameList, TownDogLabradorNames);
-                            break;
-                        case 1:
-                            AddNewNames(nameList, TownDogPitBullNames);
-                            break;
-                        case 2:
-                            AddNewNames(nameList, TownDogBeagleNames);
-                            break;
-                        case 3:
-                            AddNewNames(nameList, TownDogCorgiNames);
-                            break;
-                        case 4:
-                            AddNewNames(nameList, TownDogDalmatianNames);
-                            break;
-                        case 5:
-                            AddNewNames(nameList, TownDogHuskyNames);
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case NPCID.TownBunny:
-                    AddNewNames(nameList, TownBunnyNames);
-                    switch (npc.townNpcVariationIndex)
-                    {
-                        case 0:
-                            AddNewNames(nameList, TownBunnyWhiteNames);
-                            break;
-                        case 1:
-                            AddNewNames(nameList, TownBunnyAngoraNames);
-                            break;
-                        case 2:
-                            AddNewNames(nameList, TownBunnyDutchNames);
-                            break;
-                        case 3:
-                            AddNewNames(nameList, TownBunnyFlemishNames);
-                            break;
-                        case 4:
-                            AddNewNames(nameList, TownBunnyLopNames);
-                            break;
-                        case 5:
-                            AddNewNames(nameList, TownBunnySilverNames);
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
+                NPCID.TownCat => TownCatNames,
+                NPCID.TownDog => TownDogNames,
+                NPCID.TownBunny => TownBunnyNames,
+                _ => null
+            };
 
-                default:
-                    break;
-            }
+        private static string[] GetTownPetVariantNames(int npcType, int variationIndex) =>
+            (npcType, variationIndex) switch
+            {
+                (NPCID.TownCat, 0) => TownCatSiameseNames,
+                (NPCID.TownCat, 1) => TownCatBlackNames,
+                (NPCID.TownCat, 2) => TownCatOrangeTabbyNames,
+                (NPCID.TownCat, 3) => TownCatRussianBlueNames,
+                (NPCID.TownCat, 4) => TownCatSilverNames,
+                (NPCID.TownCat, 5) => TownCatWhiteNames,
+                (NPCID.TownDog, 0) => TownDogLabradorNames,
+                (NPCID.TownDog, 1) => TownDogPitBullNames,
+                (NPCID.TownDog, 2) => TownDogBeagleNames,
+                (NPCID.TownDog, 3) => TownDogCorgiNames,
+                (NPCID.TownDog, 4) => TownDogDalmatianNames,
+                (NPCID.TownDog, 5) => TownDogHuskyNames,
+                (NPCID.TownBunny, 0) => TownBunnyWhiteNames,
+                (NPCID.TownBunny, 1) => TownBunnyAngoraNames,
+                (NPCID.TownBunny, 2) => TownBunnyDutchNames,
+                (NPCID.TownBunny, 3) => TownBunnyFlemishNames,
+                (NPCID.TownBunny, 4) => TownBunnyLopNames,
+                (NPCID.TownBunny, 5) => TownBunnySilverNames,
+                _ => null
+            };
+
+        public override void ModifyNPCNameList(NPC npc, List<string> nameList)
+        {
+            AddNewNames(nameList, GetTownNPCNames(npc.type));
+            if (npc.type == NPCID.TownCat || npc.type == NPCID.TownDog || npc.type == NPCID.TownBunny)
+                AddNewNames(nameList, GetTownPetVariantNames(npc.type, npc.townNpcVariationIndex));
         }
         #endregion
 

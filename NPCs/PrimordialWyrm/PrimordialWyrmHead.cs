@@ -507,81 +507,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
             {
                 // First charge combo
                 case (int)Phase.ChargeOne:
-
-                    if (calamityGlobalNPC.newAI[2] >= chargePhaseGateValue)
-                    {
-                        ChargeDust();
-
-                        // Use a lerp to smoothly scale up velocity and turn speed
-                        chargeVelocityScalar += chargeVelocityScalarIncrement;
-                        if (chargeVelocityScalar > 1f)
-                            chargeVelocityScalar = 1f;
-
-                        baseVelocity *= normalChargeVelocityMult;
-                        turnSpeed *= normalChargeTurnSpeedMult;
-
-                        if ((chargeLocation - NPC.Center).Length() < chargeLocationDistance || calamityGlobalNPC.newAI[2] > chargePhaseGateValue)
-                        {
-                            // Set the scalar to max
-                            if (chargeVelocityScalar < 1f)
-                                chargeVelocityScalar = 1f;
-
-                            // Lock into looking at the target
-                            if (calamityGlobalNPC.newAI[2] < chargePhaseGateValue + 1f)
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                            // Turn towards the target
-                            if (!lookingAtTarget && calamityGlobalNPC.newAI[2] < chargePhaseGateValue + 2f)
-                            {
-                                baseVelocity /= normalChargeVelocityMult;
-                                turnSpeed /= normalChargeTurnSpeedMult;
-                            }
-
-                            // Charge at the target
-                            else
-                            {
-                                if (calamityGlobalNPC.newAI[2] == chargePhaseGateValue + 1f)
-                                {
-                                    if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && Vector2.Distance(Main.LocalPlayer.Center, NPC.Center) < soundDistance)
-                                        SoundEngine.PlaySound(ChargeSound, Main.LocalPlayer.Center);
-                                }
-
-                                // Lock into the charge phase and use this for a charge time check
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                                // Become totally visible
-                                NPC.Opacity = 1f;
-
-                                float totalChargeTime = (totalChargeDistance / baseVelocity) + chargePhaseGateValue + 1f;
-                                if (calamityGlobalNPC.newAI[2] > totalChargeTime)
-                                {
-                                    NPC.ai[3] += 1f;
-                                    float maxCharges = phase4 ? 1 : phase2 ? 2 : 3;
-                                    if (NPC.ai[3] >= maxCharges)
-                                    {
-                                        NPC.ai[3] = 0f;
-                                        AIState = phase4 ? (float)Phase.ShadowFireballSpin : (float)Phase.LightningRain;
-                                    }
-                                    else if (phase2)
-                                        AIState = (float)Phase.ShadowFireballSpin;
-
-                                    calamityGlobalNPC.newAI[1] += 1f;
-                                    if (calamityGlobalNPC.newAI[1] > 7f)
-                                        calamityGlobalNPC.newAI[1] = 0f;
-
-                                    calamityGlobalNPC.newAI[2] = 0f;
-                                    chargeVelocityScalar = 0f;
-                                    FinalPhaseCheck();
-                                    NPC.TargetClosest();
-                                }
-                            }
-                        }
-                        else
-                            destination += chargeVector;
-                    }
-                    else
-                        calamityGlobalNPC.newAI[2] += 1f;
-
+                    HandleChargePhase(Phase.ChargeOne);
                     break;
 
                 // Turn invisible, swim above and summon predictive lightning bolts
@@ -694,88 +620,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
 
                 // Turn visible and charge quickly
                 case (int)Phase.FastCharge:
-
-                    if (calamityGlobalNPC.newAI[2] >= chargePhaseGateValue)
-                    {
-                        ChargeDust();
-
-                        // Use a lerp to smoothly scale up velocity and turn speed
-                        chargeVelocityScalar += chargeVelocityScalarIncrement;
-                        if (chargeVelocityScalar > 1f)
-                            chargeVelocityScalar = 1f;
-
-                        baseVelocity *= fastChargeVelocityMult;
-                        turnSpeed *= fastChargeTurnSpeedMult;
-
-                        if ((chargeLocation - NPC.Center).Length() < chargeLocationDistance || calamityGlobalNPC.newAI[2] > chargePhaseGateValue)
-                        {
-                            // Set the scalar to max
-                            if (chargeVelocityScalar < 1f)
-                                chargeVelocityScalar = 1f;
-
-                            // Lock into looking at the target
-                            if (calamityGlobalNPC.newAI[2] < chargePhaseGateValue + 1f)
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                            // Turn towards the target
-                            if (!lookingAtTarget && calamityGlobalNPC.newAI[2] < chargePhaseGateValue + 2f)
-                            {
-                                baseVelocity /= fastChargeVelocityMult;
-                                turnSpeed /= fastChargeTurnSpeedMult;
-                            }
-
-                            // Charge very quickly
-                            else
-                            {
-                                if (calamityGlobalNPC.newAI[2] == chargePhaseGateValue + 1f)
-                                {
-                                    if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && Vector2.Distance(Main.LocalPlayer.Center, NPC.Center) < soundDistance)
-                                        SoundEngine.PlaySound(ChargeSound, Main.LocalPlayer.Center);
-                                }
-
-                                // Lock into the charge phase and use this for a charge time check
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                                // Become totally visible
-                                NPC.Opacity = 1f;
-
-                                float totalChargeTime = (totalChargeDistance / baseVelocity) + chargePhaseGateValue + 1f;
-                                if (calamityGlobalNPC.newAI[2] > totalChargeTime)
-                                {
-                                    if (!phase5)
-                                    {
-                                        AIState = NPC.localAI[0] == 0f ? (float)Phase.EidolonWyrmSpawn : (float)Phase.EidolistSpawn;
-                                        calamityGlobalNPC.newAI[2] = 0f;
-                                    }
-                                    else
-                                    {
-                                        NPC.ai[3] += 1f;
-                                        if (NPC.ai[3] >= 2f)
-                                        {
-                                            NPC.ai[3] = 0f;
-                                            AIState = NPC.localAI[0] == 0f ? (float)Phase.ChargeTwo : (float)Phase.ChargeOne;
-                                            calamityGlobalNPC.newAI[2] = 0f;
-                                        }
-                                        else
-                                            calamityGlobalNPC.newAI[2] = fastChargeGateValue;
-                                    }
-
-                                    calamityGlobalNPC.newAI[1] += 1f;
-                                    if (calamityGlobalNPC.newAI[1] > 7f)
-                                        calamityGlobalNPC.newAI[1] = 0f;
-
-                                    chargeVelocityScalar = 0f;
-                                    FinalPhaseCheck();
-                                    NPC.TargetClosest();
-                                }
-                            }
-                        }
-                        else
-                            destination += chargeVector;
-                    }
-                    else
-                        calamityGlobalNPC.newAI[2] += 1f;
-
+                    HandleChargePhase(Phase.FastCharge);
                     break;
 
                 // Summon an Eidolon Wyrm and swim below the target for 3 seconds, or less, if the Wyrm dies
@@ -806,81 +651,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
 
                 // Second charge combo
                 case (int)Phase.ChargeTwo:
-
-                    if (calamityGlobalNPC.newAI[2] >= chargePhaseGateValue)
-                    {
-                        ChargeDust();
-
-                        // Use a lerp to smoothly scale up velocity and turn speed
-                        chargeVelocityScalar += chargeVelocityScalarIncrement;
-                        if (chargeVelocityScalar > 1f)
-                            chargeVelocityScalar = 1f;
-
-                        baseVelocity *= normalChargeVelocityMult;
-                        turnSpeed *= normalChargeTurnSpeedMult;
-
-                        if ((chargeLocation - NPC.Center).Length() < chargeLocationDistance || calamityGlobalNPC.newAI[2] > chargePhaseGateValue)
-                        {
-                            // Set the scalar to max
-                            if (chargeVelocityScalar < 1f)
-                                chargeVelocityScalar = 1f;
-
-                            // Lock into looking at the target
-                            if (calamityGlobalNPC.newAI[2] < chargePhaseGateValue + 1f)
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                            // Turn towards the target
-                            if (!lookingAtTarget && calamityGlobalNPC.newAI[2] < chargePhaseGateValue + 2f)
-                            {
-                                baseVelocity /= normalChargeVelocityMult;
-                                turnSpeed /= normalChargeTurnSpeedMult;
-                            }
-
-                            // Charge
-                            else
-                            {
-                                if (calamityGlobalNPC.newAI[2] == chargePhaseGateValue + 1f)
-                                {
-                                    if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && Vector2.Distance(Main.LocalPlayer.Center, NPC.Center) < soundDistance)
-                                        SoundEngine.PlaySound(ChargeSound, Main.LocalPlayer.Center);
-                                }
-
-                                // Lock into the charge phase and use this for a charge time check
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                                // Become totally visible
-                                NPC.Opacity = 1f;
-
-                                float totalChargeTime = (totalChargeDistance / baseVelocity) + chargePhaseGateValue + 1f;
-                                if (calamityGlobalNPC.newAI[2] > totalChargeTime)
-                                {
-                                    NPC.ai[3] += 1f;
-                                    float maxCharges = phase4 ? 1 : phase3 ? 2 : 3;
-                                    if (NPC.ai[3] >= maxCharges)
-                                    {
-                                        NPC.ai[3] = 0f;
-                                        AIState = phase4 ? (float)Phase.AncientDoomSummon : (float)Phase.IceMist;
-                                    }
-                                    else if (phase3)
-                                        AIState = (float)Phase.AncientDoomSummon;
-
-                                    calamityGlobalNPC.newAI[1] += 1f;
-                                    if (calamityGlobalNPC.newAI[1] > 7f)
-                                        calamityGlobalNPC.newAI[1] = 0f;
-
-                                    calamityGlobalNPC.newAI[2] = 0f;
-                                    chargeVelocityScalar = 0f;
-                                    FinalPhaseCheck();
-                                    NPC.TargetClosest();
-                                }
-                            }
-                        }
-                        else
-                            destination += chargeVector;
-                    }
-                    else
-                        calamityGlobalNPC.newAI[2] += 1f;
-
+                    HandleChargePhase(Phase.ChargeTwo);
                     break;
 
                 // Turn invisible, swim beneath the target and summon ice mist
@@ -1085,98 +856,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
 
                 // Phase 4 attack - Swim to the right or left and charge towards the target, summon a wall of lightning bolts in the direction of the charge
                 case (int)Phase.LightningCharge:
-
-                    if (calamityGlobalNPC.newAI[2] >= lightningChargePhaseGateValue)
-                    {
-                        ChargeDust();
-
-                        // Use a lerp to smoothly scale up velocity and turn speed
-                        chargeVelocityScalar += chargeVelocityScalarIncrement;
-                        if (chargeVelocityScalar > 1f)
-                            chargeVelocityScalar = 1f;
-
-                        baseVelocity *= normalChargeVelocityMult;
-                        turnSpeed *= normalChargeTurnSpeedMult;
-
-                        if ((lightningChargeLocation - NPC.Center).Length() < lightningChargeLocationDistance || calamityGlobalNPC.newAI[2] > lightningChargePhaseGateValue)
-                        {
-                            // Set the scalar to max
-                            if (chargeVelocityScalar < 1f)
-                                chargeVelocityScalar = 1f;
-
-                            // Lock into looking at the target
-                            if (calamityGlobalNPC.newAI[2] < lightningChargePhaseGateValue + 1f)
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                            // Turn towards the target
-                            if (!lookingAtTarget && calamityGlobalNPC.newAI[2] < lightningChargePhaseGateValue + 2f)
-                            {
-                                baseVelocity /= normalChargeVelocityMult;
-                                turnSpeed /= normalChargeTurnSpeedMult;
-                            }
-
-                            // Charge
-                            else
-                            {
-                                if (calamityGlobalNPC.newAI[2] == lightningChargePhaseGateValue + 1f)
-                                {
-                                    if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && Vector2.Distance(Main.LocalPlayer.Center, NPC.Center) < soundDistance)
-                                        SoundEngine.PlaySound(ChargeSound, Main.LocalPlayer.Center);
-                                }
-
-                                // Lock into the charge phase and use this for a charge time check
-                                calamityGlobalNPC.newAI[2] += 1f;
-
-                                // Become totally visible
-                                NPC.Opacity = 1f;
-
-                                // Lightning barrage
-                                if (NPC.localAI[3] == 0f)
-                                {
-                                    if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && Vector2.Distance(Main.LocalPlayer.Center, NPC.Center) < soundDistance)
-                                        SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, Main.LocalPlayer.Center);
-
-                                    NPC.localAI[3] = 1f;
-                                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                                    {
-                                        int type = ProjectileID.CultistBossLightningOrbArc;
-                                        for (int i = 0; i < numLightningBolts; i++)
-                                        {
-                                            Vector2 projectileDestination = player.Center - lightningSpawnLocation;
-                                            Vector2 projectileVelocity = Vector2.Normalize(projectileDestination.RotatedByRandom(MathHelper.PiOver4)) * baseVelocity * 0.5f;
-                                            float ai = Main.rand.Next(100);
-                                            int proj = Projectile.NewProjectile(NPC.GetSource_FromAI(), lightningSpawnLocation, projectileVelocity, type, LightningDamage, 0f, Main.myPlayer, projectileDestination.ToRotation(), ai);
-                                            Main.projectile[proj].tileCollide = false;
-                                            lightningSpawnLocation.Y += distanceBetweenBolts;
-                                            if (i == numLightningBolts / 2)
-                                                lightningSpawnLocation.Y += distanceBetweenBolts;
-                                        }
-                                    }
-                                }
-
-                                float totalChargeTime = (totalChargeDistance / baseVelocity) + lightningChargePhaseGateValue + 1f;
-                                if (calamityGlobalNPC.newAI[2] > totalChargeTime)
-                                {
-                                    AIState = NPC.localAI[2] == 0f ? (float)Phase.LightningRain : (float)Phase.IceMist;
-                                    calamityGlobalNPC.newAI[2] = 0f;
-
-                                    NPC.localAI[2] += 1f;
-                                    if (NPC.localAI[2] > 1f)
-                                        NPC.localAI[2] = 0f;
-
-                                    NPC.localAI[3] = 0f;
-                                    chargeVelocityScalar = 0f;
-                                    FinalPhaseCheck();
-                                    NPC.TargetClosest();
-                                }
-                            }
-                        }
-                        else
-                            destination += lightningChargeVector;
-                    }
-                    else
-                        calamityGlobalNPC.newAI[2] += 1f;
-
+                    HandleChargePhase(Phase.LightningCharge);
                     break;
 
                 // Summon Eidolists and swim below the target for 3 seconds, or less, if the Eidolists die
@@ -1321,6 +1001,176 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                     }
 
                     break;
+            }
+
+            void HandleChargePhase(Phase phase)
+            {
+                bool fastCharge = phase == Phase.FastCharge;
+                bool lightningCharge = phase == Phase.LightningCharge;
+                float phaseGateValue = lightningCharge ? lightningChargePhaseGateValue : chargePhaseGateValue;
+                float velocityMultiplier = fastCharge ? fastChargeVelocityMult : normalChargeVelocityMult;
+                float turnSpeedMultiplier = fastCharge ? fastChargeTurnSpeedMult : normalChargeTurnSpeedMult;
+                Vector2 chargeTarget = lightningCharge ? lightningChargeLocation : chargeLocation;
+                Vector2 chargeOffset = lightningCharge ? lightningChargeVector : chargeVector;
+                float chargeTargetDistance = lightningCharge ? lightningChargeLocationDistance : chargeLocationDistance;
+
+                if (calamityGlobalNPC.newAI[2] >= phaseGateValue)
+                {
+                    ChargeDust();
+
+                    // Use a lerp to smoothly scale up velocity and turn speed
+                    chargeVelocityScalar += chargeVelocityScalarIncrement;
+                    if (chargeVelocityScalar > 1f)
+                        chargeVelocityScalar = 1f;
+
+                    baseVelocity *= velocityMultiplier;
+                    turnSpeed *= turnSpeedMultiplier;
+
+                    if ((chargeTarget - NPC.Center).Length() < chargeTargetDistance || calamityGlobalNPC.newAI[2] > phaseGateValue)
+                    {
+                        // Set the scalar to max
+                        if (chargeVelocityScalar < 1f)
+                            chargeVelocityScalar = 1f;
+
+                        // Lock into looking at the target
+                        if (calamityGlobalNPC.newAI[2] < phaseGateValue + 1f)
+                            calamityGlobalNPC.newAI[2] += 1f;
+
+                        // Turn towards the target
+                        if (!lookingAtTarget && calamityGlobalNPC.newAI[2] < phaseGateValue + 2f)
+                        {
+                            baseVelocity /= velocityMultiplier;
+                            turnSpeed /= turnSpeedMultiplier;
+                            return;
+                        }
+
+                        if (calamityGlobalNPC.newAI[2] == phaseGateValue + 1f)
+                        {
+                            if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && Vector2.Distance(Main.LocalPlayer.Center, NPC.Center) < soundDistance)
+                                SoundEngine.PlaySound(ChargeSound, Main.LocalPlayer.Center);
+                        }
+
+                        // Lock into the charge phase and use this for a charge time check
+                        calamityGlobalNPC.newAI[2] += 1f;
+
+                        // Become totally visible
+                        NPC.Opacity = 1f;
+
+                        // Lightning barrage
+                        if (lightningCharge && NPC.localAI[3] == 0f)
+                        {
+                            if (Main.LocalPlayer.active && !Main.LocalPlayer.dead && Vector2.Distance(Main.LocalPlayer.Center, NPC.Center) < soundDistance)
+                                SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, Main.LocalPlayer.Center);
+
+                            NPC.localAI[3] = 1f;
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
+                            {
+                                int type = ProjectileID.CultistBossLightningOrbArc;
+                                for (int i = 0; i < numLightningBolts; i++)
+                                {
+                                    Vector2 projectileDestination = player.Center - lightningSpawnLocation;
+                                    Vector2 projectileVelocity = Vector2.Normalize(projectileDestination.RotatedByRandom(MathHelper.PiOver4)) * baseVelocity * 0.5f;
+                                    float ai = Main.rand.Next(100);
+                                    int proj = Projectile.NewProjectile(NPC.GetSource_FromAI(), lightningSpawnLocation, projectileVelocity, type, LightningDamage, 0f, Main.myPlayer, projectileDestination.ToRotation(), ai);
+                                    Main.projectile[proj].tileCollide = false;
+                                    lightningSpawnLocation.Y += distanceBetweenBolts;
+                                    if (i == numLightningBolts / 2)
+                                        lightningSpawnLocation.Y += distanceBetweenBolts;
+                                }
+                            }
+                        }
+
+                        float totalChargeTime = (totalChargeDistance / baseVelocity) + phaseGateValue + 1f;
+                        if (calamityGlobalNPC.newAI[2] > totalChargeTime)
+                        {
+                            switch (phase)
+                            {
+                                case Phase.ChargeOne:
+                                    NPC.ai[3] += 1f;
+                                    float maxFirstComboCharges = phase4 ? 1 : phase2 ? 2 : 3;
+                                    if (NPC.ai[3] >= maxFirstComboCharges)
+                                    {
+                                        NPC.ai[3] = 0f;
+                                        AIState = phase4 ? (float)Phase.ShadowFireballSpin : (float)Phase.LightningRain;
+                                    }
+                                    else if (phase2)
+                                        AIState = (float)Phase.ShadowFireballSpin;
+
+                                    calamityGlobalNPC.newAI[1] += 1f;
+                                    if (calamityGlobalNPC.newAI[1] > 7f)
+                                        calamityGlobalNPC.newAI[1] = 0f;
+
+                                    calamityGlobalNPC.newAI[2] = 0f;
+                                    chargeVelocityScalar = 0f;
+                                    break;
+
+                                case Phase.ChargeTwo:
+                                    NPC.ai[3] += 1f;
+                                    float maxSecondComboCharges = phase4 ? 1 : phase3 ? 2 : 3;
+                                    if (NPC.ai[3] >= maxSecondComboCharges)
+                                    {
+                                        NPC.ai[3] = 0f;
+                                        AIState = phase4 ? (float)Phase.AncientDoomSummon : (float)Phase.IceMist;
+                                    }
+                                    else if (phase3)
+                                        AIState = (float)Phase.AncientDoomSummon;
+
+                                    calamityGlobalNPC.newAI[1] += 1f;
+                                    if (calamityGlobalNPC.newAI[1] > 7f)
+                                        calamityGlobalNPC.newAI[1] = 0f;
+
+                                    calamityGlobalNPC.newAI[2] = 0f;
+                                    chargeVelocityScalar = 0f;
+                                    break;
+
+                                case Phase.FastCharge:
+                                    if (!phase5)
+                                    {
+                                        AIState = NPC.localAI[0] == 0f ? (float)Phase.EidolonWyrmSpawn : (float)Phase.EidolistSpawn;
+                                        calamityGlobalNPC.newAI[2] = 0f;
+                                    }
+                                    else
+                                    {
+                                        NPC.ai[3] += 1f;
+                                        if (NPC.ai[3] >= 2f)
+                                        {
+                                            NPC.ai[3] = 0f;
+                                            AIState = NPC.localAI[0] == 0f ? (float)Phase.ChargeTwo : (float)Phase.ChargeOne;
+                                            calamityGlobalNPC.newAI[2] = 0f;
+                                        }
+                                        else
+                                            calamityGlobalNPC.newAI[2] = fastChargeGateValue;
+                                    }
+
+                                    calamityGlobalNPC.newAI[1] += 1f;
+                                    if (calamityGlobalNPC.newAI[1] > 7f)
+                                        calamityGlobalNPC.newAI[1] = 0f;
+
+                                    chargeVelocityScalar = 0f;
+                                    break;
+
+                                case Phase.LightningCharge:
+                                    AIState = NPC.localAI[2] == 0f ? (float)Phase.LightningRain : (float)Phase.IceMist;
+                                    calamityGlobalNPC.newAI[2] = 0f;
+
+                                    NPC.localAI[2] += 1f;
+                                    if (NPC.localAI[2] > 1f)
+                                        NPC.localAI[2] = 0f;
+
+                                    NPC.localAI[3] = 0f;
+                                    chargeVelocityScalar = 0f;
+                                    break;
+                            }
+
+                            FinalPhaseCheck();
+                            NPC.TargetClosest();
+                        }
+                    }
+                    else
+                        destination += chargeOffset;
+                }
+                else
+                    calamityGlobalNPC.newAI[2] += 1f;
             }
 
             void FinalPhaseCheck()
