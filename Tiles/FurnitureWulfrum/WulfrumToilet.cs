@@ -2,10 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
+using CalamityMod.Tiles.BaseTiles;
 using Terraria.DataStructures;
 using Terraria.Enums;
 using Terraria.GameContent;
-using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -13,11 +13,15 @@ using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.FurnitureWulfrum
 {
-    public class WulfrumToilet : ModTile
+    public class WulfrumToilet : BaseToiletTile
     {
         public const int NextStyleHeight = 40;
 
         public Asset<Texture2D> GlowTexture;
+
+        protected override int AssociatedItemType => ModContent.ItemType<Items.Placeables.FurnitureWulfrum.WulfrumToilet>();
+
+        protected override bool IsWide => true;
 
         public override void SetStaticDefaults()
         {
@@ -58,11 +62,6 @@ namespace CalamityMod.Tiles.FurnitureWulfrum
             return false;
         }
 
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
-
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
         {
             if (Main.tile[i, j].IsTileActuallyInvisible())
@@ -84,31 +83,5 @@ namespace CalamityMod.Tiles.FurnitureWulfrum
                 spriteBatch.Draw(glowmask, drawPosition + new Vector2(0f, 8f), new Rectangle(xFrameOffset, yFrameOffset, 18, 8), drawColour, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
         }
 
-        public override void ModifySittingTargetInfo(int i, int j, ref TileRestingInfo info) => FurnitureCommon.ChairSitInfo(i, j, ref info, NextStyleHeight, true, shitter: true);
-
-        public override bool RightClick(int i, int j) => FurnitureCommon.ChairRightClick(i, j);
-
-        public override void MouseOver(int i, int j) => FurnitureCommon.ChairMouseOver(i, j, ModContent.ItemType<Items.Placeables.FurnitureWulfrum.WulfrumToilet>(), true);
-
-        public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings)
-        {
-            return settings.player.IsWithinSnappngRangeToTile(i, j, PlayerSittingHelper.ChairSittingMaxDistance);
-        }
-
-        public override void HitWire(int i, int j) // I hate this please make it stop. - Merkalto
-        {
-            Tile tile = Main.tile[i, j];
-
-            int spawnX = i;
-            int spawnY = j - (tile.TileFrameY % NextStyleHeight) / 18;
-
-            Wiring.SkipWire(spawnX, spawnY);
-            Wiring.SkipWire(spawnX, spawnY + 1);
-
-            if (Wiring.CheckMech(spawnX, spawnY, 60))
-            {
-                Projectile.NewProjectile(Wiring.GetProjectileSource(spawnX, spawnY), spawnX * 16 + 8, spawnY * 16 + 12, 0f, 0f, ProjectileID.ToiletEffect, 0, 0f, Main.myPlayer);
-            }
-        }
     }
 }

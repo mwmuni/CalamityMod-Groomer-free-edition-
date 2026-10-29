@@ -283,14 +283,7 @@ namespace CalamityMod.Projectiles.Boss
             SoundStyle b = new("CalamityMod/Sounds/Custom/Kickball");
             SoundEngine.PlaySound(b with { PitchVariance = 0.15f }, Projectile.Center);
 
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
             return false;
         }
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox) => CalamityUtils.CircularHitboxCollision(Projectile.Center, (Projectile.ai[2] >= 3 ? 90 : 35 * Projectile.scale), targetHitbox);

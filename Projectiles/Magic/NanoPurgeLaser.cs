@@ -112,14 +112,7 @@ namespace CalamityMod.Projectiles.Magic
                 }
                 else // Otherwise, use standard bouncing behavior.
                 {
-                    if (Projectile.velocity.X != oldVelocity.X)
-                    {
-                        Projectile.velocity.X = -oldVelocity.X;
-                    }
-                    if (Projectile.velocity.Y != oldVelocity.Y)
-                    {
-                        Projectile.velocity.Y = -oldVelocity.Y;
-                    }
+                    Projectile.BounceOnTileCollision(oldVelocity);
                 }
 
                 // The laser loses 20% damage after bouncing.

@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Armor.Vanity
 {
     [AutoloadEquip(EquipType.Head)]
-    public class ArtemisMask : ModItem, IExtendedHat, ILocalizedModType
+    public class ArtemisMask : BaseBossMask, IExtendedHat, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.Vanity";
         public override void SetStaticDefaults()
@@ -17,15 +17,6 @@ namespace CalamityMod.Items.Armor.Vanity
                 int equipSlotHead = EquipLoader.GetEquipSlot(Mod, Name, EquipType.Head);
                 ArmorIDs.Head.Sets.DrawHead[equipSlotHead] = false;
             }
-        }
-
-        public override void SetDefaults()
-        {
-            Item.width = 28;
-            Item.height = 20;
-            Item.rare = ItemRarityID.Blue;
-            Item.value = Item.sellPrice(silver: 75);
-            Item.vanity = true;
         }
 
         public string ExtensionTexture => "CalamityMod/Items/Armor/Vanity/ArtemisMask_Extra";

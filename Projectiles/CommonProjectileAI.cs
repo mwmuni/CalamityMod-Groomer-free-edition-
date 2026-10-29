@@ -11,6 +11,18 @@ namespace CalamityMod.Projectiles;
 
 internal static class CommonProjectileAI
 {
+    public static void BounceOnTileCollision(this Projectile projectile, Vector2 oldVelocity)
+    {
+        if (projectile.velocity.X != oldVelocity.X)
+        {
+            projectile.velocity.X = -oldVelocity.X;
+        }
+        if (projectile.velocity.Y != oldVelocity.Y)
+        {
+            projectile.velocity.Y = -oldVelocity.Y;
+        }
+    }
+
     public static void ChargingMinionAI(this Projectile projectile, float range, float maxPlayerDist, float extraMaxPlayerDist, float safeDist, int initialUpdates, float chargeDelayTime, float goToSpeed, float goBackSpeed, Vector2 returnOffset, float chargeCounterMax, float chargeSpeed, bool tileVision, bool ignoreTilesWhenCharging, int updateDifference = 1)
     {
         Player player = Main.player[projectile.owner];

@@ -131,14 +131,7 @@ namespace CalamityMod.Projectiles.Ranged
             if (BounceHits >= 4f)
                 Projectile.Kill();
 
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
 
             return false;
         }

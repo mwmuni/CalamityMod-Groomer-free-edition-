@@ -101,14 +101,7 @@ namespace CalamityMod.Projectiles.Ranged
         public override bool OnTileCollide(Vector2 oldVelocity)
         {
             time = 0;
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
             if (Projectile.velocity.X < 2 && Projectile.velocity.X > 0)
                 Projectile.velocity.X = 2;
             if (Projectile.velocity.X > -2 && Projectile.velocity.X < 0)

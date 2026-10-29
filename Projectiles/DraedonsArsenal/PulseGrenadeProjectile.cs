@@ -267,14 +267,7 @@ namespace CalamityMod.Projectiles.DraedonsArsenal
             SoundStyle sound = CommonCalamitySounds.VoidstoneMine with { Volume = 1 };
             SoundEngine.PlaySound(sound with { Volume = 0.3f, Pitch = -0.25f - 0.1f * tileHits, MaxInstances = 6 }, Projectile.Center);
 
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
 
             tileHits++;
             if (tileHits > 2)

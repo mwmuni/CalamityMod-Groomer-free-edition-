@@ -104,14 +104,7 @@ namespace CalamityMod.Projectiles.Ranged
             --Projectile.penetrate;
 
             // If bounces are still left, bounce.
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
             Projectile.velocity *= 1.25f;
 
             // Do not use vanilla tile collide logic.

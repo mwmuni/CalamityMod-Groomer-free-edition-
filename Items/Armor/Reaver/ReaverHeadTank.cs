@@ -1,4 +1,5 @@
 ﻿using CalamityMod.Items.Materials;
+using CalamityMod.Items.Armor;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -8,7 +9,7 @@ namespace CalamityMod.Items.Armor.Reaver
 {
     [AutoloadEquip(EquipType.Head)]
     [LegacyName("ReaverHelm")]
-    public class ReaverHeadTank : ModItem, ILocalizedModType
+    public class ReaverHeadTank : BaseSubtleOutlineArmor, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.Hardmode";
         internal static string HealOrbEntitySourceContext => "SetBonus_Calamity_ReaverTank";
@@ -35,12 +36,6 @@ namespace CalamityMod.Items.Armor.Reaver
         }
 
         public override bool IsArmorSet(Item head, Item body, Item legs) => body.type == ModContent.ItemType<ReaverScaleMail>() && legs.type == ModContent.ItemType<ReaverCuisses>();
-
-        public override void ArmorSetShadows(Player player)
-        {
-            player.armorEffectDrawShadowSubtle = true;
-            player.armorEffectDrawOutlines = true;
-        }
 
         public override void UpdateArmorSet(Player player)
         {

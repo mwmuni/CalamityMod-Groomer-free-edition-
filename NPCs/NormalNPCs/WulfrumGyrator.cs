@@ -1,33 +1,27 @@
-﻿using System;
-using CalamityMod.Items.Accessories;
-using CalamityMod.Items.Materials;
+using System;
 using CalamityMod.Items.Placeables.Banners;
 using CalamityMod.Projectiles.Rogue;
-using CalamityMod.Sounds;
 using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.GameContent.Bestiary;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Utilities;
 
 namespace CalamityMod.NPCs.NormalNPCs
 {
-    public class WulfrumGyrator : ModNPC
+    public class WulfrumGyrator : WulfrumCombatNPCBase<WulfrumGyratorBanner>
     {
+        protected override int FrameCount => 10;
+        protected override string BestiaryEntryKey => "Mods.CalamityMod.Bestiary.WulfrumGyrator";
+        protected override int HitDustCount => 5;
+        protected override int DeathDustCount => 20;
+        protected override string GoreName => "WulfrumGyratorGore";
+        protected override bool BonusFrameInZenith => true;
+
         public float TimeSpentStuck
         {
             get => NPC.ai[0];
             set => NPC.ai[0] = value;
         }
-
-        public float SuperchargeTimer
-        {
-            get => NPC.ai[3];
-            set => NPC.ai[3] = value;
-        }
-
-        public bool Supercharged => SuperchargeTimer > 0;
 
         public const float PlayerTargetingThreshold = 90f;
         public const float PlayerSearchDistance = 500f;
@@ -36,20 +30,9 @@ namespace CalamityMod.NPCs.NormalNPCs
         public const float JumpSpeed = -8f;
         public const float NPCGravity = 0.3f; // NPC.cs has this, but it's private, and there's no way in hell I'm using reflection.
 
-        public override void SetStaticDefaults()
-        {
-            Main.npcFrameCount[Type] = 10;
-            NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers()
-            {
-                SpriteDirection = 1
-            };
-            NPCID.Sets.NPCBestiaryDrawOffset[Type] = value;
-        }
-
         public override void SetDefaults()
         {
-            AIType = -1;
-            NPC.aiStyle = -1;
+            base.SetDefaults();
             NPC.damage = 15;
             NPC.width = 40;
             NPC.height = 40;
@@ -57,36 +40,6 @@ namespace CalamityMod.NPCs.NormalNPCs
             NPC.lifeMax = 25;
             NPC.knockBackResist = 0.15f;
             NPC.value = Item.buyPrice(copper: 75);
-            NPC.HitSound = WulfrumAmplifier.Hit;
-            NPC.DeathSound = CommonCalamitySounds.WulfrumNPCDeathSound;
-            Banner = NPC.type;
-            BannerItem = ModContent.ItemType<WulfrumGyratorBanner>();
-            NPC.Calamity().VulnerableToSickness = false;
-            NPC.Calamity().VulnerableToElectricity = true;
-        }
-
-        public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
-        {
-            bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
-            {
-                BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Surface,
-                BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Times.DayTime,
-                new FlavorTextBestiaryInfoElement("Mods.CalamityMod.Bestiary.WulfrumGyrator")
-            });
-        }
-
-        public override void FindFrame(int frameHeight)
-        {
-            NPC.frameCounter++;
-            if (Main.zenithWorld)
-            {
-                NPC.frameCounter += 1;
-            }
-            int frame = (int)(NPC.frameCounter / 5) % (Main.npcFrameCount[Type] / 2);
-            if (Supercharged)
-                frame += Main.npcFrameCount[Type] / 2;
-
-            NPC.frame.Y = frame * frameHeight;
         }
 
         public override void AI()
@@ -189,48 +142,9 @@ namespace CalamityMod.NPCs.NormalNPCs
             return true;
         }
 
-        public override float SpawnChance(NPCSpawnInfo spawnInfo)
-        {
-            if (spawnInfo.PlayerSafe || spawnInfo.Player.Calamity().ZoneSulphur || (!spawnInfo.Player.ZoneOverworldHeight && !Main.remixWorld) || (!spawnInfo.Player.ZoneNormalCaverns && spawnInfo.Player.ZoneGlowshroom && Main.remixWorld))
-                return 0f;
-
-            return (Main.remixWorld ? SpawnCondition.Cavern.Chance : SpawnCondition.OverworldDaySlime.Chance) * (Main.hardMode ? 0.055f : 0.135f) * (NPC.AnyNPCs(ModContent.NPCType<WulfrumAmplifier>()) ? 5.5f : 1f);
-        }
-
-        public override void HitEffect(NPC.HitInfo hit)
-        {
-            if (!Main.dedServ)
-            {
-                for (int k = 0; k < 5; k++)
-                {
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GrassBlades, hit.HitDirection, -1f, 0, default, 1f);
-                }
-                if (NPC.life <= 0)
-                {
-                    for (int k = 0; k < 20; k++)
-                    {
-                        Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GrassBlades, hit.HitDirection, -1f, 0, default, 1f);
-                    }
-
-                    if (!Main.dedServ)
-                    {
-                        Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("WulfrumGyratorGore").Type, 1f);
-
-                        int randomGoreCount = Main.rand.Next(1, 4);
-                        for (int i = 0; i < randomGoreCount; i++)
-                        {
-                            Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("WulfrumEnemyGore" + Main.rand.Next(1, 11).ToString()).Type, 1f);
-                        }
-                    }
-                }
-            }
-        }
-
         public override void ModifyNPCLoot(NPCLoot npcLoot)
         {
-            npcLoot.Add(ModContent.ItemType<WulfrumMetalScrap>(), 1, 1, 2);
-            npcLoot.Add(ModContent.ItemType<WulfrumBattery>(), new Fraction(7, 100));
-            npcLoot.AddIf(info => info.npc.ModNPC<WulfrumGyrator>().Supercharged, ModContent.ItemType<EnergyCore>());
+            AddCombatLoot(npcLoot, 1, 2);
         }
     }
 }

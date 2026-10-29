@@ -1,5 +1,6 @@
 ﻿using System;
 using CalamityMod.Items.Materials;
+using CalamityMod.Items.Armor;
 using CalamityMod.Items.Placeables.Ores;
 using CalamityMod.Rarities;
 using Microsoft.Xna.Framework;
@@ -11,7 +12,7 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Armor.Prismatic
 {
     [AutoloadEquip(EquipType.Head)]
-    public class PrismaticHelmet : ModItem, ILocalizedModType
+    public class PrismaticHelmet : BaseSubtleOutlineArmor, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.PostMoonLord";
         internal static string LaserEntitySourceContext => "SetBonus_Calamity_Prismatic";
@@ -41,12 +42,6 @@ namespace CalamityMod.Items.Armor.Prismatic
         }
 
         public override bool IsArmorSet(Item head, Item body, Item legs) => body.type == ModContent.ItemType<PrismaticRegalia>() && legs.type == ModContent.ItemType<PrismaticGreaves>();
-
-        public override void ArmorSetShadows(Player player)
-        {
-            player.armorEffectDrawShadowSubtle = true;
-            player.armorEffectDrawOutlines = true;
-        }
 
         public override void UpdateArmorSet(Player player)
         {

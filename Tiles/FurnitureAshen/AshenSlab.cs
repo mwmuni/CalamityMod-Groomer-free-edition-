@@ -8,16 +8,19 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureAshen
 {
-    public class AshenSlab : BaseRedTorchStoneDustTile
+    public abstract class BaseAshenSlab : BaseRedTorchStoneDustTile
     {
         public Asset<Texture2D> GlowTexture;
+
+        protected virtual bool ShouldMergeWithBrimstoneSlag => true;
 
         public override void SetStaticDefaults()
         {
             Main.tileSolid[Type] = true;
             Main.tileMergeDirt[Type] = false;
             Main.tileBlockLight[Type] = true;
-            CalamityUtils.SetMerge(Type, ModContent.TileType<BrimstoneSlag>());
+            if (ShouldMergeWithBrimstoneSlag)
+                CalamityUtils.SetMerge(Type, ModContent.TileType<BrimstoneSlag>());
 
             HitSound = SoundID.Tink;
             MineResist = 2f;
@@ -525,5 +528,10 @@ namespace CalamityMod.Tiles.FurnitureAshen
                 Main.spriteBatch.Draw(glowmask, drawOffset + new Vector2(0f, 8f), new Rectangle?(new Rectangle(xDrawPos, yDrawPos, 18, 8)), drawColour, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
             }
         }
+
+    }
+
+    public class AshenSlab : BaseAshenSlab
+    {
     }
 }

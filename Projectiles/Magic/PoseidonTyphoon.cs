@@ -59,14 +59,7 @@ namespace CalamityMod.Projectiles.Magic
             }
             else
             {
-                if (Projectile.velocity.X != oldVelocity.X)
-                {
-                    Projectile.velocity.X = -oldVelocity.X;
-                }
-                if (Projectile.velocity.Y != oldVelocity.Y)
-                {
-                    Projectile.velocity.Y = -oldVelocity.Y;
-                }
+                Projectile.BounceOnTileCollision(oldVelocity);
             }
             return false;
         }

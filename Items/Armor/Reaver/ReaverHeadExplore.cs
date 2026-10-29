@@ -1,4 +1,5 @@
 ﻿using CalamityMod.Items.Materials;
+using CalamityMod.Items.Armor;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -9,7 +10,7 @@ namespace CalamityMod.Items.Armor.Reaver
 {
     [AutoloadEquip(EquipType.Head)]
     [LegacyName("ReaverHeadgear")]
-    public class ReaverHeadExplore : ModItem, ILocalizedModType
+    public class ReaverHeadExplore : BaseSubtleOutlineArmor, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.Hardmode";
 
@@ -32,12 +33,6 @@ namespace CalamityMod.Items.Armor.Reaver
         }
 
         public override bool IsArmorSet(Item head, Item body, Item legs) => body.type == ModContent.ItemType<ReaverScaleMail>() && legs.type == ModContent.ItemType<ReaverCuisses>();
-
-        public override void ArmorSetShadows(Player player)
-        {
-            player.armorEffectDrawShadowSubtle = true;
-            player.armorEffectDrawOutlines = true;
-        }
 
         public override void UpdateArmorSet(Player player)
         {

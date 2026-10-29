@@ -202,14 +202,7 @@ namespace CalamityMod.Projectiles.Rogue
             //Bounce off tiles and return to player if it hits a tile
             Collision.HitTiles(Projectile.position + Projectile.velocity, Projectile.velocity, Projectile.width, Projectile.height);
             SoundEngine.PlaySound(SoundID.Item50, Projectile.position);
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
             State = 1f;
             if (TileCollideDelay == 0)
                 TileCollideDelay = 10;

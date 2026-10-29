@@ -1,5 +1,6 @@
 ﻿using CalamityMod.Buffs.Summon;
 using CalamityMod.Items.Materials;
+using CalamityMod.Items.Armor;
 using CalamityMod.Projectiles.Summon;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -11,7 +12,7 @@ namespace CalamityMod.Items.Armor.Daedalus
 {
     [AutoloadEquip(EquipType.Head)]
     [LegacyName("DaedalusHeadgear")]
-    public class DaedalusHeadSummon : ModItem, ILocalizedModType
+    public class DaedalusHeadSummon : BaseSubtleOutlineArmor, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.Hardmode";
 
@@ -34,12 +35,6 @@ namespace CalamityMod.Items.Armor.Daedalus
         }
 
         public override bool IsArmorSet(Item head, Item body, Item legs) => body.type == ModContent.ItemType<DaedalusBreastplate>() && legs.type == ModContent.ItemType<DaedalusLeggings>();
-
-        public override void ArmorSetShadows(Player player)
-        {
-            player.armorEffectDrawShadowSubtle = true;
-            player.armorEffectDrawOutlines = true;
-        }
 
         public override void UpdateArmorSet(Player player)
         {

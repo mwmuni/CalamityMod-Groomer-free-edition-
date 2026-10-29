@@ -1,4 +1,5 @@
 ﻿using CalamityMod.Items.Materials;
+using CalamityMod.Items.Armor;
 using CalamityMod.Rarities;
 using Terraria;
 using Terraria.ID;
@@ -9,7 +10,7 @@ namespace CalamityMod.Items.Armor.Tarragon
 {
     [AutoloadEquip(EquipType.Head)]
     [LegacyName("TarragonVisage")]
-    public class TarragonHeadRanged : ModItem, ILocalizedModType
+    public class TarragonHeadRanged : BaseSubtleOutlineArmor, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Armor.PostMoonLord";
 
@@ -35,12 +36,6 @@ namespace CalamityMod.Items.Armor.Tarragon
         }
 
         public override bool IsArmorSet(Item head, Item body, Item legs) => body.type == ModContent.ItemType<TarragonBreastplate>() && legs.type == ModContent.ItemType<TarragonLeggings>();
-
-        public override void ArmorSetShadows(Player player)
-        {
-            player.armorEffectDrawShadowSubtle = true;
-            player.armorEffectDrawOutlines = true;
-        }
 
         public override void UpdateArmorSet(Player player)
         {

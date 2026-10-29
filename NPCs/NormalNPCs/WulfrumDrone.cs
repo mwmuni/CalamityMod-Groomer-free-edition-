@@ -1,13 +1,9 @@
-﻿using System.IO;
-using CalamityMod.Items.Accessories;
-using CalamityMod.Items.Materials;
+using System.IO;
 using CalamityMod.Items.Placeables.Banners;
-using CalamityMod.Sounds;
 using CalamityMod.World;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent.Bestiary;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Utilities;
@@ -20,8 +16,16 @@ namespace CalamityMod.NPCs.NormalNPCs
         Charging = 1
     }
 
-    public class WulfrumDrone : ModNPC
+    public class WulfrumDrone : WulfrumCombatNPCBase<WulfrumDroneBanner>
     {
+        protected override int FrameCount => 6;
+        protected override string BestiaryEntryKey => "Mods.CalamityMod.Bestiary.WulfrumDrone";
+        protected override int HitDustCount => 3;
+        protected override int DeathDustCount => 15;
+        protected override string GoreName => "WulfrumDroneGore1";
+        protected override string AdditionalGoreName => "WulfrumDroneGore2";
+        protected override bool SpawnHitDustOnDedicatedServer => true;
+
         internal DroneAIState AIState
         {
             get => (DroneAIState)(int)NPC.ai[0];
@@ -40,30 +44,12 @@ namespace CalamityMod.NPCs.NormalNPCs
             set => NPC.ai[2] = value;
         }
 
-        public float SuperchargeTimer
-        {
-            get => NPC.ai[3];
-            set => NPC.ai[3] = value;
-        }
-
-        public bool Supercharged => SuperchargeTimer > 0;
         public ref float FlyAwayTimer => ref NPC.localAI[0];
         public const float TotalHorizontalChargeTime = 75f;
 
-        public override void SetStaticDefaults()
-        {
-            Main.npcFrameCount[Type] = 6;
-            NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers()
-            {
-                SpriteDirection = 1
-            };
-            NPCID.Sets.NPCBestiaryDrawOffset[Type] = value;
-        }
-
         public override void SetDefaults()
         {
-            AIType = -1;
-            NPC.aiStyle = -1;
+            base.SetDefaults();
             NPC.damage = 16;
             NPC.width = 32;
             NPC.height = 32;
@@ -73,22 +59,6 @@ namespace CalamityMod.NPCs.NormalNPCs
             NPC.value = Item.buyPrice(copper: 80);
             NPC.noGravity = true;
             NPC.noTileCollide = true;
-            NPC.HitSound = WulfrumAmplifier.Hit;
-            NPC.DeathSound = CommonCalamitySounds.WulfrumNPCDeathSound;
-            Banner = NPC.type;
-            BannerItem = ModContent.ItemType<WulfrumDroneBanner>();
-            NPC.Calamity().VulnerableToSickness = false;
-            NPC.Calamity().VulnerableToElectricity = true;
-        }
-
-        public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
-        {
-            bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
-            {
-                BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Surface,
-                BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Times.DayTime,
-                new FlavorTextBestiaryInfoElement("Mods.CalamityMod.Bestiary.WulfrumDrone")
-            });
         }
 
         public override void SendExtraAI(BinaryWriter writer) => writer.Write(FlyAwayTimer);
@@ -211,56 +181,9 @@ namespace CalamityMod.NPCs.NormalNPCs
             }
         }
 
-        public override void FindFrame(int frameHeight)
-        {
-            NPC.frameCounter++;
-            int frame = (int)(NPC.frameCounter / 5) % (Main.npcFrameCount[Type] / 2);
-            if (Supercharged)
-                frame += Main.npcFrameCount[Type] / 2;
-
-            NPC.frame.Y = frame * frameHeight;
-        }
-
-        public override float SpawnChance(NPCSpawnInfo spawnInfo)
-        {
-            if (spawnInfo.PlayerSafe || spawnInfo.Player.Calamity().ZoneSulphur || (!spawnInfo.Player.ZoneOverworldHeight && !Main.remixWorld) || (!spawnInfo.Player.ZoneNormalCaverns && spawnInfo.Player.ZoneGlowshroom && Main.remixWorld))
-                return 0f;
-
-            return (Main.remixWorld ? SpawnCondition.Cavern.Chance : SpawnCondition.OverworldDaySlime.Chance) * (Main.hardMode ? 0.055f : 0.135f) * (NPC.AnyNPCs(ModContent.NPCType<WulfrumAmplifier>()) ? 5.5f : 1f);
-        }
-
-        public override void HitEffect(NPC.HitInfo hit)
-        {
-            for (int k = 0; k < 3; k++)
-            {
-                Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GrassBlades, hit.HitDirection, -1f, 0, default, 1f);
-            }
-            if (NPC.life <= 0)
-            {
-                for (int k = 0; k < 15; k++)
-                {
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GrassBlades, hit.HitDirection, -1f, 0, default, 1f);
-                }
-
-                if (!Main.dedServ)
-                {
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("WulfrumDroneGore1").Type, 1f);
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("WulfrumDroneGore2").Type, 1f);
-
-                    int randomGoreCount = Main.rand.Next(1, 4);
-                    for (int i = 0; i < randomGoreCount; i++)
-                    {
-                        Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("WulfrumEnemyGore" + Main.rand.Next(1, 11).ToString()).Type, 1f);
-                    }
-                }
-            }
-        }
-
         public override void ModifyNPCLoot(NPCLoot npcLoot)
         {
-            npcLoot.Add(ModContent.ItemType<WulfrumMetalScrap>(), 1, 1, 3);
-            npcLoot.Add(ModContent.ItemType<WulfrumBattery>(), new Fraction(7, 100));
-            npcLoot.AddIf(info => info.npc.ModNPC<WulfrumDrone>().Supercharged, ModContent.ItemType<EnergyCore>());
+            AddCombatLoot(npcLoot, 1, 3);
         }
     }
 }

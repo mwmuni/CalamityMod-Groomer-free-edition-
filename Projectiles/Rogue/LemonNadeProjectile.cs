@@ -151,14 +151,7 @@ namespace CalamityMod.Projectiles.Rogue
                 Collision.HitTiles(Projectile.position, Projectile.velocity, Projectile.width, Projectile.height);
             }
 
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
             Projectile.velocity *= 0.75f;
             return false;
         }

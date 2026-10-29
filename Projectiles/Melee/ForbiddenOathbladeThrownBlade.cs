@@ -358,14 +358,7 @@ namespace CalamityMod.Projectiles.Melee
                 }
                 else
                 {
-                    if (Projectile.velocity.X != oldVelocity.X)
-                    {
-                        Projectile.velocity.X = -oldVelocity.X;
-                    }
-                    if (Projectile.velocity.Y != oldVelocity.Y)
-                    {
-                        Projectile.velocity.Y = -oldVelocity.Y;
-                    }
+                    Projectile.BounceOnTileCollision(oldVelocity);
                     if (Projectile.velocity.Length() < 8)
                         Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * 8;
                     Projectile.velocity.Y *= 0.85f;

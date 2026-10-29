@@ -1,22 +1,28 @@
-﻿using System.Collections.Generic;
-using CalamityMod.Items.Accessories;
+using System.Collections.Generic;
 using CalamityMod.Items.Accessories.Vanity;
+using CalamityMod.Items.Accessories;
 using CalamityMod.Items.Materials;
 using CalamityMod.Items.Placeables.Banners;
-using CalamityMod.Sounds;
 using CalamityMod.World;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent.Bestiary;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Utilities;
 
 namespace CalamityMod.NPCs.NormalNPCs
 {
-    public class WulfrumAmplifier : ModNPC
+    public class WulfrumAmplifier : WulfrumNPCBase<WulfrumAmplifierBanner>
     {
+        protected override int FrameCount => 6;
+        protected override string BestiaryEntryKey => "Mods.CalamityMod.Bestiary.WulfrumAmplifier";
+        protected override int HitDustCount => 3;
+        protected override int DeathDustCount => 15;
+        protected override string GoreName => "WulfrumAmplifierGore";
+        protected override bool NeedsExpertScaling => true;
+        protected override bool SpawnHitDustOnDedicatedServer => true;
+
         public static readonly SoundStyle Hit = new("CalamityMod/Sounds/NPCHit/WulfrumHit", 3);
         public bool Charging
         {
@@ -32,21 +38,9 @@ namespace CalamityMod.NPCs.NormalNPCs
         public const float SuperchargeTime = 720f;
 
         public int laserDelay = 150;
-        public override void SetStaticDefaults()
-        {
-            NPCID.Sets.NeedsExpertScaling[Type] = true;
-            Main.npcFrameCount[Type] = 6;
-            NPCID.Sets.NPCBestiaryDrawModifiers value = new NPCID.Sets.NPCBestiaryDrawModifiers()
-            {
-                SpriteDirection = 1
-            };
-            NPCID.Sets.NPCBestiaryDrawOffset[Type] = value;
-        }
-
         public override void SetDefaults()
         {
-            AIType = -1;
-            NPC.aiStyle = -1;
+            base.SetDefaults();
             NPC.damage = 0;
             NPC.width = 44;
             NPC.height = 44;
@@ -56,24 +50,8 @@ namespace CalamityMod.NPCs.NormalNPCs
             NPC.value = Item.buyPrice(silver: 1);
             NPC.noGravity = false;
             NPC.noTileCollide = false;
-            NPC.HitSound = Hit;
-            NPC.DeathSound = CommonCalamitySounds.WulfrumNPCDeathSound;
-            Banner = NPC.type;
-            BannerItem = ModContent.ItemType<WulfrumAmplifierBanner>();
-            NPC.Calamity().VulnerableToSickness = false;
-            NPC.Calamity().VulnerableToElectricity = true;
             if (Main.zenithWorld)
                 NPC.scale = 1.5f;
-        }
-
-        public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
-        {
-            bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
-            {
-                BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Surface,
-                BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Times.DayTime,
-                new FlavorTextBestiaryInfoElement("Mods.CalamityMod.Bestiary.WulfrumAmplifier")
-            });
         }
 
         public override void AI()
@@ -210,7 +188,7 @@ namespace CalamityMod.NPCs.NormalNPCs
 
         public override float SpawnChance(NPCSpawnInfo spawnInfo)
         {
-            if (spawnInfo.PlayerSafe || spawnInfo.Player.Calamity().ZoneSulphur || (!spawnInfo.Player.ZoneOverworldHeight && !Main.remixWorld) || (!spawnInfo.Player.ZoneNormalCaverns && spawnInfo.Player.ZoneGlowshroom && Main.remixWorld))
+            if (!CanSpawnInWulfrumZones(spawnInfo))
                 return 0f;
 
             // Spawn less frequently in the inner third of the world.
@@ -218,32 +196,6 @@ namespace CalamityMod.NPCs.NormalNPCs
                 return (Main.remixWorld ? SpawnCondition.Cavern.Chance : SpawnCondition.OverworldDaySlime.Chance) * (Main.hardMode ? 0.015f : 0.06f) * (!NPC.AnyNPCs(NPC.type) ? 1.3f : 1f);
 
             return (Main.remixWorld ? SpawnCondition.Cavern.Chance : SpawnCondition.OverworldDaySlime.Chance) * (Main.hardMode ? 0.0375f : 0.15f) * (!NPC.AnyNPCs(NPC.type) ? 1.3f : 1f);
-        }
-
-        public override void HitEffect(NPC.HitInfo hit)
-        {
-            for (int k = 0; k < 3; k++)
-            {
-                Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GrassBlades, hit.HitDirection, -1f, 0, default, 1f);
-            }
-            if (NPC.life <= 0)
-            {
-                for (int k = 0; k < 15; k++)
-                {
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GrassBlades, hit.HitDirection, -1f, 0, default, 1f);
-                }
-
-                if (!Main.dedServ)
-                {
-                    Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("WulfrumAmplifierGore").Type, 1f);
-
-                    int randomGoreCount = Main.rand.Next(1, 4);
-                    for (int i = 0; i < randomGoreCount; i++)
-                    {
-                        Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("WulfrumEnemyGore" + Main.rand.Next(1, 11).ToString()).Type, 1f);
-                    }
-                }
-            }
         }
 
         public override void ModifyNPCLoot(NPCLoot npcLoot)

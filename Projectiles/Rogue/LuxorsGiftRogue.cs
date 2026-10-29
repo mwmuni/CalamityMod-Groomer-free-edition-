@@ -79,14 +79,7 @@ namespace CalamityMod.Projectiles.Rogue
         {
             if (Projectile.numHits == 0)
                 Projectile.numHits = 1;
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
             Projectile.velocity *= 0.92f;
             for (int i = 0; i < Main.maxNPCs; i++)
                 Projectile.localNPCImmunity[i] = 0;

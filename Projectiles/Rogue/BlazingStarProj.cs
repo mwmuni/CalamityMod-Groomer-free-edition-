@@ -113,14 +113,7 @@ namespace CalamityMod.Projectiles.Rogue
             SoundEngine.PlaySound(SoundID.Dig, Projectile.Center);
             Collision.HitTiles(Projectile.position, Projectile.velocity, Projectile.width, Projectile.height);
 
-            if (Projectile.velocity.X != oldVelocity.X)
-            {
-                Projectile.velocity.X = -oldVelocity.X;
-            }
-            if (Projectile.velocity.Y != oldVelocity.Y)
-            {
-                Projectile.velocity.Y = -oldVelocity.Y;
-            }
+            Projectile.BounceOnTileCollision(oldVelocity);
             Projectile.ResetLocalNPCHitImmunity();
             Ricochet();
             Projectile.damage = (int)(Projectile.damage * 0.8f);
