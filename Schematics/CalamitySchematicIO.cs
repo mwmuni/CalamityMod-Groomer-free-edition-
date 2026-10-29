@@ -75,152 +75,40 @@ namespace CalamityMod.Schematics
         // This function is used by the schematic placer to respect the keepTile and keepWall booleans.
         public void ApplyTo(int x, int y, SchematicMetaTile original)
         {
-            // The direct Main.tile[x, y] variable setting is used instead of using a temporarily variable since tiles are now value types.
-            // Four cases.
-            // Each is contained in its own region because the code LOOKS very similar but is different in practice
+            // Tile data supplies the foreground/shared state; wall data supplies wall-specific state.
+            SchematicMetaTile tileSource = keepTile ? original : this;
+            SchematicMetaTile wallSource = keepWall ? original : this;
 
-            #region Replace Tile and Wall
-            if (!keepTile && !keepWall) // full overwrite
+            Main.tile[x, y].TileType = tileSource.TileType;
+            Main.tile[x, y].WallType = wallSource.WallType;
+            Main.tile[x, y].LiquidAmount = tileSource.LiquidAmount;
+            ref var targetLiquidState = ref (Main.tile[x, y].Get<LiquidData>());
+            targetLiquidState.LiquidType = tileSource.LiquidType;
+
+            ref var targetWBIState = ref (Main.tile[x, y].Get<TileWallBrightnessInvisibilityData>());
+            if (keepTile || brightnessInvisibility.HasValue)
             {
-                Main.tile[x, y].TileType = TileType;
-                Main.tile[x, y].WallType = WallType;
-
-                Main.tile[x, y].LiquidAmount = LiquidAmount;
-                ref var targetLiquidState = ref (Main.tile[x, y].Get<LiquidData>());
-                targetLiquidState.LiquidType = LiquidType;
-
-                // assign TileWallBrightnessInvisibilityData, both TILE and WALL, from this SMT
-                // if this SMT is from 1.4 and does not possess this data, make no changes
-                ref var targetWBIState = ref (Main.tile[x, y].Get<TileWallBrightnessInvisibilityData>());
-                if (brightnessInvisibility.HasValue)
-                {
-                    var biActual = brightnessInvisibility.Value;
-                    targetWBIState.IsTileInvisible = biActual.IsTileInvisible;
-                    targetWBIState.IsWallInvisible = biActual.IsWallInvisible;
-                    targetWBIState.IsTileFullbright = biActual.IsTileFullbright;
-                    targetWBIState.IsWallFullbright = biActual.IsWallFullbright;
-                }
-
-                // assign TileWallWireStateData from this SMT
-                ref var targetWallWireState = ref (Main.tile[x, y].Get<TileWallWireStateData>());
-                CalamitySchematicIO.AssignWallWireState(ref targetWallWireState, wallWireState.NonFrameBits);
-                targetWallWireState.TileFrameX = wallWireState.TileFrameX;
-                targetWallWireState.TileFrameY = wallWireState.TileFrameY;
+                var tileBrightness = keepTile ? original.brightnessInvisibility.Value : brightnessInvisibility.Value;
+                targetWBIState.IsTileInvisible = tileBrightness.IsTileInvisible;
+                targetWBIState.IsWallInvisible = tileBrightness.IsWallInvisible;
+                targetWBIState.IsTileFullbright = tileBrightness.IsTileFullbright;
+                targetWBIState.IsWallFullbright = tileBrightness.IsWallFullbright;
             }
-            #endregion
-
-            #region Keep Tile and Wall
-            else if (keepTile && keepWall) // full preservation
+            if (keepWall || brightnessInvisibility.HasValue)
             {
-                Main.tile[x, y].TileType = original.TileType;
-                Main.tile[x, y].WallType = original.WallType;
-
-                Main.tile[x, y].LiquidAmount = original.LiquidAmount;
-                ref var targetLiquidState = ref (Main.tile[x, y].Get<LiquidData>());
-                targetLiquidState.LiquidType = original.LiquidType; // this line caused the lava->water transmutation bug
-
-                // assign TileWallBrightnessInvisibilityData, both TILE and WALL, from ORIGINAL
-                // no safety check is performed here because original tiles will be from 1.4.4 worlds
-                ref var targetWBIState = ref (Main.tile[x, y].Get<TileWallBrightnessInvisibilityData>());
-                var biOriginal = original.brightnessInvisibility.Value;
-
-                targetWBIState.IsTileInvisible = biOriginal.IsTileInvisible;
-                targetWBIState.IsWallInvisible = biOriginal.IsWallInvisible;
-                targetWBIState.IsTileFullbright = biOriginal.IsTileFullbright;
-                targetWBIState.IsWallFullbright = biOriginal.IsWallFullbright;
-
-                ref var targetWallWireState = ref (Main.tile[x, y].Get<TileWallWireStateData>());
-                CalamitySchematicIO.AssignWallWireState(ref targetWallWireState, original.wallWireState.NonFrameBits);
-                targetWallWireState.TileFrameX = original.wallWireState.TileFrameX;
-                targetWallWireState.TileFrameY = original.wallWireState.TileFrameY;
+                var wallBrightness = wallSource.brightnessInvisibility.Value;
+                targetWBIState.IsWallInvisible = wallBrightness.IsWallInvisible;
+                targetWBIState.IsWallFullbright = wallBrightness.IsWallFullbright;
             }
-            #endregion
 
-            #region Replace Tile and Wall, then Splice Original Wall
-            else if (keepWall) // Start with replacement, then splice in wall data from original
-            {
-                Main.tile[x, y].TileType = TileType;
-                Main.tile[x, y].WallType = original.WallType;
-
-                Main.tile[x, y].LiquidAmount = LiquidAmount;
-                ref var targetLiquidState = ref (Main.tile[x, y].Get<LiquidData>());
-                targetLiquidState.LiquidType = LiquidType;
-
-                // assign TileWallBrightnessInvisibilityData, both TILE and WALL, from this SMT
-                // if this SMT is from 1.4 and does not possess this data, make no changes
-                ref var targetWBIState = ref (Main.tile[x, y].Get<TileWallBrightnessInvisibilityData>());
-                if (brightnessInvisibility.HasValue)
-                {
-                    var biActual = brightnessInvisibility.Value;
-                    targetWBIState.IsTileInvisible = biActual.IsTileInvisible;
-                    targetWBIState.IsWallInvisible = biActual.IsWallInvisible;
-                    targetWBIState.IsTileFullbright = biActual.IsTileFullbright;
-                    targetWBIState.IsWallFullbright = biActual.IsWallFullbright;
-                }
-
-                ref var targetWallWireState = ref (Main.tile[x, y].Get<TileWallWireStateData>());
-                CalamitySchematicIO.AssignWallWireState(ref targetWallWireState, wallWireState.NonFrameBits);
-                targetWallWireState.TileFrameX = wallWireState.TileFrameX;
-                targetWallWireState.TileFrameY = wallWireState.TileFrameY;
-
-                // Wall splice of TileWallWireStateData
-                // All relevant fields are contained in the above bitpack, so assign them a second time
-                targetWallWireState.WallColor = original.wallWireState.WallColor;
-                targetWallWireState.WallFrameNumber = original.wallWireState.WallFrameNumber;
-                targetWallWireState.WallFrameX = original.wallWireState.WallFrameX;
-                targetWallWireState.WallFrameY = original.wallWireState.WallFrameY;
-
-                // Wall splice of TileWallBrightnessInvisibilityData
-                // no safety check is performed here because original tiles will be from 1.4.4 worlds
-                var biOriginal = original.brightnessInvisibility.Value;
-                targetWBIState.IsWallInvisible = biOriginal.IsWallInvisible;
-                targetWBIState.IsWallFullbright = biOriginal.IsWallFullbright;
-            }
-            #endregion
-
-            #region Keep Tile and Wall, then Splice New Wall
-            else if (keepTile) // Start with original, then splice in wall data from replacement
-            {
-                Main.tile[x, y].TileType = original.TileType;
-                Main.tile[x, y].WallType = WallType;
-
-                Main.tile[x, y].LiquidAmount = original.LiquidAmount;
-                ref var targetLiquidState = ref (Main.tile[x, y].Get<LiquidData>());
-                // keeping the original tile could mean keeping a full space of liquid that was originally there
-                // this is fine, of course, because all you are changing is the background wall and the liquid can be on top of that
-                targetLiquidState.LiquidType = original.LiquidType;
-
-                // assign TileWallBrightnessInvisibilityData, both TILE and WALL, from ORIGINAL
-                // no safety check is performed here because original tiles will be from 1.4.4 worlds
-                ref var targetWBIState = ref (Main.tile[x, y].Get<TileWallBrightnessInvisibilityData>());
-                var biOriginal = original.brightnessInvisibility.Value;
-
-                targetWBIState.IsTileInvisible = biOriginal.IsTileInvisible;
-                targetWBIState.IsWallInvisible = biOriginal.IsWallInvisible;
-                targetWBIState.IsTileFullbright = biOriginal.IsTileFullbright;
-                targetWBIState.IsWallFullbright = biOriginal.IsWallFullbright;
-
-                ref var targetWallWireState = ref (Main.tile[x, y].Get<TileWallWireStateData>());
-                CalamitySchematicIO.AssignWallWireState(ref targetWallWireState, original.wallWireState.NonFrameBits);
-                targetWallWireState.TileFrameX = original.wallWireState.TileFrameX;
-                targetWallWireState.TileFrameY = original.wallWireState.TileFrameY;
-
-                // Wall splice of TileWallWireStateData
-                // All relevant fields are contained in the above bitpack, so assign them a second time
-                targetWallWireState.WallColor = wallWireState.WallColor;
-                targetWallWireState.WallFrameNumber = wallWireState.WallFrameNumber;
-                targetWallWireState.WallFrameX = wallWireState.WallFrameX;
-                targetWallWireState.WallFrameY = wallWireState.WallFrameY;
-
-                // Wall splice of TileWallBrightnessInvisibilityData
-                if (brightnessInvisibility.HasValue)
-                {
-                    var biActual = brightnessInvisibility.Value;
-                    targetWBIState.IsWallInvisible = biActual.IsWallInvisible;
-                    targetWBIState.IsWallFullbright = biActual.IsWallFullbright;
-                }
-            }
-            #endregion
+            ref var targetWallWireState = ref (Main.tile[x, y].Get<TileWallWireStateData>());
+            CalamitySchematicIO.AssignWallWireState(ref targetWallWireState, tileSource.wallWireState.NonFrameBits);
+            targetWallWireState.TileFrameX = tileSource.wallWireState.TileFrameX;
+            targetWallWireState.TileFrameY = tileSource.wallWireState.TileFrameY;
+            targetWallWireState.WallColor = wallSource.wallWireState.WallColor;
+            targetWallWireState.WallFrameNumber = wallSource.wallWireState.WallFrameNumber;
+            targetWallWireState.WallFrameX = wallSource.wallWireState.WallFrameX;
+            targetWallWireState.WallFrameY = wallSource.wallWireState.WallFrameY;
         }
     }
 
