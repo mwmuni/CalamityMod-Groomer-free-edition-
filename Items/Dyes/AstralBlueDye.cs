@@ -11,11 +11,6 @@ namespace CalamityMod.Items.Dyes
     {
         public override ArmorShaderData ShaderDataToBind => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/AstralBlueDyeShader"), "DyePass").
             UseColor(new Color(109, 242, 197)).UseSecondaryColor(new Color(42, 147, 154));
-        public override void SafeSetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-        }
-
         public override void SafeSetDefaults()
         {
             Item.rare = ItemRarityID.Cyan;

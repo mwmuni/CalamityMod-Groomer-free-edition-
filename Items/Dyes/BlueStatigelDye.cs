@@ -11,11 +11,6 @@ namespace CalamityMod.Items.Dyes
     {
         public override ArmorShaderData ShaderDataToBind => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/SlimeGodDyeShader"), "DyePass").
             UseColor(new Color(80, 170, 206)).UseSecondaryColor(new Color(81, 87, 119)).UseImage("Images/Misc/Perlin");
-        public override void SafeSetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-        }
-
         public override void SafeSetDefaults()
         {
             Item.rare = ItemRarityID.LightRed;

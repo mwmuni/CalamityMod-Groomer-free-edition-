@@ -12,11 +12,6 @@ namespace CalamityMod.Items.Dyes
     {
         public override ArmorShaderData ShaderDataToBind => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/ProfanedRockDyeShader"), "DyePass").
             UseColor(new Color(79, 16, 16)).UseSecondaryColor(new Color(173, 116, 0)).UseImage(Request<Texture2D>("CalamityMod/ExtraTextures/GreyscaleGradients/Veins"));
-        public override void SafeSetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-        }
-
         public override void SafeSetDefaults()
         {
             Item.rare = ItemRarityID.Purple;

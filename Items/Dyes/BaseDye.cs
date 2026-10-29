@@ -18,6 +18,7 @@ namespace CalamityMod.Items.Dyes
             {
                 GameShaders.Armor.BindShader(Item.type, ShaderDataToBind);
             }
+            Item.ResearchUnlockCount = 3;
             SafeSetStaticDefaults();
         }
         public sealed override void SetDefaults()

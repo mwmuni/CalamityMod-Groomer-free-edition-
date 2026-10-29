@@ -15,11 +15,6 @@ namespace CalamityMod.Items.Dyes
             get => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/ExoDyeShader"), "DyePass").UseImage("Images/Misc/Perlin");
         }
 
-        public override void SafeSetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-        }
-
         public override void SafeSetDefaults()
         {
             Item.rare = ModContent.RarityType<ExoticRainbow>();

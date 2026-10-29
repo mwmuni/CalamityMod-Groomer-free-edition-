@@ -417,87 +417,10 @@ namespace CalamityMod.NPCs.ProfanedGuardians
 
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
-            void drawGuardianInstance(Vector2 drawOffset, Color? colorOverride)
-            {
-                SpriteEffects spriteEffects = SpriteEffects.None;
-                if (NPC.spriteDirection == 1)
-                    spriteEffects = SpriteEffects.FlipHorizontally;
-
-                Texture2D texture2D15 = TextureAssets.Npc[Type].Value;
-                Texture2D texture2D16 = Texture_Glow2.Value;
-                Vector2 halfSizeTexture = new Vector2(TextureAssets.Npc[Type].Value.Width / 2, TextureAssets.Npc[Type].Value.Height / Main.npcFrameCount[Type] / 2);
-                int afterimageAmt = 5;
-
-                if (CalamityClientConfig.Instance.Afterimages)
-                {
-                    for (int i = 1; i < afterimageAmt; i += 2)
-                    {
-                        Color afterimageColor = drawColor;
-                        afterimageColor = Color.Lerp(afterimageColor, Color.White, 0.5f);
-                        afterimageColor = NPC.GetAlpha(afterimageColor);
-                        afterimageColor *= (afterimageAmt - i) / 15f;
-                        if (colorOverride != null)
-                            afterimageColor = colorOverride.Value;
-
-                        Vector2 afterimagePos = NPC.oldPos[i] + new Vector2(NPC.width, NPC.height) / 2f - screenPos;
-                        afterimagePos -= new Vector2(texture2D15.Width, texture2D15.Height / Main.npcFrameCount[Type]) * NPC.scale / 2f;
-                        afterimagePos += halfSizeTexture * NPC.scale + new Vector2(0f, NPC.gfxOffY) + drawOffset;
-                        spriteBatch.Draw(texture2D15, afterimagePos, NPC.frame, afterimageColor, NPC.rotation, halfSizeTexture, NPC.scale, spriteEffects, 0f);
-                    }
-                }
-
-                Vector2 drawLocation = NPC.Center - screenPos;
-                drawLocation -= new Vector2(texture2D15.Width, texture2D15.Height / Main.npcFrameCount[Type]) * NPC.scale / 2f;
-                drawLocation += halfSizeTexture * NPC.scale + new Vector2(0f, NPC.gfxOffY) + drawOffset;
-                spriteBatch.Draw(texture2D15, drawLocation, NPC.frame, colorOverride ?? NPC.GetAlpha(drawColor), NPC.rotation, halfSizeTexture, NPC.scale, spriteEffects, 0f);
-
-                texture2D15 = Texture_Glow.Value;
-                Color timeBasedDrawColor = Color.Lerp(Color.White, Color.Yellow, 0.5f);
-                if (Main.zenithWorld)
-                {
-                    texture2D15 = TextureNight_Glow.Value;
-                    timeBasedDrawColor = Main.DiscoColor;
-                }
-                Color overrideColor = Color.Lerp(Color.White, Color.Violet, 0.5f);
-                if (colorOverride != null)
-                {
-                    timeBasedDrawColor = colorOverride.Value;
-                    overrideColor = colorOverride.Value;
-                }
-
-                if (CalamityClientConfig.Instance.Afterimages)
-                {
-                    for (int j = 1; j < afterimageAmt; j++)
-                    {
-                        Color timeBasedAfterimageColor = timeBasedDrawColor;
-                        timeBasedAfterimageColor = Color.Lerp(timeBasedAfterimageColor, Color.White, 0.5f);
-                        timeBasedAfterimageColor = NPC.GetAlpha(timeBasedAfterimageColor);
-                        timeBasedAfterimageColor *= (afterimageAmt - j) / 15f;
-                        if (colorOverride != null)
-                            timeBasedAfterimageColor = colorOverride.Value;
-
-                        Vector2 timeBasedAfterimagePos = NPC.oldPos[j] + new Vector2(NPC.width, NPC.height) / 2f - screenPos;
-                        timeBasedAfterimagePos -= new Vector2(texture2D15.Width, texture2D15.Height / Main.npcFrameCount[Type]) * NPC.scale / 2f;
-                        timeBasedAfterimagePos += halfSizeTexture * NPC.scale + new Vector2(0f, NPC.gfxOffY) + drawOffset;
-                        spriteBatch.Draw(texture2D15, timeBasedAfterimagePos, NPC.frame, timeBasedAfterimageColor, NPC.rotation, halfSizeTexture, NPC.scale, spriteEffects, 0f);
-
-                        Color alphaOverrideColor = overrideColor;
-                        alphaOverrideColor = Color.Lerp(alphaOverrideColor, Color.White, 0.5f);
-                        alphaOverrideColor = NPC.GetAlpha(alphaOverrideColor);
-                        alphaOverrideColor *= (afterimageAmt - j) / 15f;
-                        if (colorOverride != null)
-                            alphaOverrideColor = colorOverride.Value;
-
-                        spriteBatch.Draw(texture2D16, timeBasedAfterimagePos, NPC.frame, alphaOverrideColor, NPC.rotation, halfSizeTexture, NPC.scale, spriteEffects, 0f);
-                    }
-                }
-
-                NPC.DrawBackglow(Main.zenithWorld ? Main.DiscoColor : new Color(255, 64, 0, 0), 4f, spriteEffects, NPC.frame, Main.screenPosition, texture2D15);
-
-                spriteBatch.Draw(texture2D15, drawLocation, NPC.frame, ProvUtils.GetColorBasedOnEnrage(false, 0), NPC.rotation, halfSizeTexture, NPC.scale, spriteEffects, 0f);
-
-                spriteBatch.Draw(texture2D16, drawLocation, NPC.frame, overrideColor, NPC.rotation, halfSizeTexture, NPC.scale, spriteEffects, 0f);
-            }
+            void drawGuardianInstance(Vector2 drawOffset, Color? colorOverride) =>
+                ProfanedGuardianDrawHelper.DrawGuardianInstance(
+                    NPC, spriteBatch, screenPos, drawColor, drawOffset, colorOverride,
+                    5, Texture_Glow.Value, TextureNight_Glow.Value, Texture_Glow2.Value);
 
             // Draw laser effects
             float useLaserGateValue = 120f;

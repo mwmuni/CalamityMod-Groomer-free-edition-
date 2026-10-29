@@ -14,7 +14,6 @@ namespace CalamityMod.Items.Dyes
             UseColor(new Color(255, 191, 73)).UseSecondaryColor(new Color(255, 255, 186)).UseImage("Images/Misc/Perlin");
         public override void SafeSetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 3;
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<ProfanedMoonlightDye>();
         }
 

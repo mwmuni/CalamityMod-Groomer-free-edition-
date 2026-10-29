@@ -12,7 +12,6 @@ namespace CalamityMod.Items.Dyes
         public override ArmorShaderData ShaderDataToBind => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/ProfanedMoonlightDye"), "DyePass");
         public override void SafeSetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 3;
             ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<ProfanedFlameDye>();
         }
 

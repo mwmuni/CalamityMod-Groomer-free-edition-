@@ -12,11 +12,6 @@ namespace CalamityMod.Items.Dyes
     {
         public override ArmorShaderData ShaderDataToBind => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/DaedalusDyeShader"), "DyePass").
             UseColor(new Color(59, 183, 255)).UseSecondaryColor(new Color(181, 45, 196)).UseImage(Request<Texture2D>("CalamityMod/ExtraTextures/GreyscaleGradients/VoronoiShapes3"));
-        public override void SafeSetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-        }
-
         public override void SafeSetDefaults()
         {
             Item.rare = ItemRarityID.Pink;

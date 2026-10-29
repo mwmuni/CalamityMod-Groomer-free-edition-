@@ -13,11 +13,6 @@ namespace CalamityMod.Items.Dyes
     {
         public override ArmorShaderData ShaderDataToBind => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/TarragonDyeShader"), "DyePass").
             UseColor(new Color(20, 117, 70)).UseSecondaryColor(new Color(28, 255, 55)).UseImage(Request<Texture2D>("CalamityMod/ExtraTextures/GreyscaleGradients/Bark"));
-        public override void SafeSetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-        }
-
         public override void SafeSetDefaults()
         {
             Item.rare = RarityType<Turquoise>();

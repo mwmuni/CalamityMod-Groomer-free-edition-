@@ -12,11 +12,6 @@ namespace CalamityMod.Items.Dyes
     {
         public override ArmorShaderData ShaderDataToBind => new ArmorShaderData(Mod.Assets.Request<Effect>("Effects/Dyes/PlagueGooDyeShader"), "DyePass").
             UseColor(new Color(26, 288, 0)).UseImage(Request<Texture2D>("CalamityMod/ExtraTextures/GreyscaleGradients/Neurons"));
-        public override void SafeSetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 3;
-        }
-
         public override void SafeSetDefaults()
         {
             Item.rare = ItemRarityID.Yellow;
