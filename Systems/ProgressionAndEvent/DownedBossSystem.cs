@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -10,6 +11,20 @@ namespace CalamityMod
 {
     public class DownedBossSystem : ModSystem
     {
+        private sealed class DownedFlag
+        {
+            public readonly string Tag;
+            public readonly Func<bool> Get;
+            public readonly Action<bool> Set;
+
+            public DownedFlag(string tag, Func<bool> get, Action<bool> set)
+            {
+                Tag = tag;
+                Get = get;
+                Set = set;
+            }
+        }
+
         // Bosses
         internal static bool _downedDesertScourge = false;
         internal static bool _downedCrabulon = false;
@@ -61,6 +76,75 @@ namespace CalamityMod
         // Betsy and Dreadnautilus because vanilla doesn't track them
         internal static bool _downedBetsy = false;
         internal static bool _downedDreadnautilus = false;
+
+        // Keep this table in LoadWorldData assignment order. SaveOrder and ResetOrder refer to
+        // these zero-based positions to preserve their existing order independently.
+        private static readonly DownedFlag[] DownedFlags =
+        {
+            new DownedFlag("desertScourge", () => downedDesertScourge, value => downedDesertScourge = value),
+            new DownedFlag("aquaticScourge", () => downedAquaticScourge, value => downedAquaticScourge = value),
+            new DownedFlag("crabulon", () => downedCrabulon, value => downedCrabulon = value),
+            new DownedFlag("hiveMind", () => downedHiveMind, value => downedHiveMind = value),
+            new DownedFlag("perforator", () => downedPerforator, value => downedPerforator = value),
+            new DownedFlag("slimeGod", () => downedSlimeGod, value => downedSlimeGod = value),
+            new DownedFlag("dreadnautilus", () => downedDreadnautilus, value => downedDreadnautilus = value),
+            new DownedFlag("cryogen", () => downedCryogen, value => downedCryogen = value),
+            new DownedFlag("brimstoneElemental", () => downedBrimstoneElemental, value => downedBrimstoneElemental = value),
+            new DownedFlag("calamitas", () => downedCalamitasClone, value => downedCalamitasClone = value),
+            new DownedFlag("leviathan", () => downedLeviathan, value => downedLeviathan = value),
+            new DownedFlag("astrageldon", () => downedAstrumAureus, value => downedAstrumAureus = value),
+            new DownedFlag("betsy", () => downedBetsy, value => downedBetsy = value),
+            new DownedFlag("plaguebringerGoliath", () => downedPlaguebringer, value => downedPlaguebringer = value),
+            new DownedFlag("scavenger", () => downedRavager, value => downedRavager = value),
+            new DownedFlag("starGod", () => downedAstrumDeus, value => downedAstrumDeus = value),
+            new DownedFlag("guardians", () => downedGuardians, value => downedGuardians = value),
+            new DownedFlag("bumblebirb", () => downedDragonfolly, value => downedDragonfolly = value),
+            new DownedFlag("providence", () => downedProvidence, value => downedProvidence = value),
+            new DownedFlag("ceaselessVoid", () => downedCeaselessVoid, value => downedCeaselessVoid = value),
+            new DownedFlag("stormWeaver", () => downedStormWeaver, value => downedStormWeaver = value),
+            new DownedFlag("signus", () => downedSignus, value => downedSignus = value),
+            new DownedFlag("polterghast", () => downedPolterghast, value => downedPolterghast = value),
+            new DownedFlag("oldDuke", () => downedBoomerDuke, value => downedBoomerDuke = value),
+            new DownedFlag("secondSentinels", () => downedSecondSentinels, value => downedSecondSentinels = value),
+            new DownedFlag("devourerOfGods", () => downedDoG, value => downedDoG = value),
+            new DownedFlag("yharon", () => downedYharon, value => downedYharon = value),
+            new DownedFlag("thanatos", () => downedThanatos, value => downedThanatos = value),
+            new DownedFlag("artemisAndApollo", () => downedArtemisAndApollo, value => downedArtemisAndApollo = value),
+            new DownedFlag("ares", () => downedAres, value => downedAres = value),
+            new DownedFlag("exoMechs", () => downedExoMechs, value => downedExoMechs = value),
+            new DownedFlag("supremeCalamitas", () => downedCalamitas, value => downedCalamitas = value),
+            new DownedFlag("adultEidolonWyrm", () => downedPrimordialWyrm, value => downedPrimordialWyrm = value),
+            new DownedFlag("horribleHog", () => downedHorribleHog, value => downedHorribleHog = value),
+            new DownedFlag("clam", () => downedCLAM, value => downedCLAM = value),
+            new DownedFlag("eocRain", () => downedEoCAcidRain, value => downedEoCAcidRain = value),
+            new DownedFlag("clamHardmode", () => downedCLAMHardMode, value => downedCLAMHardMode = value),
+            new DownedFlag("cragmawMire", () => downedCragmawMire, value => downedCragmawMire = value),
+            new DownedFlag("hmRain", () => downedAquaticScourgeAcidRain, value => downedAquaticScourgeAcidRain = value),
+            new DownedFlag("greatSandShark", () => downedGSS, value => downedGSS = value),
+            new DownedFlag("mauler", () => downedMauler, value => downedMauler = value),
+            new DownedFlag("nuclearTerror", () => downedNuclearTerror, value => downedNuclearTerror = value),
+            new DownedFlag("startedBossRush", () => startedBossRushAtLeastOnce, value => startedBossRushAtLeastOnce = value),
+            new DownedFlag("bossRush", () => downedBossRush, value => downedBossRush = value)
+        };
+
+        private static readonly int[] SaveOrder =
+        {
+            // Pre-hardmode bosses
+            0, 2, 3, 4, 5,
+            // Hardmode bosses
+            6, 7, 1, 8, 9, 10, 11, 12, 13, 14, 15,
+            // Post-ML bosses
+            16, 17, 18, 19, 20, 21, 24, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32,
+            // Minibosses and events
+            33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43
+        };
+
+        private static readonly int[] ResetOrder =
+        {
+            0, 2, 3, 4, 5, 6, 7, 1, 8, 9, 10, 11, 12, 13, 14, 15,
+            16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 29, 27, 28, 30, 31, 32, 24,
+            33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43
+        };
 
         #region Wrapper Properties for Lantern Nights
         public static bool downedDesertScourge { get => _downedDesertScourge; set => SetLanternNightFlag(ref _downedDesertScourge, value); }
@@ -143,55 +227,8 @@ namespace CalamityMod
 
         internal static void ResetAllFlags()
         {
-            downedDesertScourge = false;
-            downedCrabulon = false;
-            downedHiveMind = false;
-            downedPerforator = false;
-            downedSlimeGod = false;
-            downedDreadnautilus = false;
-            downedCryogen = false;
-            downedAquaticScourge = false;
-            downedBrimstoneElemental = false;
-            downedCalamitasClone = false;
-            downedLeviathan = false;
-            downedAstrumAureus = false;
-            downedBetsy = false;
-            downedPlaguebringer = false;
-            downedRavager = false;
-            downedAstrumDeus = false;
-            downedGuardians = false;
-            downedDragonfolly = false;
-            downedProvidence = false;
-            downedCeaselessVoid = false;
-            downedStormWeaver = false;
-            downedSignus = false;
-            downedPolterghast = false;
-            downedBoomerDuke = false;
-            downedDoG = false;
-            downedYharon = false;
-            downedAres = false;
-            downedThanatos = false;
-            downedArtemisAndApollo = false;
-            downedExoMechs = false;
-            downedCalamitas = false;
-            downedPrimordialWyrm = false;
-
-            downedSecondSentinels = false;
-
-            downedHorribleHog = false;
-            downedCLAM = false;
-            downedEoCAcidRain = false;
-
-            downedCLAMHardMode = false;
-            downedCragmawMire = false;
-            downedAquaticScourgeAcidRain = false;
-            downedGSS = false;
-
-            downedMauler = false;
-            downedNuclearTerror = false;
-
-            startedBossRushAtLeastOnce = false;
-            downedBossRush = false;
+            foreach (int flagIndex in ResetOrder)
+                DownedFlags[flagIndex].Set(false);
         }
 
         //public override void OnWorldLoad() => ResetAllFlags();
@@ -201,105 +238,12 @@ namespace CalamityMod
         public override void SaveWorldData(TagCompound tag)
         {
             List<string> downed = new List<string>();
-
-            // Pre-hardmode bosses (progression sorted)
-            if (downedDesertScourge)
-                downed.Add("desertScourge");
-            if (downedCrabulon)
-                downed.Add("crabulon");
-            if (downedHiveMind)
-                downed.Add("hiveMind");
-            if (downedPerforator)
-                downed.Add("perforator");
-            if (downedSlimeGod)
-                downed.Add("slimeGod");
-
-            // Hardmode bosses (progression sorted)
-            if (downedDreadnautilus)
-                downed.Add("dreadnautilus");
-            if (downedCryogen)
-                downed.Add("cryogen");
-            if (downedAquaticScourge)
-                downed.Add("aquaticScourge");
-            if (downedBrimstoneElemental)
-                downed.Add("brimstoneElemental");
-            if (downedCalamitasClone)
-                downed.Add("calamitas");
-            if (downedLeviathan)
-                downed.Add("leviathan");
-            if (downedAstrumAureus)
-                downed.Add("astrageldon");
-            if (downedBetsy)
-                downed.Add("betsy");
-            if (downedPlaguebringer)
-                downed.Add("plaguebringerGoliath");
-            if (downedRavager)
-                downed.Add("scavenger");
-            if (downedAstrumDeus)
-                downed.Add("starGod");
-
-            // Post-ML bosses (progression sorted)
-            if (downedGuardians)
-                downed.Add("guardians");
-            if (downedDragonfolly)
-                downed.Add("bumblebirb");
-            if (downedProvidence)
-                downed.Add("providence");
-            if (downedCeaselessVoid)
-                downed.Add("ceaselessVoid");
-            if (downedStormWeaver)
-                downed.Add("stormWeaver");
-            if (downedSignus)
-                downed.Add("signus");
-            if (downedSecondSentinels)
-                downed.Add("secondSentinels");
-            if (downedPolterghast)
-                downed.Add("polterghast");
-            if (downedBoomerDuke)
-                downed.Add("oldDuke");
-            if (downedDoG)
-                downed.Add("devourerOfGods");
-            if (downedYharon)
-                downed.Add("yharon");
-            if (downedThanatos)
-                downed.Add("thanatos");
-            if (downedArtemisAndApollo)
-                downed.Add("artemisAndApollo");
-            if (downedAres)
-                downed.Add("ares");
-            if (downedExoMechs)
-                downed.Add("exoMechs");
-            if (downedCalamitas)
-                downed.Add("supremeCalamitas");
-            if (downedPrimordialWyrm)
-                downed.Add("adultEidolonWyrm");
-
-            // Minibosses and events
-            if (downedHorribleHog)
-                downed.Add("horribleHog");
-            if (downedCLAM)
-                downed.Add("clam");
-            if (downedEoCAcidRain)
-                downed.Add("eocRain");
-
-            if (downedCLAMHardMode)
-                downed.Add("clamHardmode");
-            if (downedCragmawMire)
-                downed.Add("cragmawMire");
-            if (downedAquaticScourgeAcidRain)
-                downed.Add("hmRain");
-            if (downedGSS)
-                downed.Add("greatSandShark");
-
-            if (downedMauler)
-                downed.Add("mauler");
-            if (downedNuclearTerror)
-                downed.Add("nuclearTerror");
-
-            if (startedBossRushAtLeastOnce)
-                downed.Add("startedBossRush");
-            if (downedBossRush)
-                downed.Add("bossRush");
+            foreach (int flagIndex in SaveOrder)
+            {
+                DownedFlag flag = DownedFlags[flagIndex];
+                if (flag.Get())
+                    downed.Add(flag.Tag);
+            }
 
             tag["downedFlags"] = downed;
         }
@@ -307,57 +251,8 @@ namespace CalamityMod
         public override void LoadWorldData(TagCompound tag)
         {
             IList<string> downed = tag.GetList<string>("downedFlags");
-
-            downedDesertScourge = downed.Contains("desertScourge");
-            downedAquaticScourge = downed.Contains("aquaticScourge");
-            downedCrabulon = downed.Contains("crabulon");
-            downedHiveMind = downed.Contains("hiveMind");
-            downedPerforator = downed.Contains("perforator");
-            downedSlimeGod = downed.Contains("slimeGod");
-
-            downedDreadnautilus = downed.Contains("dreadnautilus");
-            downedCryogen = downed.Contains("cryogen");
-            downedBrimstoneElemental = downed.Contains("brimstoneElemental");
-            downedCalamitasClone = downed.Contains("calamitas");
-            downedLeviathan = downed.Contains("leviathan");
-            downedAstrumAureus = downed.Contains("astrageldon");
-            downedBetsy = downed.Contains("betsy");
-            downedPlaguebringer = downed.Contains("plaguebringerGoliath");
-            downedRavager = downed.Contains("scavenger");
-            downedAstrumDeus = downed.Contains("starGod");
-
-            downedGuardians = downed.Contains("guardians");
-            downedDragonfolly = downed.Contains("bumblebirb");
-            downedProvidence = downed.Contains("providence");
-            downedCeaselessVoid = downed.Contains("ceaselessVoid");
-            downedStormWeaver = downed.Contains("stormWeaver");
-            downedSignus = downed.Contains("signus");
-            downedPolterghast = downed.Contains("polterghast");
-            downedBoomerDuke = downed.Contains("oldDuke");
-            downedSecondSentinels = downed.Contains("secondSentinels");
-            downedDoG = downed.Contains("devourerOfGods");
-            downedYharon = downed.Contains("yharon");
-            downedThanatos = downed.Contains("thanatos");
-            downedArtemisAndApollo = downed.Contains("artemisAndApollo");
-            downedAres = downed.Contains("ares");
-            downedExoMechs = downed.Contains("exoMechs");
-            downedCalamitas = downed.Contains("supremeCalamitas");
-            downedPrimordialWyrm = downed.Contains("adultEidolonWyrm");
-
-            downedHorribleHog = downed.Contains("horribleHog");
-            downedCLAM = downed.Contains("clam");
-            downedEoCAcidRain = downed.Contains("eocRain");
-
-            downedCLAMHardMode = downed.Contains("clamHardmode");
-            downedCragmawMire = downed.Contains("cragmawMire");
-            downedAquaticScourgeAcidRain = downed.Contains("hmRain");
-            downedGSS = downed.Contains("greatSandShark");
-
-            downedMauler = downed.Contains("mauler");
-            downedNuclearTerror = downed.Contains("nuclearTerror");
-
-            startedBossRushAtLeastOnce = downed.Contains("startedBossRush");
-            downedBossRush = downed.Contains("bossRush");
+            foreach (DownedFlag flag in DownedFlags)
+                flag.Set(downed.Contains(flag.Tag));
         }
     }
 }
