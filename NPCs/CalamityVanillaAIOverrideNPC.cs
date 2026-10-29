@@ -343,182 +343,58 @@ public sealed partial class CalamityVanillaAIOverrideNPC : GlobalNPC
                     {
                         return new RevengeanceAndDeathAI.FighterAI();
                     }
-                    else
+                    else if (npc.type is
+                        NPCID.Zombie or NPCID.ArmedZombie or NPCID.ArmedZombieEskimo or
+                        NPCID.ArmedZombiePincussion or NPCID.ArmedZombieSlimed or NPCID.ArmedZombieSwamp or
+                        NPCID.ArmedZombieTwiggy or NPCID.ArmedZombieCenx or NPCID.Skeleton or NPCID.SporeSkeleton or
+                        NPCID.AngryBones or NPCID.UndeadMiner or NPCID.CorruptBunny or NPCID.DoctorBones or
+                        NPCID.TheGroom or NPCID.Crab or NPCID.GoblinScout or NPCID.ArmoredSkeleton or NPCID.Mummy or
+                        NPCID.DarkMummy or NPCID.LightMummy or NPCID.Werewolf or NPCID.Clown or
+                        NPCID.SkeletonArcher or NPCID.ChaosElemental or NPCID.BaldZombie or NPCID.PossessedArmor or
+                        NPCID.ZombieEskimo or NPCID.UndeadViking or NPCID.CorruptPenguin or NPCID.FaceMonster or
+                        NPCID.SnowFlinx or NPCID.PincushionZombie or NPCID.SlimedZombie or NPCID.SwampZombie or
+                        NPCID.TwiggyZombie or NPCID.Nymph or NPCID.ArmoredViking or NPCID.Lihzahrd or
+                        NPCID.LihzahrdCrawler or NPCID.FemaleZombie or NPCID.HeadacheSkeleton or
+                        NPCID.MisassembledSkeleton or NPCID.PantlessSkeleton or NPCID.IcyMerman or
+                        NPCID.PirateDeckhand or NPCID.PirateCorsair or NPCID.PirateDeadeye or
+                        NPCID.PirateCrossbower or NPCID.PirateCaptain or NPCID.CochinealBeetle or
+                        NPCID.CyanBeetle or NPCID.LacBeetle or NPCID.SeaSnail or NPCID.ZombieRaincoat or
+                        NPCID.ZombieMushroom or NPCID.ZombieMushroomHat or NPCID.AnomuraFungus or
+                        NPCID.MushiLadybug or NPCID.RustyArmoredBonesAxe or NPCID.RustyArmoredBonesFlail or
+                        NPCID.RustyArmoredBonesSword or NPCID.RustyArmoredBonesSwordNoArmor or
+                        NPCID.BlueArmoredBones or NPCID.BlueArmoredBonesMace or NPCID.BlueArmoredBonesNoPants or
+                        NPCID.BlueArmoredBonesSword or NPCID.HellArmoredBones or
+                        NPCID.HellArmoredBonesSpikeShield or NPCID.HellArmoredBonesMace or
+                        NPCID.HellArmoredBonesSword or NPCID.Paladin or NPCID.SkeletonSniper or
+                        NPCID.SkeletonCommando or NPCID.AngryBonesBig or NPCID.AngryBonesBigMuscle or
+                        NPCID.AngryBonesBigHelmet or NPCID.Scarecrow1 or NPCID.Scarecrow2 or NPCID.Scarecrow3 or
+                        NPCID.Scarecrow4 or NPCID.Scarecrow5 or NPCID.Scarecrow6 or NPCID.Scarecrow7 or
+                        NPCID.Scarecrow8 or NPCID.Scarecrow9 or NPCID.Scarecrow10 or NPCID.ZombieDoctor or
+                        NPCID.ZombieSuperman or NPCID.ZombiePixie or NPCID.SkeletonTopHat or
+                        NPCID.SkeletonAstonaut or NPCID.SkeletonAlien or NPCID.Splinterling or NPCID.ZombieXmas or
+                        NPCID.ZombieSweater or NPCID.ZombieElf or NPCID.ZombieElfBeard or NPCID.ZombieElfGirl or
+                        NPCID.GingerbreadMan or NPCID.Yeti or NPCID.Nutcracker or NPCID.NutcrackerSpinning or
+                        NPCID.ElfArcher or NPCID.Krampus or NPCID.CultistArcherBlue or NPCID.CultistArcherWhite or
+                        NPCID.BrainScrambler or NPCID.RayGunner or NPCID.MartianOfficer or NPCID.GrayGrunt or
+                        NPCID.MartianEngineer or NPCID.GigaZapper or NPCID.Scutlix or NPCID.BoneThrowingSkeleton or
+                        NPCID.BoneThrowingSkeleton2 or NPCID.BoneThrowingSkeleton3 or NPCID.BoneThrowingSkeleton4 or
+                        NPCID.CrimsonBunny or NPCID.CrimsonPenguin or NPCID.Medusa or NPCID.GreekSkeleton or
+                        NPCID.GraniteGolem or NPCID.BloodZombie or NPCID.Crawdad or NPCID.Crawdad2 or
+                        NPCID.Salamander or NPCID.Salamander2 or NPCID.Salamander3 or NPCID.Salamander4 or
+                        NPCID.Salamander5 or NPCID.Salamander6 or NPCID.Salamander7 or NPCID.Salamander8 or
+                        NPCID.Salamander9 or NPCID.GiantWalkingAntlion or NPCID.WalkingAntlion or
+                        NPCID.LarvaeAntlion or NPCID.DesertGhoul or NPCID.DesertGhoulCorruption or
+                        NPCID.DesertGhoulCrimson or NPCID.DesertGhoulHallow or NPCID.DesertLamiaLight or
+                        NPCID.DesertLamiaDark or NPCID.DesertScorpionWalk or NPCID.DesertBeast or
+                        NPCID.StardustSoldier or NPCID.StardustSpiderBig or NPCID.NebulaSoldier or
+                        NPCID.VortexSoldier or NPCID.SolarDrakomire or NPCID.SolarSpearman or NPCID.SolarSolenian or
+                        NPCID.Frankenstein or NPCID.SwampThing or NPCID.Vampire or NPCID.Butcher or
+                        NPCID.CreatureFromTheDeep or NPCID.Fritz or NPCID.Psycho or NPCID.ThePossessed or
+                        NPCID.DrManFly or NPCID.GoblinPeon or NPCID.GoblinThief or NPCID.GoblinWarrior or
+                        NPCID.GoblinArcher or NPCID.GoblinSummoner or NPCID.MartianWalker or
+                        NPCID.DemonTaxCollector or NPCID.TheBride)
                     {
-                        switch (npc.type)
-                        {
-                            case NPCID.Zombie:
-                            case NPCID.ArmedZombie:
-                            case NPCID.ArmedZombieEskimo:
-                            case NPCID.ArmedZombiePincussion:
-                            case NPCID.ArmedZombieSlimed:
-                            case NPCID.ArmedZombieSwamp:
-                            case NPCID.ArmedZombieTwiggy:
-                            case NPCID.ArmedZombieCenx:
-                            case NPCID.Skeleton:
-                            case NPCID.SporeSkeleton:
-                            case NPCID.AngryBones:
-                            case NPCID.UndeadMiner:
-                            case NPCID.CorruptBunny:
-                            case NPCID.DoctorBones:
-                            case NPCID.TheGroom:
-                            case NPCID.Crab:
-                            case NPCID.GoblinScout:
-                            case NPCID.ArmoredSkeleton:
-                            case NPCID.Mummy:
-                            case NPCID.DarkMummy:
-                            case NPCID.LightMummy:
-                            case NPCID.Werewolf:
-                            case NPCID.Clown:
-                            case NPCID.SkeletonArcher:
-                            case NPCID.ChaosElemental:
-                            case NPCID.BaldZombie:
-                            case NPCID.PossessedArmor:
-                            case NPCID.ZombieEskimo:
-                            case NPCID.UndeadViking:
-                            case NPCID.CorruptPenguin:
-                            case NPCID.FaceMonster:
-                            case NPCID.SnowFlinx:
-                            case NPCID.PincushionZombie:
-                            case NPCID.SlimedZombie:
-                            case NPCID.SwampZombie:
-                            case NPCID.TwiggyZombie:
-                            case NPCID.Nymph:
-                            case NPCID.ArmoredViking:
-                            case NPCID.Lihzahrd:
-                            case NPCID.LihzahrdCrawler:
-                            case NPCID.FemaleZombie:
-                            case NPCID.HeadacheSkeleton:
-                            case NPCID.MisassembledSkeleton:
-                            case NPCID.PantlessSkeleton:
-                            case NPCID.IcyMerman:
-                            case NPCID.PirateDeckhand:
-                            case NPCID.PirateCorsair:
-                            case NPCID.PirateDeadeye:
-                            case NPCID.PirateCrossbower:
-                            case NPCID.PirateCaptain:
-                            case NPCID.CochinealBeetle:
-                            case NPCID.CyanBeetle:
-                            case NPCID.LacBeetle:
-                            case NPCID.SeaSnail:
-                            case NPCID.ZombieRaincoat:
-                            case NPCID.ZombieMushroom:
-                            case NPCID.ZombieMushroomHat:
-                            case NPCID.AnomuraFungus:
-                            case NPCID.MushiLadybug:
-                            case NPCID.RustyArmoredBonesAxe:
-                            case NPCID.RustyArmoredBonesFlail:
-                            case NPCID.RustyArmoredBonesSword:
-                            case NPCID.RustyArmoredBonesSwordNoArmor:
-                            case NPCID.BlueArmoredBones:
-                            case NPCID.BlueArmoredBonesMace:
-                            case NPCID.BlueArmoredBonesNoPants:
-                            case NPCID.BlueArmoredBonesSword:
-                            case NPCID.HellArmoredBones:
-                            case NPCID.HellArmoredBonesSpikeShield:
-                            case NPCID.HellArmoredBonesMace:
-                            case NPCID.HellArmoredBonesSword:
-                            case NPCID.Paladin:
-                            case NPCID.SkeletonSniper:
-                            case NPCID.SkeletonCommando:
-                            case NPCID.AngryBonesBig:
-                            case NPCID.AngryBonesBigMuscle:
-                            case NPCID.AngryBonesBigHelmet:
-                            case NPCID.Scarecrow1:
-                            case NPCID.Scarecrow2:
-                            case NPCID.Scarecrow3:
-                            case NPCID.Scarecrow4:
-                            case NPCID.Scarecrow5:
-                            case NPCID.Scarecrow6:
-                            case NPCID.Scarecrow7:
-                            case NPCID.Scarecrow8:
-                            case NPCID.Scarecrow9:
-                            case NPCID.Scarecrow10:
-                            case NPCID.ZombieDoctor:
-                            case NPCID.ZombieSuperman:
-                            case NPCID.ZombiePixie:
-                            case NPCID.SkeletonTopHat:
-                            case NPCID.SkeletonAstonaut:
-                            case NPCID.SkeletonAlien:
-                            case NPCID.Splinterling:
-                            case NPCID.ZombieXmas:
-                            case NPCID.ZombieSweater:
-                            case NPCID.ZombieElf:
-                            case NPCID.ZombieElfBeard:
-                            case NPCID.ZombieElfGirl:
-                            case NPCID.GingerbreadMan:
-                            case NPCID.Yeti:
-                            case NPCID.Nutcracker:
-                            case NPCID.NutcrackerSpinning:
-                            case NPCID.ElfArcher:
-                            case NPCID.Krampus:
-                            case NPCID.CultistArcherBlue:
-                            case NPCID.CultistArcherWhite:
-                            case NPCID.BrainScrambler:
-                            case NPCID.RayGunner:
-                            case NPCID.MartianOfficer:
-                            case NPCID.GrayGrunt:
-                            case NPCID.MartianEngineer:
-                            case NPCID.GigaZapper:
-                            case NPCID.Scutlix:
-                            case NPCID.BoneThrowingSkeleton:
-                            case NPCID.BoneThrowingSkeleton2:
-                            case NPCID.BoneThrowingSkeleton3:
-                            case NPCID.BoneThrowingSkeleton4:
-                            case NPCID.CrimsonBunny:
-                            case NPCID.CrimsonPenguin:
-                            case NPCID.Medusa:
-                            case NPCID.GreekSkeleton:
-                            case NPCID.GraniteGolem:
-                            case NPCID.BloodZombie:
-                            case NPCID.Crawdad:
-                            case NPCID.Crawdad2:
-                            case NPCID.Salamander:
-                            case NPCID.Salamander2:
-                            case NPCID.Salamander3:
-                            case NPCID.Salamander4:
-                            case NPCID.Salamander5:
-                            case NPCID.Salamander6:
-                            case NPCID.Salamander7:
-                            case NPCID.Salamander8:
-                            case NPCID.Salamander9:
-                            case NPCID.GiantWalkingAntlion:
-                            case NPCID.WalkingAntlion:
-                            case NPCID.LarvaeAntlion:
-                            case NPCID.DesertGhoul:
-                            case NPCID.DesertGhoulCorruption:
-                            case NPCID.DesertGhoulCrimson:
-                            case NPCID.DesertGhoulHallow:
-                            case NPCID.DesertLamiaLight:
-                            case NPCID.DesertLamiaDark:
-                            case NPCID.DesertScorpionWalk:
-                            case NPCID.DesertBeast:
-                            case NPCID.StardustSoldier:
-                            case NPCID.StardustSpiderBig:
-                            case NPCID.NebulaSoldier:
-                            case NPCID.VortexSoldier:
-                            case NPCID.SolarDrakomire:
-                            case NPCID.SolarSpearman:
-                            case NPCID.SolarSolenian:
-                            case NPCID.Frankenstein:
-                            case NPCID.SwampThing:
-                            case NPCID.Vampire:
-                            case NPCID.Butcher:
-                            case NPCID.CreatureFromTheDeep:
-                            case NPCID.Fritz:
-                            case NPCID.Psycho:
-                            case NPCID.ThePossessed:
-                            case NPCID.DrManFly:
-                            case NPCID.GoblinPeon:
-                            case NPCID.GoblinThief:
-                            case NPCID.GoblinWarrior:
-                            case NPCID.GoblinArcher:
-                            case NPCID.GoblinSummoner:
-                            case NPCID.MartianWalker:
-                            case NPCID.DemonTaxCollector:
-                            case NPCID.TheBride:
-                                return new RevengeanceAndDeathAI.FighterAI();
-                        }
+                        return new RevengeanceAndDeathAI.FighterAI();
                     }
                     break;
 
