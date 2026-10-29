@@ -39,6 +39,130 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             return damage;
         }
 
+        private static void RetargetBoss(NPC npc, bool finishThemOff = false)
+        {
+            CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
+            if (finishThemOff)
+                options.finishThemOff = true;
+            else
+                options.aggroRatio = -1f;
+            CalamityUtils.CalamityTargeting(npc, options);
+        }
+
+        private static Vector2 GetMechQueenSpacing(NPC npc, float horizontalOffset)
+        {
+            Vector2 spacing = Vector2.Zero;
+            if (NPC.IsMechQueenUp)
+            {
+                NPC mechQueen = Main.npc[NPC.mechQueen];
+                Vector2 mechQueenCenter = mechQueen.GetMechQueenCenter();
+                Vector2 spacingOffset = new Vector2(horizontalOffset, -250f);
+                spacingOffset *= 0.75f;
+                float mechdusaRotation = mechQueen.velocity.X * 0.025f;
+                spacing = mechQueenCenter + spacingOffset;
+                spacing = spacing.RotatedBy(mechdusaRotation, mechQueenCenter);
+            }
+            return spacing;
+        }
+
+        private static void MoveToMechQueen(NPC npc, Vector2 spacing, float inertia, ref float maxVelocity, ref Vector2 destination, ref float distanceFromDestination, ref Vector2 idealVelocity)
+        {
+            maxVelocity = 14f;
+            destination = spacing;
+            distanceFromDestination = (destination - npc.Center).Length();
+            idealVelocity = (destination - npc.Center).SafeNormalize(Vector2.UnitY);
+
+            if (distanceFromDestination > maxVelocity)
+                idealVelocity *= maxVelocity / distanceFromDestination;
+
+            npc.velocity = (npc.velocity * (inertia - 1f) + idealVelocity) / inertia;
+        }
+
+        private static void EmitBloodDust(NPC npc)
+        {
+            if (Main.rand.NextBool(5))
+            {
+                int bloodDust = Dust.NewDust(new Vector2(npc.position.X, npc.position.Y + npc.height * 0.25f), npc.width, (int)(npc.height * 0.5f), DustID.Blood, npc.velocity.X, 2f, 0, default, 1f);
+                Dust dust = Main.dust[bloodDust];
+                dust.velocity.X *= 0.5f;
+                dust.velocity.Y *= 0.1f;
+            }
+        }
+
+        private static void SynchronizeTwinsTimeLeft(NPC npc)
+        {
+            if (Main.netMode != NetmodeID.MultiplayerClient && !Main.player[npc.target].dead && npc.timeLeft < 10)
+            {
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    if (i != npc.whoAmI && Main.npc[i].active && (Main.npc[i].type == NPCID.Retinazer || Main.npc[i].type == NPCID.Spazmatism) && Main.npc[i].timeLeft - 1 > npc.timeLeft)
+                        npc.timeLeft = Main.npc[i].timeLeft - 1;
+                }
+            }
+        }
+
+        private static void ApplyDeceleration(NPC npc, float deceleration)
+        {
+            npc.velocity *= deceleration;
+            if (Math.Abs(npc.velocity.X) < 0.1)
+                npc.velocity.X = 0f;
+            if (Math.Abs(npc.velocity.Y) < 0.1)
+                npc.velocity.Y = 0f;
+        }
+
+        private static void UpdateTransformationAI(NPC npc, int transformationGoreType)
+        {
+            if (NPC.IsMechQueenUp)
+                npc.reflectsProjectiles = true;
+
+            if (npc.ai[0] == 1f)
+            {
+                npc.ai[2] += 0.005f;
+                if (npc.ai[2] > 0.5)
+                    npc.ai[2] = 0.5f;
+            }
+            else
+            {
+                npc.ai[2] -= 0.005f;
+                if (npc.ai[2] < 0f)
+                    npc.ai[2] = 0f;
+            }
+
+            npc.rotation += npc.ai[2];
+            npc.ai[1] += 1f;
+
+            if (npc.ai[1] == 100f)
+            {
+                npc.ai[0] += 1f;
+                npc.ai[1] = 0f;
+                if (npc.ai[0] == 3f)
+                    npc.ai[2] = 0f;
+                else
+                {
+                    SoundEngine.PlaySound(SoundID.NPCHit1, npc.Center);
+
+                    if (!Main.dedServ)
+                    {
+                        for (int i = 0; i < 2; i++)
+                        {
+                            Gore.NewGore(npc.GetSource_FromAI(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), transformationGoreType, 1f);
+                            Gore.NewGore(npc.GetSource_FromAI(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 7, 1f);
+                            Gore.NewGore(npc.GetSource_FromAI(), npc.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 6, 1f);
+                        }
+                    }
+
+                    for (int j = 0; j < 20; j++)
+                        Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f, 0, default, 1f);
+
+                    SoundEngine.PlaySound(SoundID.ForceRoar, npc.Center);
+                }
+            }
+
+            Dust.NewDust(npc.position, npc.width, npc.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f, 0, default, 1f);
+
+            ApplyDeceleration(npc, 0.98f);
+        }
+
         public class RetinazerAI : VanillaAIOverride
         {
             public override bool AI(Mod mod)
@@ -48,11 +172,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 // Get a target
                 if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                {
-                    CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                    options.aggroRatio = -1f;
-                    CalamityUtils.CalamityTargeting(NPC, options);
-                }
+                    RetargetBoss(NPC);
 
                 // Percent life remaining
                 float lifeRatio = NPC.life / (float)NPC.lifeMax;
@@ -78,22 +198,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 float rotationRate = 0.15f;
                 NPC.rotation = NPC.rotation.AngleTowards(hoverRotation, rotationRate);
 
-                if (Main.rand.NextBool(5))
-                {
-                    int retiDust = Dust.NewDust(new Vector2(NPC.position.X, NPC.position.Y + NPC.height * 0.25f), NPC.width, (int)(NPC.height * 0.5f), DustID.Blood, NPC.velocity.X, 2f, 0, default, 1f);
-                    Dust dust = Main.dust[retiDust];
-                    dust.velocity.X *= 0.5f;
-                    dust.velocity.Y *= 0.1f;
-                }
-
-                if (Main.netMode != NetmodeID.MultiplayerClient && !Main.player[NPC.target].dead && NPC.timeLeft < 10)
-                {
-                    for (int i = 0; i < Main.maxNPCs; i++)
-                    {
-                        if (i != NPC.whoAmI && Main.npc[i].active && (Main.npc[i].type == NPCID.Retinazer || Main.npc[i].type == NPCID.Spazmatism) && Main.npc[i].timeLeft - 1 > NPC.timeLeft)
-                            NPC.timeLeft = Main.npc[i].timeLeft - 1;
-                    }
-                }
+                EmitBloodDust(NPC);
+                SynchronizeTwinsTimeLeft(NPC);
 
                 // Phase HP ratios
                 float phase2LifeRatio = death ? 0.85f : 0.7f;
@@ -110,17 +216,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 bool phase2 = lifeRatio < phase2LifeRatio;
                 bool finalPhase = lifeRatio < finalPhaseLifeRatio;
 
-                Vector2 mechQueenSpacing = Vector2.Zero;
-                if (NPC.IsMechQueenUp)
-                {
-                    NPC nPC = Main.npc[NPC.mechQueen];
-                    Vector2 mechQueenCenter = nPC.GetMechQueenCenter();
-                    Vector2 eyePosition = new Vector2(-150f, -250f);
-                    eyePosition *= 0.75f;
-                    float mechdusaRotation = nPC.velocity.X * 0.025f;
-                    mechQueenSpacing = mechQueenCenter + eyePosition;
-                    mechQueenSpacing = mechQueenSpacing.RotatedBy(mechdusaRotation, mechQueenCenter);
-                }
+                Vector2 mechQueenSpacing = GetMechQueenSpacing(NPC, -150f);
 
                 NPC.reflectsProjectiles = false;
 
@@ -159,19 +255,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         Vector2 idealVelocity = (destination - NPC.Center).SafeNormalize(Vector2.UnitX * direction);
 
                         if (NPC.IsMechQueenUp)
-                        {
-                            maxVelocity = 14f;
-
-                            destination = mechQueenSpacing;
-                            distanceFromDestination = (destination - NPC.Center).Length();
-                            idealVelocity = (destination - NPC.Center).SafeNormalize(Vector2.UnitY);
-
-                            if (distanceFromDestination > maxVelocity)
-                                idealVelocity *= maxVelocity / distanceFromDestination;
-
-                            float inertia = 60f;
-                            NPC.velocity = (NPC.velocity * (inertia - 1f) + idealVelocity) / inertia;
-                        }
+                            MoveToMechQueen(NPC, mechQueenSpacing, 60f, ref maxVelocity, ref destination, ref distanceFromDestination, ref idealVelocity);
                         else
                             NPC.SimpleFlyMovement(idealVelocity * maxVelocity, acceleration);
 
@@ -190,9 +274,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             NPC.ai[2] = 0f;
                             NPC.ai[3] = 0f;
 
-                            CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                            options.aggroRatio = -1f;
-                            CalamityUtils.CalamityTargeting(NPC, options);
+                            RetargetBoss(NPC);
 
                             NPC.netUpdate = true;
                         }
@@ -243,12 +325,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         if (NPC.ai[2] >= decelerateGateValue)
                         {
                             float decelerationMultiplier = (death ? 0.84f : 0.92f) - (death ? 0.16f * ((1f - lifeRatio) / (1f - phase2LifeRatio)) : 0f);
-                            NPC.velocity *= decelerationMultiplier;
-
-                            if (Math.Abs(NPC.velocity.X) < 0.1)
-                                NPC.velocity.X = 0f;
-                            if (Math.Abs(NPC.velocity.Y) < 0.1)
-                                NPC.velocity.Y = 0f;
+                            ApplyDeceleration(NPC, decelerationMultiplier);
                         }
                         else
                             NPC.rotation = NPC.velocity.ToRotation() - MathHelper.PiOver2;
@@ -268,9 +345,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                                 NPC.ai[1] = 0f;
                                 NPC.ai[3] = 0f;
 
-                                CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                                options.aggroRatio = -1f;
-                                CalamityUtils.CalamityTargeting(NPC, options);
+                                RetargetBoss(NPC);
                             }
                             else
                                 NPC.ai[1] = 1f;
@@ -285,9 +360,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         NPC.ai[2] = 0f;
                         NPC.ai[3] = 0f;
 
-                        CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                        options.aggroRatio = -1f;
-                        CalamityUtils.CalamityTargeting(NPC, options);
+                        RetargetBoss(NPC);
 
                         NPC.netUpdate = true;
                     }
@@ -295,62 +368,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 else if (NPC.ai[0] == 1f || NPC.ai[0] == 2f)
                 {
-                    if (NPC.IsMechQueenUp)
-                        NPC.reflectsProjectiles = true;
-
-                    if (NPC.ai[0] == 1f)
-                    {
-                        NPC.ai[2] += 0.005f;
-                        if (NPC.ai[2] > 0.5)
-                            NPC.ai[2] = 0.5f;
-                    }
-                    else
-                    {
-                        NPC.ai[2] -= 0.005f;
-                        if (NPC.ai[2] < 0f)
-                            NPC.ai[2] = 0f;
-                    }
-
-                    NPC.rotation += NPC.ai[2];
-
-                    NPC.ai[1] += 1f;
-
-                    if (NPC.ai[1] == 100f)
-                    {
-                        NPC.ai[0] += 1f;
-                        NPC.ai[1] = 0f;
-                        if (NPC.ai[0] == 3f)
-                        {
-                            NPC.ai[2] = 0f;
-                        }
-                        else
-                        {
-                            SoundEngine.PlaySound(SoundID.NPCHit1, NPC.Center);
-
-                            if (!Main.dedServ)
-                            {
-                                for (int i = 0; i < 2; i++)
-                                {
-                                    Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 143, 1f);
-                                    Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 7, 1f);
-                                    Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 6, 1f);
-                                }
-                            }
-
-                            for (int j = 0; j < 20; j++)
-                                Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f, 0, default, 1f);
-
-                            SoundEngine.PlaySound(SoundID.ForceRoar, NPC.Center);
-                        }
-                    }
-
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f, 0, default, 1f);
-
-                    NPC.velocity *= 0.98f;
-                    if (Math.Abs(NPC.velocity.X) < 0.1)
-                        NPC.velocity.X = 0f;
-                    if (Math.Abs(NPC.velocity.Y) < 0.1)
-                        NPC.velocity.Y = 0f;
+                    UpdateTransformationAI(NPC, 143);
                 }
                 else
                 {
@@ -389,19 +407,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         Vector2 idealVelocity = (destination - NPC.Center).SafeNormalize(Vector2.UnitX * direction);
 
                         if (NPC.IsMechQueenUp)
-                        {
-                            maxVelocity = 14f;
-
-                            destination = mechQueenSpacing;
-                            distanceFromDestination = (destination - NPC.Center).Length();
-                            idealVelocity = (destination - NPC.Center).SafeNormalize(Vector2.UnitY);
-
-                            if (distanceFromDestination > maxVelocity)
-                                idealVelocity *= maxVelocity / distanceFromDestination;
-
-                            float inertia = 5f;
-                            NPC.velocity = (NPC.velocity * (inertia - 1f) + idealVelocity) / inertia;
-                        }
+                            MoveToMechQueen(NPC, mechQueenSpacing, 5f, ref maxVelocity, ref destination, ref distanceFromDestination, ref idealVelocity);
                         else
                             NPC.SimpleFlyMovement(idealVelocity * maxVelocity, acceleration);
 
@@ -413,9 +419,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             NPC.ai[2] = 0f;
                             NPC.ai[3] = 0f;
 
-                            CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                            options.aggroRatio = -1f;
-                            CalamityUtils.CalamityTargeting(NPC, options);
+                            RetargetBoss(NPC);
 
                             NPC.netUpdate = true;
                         }
@@ -487,9 +491,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                                 NPC.ai[2] = 0f;
                                 NPC.ai[3] = 0f;
 
-                                CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                                options.aggroRatio = -1f;
-                                CalamityUtils.CalamityTargeting(NPC, options);
+                                RetargetBoss(NPC);
 
                                 NPC.netUpdate = true;
                             }
@@ -526,12 +528,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             // Slow down
                             if (NPC.ai[2] >= chargeTime)
                             {
-                                NPC.velocity *= 0.93f;
-
-                                if (Math.Abs(NPC.velocity.X) < 0.1)
-                                    NPC.velocity.X = 0f;
-                                if (Math.Abs(NPC.velocity.Y) < 0.1)
-                                    NPC.velocity.Y = 0f;
+                                ApplyDeceleration(NPC, 0.93f);
                             }
                             else
                             {
@@ -592,9 +589,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                                     NPC.ai[1] = 0f;
                                     NPC.ai[3] = 0f;
 
-                                    CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                                    options.aggroRatio = -1f;
-                                    CalamityUtils.CalamityTargeting(NPC, options);
+                                    RetargetBoss(NPC);
                                 }
                                 else
                                     NPC.ai[1] = 4f;
@@ -651,9 +646,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 // Get a target
                 if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
                 {
-                    CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                    options.finishThemOff = true;
-                    CalamityUtils.CalamityTargeting(NPC, options);
+                    RetargetBoss(NPC, finishThemOff: true);
                 }
 
                 // Percent life remaining
@@ -683,24 +676,10 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 NPC.rotation = NPC.rotation.AngleTowards(hoverRotation, rotationRate);
 
-                // Dust
-                if (Main.rand.NextBool(5))
-                {
-                    int spazDust = Dust.NewDust(new Vector2(NPC.position.X, NPC.position.Y + NPC.height * 0.25f), NPC.width, (int)(NPC.height * 0.5f), DustID.Blood, NPC.velocity.X, 2f, 0, default, 1f);
-                    Dust dust = Main.dust[spazDust];
-                    dust.velocity.X *= 0.5f;
-                    dust.velocity.Y *= 0.1f;
-                }
+                EmitBloodDust(NPC);
 
                 // Despawn Twins at the same time
-                if (Main.netMode != NetmodeID.MultiplayerClient && !Main.player[NPC.target].dead && NPC.timeLeft < 10)
-                {
-                    for (int i = 0; i < Main.maxNPCs; i++)
-                    {
-                        if (i != NPC.whoAmI && Main.npc[i].active && (Main.npc[i].type == NPCID.Retinazer || Main.npc[i].type == NPCID.Spazmatism) && Main.npc[i].timeLeft - 1 > NPC.timeLeft)
-                            NPC.timeLeft = Main.npc[i].timeLeft - 1;
-                    }
-                }
+                SynchronizeTwinsTimeLeft(NPC);
 
                 // Phase HP ratios
                 float phase2LifeRatio = death ? 0.85f : 0.7f;
@@ -718,17 +697,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 bool phase2 = lifeRatio < phase2LifeRatio;
                 bool finalPhase = lifeRatio < finalPhaseLifeRatio;
 
-                Vector2 mechQueenSpacing = Vector2.Zero;
-                if (NPC.IsMechQueenUp)
-                {
-                    NPC nPC2 = Main.npc[NPC.mechQueen];
-                    Vector2 mechQueenCenter2 = nPC2.GetMechQueenCenter();
-                    Vector2 mechdusaSpacingVector = new Vector2(150f, -250f);
-                    mechdusaSpacingVector *= 0.75f;
-                    float mechdusaSpacingVel = nPC2.velocity.X * 0.025f;
-                    mechQueenSpacing = mechQueenCenter2 + mechdusaSpacingVector;
-                    mechQueenSpacing = mechQueenSpacing.RotatedBy(mechdusaSpacingVel, mechQueenCenter2);
-                }
+                Vector2 mechQueenSpacing = GetMechQueenSpacing(NPC, 150f);
 
                 NPC.reflectsProjectiles = false;
 
@@ -770,19 +739,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         Vector2 idealVelocity = (destination - NPC.Center).SafeNormalize(Vector2.UnitX * direction);
 
                         if (NPC.IsMechQueenUp)
-                        {
-                            maxVelocity = 14f;
-
-                            destination = mechQueenSpacing;
-                            distanceFromDestination = (destination - NPC.Center).Length();
-                            idealVelocity = (destination - NPC.Center).SafeNormalize(Vector2.UnitY);
-
-                            if (distanceFromDestination > maxVelocity)
-                                idealVelocity *= maxVelocity / distanceFromDestination;
-
-                            float inertia = 5f;
-                            NPC.velocity = (NPC.velocity * (inertia - 1f) + idealVelocity) / inertia;
-                        }
+                            MoveToMechQueen(NPC, mechQueenSpacing, 5f, ref maxVelocity, ref destination, ref distanceFromDestination, ref idealVelocity);
                         else
                             NPC.SimpleFlyMovement(idealVelocity * maxVelocity, acceleration);
 
@@ -847,12 +804,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         if (NPC.ai[2] >= timeBeforeSlowDown)
                         {
                             // Slow down
-                            NPC.velocity *= 0.8f;
-
-                            if (Math.Abs(NPC.velocity.X) < 0.1)
-                                NPC.velocity.X = 0f;
-                            if (Math.Abs(NPC.velocity.Y) < 0.1)
-                                NPC.velocity.Y = 0f;
+                            ApplyDeceleration(NPC, 0.8f);
                         }
                         else
                             NPC.rotation = NPC.velocity.ToRotation() - MathHelper.PiOver2;
@@ -890,9 +842,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         NPC.ai[2] = 0f;
                         NPC.ai[3] = 0f;
 
-                        CalamityTargetingParameters options = CalamityTargetingParameters.BossDefaults;
-                        options.finishThemOff = true;
-                        CalamityUtils.CalamityTargeting(NPC, options);
+                        RetargetBoss(NPC, finishThemOff: true);
 
                         NPC.netUpdate = true;
                     }
@@ -901,65 +851,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 // Transition phase
                 else if (NPC.ai[0] == 1f || NPC.ai[0] == 2f)
                 {
-                    if (NPC.IsMechQueenUp)
-                        NPC.reflectsProjectiles = true;
-
-                    // AI timer for rotation
-                    if (NPC.ai[0] == 1f)
-                    {
-                        NPC.ai[2] += 0.005f;
-                        if (NPC.ai[2] > 0.5)
-                            NPC.ai[2] = 0.5f;
-                    }
-                    else
-                    {
-                        NPC.ai[2] -= 0.005f;
-                        if (NPC.ai[2] < 0f)
-                            NPC.ai[2] = 0f;
-                    }
-
-                    // Spin around like a moron while flinging blood and gore everywhere
-                    NPC.rotation += NPC.ai[2];
-
-                    NPC.ai[1] += 1f;
-
-                    if (NPC.ai[1] == 100f)
-                    {
-                        NPC.ai[0] += 1f;
-                        NPC.ai[1] = 0f;
-
-                        if (NPC.ai[0] == 3f)
-                        {
-                            NPC.ai[2] = 0f;
-                        }
-                        else
-                        {
-                            SoundEngine.PlaySound(SoundID.NPCHit1, NPC.Center);
-
-                            if (!Main.dedServ)
-                            {
-                                for (int i = 0; i < 2; i++)
-                                {
-                                    Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 144, 1f);
-                                    Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 7, 1f);
-                                    Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, new Vector2(Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f), 6, 1f);
-                                }
-                            }
-
-                            for (int j = 0; j < 20; j++)
-                                Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f, 0, default, 1f);
-
-                            SoundEngine.PlaySound(SoundID.ForceRoar, NPC.Center);
-                        }
-                    }
-
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Blood, Main.rand.Next(-30, 31) * 0.2f, Main.rand.Next(-30, 31) * 0.2f, 0, default, 1f);
-
-                    NPC.velocity *= 0.98f;
-                    if (Math.Abs(NPC.velocity.X) < 0.1)
-                        NPC.velocity.X = 0f;
-                    if (Math.Abs(NPC.velocity.Y) < 0.1)
-                        NPC.velocity.Y = 0f;
+                    // Shared spinning and transition effects.
+                    UpdateTransformationAI(NPC, 144);
                 }
 
                 // Phase 2
@@ -1059,19 +952,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         }
 
                         if (NPC.IsMechQueenUp)
-                        {
-                            maxVelocity = 14f;
-
-                            destination = mechQueenSpacing;
-                            distanceFromDestination = (destination - NPC.Center).Length();
-                            idealVelocity = (destination - NPC.Center).SafeNormalize(Vector2.UnitY);
-
-                            if (distanceFromDestination > maxVelocity)
-                                idealVelocity *= maxVelocity / distanceFromDestination;
-
-                            float inertia = 60f;
-                            NPC.velocity = (NPC.velocity * (inertia - 1f) + idealVelocity) / inertia;
-                        }
+                            MoveToMechQueen(NPC, mechQueenSpacing, 60f, ref maxVelocity, ref destination, ref distanceFromDestination, ref idealVelocity);
                     }
 
                     // Charging phase
@@ -1107,12 +988,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             if (NPC.ai[2] >= chargeTime)
                             {
                                 float deceleration = 0.85f - (death ? 0.1f * ((phase2LifeRatio - lifeRatio) / phase2LifeRatio) : 0f);
-                                NPC.velocity *= deceleration;
-
-                                if (Math.Abs(NPC.velocity.X) < 0.1)
-                                    NPC.velocity.X = 0f;
-                                if (Math.Abs(NPC.velocity.Y) < 0.1)
-                                    NPC.velocity.Y = 0f;
+                                ApplyDeceleration(NPC, deceleration);
                             }
                             else
                                 NPC.rotation = NPC.velocity.ToRotation() - MathHelper.PiOver2;
@@ -1224,11 +1100,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             // Slow down
                             if (NPC.ai[2] >= spazmatismRetDeadChargeSpeed)
                             {
-                                NPC.velocity *= 0.93f;
-                                if (Math.Abs(NPC.velocity.X) < 0.1)
-                                    NPC.velocity.X = 0f;
-                                if (Math.Abs(NPC.velocity.Y) < 0.1)
-                                    NPC.velocity.Y = 0f;
+                                ApplyDeceleration(NPC, 0.93f);
                             }
                             else
                                 NPC.rotation = NPC.velocity.ToRotation() - MathHelper.PiOver2;

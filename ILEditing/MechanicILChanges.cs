@@ -61,6 +61,20 @@ namespace CalamityMod.ILEditing
         private static int exoDoorOpen = -1;
         private static int exoDoorClosed = -1;
 
+        private static bool LogFailureIfFalse(bool succeeded, string hookName, string message)
+        {
+            if (!succeeded)
+                LogFailure(hookName, message);
+            return succeeded;
+        }
+
+        private static bool LogFailureIfFalse(bool succeeded, string hookName, Func<string> messageFactory)
+        {
+            if (!succeeded)
+                LogFailure(hookName, messageFactory());
+            return succeeded;
+        }
+
         //private static readonly MethodInfo textureGetValueMethod = typeof(Asset<Texture2D>).GetMethod("get_Value", BindingFlags.Public | BindingFlags.Instance);
 
         #region Dash Fixes and Improvements
@@ -69,11 +83,7 @@ namespace CalamityMod.ILEditing
             var cursor = new ILCursor(il);
 
             // Find the direct assignment of the player's iframes.
-            if (!cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchStfld<Player>("immuneTime")))
-            {
-                LogFailure("Shield Slam Consistent Immunity Frames", "Could not locate the assignment of the player's immune time.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchStfld<Player>("immuneTime")), "Shield Slam Consistent Immunity Frames", "Could not locate the assignment of the player's immune time.")) return;
 
             // Delete this instruction. The stack still contains the player and amount of iframes to give.
             cursor.Remove();
@@ -94,11 +104,7 @@ namespace CalamityMod.ILEditing
             //
 
             // Vanilla resets dash cooldown if no vanilla dash is equipped. Calamity dashes must also be considered.
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("dash")))
-            {
-                LogFailure("Vanilla Dash Fixes", "Could not locate the check for vanilla dash ID.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("dash")), "Vanilla Dash Fixes", "Could not locate the check for vanilla dash ID.")) return;
 
             // Load the player itself onto the stack so that it becomes an argument for the following delegate.
             cursor.Emit(OpCodes.Ldarg_0);
@@ -117,21 +123,13 @@ namespace CalamityMod.ILEditing
             //
 
             // Move onto the next dash (Solar Flare set bonus) by looking for the base damage of the direct contact strike.
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchLdcR4(150f)))
-            {
-                LogFailure("Vanilla Dash Fixes", "Could not locate Solar Flare Armor shield slam base damage.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchLdcR4(150f)), "Vanilla Dash Fixes", "Could not locate Solar Flare Armor shield slam base damage.")) return;
 
             // Replace vanilla's base damage of 150 with Calamity's custom base damage.
             cursor.Next.Operand = BalancingConstants.SolarFlareBaseDamage;
 
             // Move to the immunity frame setting code for the Solar Flare set bonus. Find the constant 4 given as iframes.
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchLdcI4(4)))
-            {
-                LogFailure("Vanilla Dash Fixes", "Could not locate Solar Flare shield slam iframes.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchLdcI4(4)), "Vanilla Dash Fixes", "Could not locate Solar Flare shield slam iframes.")) return;
 
             // Replace it with Calamity's number of iframes.
             cursor.Remove();
@@ -142,11 +140,7 @@ namespace CalamityMod.ILEditing
             //
 
             // Move to the dash cooldown code by finding the location where the dash cooldown local variable is initialized.
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)))
-            {
-                LogFailure("Vanilla Dash Fixes", "Could not locate default dash cooldown initialization.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)), "Vanilla Dash Fixes", "Could not locate default dash cooldown initialization.")) return;
 
             // The instruction right before this is Ldc.I4 20, so replace its operand directly.
             // This is the default, so set it to the default universal dash cooldown.
@@ -155,33 +149,21 @@ namespace CalamityMod.ILEditing
             // dash == 1 (aka Tabi) uses the default cooldown and thus does not need edits.
 
             // Same thing as last time, but this time it's the cooldown for dash == 2 (aka Shield of Cthulhu).
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)))
-            {
-                LogFailure("Vanilla Dash Fixes", "Could not locate dash cooldown assignment for Shield of Cthulhu.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)), "Vanilla Dash Fixes", "Could not locate dash cooldown assignment for Shield of Cthulhu.")) return;
 
             // The instruction right before this is Ldc.I4 30, so replace its operand directly.
             // This is for Shield of Cthulhu, so set it to the shield bonk cooldown.
             cursor.Previous.Operand = BalancingConstants.UniversalShieldBonkCooldown;
 
             // Same thing as last time, but this time it's the cooldown for dash == 3 (aka Solar Flare Armor).
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)))
-            {
-                LogFailure("Vanilla Dash Fixes", "Could not locate dash cooldown assignment for Solar Flare Armor.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)), "Vanilla Dash Fixes", "Could not locate dash cooldown assignment for Solar Flare Armor.")) return;
 
             // The instruction right before this is Ldc.I4 30, so replace its operand directly.
             // This is for Solar Flare Armor, so set it to the shield slam cooldown.
             cursor.Previous.Operand = BalancingConstants.UniversalShieldSlamCooldown;
 
             // Same thing as last time, but this time it's the cooldown for dash == 4 (?????).
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)))
-            {
-                LogFailure("Vanilla Dash Fixes", "Could not locate dash cooldown assignment for UNKNOWN DASH ID 4.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchStloc(22)), "Vanilla Dash Fixes", "Could not locate dash cooldown assignment for UNKNOWN DASH ID 4.")) return;
 
             // The instruction right before this is Ldc.I4 20, so replace its operand directly.
             cursor.Previous.Operand = BalancingConstants.UniversalDashCooldown;
@@ -193,18 +175,10 @@ namespace CalamityMod.ILEditing
         {
             // Reduce the number of "no-collide frames" (they are NOT iframes) granted by the Shield of Cthulhu bonk.
             var cursor = new ILCursor(il);
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchLdfld<Player>("eocDash"))) // Loading the remaining frames of the SoC dash
-            {
-                LogFailure("Shield of Cthulhu Bonk Nerf", "Could not locate Shield of Cthulhu dash remaining frame counter.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchLdfld<Player>("eocDash")), "Shield of Cthulhu Bonk Nerf", "Could not locate Shield of Cthulhu dash remaining frame counter.")) return; // Loading the remaining frames of the SoC dash
 
             // Find the 0 this is normally compared to. We will be replacing this value.
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchLdcI4(0)))
-            {
-                LogFailure("Shield of Cthulhu Bonk Nerf", "Could not locate the zero comparison.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchLdcI4(0)), "Shield of Cthulhu Bonk Nerf", "Could not locate the zero comparison.")) return;
 
             // Remove the zero and replace it with a calculated value.
             // This is the total length of the EoC bonk (10) minus the number of safe frames allowed by Calamity.
@@ -278,11 +252,7 @@ namespace CalamityMod.ILEditing
             var cursor = new ILCursor(il);
 
             // Move to the point right before the switch case.
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall<NPC>("SpawnOnPlayer")))
-            {
-                LogFailure("Prevent Vanilla Defeated Flags in Boss Rush", "Could not move to before the switch case.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchCall<NPC>("SpawnOnPlayer")), "Prevent Vanilla Defeated Flags in Boss Rush", "Could not move to before the switch case.")) return;
 
             // Define a branch label, load the Boss Rush check, and create the branch if it is true.
             var label = il.DefineLabel();
@@ -292,17 +262,9 @@ namespace CalamityMod.ILEditing
             // Move to after the switch case to place the label.
             for (int i = 0; i < 2; i++)
             {
-                if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall<NPC>("SpawnBoss")))
-                {
-                    LogFailure("Prevent Vanilla Defeated Flags in Boss Rush", "Could not move to after the switch case.");
-                    return;
-                }
+                if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchCall<NPC>("SpawnBoss")), "Prevent Vanilla Defeated Flags in Boss Rush", "Could not move to after the switch case.")) return;
             }
-            if (!cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchLdarg0()))
-            {
-                LogFailure("Prevent Vanilla Defeated Flags in Boss Rush", "Could not move to after the switch case.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchLdarg0()), "Prevent Vanilla Defeated Flags in Boss Rush", "Could not move to after the switch case.")) return;
             cursor.MarkLabel(label);
         }
         #endregion
@@ -393,21 +355,13 @@ namespace CalamityMod.ILEditing
             // 6. ogre knockback
             //
             // To skip to the part we care about, go after the one and only call to HurtModifiers.ToHurtInfo.
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(typeof(Player.HurtModifiers), nameof(Player.HurtModifiers.ToHurtInfo))))
-            {
-                LogFailure("Dodge Mechanic Adjustments", "Could not locate the call to HurtModifiers.ToHurtInfo.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchCall(typeof(Player.HurtModifiers), nameof(Player.HurtModifiers.ToHurtInfo))), "Dodge Mechanic Adjustments", "Could not locate the call to HurtModifiers.ToHurtInfo.")) return;
 
             // The load for the dodgeable boolean is impossible to decipher due to being an ldarg_s (optional parameter).
             // This is used to make Day Empress' attacks undodgeable.
             // Instead, find the immediately following brfalse.
             // If Calamity's old Armageddon bool which "Disables all dodges" is enabled, EVERY attack is considered undodgeable.
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchBrfalse(out ILLabel branchEnd)))
-            {
-                LogFailure("Dodge Mechanic Adjustments", "Could not locate the dodgeable boolean branch.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchBrfalse(out ILLabel branchEnd)), "Dodge Mechanic Adjustments", "Could not locate the dodgeable boolean branch.")) return;
 
             // AND with an emitted delegate which takes the player and gets whether Calamity is allowing dodges for them right now
             cursor.Emit(OpCodes.Ldarg_0);
@@ -415,11 +369,7 @@ namespace CalamityMod.ILEditing
             cursor.Emit(OpCodes.And);
 
             // Skip ahead to Black Belt
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("blackBelt")))
-            {
-                LogFailure("Dodge Mechanic Adjustments", "Could not locate the Black Belt equipped boolean.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("blackBelt")), "Dodge Mechanic Adjustments", "Could not locate the Black Belt equipped boolean.")) return;
 
             // Destroy the value, utterly, and in its place put zero.
             // The player is never considered to have Black Belt equipped from the perspective of vanilla code.
@@ -431,11 +381,7 @@ namespace CalamityMod.ILEditing
             // Here the part we skip to is actually
             // brainOfConfusionItem != null
             // This is implemented as a brfalse, so just do the same thing as above.
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("brainOfConfusionItem")))
-            {
-                LogFailure("Dodge Mechanic Adjustments", "Could not locate the Brain of Confusion tracked equipped item.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("brainOfConfusionItem")), "Dodge Mechanic Adjustments", "Could not locate the Brain of Confusion tracked equipped item.")) return;
 
             // The player is never considered to have Brain of Confusion equipped from the perspective of vanilla code.
             // Calamity re-implements Brain of Confusion in CalamityPlayer.ConsumableDodge
@@ -593,11 +539,7 @@ namespace CalamityMod.ILEditing
             //
 
             // Start by finding the moment where health is restored from a healing item.
-            if (!cursor.TryGotoNext(MoveType.After, c => c.MatchStfld<Player>("statLife")))
-            {
-                LogFailure("Chalice of the Blood God Bleedout Heal", "Could not locate the player's health being restored");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, c => c.MatchStfld<Player>("statLife")), "Chalice of the Blood God Bleedout Heal", "Could not locate the player's health being restored")) return;
 
             // Load the player and the healing potion used onto the stack for use in the following delegate.
             cursor.Emit(OpCodes.Ldarg_0);
@@ -885,11 +827,7 @@ namespace CalamityMod.ILEditing
             // Move to the method which randomly selects an NPC for the Statue to spawn. This is the second call of the method in this function.
             for (int i = 0; i < 2; i++)
             {
-                if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchCall(typeof(Utils), nameof(Utils.SelectRandom))))
-                {
-                    LogFailure("Add Twinkler to Firefly Statue", "Could not move to the SelectRandom method.");
-                    return;
-                }
+                if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchCall(typeof(Utils), nameof(Utils.SelectRandom))), "Add Twinkler to Firefly Statue", "Could not move to the SelectRandom method.")) return;
             }
 
             // Emit a delegate which resizes the array and adds Twinkler to it.
@@ -906,19 +844,11 @@ namespace CalamityMod.ILEditing
         private static void MakeTaxCollectorUseful(ILContext il)
         {
             ILCursor cursor = new(il);
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall<Item>(nameof(Item.buyPrice))))
-            {
-                LogFailure("Tax Collector Money Boosts", "Could not locate the amount of money to collect per town NPC.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchCall<Item>(nameof(Item.buyPrice))), "Tax Collector Money Boosts", "Could not locate the amount of money to collect per town NPC.")) return;
             cursor.Emit(OpCodes.Pop);
             cursor.Emit<CalamityGlobalTownNPC>(OpCodes.Call, $"get_{nameof(CalamityGlobalTownNPC.TotalTaxesPerNPC)}");
 
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall<Item>(nameof(Item.buyPrice))))
-            {
-                LogFailure("Tax Collector Money Boosts", "Could not locate the maximum amount of money to collect.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, i => i.MatchCall<Item>(nameof(Item.buyPrice))), "Tax Collector Money Boosts", "Could not locate the maximum amount of money to collect.")) return;
             cursor.Emit(OpCodes.Pop);
             cursor.Emit<CalamityGlobalTownNPC>(OpCodes.Call, $"get_{nameof(CalamityGlobalTownNPC.TaxesToCollectLimit)}");
         }
@@ -1032,11 +962,7 @@ namespace CalamityMod.ILEditing
             var cursor = new ILCursor(il);
 
             // Search for the only place in the function where Player.scope is set to true.
-            if (!cursor.TryGotoNext(MoveType.Before, i => i.MatchStfld<Player>("scope")))
-            {
-                LogFailure("Scopes Require Visibility to Zoom", "Could not locate where player is set to have a scope equipped.");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, i => i.MatchStfld<Player>("scope")), "Scopes Require Visibility to Zoom", "Could not locate where player is set to have a scope equipped.")) return;
 
             // Pop the useless 1 off the stack.
             cursor.Emit(OpCodes.Pop);
@@ -1510,23 +1436,15 @@ namespace CalamityMod.ILEditing
             var cursor = new ILCursor(il);
 
             int visibleFlagIndex = 0;
-            if (!cursor.TryGotoNext(MoveType.Before,
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before,
             [
                 x => x.MatchLdloc(out visibleFlagIndex),
                 x => x.MatchLdarg(out _),
                 x => x.MatchLdfld(out _),
                 x => x.MatchCallOrCallvirt<TileDrawing>("IsVisible")
-            ]))
-            {
-                LogFailure("Disable Tree And Cactus Culling", "Unable to Locate IsVisible Call");
-                return;
-            }
+            ]), "Disable Tree And Cactus Culling", "Unable to Locate IsVisible Call")) return;
 
-            if (!cursor.TryGotoPrev(MoveType.Before, x => x.MatchBrfalse(out _)))
-            {
-                LogFailure("Disable Tree And Cactus Culling", "Unable to Locate Brfalse.s");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoPrev(MoveType.Before, x => x.MatchBrfalse(out _)), "Disable Tree And Cactus Culling", "Unable to Locate Brfalse.s")) return;
 
             cursor.EmitLdarg1(); // TileDrawInfo drawInfo
             cursor.EmitDelegate((TileDrawInfo drawInfo) =>
@@ -1545,29 +1463,13 @@ namespace CalamityMod.ILEditing
         {
             var cursor = new ILCursor(il);
 
-            if (!cursor.TryGotoNext(MoveType.After, x => x.MatchLdfld<Point>("X")))
-            {
-                LogFailure("GlowMask Tree Rendering", "Unable to Locate Ldfld for Point::X");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, x => x.MatchLdfld<Point>("X")), "GlowMask Tree Rendering", "Unable to Locate Ldfld for Point::X")) return;
 
-            if (!cursor.Next.MatchStloc(out var xLocaIdx))
-            {
-                LogFailure("GlowMask Tree Rendering", "Unable to Locate Stloc Index for Point::X");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.Next.MatchStloc(out var xLocaIdx), "GlowMask Tree Rendering", "Unable to Locate Stloc Index for Point::X")) return;
 
-            if (!cursor.TryGotoNext(MoveType.After, x => x.MatchLdfld<Point>("Y")))
-            {
-                LogFailure("GlowMask Tree Rendering", "Unable to Locate Ldfld for Point::Y");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.After, x => x.MatchLdfld<Point>("Y")), "GlowMask Tree Rendering", "Unable to Locate Ldfld for Point::Y")) return;
 
-            if (!cursor.Next.MatchStloc(out var yLocaIdx))
-            {
-                LogFailure("GlowMask Tree Rendering", "Unable to Locate Stloc Index for Point::Y");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.Next.MatchStloc(out var yLocaIdx), "GlowMask Tree Rendering", "Unable to Locate Stloc Index for Point::Y")) return;
 
             ApplyTreeGlowMaskSubParts<GlowMaskTree>(cursor, "GlowMaskTree-Top", "GetTreeTopTexture", xLocaIdx, yLocaIdx,
                 (glowMaskTree, tileX, tileY) =>
@@ -1623,29 +1525,13 @@ namespace CalamityMod.ILEditing
             int yLocaIdx,
             Func<PlantType, int, int, GlowMaskPlantDrawInfo?> onPlantDrawn) where PlantType : IPlant
         {
-            if (!cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<TileDrawing>(getTextureMethodName)))
-            {
-                LogFailure("GlowMask Tree Rendering", $"Could not locate First {getTextureMethodName} call ({debugSubpartName})");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<TileDrawing>(getTextureMethodName)), "GlowMask Tree Rendering", () => $"Could not locate First {getTextureMethodName} call ({debugSubpartName})")) return;
 
-            if (!cursor.TryGotoPrev([x => x.MatchLdcI4(out var styleEq) && styleEq == 14, x => x.MatchBneUn(out _)]))
-            {
-                LogFailure("GlowMask Tree Rendering", $"Could not locate Bne.Un for TreeStyleIndex ({debugSubpartName})");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoPrev([x => x.MatchLdcI4(out var styleEq) && styleEq == 14, x => x.MatchBneUn(out _)]), "GlowMask Tree Rendering", () => $"Could not locate Bne.Un for TreeStyleIndex ({debugSubpartName})")) return;
 
-            if (!cursor.Prev.MatchLdloc(out var treeStyleLocaIdx))
-            {
-                LogFailure("GlowMask Tree Rendering", $"Prev Instruction is not a LdLoc. Cannot locate TreeStyleIndex ({debugSubpartName})");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.Prev.MatchLdloc(out var treeStyleLocaIdx), "GlowMask Tree Rendering", () => $"Prev Instruction is not a LdLoc. Cannot locate TreeStyleIndex ({debugSubpartName})")) return;
 
-            if (!cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<SpriteBatch>("Draw")))
-            {
-                LogFailure("GlowMask Tree Rendering", $"Could not locate DrawCall ({debugSubpartName})");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<SpriteBatch>("Draw")), "GlowMask Tree Rendering", () => $"Could not locate DrawCall ({debugSubpartName})")) return;
 
             cursor.EmitLdloc(treeStyleLocaIdx); // TreeStyle
             cursor.EmitLdloc(xLocaIdx);
@@ -1696,17 +1582,9 @@ namespace CalamityMod.ILEditing
             int yLocaIdx,
             Func<PlantType, int, int, GlowMaskPlantDrawInfo?> onPlantDrawn)
         {
-            if (!cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<TileDrawing>(getTextureMethodName)))
-            {
-                LogFailure("GlowMask Tree Rendering", $"Could not locate First {getTextureMethodName} call ({debugSubpartName})");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<TileDrawing>(getTextureMethodName)), "GlowMask Tree Rendering", () => $"Could not locate First {getTextureMethodName} call ({debugSubpartName})")) return;
 
-            if (!cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<SpriteBatch>("Draw")))
-            {
-                LogFailure("GlowMask Tree Rendering", $"Could not locate DrawCall ({debugSubpartName})");
-                return;
-            }
+            if (!LogFailureIfFalse(cursor.TryGotoNext(MoveType.Before, x => x.MatchCallOrCallvirt<SpriteBatch>("Draw")), "GlowMask Tree Rendering", () => $"Could not locate DrawCall ({debugSubpartName})")) return;
 
             cursor.EmitLdloc(xLocaIdx);
             cursor.EmitLdloc(yLocaIdx);

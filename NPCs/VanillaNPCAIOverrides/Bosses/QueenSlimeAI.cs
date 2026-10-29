@@ -955,6 +955,119 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 npc.rotation = -0.5f;
         }
 
+        private static void UpdateMinionMovementAI(NPC npc, bool death, bool bouncy)
+        {
+            if (npc.ai[2] > 1f) npc.ai[2] -= 1f;
+
+            if (npc.wet)
+            {
+                if (npc.collideY)
+                    npc.velocity.Y = -2f;
+
+                if (npc.velocity.Y < 0f && npc.ai[3] == npc.position.X)
+                {
+                    npc.direction *= -1;
+                    npc.ai[2] = 200f;
+                }
+
+                if (npc.velocity.Y > 0f)
+                    npc.ai[3] = npc.position.X;
+
+                if (npc.velocity.Y > 2f)
+                    npc.velocity.Y *= 0.9f;
+
+                npc.velocity.Y -= 0.5f;
+                if (npc.velocity.Y < -4f)
+                    npc.velocity.Y = -4f;
+
+                if (npc.ai[2] == 1f)
+                    CalamityUtils.CalamityTargeting(npc, default);
+            }
+
+            npc.aiAction = 0;
+            if (npc.ai[2] == 0f)
+            {
+                npc.ai[0] = -100f;
+                npc.ai[2] = 1f;
+                CalamityUtils.CalamityTargeting(npc, default);
+            }
+
+            if (npc.velocity.Y == 0f)
+            {
+                if (npc.collideY && npc.oldVelocity.Y != 0f && Collision.SolidCollision(npc.position, npc.width, npc.height))
+                    npc.position.X -= npc.velocity.X + (float)npc.direction;
+
+                if (npc.ai[3] == npc.position.X)
+                {
+                    npc.direction *= -1;
+                    npc.ai[2] = 200f;
+                }
+
+                npc.ai[3] = 0f;
+                npc.velocity.X *= 0.8f;
+                if ((double)npc.velocity.X > -0.1 && (double)npc.velocity.X < 0.1)
+                    npc.velocity.X = 0f;
+
+                npc.ai[0] += death ? (bouncy ? 11f : 16f) : (bouncy ? 7f : 10f);
+
+                float jumpTimerThreshold = bouncy ? -500f : -1000f;
+
+                int jumpType = npc.ai[0] >= 0f ? 1 : 0;
+
+                if (npc.ai[0] >= jumpTimerThreshold && npc.ai[0] <= jumpTimerThreshold * 0.5f)
+                    jumpType = 2;
+
+                if (npc.ai[0] >= jumpTimerThreshold * 2f && npc.ai[0] <= jumpTimerThreshold * 1.5f)
+                    jumpType = 3;
+
+                if (jumpType > 0)
+                {
+                    npc.netUpdate = true;
+                    if (npc.ai[2] == 1f)
+                        CalamityUtils.CalamityTargeting(npc, default);
+
+                    if (jumpType == 3)
+                    {
+                        npc.velocity.Y = -8f;
+                        npc.velocity.X += (death ? 9 : 6) * npc.direction;
+                        npc.ai[0] = -200f;
+                        npc.ai[3] = npc.position.X;
+                    }
+                    else
+                    {
+                        npc.velocity.Y = -6f;
+                        npc.velocity.X += (death ? 6 : 4) * npc.direction;
+                        npc.ai[0] = -120f;
+                        if (jumpType == 1)
+                            npc.ai[0] += jumpTimerThreshold;
+                        else
+                            npc.ai[0] += jumpTimerThreshold * 2f;
+                    }
+
+                    if (bouncy)
+                    {
+                        npc.velocity.Y *= 1.6f;
+                        npc.velocity.X *= 1.2f;
+                    }
+                }
+                else if (npc.ai[0] >= -30f)
+                    npc.aiAction = 1;
+            }
+            else if (npc.target < Main.maxPlayers && ((npc.direction == 1 && npc.velocity.X < 3f) || (npc.direction == -1 && npc.velocity.X > -3f)))
+            {
+                if (npc.collideX && Math.Abs(npc.velocity.X) == 0.2f)
+                    npc.position.X -= 1.4f * (float)npc.direction;
+
+                if (npc.collideY && npc.oldVelocity.Y != 0f && Collision.SolidCollision(npc.position, npc.width, npc.height))
+                    npc.position.X -= npc.velocity.X + (float)npc.direction;
+
+                if ((npc.direction == -1 && (double)npc.velocity.X < 0.01) || (npc.direction == 1 && (double)npc.velocity.X > -0.01))
+                    npc.velocity.X += 0.2f * (float)npc.direction;
+                else
+                    npc.velocity.X *= 0.93f;
+            }
+        }
+
         public class CrystalSlimeAI : VanillaAIOverride
         {
             public override bool AI(Mod mod)
@@ -1028,112 +1141,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     }
                 }
 
-                if (NPC.ai[2] > 1f)
-                    NPC.ai[2] -= 1f;
-
-                if (NPC.wet)
-                {
-                    if (NPC.collideY)
-                        NPC.velocity.Y = -2f;
-
-                    if (NPC.velocity.Y < 0f && NPC.ai[3] == NPC.position.X)
-                    {
-                        NPC.direction *= -1;
-                        NPC.ai[2] = 200f;
-                    }
-
-                    if (NPC.velocity.Y > 0f)
-                        NPC.ai[3] = NPC.position.X;
-
-                    if (NPC.velocity.Y > 2f)
-                        NPC.velocity.Y *= 0.9f;
-
-                    NPC.velocity.Y -= 0.5f;
-                    if (NPC.velocity.Y < -4f)
-                        NPC.velocity.Y = -4f;
-
-                    if (NPC.ai[2] == 1f)
-                        CalamityUtils.CalamityTargeting(NPC, default);
-                }
-
-                NPC.aiAction = 0;
-                if (NPC.ai[2] == 0f)
-                {
-                    NPC.ai[0] = -100f;
-                    NPC.ai[2] = 1f;
-                    CalamityUtils.CalamityTargeting(NPC, default);
-                }
-
-                if (NPC.velocity.Y == 0f)
-                {
-                    if (NPC.collideY && NPC.oldVelocity.Y != 0f && Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-                        NPC.position.X -= NPC.velocity.X + (float)NPC.direction;
-
-                    if (NPC.ai[3] == NPC.position.X)
-                    {
-                        NPC.direction *= -1;
-                        NPC.ai[2] = 200f;
-                    }
-
-                    NPC.ai[3] = 0f;
-                    NPC.velocity.X *= 0.8f;
-                    if ((double)NPC.velocity.X > -0.1 && (double)NPC.velocity.X < 0.1)
-                        NPC.velocity.X = 0f;
-
-                    NPC.ai[0] += death ? 16f : 10f;
-
-                    float num33 = -1000f;
-
-                    int num34 = 0;
-                    if (NPC.ai[0] >= 0f)
-                        num34 = 1;
-
-                    if (NPC.ai[0] >= num33 && NPC.ai[0] <= num33 * 0.5f)
-                        num34 = 2;
-
-                    if (NPC.ai[0] >= num33 * 2f && NPC.ai[0] <= num33 * 1.5f)
-                        num34 = 3;
-
-                    if (num34 > 0)
-                    {
-                        NPC.netUpdate = true;
-                        if (NPC.ai[2] == 1f)
-                            CalamityUtils.CalamityTargeting(NPC, default);
-
-                        if (num34 == 3)
-                        {
-                            NPC.velocity.Y = -8f;
-                            NPC.velocity.X += (death ? 9 : 6) * NPC.direction;
-                            NPC.ai[0] = -200f;
-                            NPC.ai[3] = NPC.position.X;
-                        }
-                        else
-                        {
-                            NPC.velocity.Y = -6f;
-                            NPC.velocity.X += (death ? 6 : 4) * NPC.direction;
-                            NPC.ai[0] = -120f;
-                            if (num34 == 1)
-                                NPC.ai[0] += num33;
-                            else
-                                NPC.ai[0] += num33 * 2f;
-                        }
-                    }
-                    else if (NPC.ai[0] >= -30f)
-                        NPC.aiAction = 1;
-                }
-                else if (NPC.target < Main.maxPlayers && ((NPC.direction == 1 && NPC.velocity.X < 3f) || (NPC.direction == -1 && NPC.velocity.X > -3f)))
-                {
-                    if (NPC.collideX && Math.Abs(NPC.velocity.X) == 0.2f)
-                        NPC.position.X -= 1.4f * (float)NPC.direction;
-
-                    if (NPC.collideY && NPC.oldVelocity.Y != 0f && Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-                        NPC.position.X -= NPC.velocity.X + (float)NPC.direction;
-
-                    if ((NPC.direction == -1 && (double)NPC.velocity.X < 0.01) || (NPC.direction == 1 && (double)NPC.velocity.X > -0.01))
-                        NPC.velocity.X += 0.2f * (float)NPC.direction;
-                    else
-                        NPC.velocity.X *= 0.93f;
-                }
+                UpdateMinionMovementAI(NPC, death, false);
 
                 return false;
             }
@@ -1184,115 +1192,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     }
                 }
 
-                if (NPC.ai[2] > 1f)
-                    NPC.ai[2] -= 1f;
-
-                if (NPC.wet)
-                {
-                    if (NPC.collideY)
-                        NPC.velocity.Y = -2f;
-
-                    if (NPC.velocity.Y < 0f && NPC.ai[3] == NPC.position.X)
-                    {
-                        NPC.direction *= -1;
-                        NPC.ai[2] = 200f;
-                    }
-
-                    if (NPC.velocity.Y > 0f)
-                        NPC.ai[3] = NPC.position.X;
-
-                    if (NPC.velocity.Y > 2f)
-                        NPC.velocity.Y *= 0.9f;
-
-                    NPC.velocity.Y -= 0.5f;
-                    if (NPC.velocity.Y < -4f)
-                        NPC.velocity.Y = -4f;
-
-                    if (NPC.ai[2] == 1f)
-                        CalamityUtils.CalamityTargeting(NPC, default);
-                }
-
-                NPC.aiAction = 0;
-                if (NPC.ai[2] == 0f)
-                {
-                    NPC.ai[0] = -100f;
-                    NPC.ai[2] = 1f;
-                    CalamityUtils.CalamityTargeting(NPC, default);
-                }
-
-                if (NPC.velocity.Y == 0f)
-                {
-                    if (NPC.collideY && NPC.oldVelocity.Y != 0f && Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-                        NPC.position.X -= NPC.velocity.X + (float)NPC.direction;
-
-                    if (NPC.ai[3] == NPC.position.X)
-                    {
-                        NPC.direction *= -1;
-                        NPC.ai[2] = 200f;
-                    }
-
-                    NPC.ai[3] = 0f;
-                    NPC.velocity.X *= 0.8f;
-                    if ((double)NPC.velocity.X > -0.1 && (double)NPC.velocity.X < 0.1)
-                        NPC.velocity.X = 0f;
-
-                    NPC.ai[0] += death ? 11f : 7f;
-
-                    float num33 = -500f;
-
-                    int num34 = 0;
-                    if (NPC.ai[0] >= 0f)
-                        num34 = 1;
-
-                    if (NPC.ai[0] >= num33 && NPC.ai[0] <= num33 * 0.5f)
-                        num34 = 2;
-
-                    if (NPC.ai[0] >= num33 * 2f && NPC.ai[0] <= num33 * 1.5f)
-                        num34 = 3;
-
-                    if (num34 > 0)
-                    {
-                        NPC.netUpdate = true;
-                        if (NPC.ai[2] == 1f)
-                            CalamityUtils.CalamityTargeting(NPC, default);
-
-                        if (num34 == 3)
-                        {
-                            NPC.velocity.Y = -8f;
-                            NPC.velocity.X += (death ? 9 : 6) * NPC.direction;
-                            NPC.ai[0] = -200f;
-                            NPC.ai[3] = NPC.position.X;
-                        }
-                        else
-                        {
-                            NPC.velocity.Y = -6f;
-                            NPC.velocity.X += (death ? 6 : 4) * NPC.direction;
-                            NPC.ai[0] = -120f;
-                            if (num34 == 1)
-                                NPC.ai[0] += num33;
-                            else
-                                NPC.ai[0] += num33 * 2f;
-                        }
-
-                        NPC.velocity.Y *= 1.6f;
-                        NPC.velocity.X *= 1.2f;
-                    }
-                    else if (NPC.ai[0] >= -30f)
-                        NPC.aiAction = 1;
-                }
-                else if (NPC.target < Main.maxPlayers && ((NPC.direction == 1 && NPC.velocity.X < 3f) || (NPC.direction == -1 && NPC.velocity.X > -3f)))
-                {
-                    if (NPC.collideX && Math.Abs(NPC.velocity.X) == 0.2f)
-                        NPC.position.X -= 1.4f * (float)NPC.direction;
-
-                    if (NPC.collideY && NPC.oldVelocity.Y != 0f && Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-                        NPC.position.X -= NPC.velocity.X + (float)NPC.direction;
-
-                    if ((NPC.direction == -1 && (double)NPC.velocity.X < 0.01) || (NPC.direction == 1 && (double)NPC.velocity.X > -0.01))
-                        NPC.velocity.X += 0.2f * (float)NPC.direction;
-                    else
-                        NPC.velocity.X *= 0.93f;
-                }
+                UpdateMinionMovementAI(NPC, death, true);
 
                 return false;
             }
