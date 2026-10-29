@@ -1,10 +1,9 @@
 ﻿using CalamityMod.Items.Placeables.FurnitureAcidwood;
+using CalamityMod.Tiles.BaseTiles;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
-using Terraria.GameContent;
-using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -12,8 +11,10 @@ using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.FurnitureAcidwood
 {
-    public class AcidwoodChairTile : ModTile
+    public class AcidwoodChairTile : BaseChairTile<AcidwoodChair>
     {
+        protected override bool IsWide => true;
+
         public override void SetStaticDefaults()
         {
             Main.tileFrameImportant[Type] = true;
@@ -49,22 +50,6 @@ namespace CalamityMod.Tiles.FurnitureAcidwood
         {
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.WoodFurniture, 0f, 0f, 1, new Color(255, 255, 255), 1f);
             return false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
-
-        public override void ModifySittingTargetInfo(int i, int j, ref TileRestingInfo info) => FurnitureCommon.ChairSitInfo(i, j, ref info, 40, true, true);
-
-        public override bool RightClick(int i, int j) => FurnitureCommon.ChairRightClick(i, j);
-
-        public override void MouseOver(int i, int j) => FurnitureCommon.ChairMouseOver(i, j, ModContent.ItemType<AcidwoodChair>(), true);
-
-        public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings)
-        {
-            return settings.player.IsWithinSnappngRangeToTile(i, j, PlayerSittingHelper.ChairSittingMaxDistance);
         }
     }
 }

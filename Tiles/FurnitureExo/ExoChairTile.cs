@@ -1,4 +1,5 @@
 ﻿using CalamityMod.Items.Placeables.FurnitureExo;
+using CalamityMod.Tiles.BaseTiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -6,7 +7,6 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
 using Terraria.GameContent;
-using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -14,8 +14,10 @@ using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.FurnitureExo
 {
-    public class ExoChairTile : ModTile
+    public class ExoChairTile : BaseChairTile<ExoChair>
     {
+        protected override bool IsWide => true;
+
         public Asset<Texture2D> GlowTexture;
 
         public override void SetStaticDefaults()
@@ -57,11 +59,6 @@ namespace CalamityMod.Tiles.FurnitureExo
             return false;
         }
 
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
-
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
         {
             if (Main.tile[i, j].IsTileActuallyInvisible())
@@ -81,17 +78,6 @@ namespace CalamityMod.Tiles.FurnitureExo
                 spriteBatch.Draw(glowmask, drawPosition, new Rectangle(xFrameOffset, yFrameOffset, 18, 18), drawColour, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
             else if (trackTile.IsHalfBlock)
                 spriteBatch.Draw(glowmask, drawPosition + new Vector2(0f, 8f), new Rectangle(xFrameOffset, yFrameOffset, 18, 8), drawColour, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
-        }
-
-        public override void ModifySittingTargetInfo(int i, int j, ref TileRestingInfo info) => FurnitureCommon.ChairSitInfo(i, j, ref info, 40, true, true);
-
-        public override bool RightClick(int i, int j) => FurnitureCommon.ChairRightClick(i, j);
-
-        public override void MouseOver(int i, int j) => FurnitureCommon.ChairMouseOver(i, j, ModContent.ItemType<ExoChair>(), true);
-
-        public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings)
-        {
-            return settings.player.IsWithinSnappngRangeToTile(i, j, PlayerSittingHelper.ChairSittingMaxDistance);
         }
     }
 }
