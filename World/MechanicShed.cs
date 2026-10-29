@@ -126,12 +126,7 @@ namespace CalamityMod.World
                 new ChestItem(ItemID.GoldCoin, WorldGen.genRand.Next(1, 3)),
             };
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
     }
 }

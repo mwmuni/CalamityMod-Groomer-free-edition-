@@ -551,11 +551,7 @@ namespace CalamityMod.World
                 contents.Insert(0, new ChestItem(ModContent.ItemType<Items.Weapons.Ranged.SlagfireDouser>(), 1));
             }
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
 
         //shamelessly copy pasted from the astral biome generation

@@ -83,12 +83,7 @@ namespace CalamityMod.World
                 contents.Insert(1, new ChestItem(bars, WorldGen.genRand.Next(4, 7)));
             }
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
 
         //determine if theres no snow blocks nearby so the biome doesnt place in the snow biome

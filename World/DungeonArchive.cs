@@ -121,21 +121,7 @@ namespace CalamityMod.World
                 new ChestItem(ItemID.GoldCoin, WorldGen.genRand.Next(5, 10)),
             };
 
-            //this is normally not a good idea with separate items lists, but both lists are the same size so it is fine here
-            for (int i = 0; i < contents1.Count; i++)
-            {
-                if (!firstItem)
-                {
-                    chest.item[i].SetDefaults(contents1[i].Type);
-                    chest.item[i].stack = contents1[i].Stack;
-                }
-                else
-                {
-                    chest.item[i].SetDefaults(contents2[i].Type);
-                    chest.item[i].Prefix(-1);
-                    chest.item[i].stack = contents2[i].Stack;
-                }
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, firstItem ? contents2 : contents1, prefixItems: firstItem);
         }
     }
 }

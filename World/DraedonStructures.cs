@@ -92,11 +92,7 @@ namespace CalamityMod.World
             else
                 contents.Insert(0, new ChestItem(ModContent.ItemType<YellowSeekingMechanism>(), 1));
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceWorkshop(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
         {
@@ -171,11 +167,7 @@ namespace CalamityMod.World
             else
                 contents.Insert(0, new ChestItem(ModContent.ItemType<YellowSeekingMechanism>(), 1));
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceResearchFacility(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
         {
@@ -243,12 +235,7 @@ namespace CalamityMod.World
                 contents.Insert(1, new ChestItem(ModContent.ItemType<Murasama>(), 1));
                 contents.Insert(2, new ChestItem(ModContent.ItemType<EncryptedSchematicHell>(), 1));
             }
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
 
         public static void PlaceHellLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
@@ -329,11 +316,7 @@ namespace CalamityMod.World
                 contents.Insert(0, new ChestItem(ModContent.ItemType<DraedonsLogSunkenSea>(), 1));
                 contents.Insert(1, new ChestItem(ModContent.ItemType<EncryptedSchematicSunkenSea>(), 1));
             }
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
 
         public static void PlaceSunkenSeaLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
@@ -421,11 +404,7 @@ namespace CalamityMod.World
             // If it's a frozen chest, add Arctic Diving Gear to it.
             if (type == TileID.Containers)
                 contents.Insert(0, new ChestItem(ItemID.ArcticDivingGear, 1));
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
 
         public static void PlaceIceLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
@@ -509,11 +488,7 @@ namespace CalamityMod.World
                 contents.Insert(0, new ChestItem(ModContent.ItemType<DraedonsLogJungle>(), 1));
                 contents.Insert(1, new ChestItem(ModContent.ItemType<EncryptedSchematicJungle>(), 1));
             }
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
 
         public static void PlacePlagueLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
@@ -626,11 +601,7 @@ namespace CalamityMod.World
                 contents.Insert(2, new ChestItem(ModContent.ItemType<PlasmaDriveCore>(), 1));
             }
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         #endregion
 
@@ -650,11 +621,7 @@ namespace CalamityMod.World
                 new ChestItem(ModContent.ItemType<LabSeekingMechanism>(), 1),
             };
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceCavernLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
         {

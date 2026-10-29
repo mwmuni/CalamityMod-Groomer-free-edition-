@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CalamityMod.Items.Materials;
 using CalamityMod.Items.Potions;
 using CalamityMod.Items.Potions.Food;
@@ -6,6 +7,7 @@ using CalamityMod.Tiles;
 using CalamityMod.Tiles.Abyss;
 using CalamityMod.Tiles.Astral;
 using CalamityMod.Tiles.FurnitureAuric;
+using CalamityMod.Schematics;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -17,6 +19,17 @@ namespace CalamityMod.World
     public class MiscWorldgenRoutines
     {
         #region Place Chests
+        internal static void FillChestContents(Chest chest, List<ChestItem> contents, bool prefixItems = false)
+        {
+            for (int i = 0; i < contents.Count; i++)
+            {
+                chest.item[i].SetDefaults(contents[i].Type);
+                if (prefixItems)
+                    chest.item[i].Prefix(-1);
+                chest.item[i].stack = contents[i].Stack;
+            }
+        }
+
         internal static Chest AddChestWithLoot(int i, int j, ushort type = TileID.Containers, uint startingSlot = 1, int tileStyle = 0)
         {
             int chestIndex = -1;

@@ -81,11 +81,7 @@ namespace CalamityMod.World
             };
             }
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceCorruptionShrine(StructureMap structures)
         {
@@ -172,11 +168,7 @@ namespace CalamityMod.World
                 };
             }
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceCrimsonShrine(StructureMap structures)
         {
@@ -263,12 +255,7 @@ namespace CalamityMod.World
                 };
             }
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
         public static void PlaceDesertShrine(StructureMap structures)
         {
@@ -333,12 +320,7 @@ namespace CalamityMod.World
                 new ChestItem((Main.rand.NextBool() && Main.zenithWorld) ? ItemID.GasTrap : ItemID.Granite, Main.zenithWorld ? 1 : WorldGen.genRand.Next(7,15+1)),
             };
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
         public static void PlaceGraniteShrine(StructureMap structures)
         {
@@ -455,11 +437,7 @@ namespace CalamityMod.World
             };
             }
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceIceShrine(StructureMap structures)
         {
@@ -522,15 +500,10 @@ namespace CalamityMod.World
                 new ChestItem(ItemID.GoldCoin, WorldGen.genRand.Next(8, 10 + 1)),
                 new ChestItem(ItemID.HealingPotion, WorldGen.genRand.Next(10, 12 + 1)),
                 new ChestItem(potionType, WorldGen.genRand.Next(Main.zenithWorld ? 1 : 10, (Main.zenithWorld ? 2 : 12) + 1)),
-                new ChestItem((Main.rand.NextBool() && Main.zenithWorld) ? ItemID.GasTrap : ItemID.Marble, Main.zenithWorld ? 1 : WorldGen.genRand.Next(7,15+1)),
+               new ChestItem((Main.rand.NextBool() && Main.zenithWorld) ? ItemID.GasTrap : ItemID.Marble, Main.zenithWorld ? 1 : WorldGen.genRand.Next(7,15+1)),
             };
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
         public static void PlaceMarbleShrine(StructureMap structures)
         {
@@ -661,13 +634,7 @@ namespace CalamityMod.World
                 };
             }
 
-
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
         public static void PlaceMushroomShrine(StructureMap structures)
         {
@@ -754,12 +721,7 @@ namespace CalamityMod.World
                 new ChestItem(Main.zenithWorld ? ItemID.GasTrap : ItemID.Mushroom, Main.zenithWorld ? 1 : WorldGen.genRand.Next(5,9+1)),
             };
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
         public static void PlaceSurfaceShrine(StructureMap structures)
         {
@@ -1005,12 +967,7 @@ namespace CalamityMod.World
             if (Main.zenithWorld)
                 contents.Add(new ChestItem(ItemID.GasTrap, 1));
 
-            for (int i = 0; i < contents.Count; i++)
-            {
-                chest.item[i].SetDefaults(contents[i].Type);
-                chest.item[i].Prefix(-1);
-                chest.item[i].stack = contents[i].Stack;
-            }
+            MiscWorldgenRoutines.FillChestContents(chest, contents, prefixItems: true);
         }
         #endregion
     }
