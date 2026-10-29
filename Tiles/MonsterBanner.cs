@@ -70,396 +70,153 @@ namespace CalamityMod.Tiles
 
         public static int GetBannerNPC(int style)
         {
-            int npc = -1;
             switch (style)
             {
-                case 0:
-                    npc = NPCType<RepairUnitCritter>();
-                    break;
-                case 1:
-                    npc = NPCType<Sulflounder>();
-                    break;
-                case 2:
-                    npc = NPCType<Gnasher>();
-                    break;
-                case 3:
-                    npc = NPCType<Trasher>();
-                    break;
-                case 4:
-                    npc = NPCType<Toxicatfish>();
-                    break;
-                case 5:
-                    npc = NPCType<SlabCrab>();
-                    break;
-                case 6:
-                    npc = NPCType<Androomba>();
-                    break;
-                case 7:
-                    npc = NPCType<AquaticUrchin>();
-                    break;
-                case 8:
-                    npc = NPCType<Frogfish>();
-                    break;
-                case 9:
-                    npc = NPCType<MantisShrimp>();
-                    break;
-                case 10:
-                    npc = NPCType<AuroraSpirit>();
-                    break;
-                case 11:
-                    npc = NPCType<WildBumblebirb>(); // There's also the boss variant but I dont think we want banners to affect them?
-                    break;
+                case 0: return NPCType<RepairUnitCritter>();
+                case 1: return NPCType<Sulflounder>();
+                case 2: return NPCType<Gnasher>();
+                case 3: return NPCType<Trasher>();
+                case 4: return NPCType<Toxicatfish>();
+                case 5: return NPCType<SlabCrab>();
+                case 6: return NPCType<Androomba>();
+                case 7: return NPCType<AquaticUrchin>();
+                case 8: return NPCType<Frogfish>();
+                case 9: return NPCType<MantisShrimp>();
+                case 10: return NPCType<AuroraSpirit>();
+                case 11: return NPCType<WildBumblebirb>(); // There's also the boss variant but I dont think we want banners to affect them?
                 /*case 12:
                     npc = NPCType<Unused>(); - Formerly Sea Urchin
                     break*/
-                case 13:
-                    npc = NPCType<BoxJellyfish>();
-                    break;
-                case 14:
-                    npc = NPCType<MorayEel>();
-                    break;
-                case 15:
-                    npc = NPCType<DevilFish>();
-                    break;
-                case 16:
-                    npc = NPCType<Cuttlefish>();
-                    break;
-                case 17:
-                    npc = NPCType<ToxicMinnow>();
-                    break;
-                case 18:
-                    npc = NPCType<Viperfish>();
-                    break;
-                case 19:
-                    npc = NPCType<LuminousCorvina>();
-                    break;
-                case 20:
-                    npc = NPCType<GiantSquid>();
-                    break;
-                case 21:
-                    npc = NPCType<Laserfish>();
-                    break;
-                case 22:
-                    npc = NPCType<OarfishHead>();
-                    break;
-                case 23:
-                    npc = NPCType<ColossalSquid>();
-                    break;
-                case 24:
-                    npc = NPCType<MirageJelly>();
-                    break;
-                case 25:
-                    npc = NPCType<Eidolist>();
-                    break;
-                case 26:
-                    npc = NPCType<GulperEelHead>();
-                    break;
-                case 27:
-                    npc = NPCType<EidolonWyrmHead>();
-                    break;
-                case 28:
-                    npc = NPCType<Bloatfish>();
-                    break;
-                case 29:
-                    npc = NPCType<BobbitWormHead>();
-                    break;
-                case 30:
-                    npc = NPCType<ChaoticPuffer>();
-                    break;
-                case 31:
-                    npc = NPCType<AstralProbe>();
-                    break;
-                case 32:
-                    npc = NPCType<SightseerCollider>();
-                    break;
-                case 33:
-                    npc = NPCType<SightseerSpitter>();
-                    break;
-                case 34:
-                    npc = NPCType<Aries>();
-                    break;
-                case 35:
-                    npc = NPCType<AstralSlime>();
-                    break;
-                case 36:
-                    npc = NPCType<Atlas>();
-                    break;
-                case 37:
-                    npc = NPCType<Mantis>();
-                    break;
-                case 38:
-                    npc = NPCType<Nova>();
-                    break;
-                case 39:
-                    npc = NPCType<AstralachneaGround>();
-                    break;
-                case 40:
-                    npc = NPCType<Astraglomerate>();
-                    break;
-                case 41:
-                    npc = NPCType<StellarCulex>();
-                    break;
-                case 42:
-                    npc = NPCType<FusionFeeder>();
-                    break;
-                case 43:
-                    npc = NPCType<Hadarian>();
-                    break;
-                case 44:
-                    npc = NPCType<HeatSpirit>();
-                    break;
-                case 45:
-                    npc = NPCType<Scryllar>();
-                    break;
-                case 46:
-                    npc = NPCType<DespairStone>();
-                    break;
-                case 47:
-                    npc = NPCType<SoulSlurper>();
-                    break;
-                case 48:
-                    npc = NPCType<ImpiousImmolator>();
-                    break;
-                case 49:
-                    npc = NPCType<ScornEater>();
-                    break;
-                case 50:
-                    npc = NPCType<ProfanedEnergyBody>();
-                    break;
-                case 51:
-                    npc = NPCType<Shroomble>();
-                    break;
-                case 52:
-                    npc = NPCType<WulfrumDrone>();
-                    break;
-                case 53:
-                    npc = NPCType<Rotdog>();
-                    break;
-                case 54:
-                    npc = NPCType<CladCrab>();
-                    break;
-                case 55:
-                    npc = NPCType<CalamityEye>();
-                    break;
-                case 56:
-                    npc = NPCType<Sunskater>();
-                    break;
-                case 57:
-                    npc = NPCType<ShockstormShuttle>();
-                    break;
-                case 58:
-                    npc = NPCType<CloudElemental>();
-                    break;
-                case 59:
-                    npc = NPCType<Rimehound>();
-                    break;
-                case 60:
-                    npc = NPCType<Cryon>();
-                    break;
-                case 61:
-                    npc = NPCType<IceClasper>();
-                    break;
-                case 62:
-                    npc = NPCType<Stormlion>();
-                    break;
-                case 63:
-                    npc = NPCType<Cnidrion>();
-                    break;
+                case 13: return NPCType<BoxJellyfish>();
+                case 14: return NPCType<MorayEel>();
+                case 15: return NPCType<DevilFish>();
+                case 16: return NPCType<Cuttlefish>();
+                case 17: return NPCType<ToxicMinnow>();
+                case 18: return NPCType<Viperfish>();
+                case 19: return NPCType<LuminousCorvina>();
+                case 20: return NPCType<GiantSquid>();
+                case 21: return NPCType<Laserfish>();
+                case 22: return NPCType<OarfishHead>();
+                case 23: return NPCType<ColossalSquid>();
+                case 24: return NPCType<MirageJelly>();
+                case 25: return NPCType<Eidolist>();
+                case 26: return NPCType<GulperEelHead>();
+                case 27: return NPCType<EidolonWyrmHead>();
+                case 28: return NPCType<Bloatfish>();
+                case 29: return NPCType<BobbitWormHead>();
+                case 30: return NPCType<ChaoticPuffer>();
+                case 31: return NPCType<AstralProbe>();
+                case 32: return NPCType<SightseerCollider>();
+                case 33: return NPCType<SightseerSpitter>();
+                case 34: return NPCType<Aries>();
+                case 35: return NPCType<AstralSlime>();
+                case 36: return NPCType<Atlas>();
+                case 37: return NPCType<Mantis>();
+                case 38: return NPCType<Nova>();
+                case 39: return NPCType<AstralachneaGround>();
+                case 40: return NPCType<Astraglomerate>();
+                case 41: return NPCType<StellarCulex>();
+                case 42: return NPCType<FusionFeeder>();
+                case 43: return NPCType<Hadarian>();
+                case 44: return NPCType<HeatSpirit>();
+                case 45: return NPCType<Scryllar>();
+                case 46: return NPCType<DespairStone>();
+                case 47: return NPCType<SoulSlurper>();
+                case 48: return NPCType<ImpiousImmolator>();
+                case 49: return NPCType<ScornEater>();
+                case 50: return NPCType<ProfanedEnergyBody>();
+                case 51: return NPCType<Shroomble>();
+                case 52: return NPCType<WulfrumDrone>();
+                case 53: return NPCType<Rotdog>();
+                case 54: return NPCType<CladCrab>();
+                case 55: return NPCType<CalamityEye>();
+                case 56: return NPCType<Sunskater>();
+                case 57: return NPCType<ShockstormShuttle>();
+                case 58: return NPCType<CloudElemental>();
+                case 59: return NPCType<Rimehound>();
+                case 60: return NPCType<Cryon>();
+                case 61: return NPCType<IceClasper>();
+                case 62: return NPCType<Stormlion>();
+                case 63: return NPCType<Cnidrion>();
                 /*case 64:
                     npc = NPCType<Unused>(); - Formerly Sand Tortoise
                     break*/
                 /*case 65:
                     npc = NPCType<Unused>(); - Formerly Great Sand Shark
                     break*/
-                case 66:
-                    npc = NPCType<CrawlerAmethyst>();
-                    break;
-                case 67:
-                    npc = NPCType<CrawlerTopaz>();
-                    break;
-                case 68:
-                    npc = NPCType<CrawlerSapphire>();
-                    break;
-                case 69:
-                    npc = NPCType<CrawlerEmerald>();
-                    break;
-                case 70:
-                    npc = NPCType<CrawlerRuby>();
-                    break;
-                case 71:
-                    npc = NPCType<CrawlerDiamond>();
-                    break;
-                case 72:
-                    npc = NPCType<CrawlerAmber>();
-                    break;
-                case 73:
-                    npc = NPCType<CrawlerCrystal>();
-                    break;
+                case 66: return NPCType<CrawlerAmethyst>();
+                case 67: return NPCType<CrawlerTopaz>();
+                case 68: return NPCType<CrawlerSapphire>();
+                case 69: return NPCType<CrawlerEmerald>();
+                case 70: return NPCType<CrawlerRuby>();
+                case 71: return NPCType<CrawlerDiamond>();
+                case 72: return NPCType<CrawlerAmber>();
+                case 73: return NPCType<CrawlerCrystal>();
                 /*case 74:
                     npc = NPCType<Unused>(); - Formerly Sun Bat
                     break*/
                 /*case 75:
                     npc = NPCType<Unused>(); - Formerly Cosmic Elemental
                     break*/
-                case 76:
-                    npc = NPCType<EarthElemental>();
-                    break;
-                case 77:
-                    npc = NPCType<Burrower>();
-                    break;
-                case 78:
-                    npc = NPCType<Melter>();
-                    break;
-                case 79:
-                    npc = NPCType<PestilentSlime>();
-                    break;
-                case 80:
-                    npc = NPCType<Plagueshell>();
-                    break;
-                case 81:
-                    npc = NPCType<PlagueCharger>();
-                    break;
-                case 82:
-                    npc = NPCType<Viruling>();
-                    break;
-                case 83:
-                    npc = NPCType<PlaguebringerMiniboss>();
-                    break;
-                case 84:
-                    npc = NPCType<PhantomSpirit>();
-                    break;
-                case 85:
-                    npc = NPCType<OverloadedSoldier>();
-                    break;
+                case 76: return NPCType<EarthElemental>();
+                case 77: return NPCType<Burrower>();
+                case 78: return NPCType<Melter>();
+                case 79: return NPCType<PestilentSlime>();
+                case 80: return NPCType<Plagueshell>();
+                case 81: return NPCType<PlagueCharger>();
+                case 82: return NPCType<Viruling>();
+                case 83: return NPCType<PlaguebringerMiniboss>();
+                case 84: return NPCType<PhantomSpirit>();
+                case 85: return NPCType<OverloadedSoldier>();
                 /*case 86:
                     npc = NPCType<Unused>(); - Formerly Phantom Debris
                     break*/
-                case 87:
-                    npc = NPCType<Bohldohr>();
-                    break;
-                case 88:
-                    npc = NPCType<EbonianBlightSlime>();
-                    break;
-                case 89:
-                    npc = NPCType<CrimulanBlightSlime>();
-                    break;
-                case 90:
-                    npc = NPCType<AeroSlime>();
-                    break;
-                case 91:
-                    npc = NPCType<CryoSlime>();
-                    break;
-                case 92:
-                    npc = NPCType<PerennialSlime>();
-                    break;
-                case 93:
-                    npc = NPCType<InfernalCongealment>();
-                    break;
-                case 94:
-                    npc = NPCType<BloomSlime>();
-                    break;
-                case 95:
-                    npc = NPCType<RenegadeWarlock>();
-                    break;
-                case 96:
-                    npc = NPCType<ReaperShark>();
-                    break;
-                case 97:
-                    npc = NPCType<IrradiatedSlime>();
-                    break;
-                case 98:
-                    npc = NPCType<PrismBack>();
-                    break;
-                case 99:
-                    npc = NPCType<Clam>();
-                    break;
-                case 100:
-                    npc = NPCType<EutrophicRay>();
-                    break;
-                case 101:
-                    npc = NPCType<GhostBell>();
-                    break;
-                case 102:
-                    npc = NPCType<BabyGhostBell>();
-                    break;
-                case 103:
-                    npc = NPCType<SeaFloaty>();
-                    break;
-                case 104:
-                    npc = NPCType<BlindedAngler>();
-                    break;
-                case 105:
-                    npc = NPCType<SeaMinnow>();
-                    break;
-                case 106:
-                    npc = NPCType<SeaSerpent1>();
-                    break;
+                case 87: return NPCType<Bohldohr>();
+                case 88: return NPCType<EbonianBlightSlime>();
+                case 89: return NPCType<CrimulanBlightSlime>();
+                case 90: return NPCType<AeroSlime>();
+                case 91: return NPCType<CryoSlime>();
+                case 92: return NPCType<PerennialSlime>();
+                case 93: return NPCType<InfernalCongealment>();
+                case 94: return NPCType<BloomSlime>();
+                case 95: return NPCType<RenegadeWarlock>();
+                case 96: return NPCType<ReaperShark>();
+                case 97: return NPCType<IrradiatedSlime>();
+                case 98: return NPCType<PrismBack>();
+                case 99: return NPCType<Clam>();
+                case 100: return NPCType<EutrophicRay>();
+                case 101: return NPCType<GhostBell>();
+                case 102: return NPCType<BabyGhostBell>();
+                case 103: return NPCType<SeaFloaty>();
+                case 104: return NPCType<BlindedAngler>();
+                case 105: return NPCType<SeaMinnow>();
+                case 106: return NPCType<SeaSerpent1>();
                 /*case 107:
                     npc = NPCType<Unused>(); - Formerly Giant Clam
                     break*/
-                case 108:
-                    npc = NPCType<Piggy>();
-                    break;
-                case 109:
-                    npc = NPCType<FearlessGoldfishWarrior>();
-                    break;
-                case 110:
-                    npc = NPCType<Radiator>();
-                    break;
-                case 111:
-                    npc = NPCType<Trilobite>();
-                    break;
-                case 112:
-                    npc = NPCType<Orthocera>();
-                    break;
-                case 113:
-                    npc = NPCType<Skyfin>();
-                    break;
+                case 108: return NPCType<Piggy>();
+                case 109: return NPCType<FearlessGoldfishWarrior>();
+                case 110: return NPCType<Radiator>();
+                case 111: return NPCType<Trilobite>();
+                case 112: return NPCType<Orthocera>();
+                case 113: return NPCType<Skyfin>();
                 /*case 114:
                     npc = NPCType<Unused>(); - Formerly Water Leech
                     break*/
-                case 115:
-                    npc = NPCType<AcidEel>();
-                    break;
-                case 116:
-                    npc = NPCType<NuclearToad>();
-                    break;
-                case 117:
-                    npc = NPCType<FlakCrab>();
-                    break;
-                case 118:
-                    npc = NPCType<SulphurousSkater>();
-                    break;
-                case 119:
-                    npc = NPCType<BabyFlakCrab>();
-                    break;
-                case 120:
-                    npc = NPCType<AnthozoanCrab>();
-                    break;
-                case 121:
-                    npc = NPCType<BelchingCoral>();
-                    break;
-                case 122:
-                    npc = NPCType<GammaSlime>();
-                    break;
-                case 123:
-                    npc = NPCType<WulfrumGyrator>();
-                    break;
-                case 124:
-                    npc = NPCType<WulfrumHovercraft>();
-                    break;
-                case 125:
-                    npc = NPCType<WulfrumRover>();
-                    break;
-                case 126:
-                    npc = NPCType<WulfrumAmplifier>();
-                    break;
-                case 127:
-                    npc = NPCType<CannonballJellyfish>();
-                    break;
-                case 128:
-                    npc = NPCType<BabyCannonballJellyfish>();
-                    break;
+                case 115: return NPCType<AcidEel>();
+                case 116: return NPCType<NuclearToad>();
+                case 117: return NPCType<FlakCrab>();
+                case 118: return NPCType<SulphurousSkater>();
+                case 119: return NPCType<BabyFlakCrab>();
+                case 120: return NPCType<AnthozoanCrab>();
+                case 121: return NPCType<BelchingCoral>();
+                case 122: return NPCType<GammaSlime>();
+                case 123: return NPCType<WulfrumGyrator>();
+                case 124: return NPCType<WulfrumHovercraft>();
+                case 125: return NPCType<WulfrumRover>();
+                case 126: return NPCType<WulfrumAmplifier>();
+                case 127: return NPCType<CannonballJellyfish>();
+                case 128: return NPCType<BabyCannonballJellyfish>();
                 // Hello source code diver, here are a bunch of Sunken Sea enemy names, have fun
                 /*case 129:
                     npc = NPCType<Sharkoon>();
@@ -530,13 +287,9 @@ namespace CalamityMod.Tiles
                 /* case 151:
                     npc = NPCType<StormlionScout>();
                     break; */
-                case 152:
-                    npc = NPCType<HorribleHog>();
-                    break;
-                default:
-                    break;
+                case 152: return NPCType<HorribleHog>();
+                default: return -1;
             }
-            return npc;
         }
     }
 }
