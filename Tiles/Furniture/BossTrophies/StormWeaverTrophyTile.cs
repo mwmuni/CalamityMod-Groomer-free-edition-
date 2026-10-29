@@ -1,9 +1,6 @@
-﻿using Terraria.ModLoader;
-
-namespace CalamityMod.Tiles.Furniture.BossTrophies
+﻿namespace CalamityMod.Tiles.Furniture.BossTrophies
 {
-    public class StormWeaverTrophyTile : ModTile
+    public class StormWeaverTrophyTile : BaseBossTrophy
     {
-        public override void SetStaticDefaults() => this.SetUpTrophy();
     }
 }

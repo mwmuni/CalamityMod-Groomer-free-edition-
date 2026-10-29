@@ -5,27 +5,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class ReefclawHamaxe : ModItem, ILocalizedModType
+    public class ReefclawHamaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 44;
-            Item.height = 44;
-            Item.damage = 15;
-            Item.knockBack = 6f;
-            Item.useTime = 11;
-            Item.useAnimation = 29;
-            Item.hammer = 60;
-            Item.axe = 55 / 5;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(silver: 30);
-            Item.rare = ItemRarityID.Green;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                44, 44, 15, 6f, 11, 29, Item.sellPrice(silver: 30), ItemRarityID.Green,
+                axePower: 55 / 5, hammerPower: 60);
         }
 
         public override void AddRecipes()

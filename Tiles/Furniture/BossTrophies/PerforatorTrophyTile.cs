@@ -1,9 +1,6 @@
-﻿using Terraria.ModLoader;
-
-namespace CalamityMod.Tiles.Furniture.BossTrophies
+﻿namespace CalamityMod.Tiles.Furniture.BossTrophies
 {
-    public class PerforatorTrophyTile : ModTile
+    public class PerforatorTrophyTile : BaseBossTrophy
     {
-        public override void SetStaticDefaults() => this.SetUpTrophy();
     }
 }

@@ -9,28 +9,14 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class InfernaCutter : ModItem, ILocalizedModType
+    public class InfernaCutter : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 80;
-            Item.height = 66;
-            Item.damage = 55;
-            Item.crit = 10;
-            Item.knockBack = 7f;
-            Item.useTime = 8;
-            Item.useAnimation = 12;
-            Item.axe = 135 / 5;
-            Item.tileBoost += 1;
             Item.shoot = ProjectileID.Spark; // Dummy argument to ensure it doesn't get set to true melee
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = CalamityGlobalItem.RarityPinkBuyPrice;
-            Item.rare = ItemRarityID.Pink;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                80, 66, 55, 7f, 8, 12, CalamityGlobalItem.RarityPinkBuyPrice, ItemRarityID.Pink,
+                axePower: 135 / 5, tileBoost: 1, crit: 10);
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback) => false;

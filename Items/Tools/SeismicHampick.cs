@@ -7,9 +7,8 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Tools
 {
     [LegacyName("FlamebeakHampick")]
-    public class SeismicHampick : ModItem, ILocalizedModType
+    public class SeismicHampick : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         private const int PickPower = 210;
         private const int HammerPower = 95;
 
@@ -20,23 +19,9 @@ namespace CalamityMod.Items.Tools
 
         public override void SetDefaults()
         {
-            Item.width = 52;
-            Item.height = 50;
-            Item.damage = 58;
-            Item.knockBack = 8f;
-            Item.useTime = 6;
-            Item.useAnimation = 15;
-            Item.pick = PickPower;
-            Item.hammer = HammerPower;
-            Item.tileBoost += 2;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 4, silver: 35);
-            Item.rare = ItemRarityID.Yellow;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                52, 50, 58, 8f, 6, 15, Item.sellPrice(gold: 4, silver: 35), ItemRarityID.Yellow,
+                pickPower: PickPower, hammerPower: HammerPower, tileBoost: 2);
         }
 
         public override bool AltFunctionUse(Player player)

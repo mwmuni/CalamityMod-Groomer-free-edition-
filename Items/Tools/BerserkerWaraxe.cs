@@ -6,26 +6,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class BerserkerWaraxe : ModItem, ILocalizedModType
+    public class BerserkerWaraxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 66;
-            Item.height = 56;
-            Item.damage = 51;
-            Item.knockBack = 8f;
-            Item.useTime = 5;
-            Item.useAnimation = 13;
-            Item.axe = 180 / 5;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 4, silver: 35);
-            Item.rare = ItemRarityID.Lime;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                66, 56, 51, 8f, 5, 13, Item.sellPrice(gold: 4, silver: 35), ItemRarityID.Lime,
+                axePower: 180 / 5);
         }
 
         public override void AddRecipes()

@@ -1,9 +1,6 @@
-﻿using Terraria.ModLoader;
-
-namespace CalamityMod.Tiles.Furniture.BossTrophies
+﻿namespace CalamityMod.Tiles.Furniture.BossTrophies
 {
-    public class PolterghastTrophyTile : ModTile
+    public class PolterghastTrophyTile : BaseBossTrophy
     {
-        public override void SetStaticDefaults() => this.SetUpTrophy();
     }
 }

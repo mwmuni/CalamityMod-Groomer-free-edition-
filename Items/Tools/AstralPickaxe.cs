@@ -8,28 +8,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class AstralPickaxe : ModItem, ILocalizedModType
+    public class AstralPickaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 50;
-            Item.height = 60;
-            Item.damage = 65;
-            Item.crit = 25;
-            Item.knockBack = 5f;
-            Item.useTime = 6;
-            Item.useAnimation = 10;
-            Item.pick = 220;
-            Item.tileBoost += 3;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 6);
-            Item.rare = ItemRarityID.Cyan;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                50, 60, 65, 5f, 6, 10, Item.sellPrice(gold: 6), ItemRarityID.Cyan,
+                pickPower: 220, tileBoost: 3, crit: 25);
         }
 
         public override void AddRecipes()

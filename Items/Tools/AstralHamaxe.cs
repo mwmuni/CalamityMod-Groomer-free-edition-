@@ -8,29 +8,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class AstralHamaxe : ModItem, ILocalizedModType
+    public class AstralHamaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 60;
-            Item.height = 70;
-            Item.damage = 80;
-            Item.crit = 25;
-            Item.knockBack = 5f;
-            Item.useTime = 5;
-            Item.useAnimation = 20;
-            Item.hammer = 100;
-            Item.axe = 165 / 5;
-            Item.tileBoost += 3;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 4, silver: 50);
-            Item.rare = ItemRarityID.Cyan;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                60, 70, 80, 5f, 5, 20, Item.sellPrice(gold: 4, silver: 50), ItemRarityID.Cyan,
+                axePower: 165 / 5, hammerPower: 100, tileBoost: 3, crit: 25);
         }
 
         public override void MeleeEffects(Player player, Rectangle hitbox)

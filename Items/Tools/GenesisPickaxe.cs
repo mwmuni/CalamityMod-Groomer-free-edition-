@@ -9,32 +9,17 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Tools
 {
     [LegacyName("GallantPickaxe")]
-    public class GenesisPickaxe : ModItem, ILocalizedModType
+    public class GenesisPickaxe : BaseMeleeTool
     {
         private int swordDirection;
         public int time = 0;
         public float swingRotation = 0;
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
             // These stats exactly match vanilla's Luminite pickaxes.
-            Item.width = 84;
-            Item.height = 80;
-            Item.damage = 80;
-            Item.knockBack = 5.5f;
-            Item.useTime = 6;
-            Item.useAnimation = 12;
-            Item.pick = 225;
-            Item.tileBoost += 4;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 7);
-            Item.rare = ItemRarityID.Red;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
-            Item.useTurn = true;
+            SetMeleeToolDefaults(
+                84, 80, 80, 5.5f, 6, 12, Item.sellPrice(gold: 7), ItemRarityID.Red,
+                pickPower: 225, tileBoost: 4);
         }
 
         public override void AddRecipes()

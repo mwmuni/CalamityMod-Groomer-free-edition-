@@ -3,8 +3,7 @@
 namespace CalamityMod.Tiles.Furniture.BossTrophies
 {
     [LegacyName("CalamitasTrophyTile")]
-    public class CalamitasCloneTrophyTile : ModTile
+    public class CalamitasCloneTrophyTile : BaseBossTrophy
     {
-        public override void SetStaticDefaults() => this.SetUpTrophy();
     }
 }

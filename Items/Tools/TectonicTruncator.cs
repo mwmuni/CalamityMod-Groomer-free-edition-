@@ -7,27 +7,13 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Tools
 {
     [LegacyName("ChaoswarpedSlashaxe")]
-    public class TectonicTruncator : ModItem, ILocalizedModType
+    public class TectonicTruncator : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 50;
-            Item.height = 50;
-            Item.damage = 68;
-            Item.knockBack = 7f;
-            Item.useTime = 6;
-            Item.useAnimation = 17;
-            Item.axe = 190 / 5;
-            Item.tileBoost += 2;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 4, silver: 35);
-            Item.rare = ItemRarityID.Yellow;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                50, 50, 68, 7f, 6, 17, Item.sellPrice(gold: 4, silver: 35), ItemRarityID.Yellow,
+                axePower: 190 / 5, tileBoost: 2);
         }
 
         public override void AddRecipes()

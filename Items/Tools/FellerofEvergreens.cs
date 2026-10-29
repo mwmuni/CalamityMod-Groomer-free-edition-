@@ -3,26 +3,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class FellerofEvergreens : ModItem, ILocalizedModType
+    public class FellerofEvergreens : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 66;
-            Item.height = 66;
-            Item.damage = 18;
-            Item.knockBack = 5f;
-            Item.useTime = 17;
-            Item.useAnimation = 25;
-            Item.axe = 100 / 5;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = CalamityGlobalItem.RarityGreenBuyPrice;
-            Item.rare = ItemRarityID.Green;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                66, 66, 18, 5f, 17, 25, CalamityGlobalItem.RarityGreenBuyPrice, ItemRarityID.Green,
+                axePower: 100 / 5);
         }
 
         public override void AddRecipes()

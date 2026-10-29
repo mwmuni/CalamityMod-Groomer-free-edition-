@@ -6,27 +6,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class AbyssalWarhammer : ModItem, ILocalizedModType
+    public class AbyssalWarhammer : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 70;
-            Item.height = 70;
-            Item.damage = 42;
-            Item.knockBack = 8f;
-            Item.useTime = 10;
-            Item.useAnimation = 38;
-            Item.hammer = 88;
-            Item.tileBoost += 1;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 3);
-            Item.rare = ItemRarityID.Pink;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                70, 70, 42, 8f, 10, 38, Item.sellPrice(gold: 3), ItemRarityID.Pink,
+                hammerPower: 88, tileBoost: 1);
         }
 
         public override void AddRecipes()

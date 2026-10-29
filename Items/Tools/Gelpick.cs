@@ -6,27 +6,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class Gelpick : ModItem, ILocalizedModType
+    public class Gelpick : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 46;
-            Item.height = 48;
-            Item.damage = 19;
-            Item.knockBack = 2.5f;
-            Item.useTime = 9;
-            Item.useAnimation = 12;
-            Item.pick = 105;
-            Item.tileBoost += 1;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(silver: 75);
-            Item.rare = ItemRarityID.LightRed;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
-            Item.useTurn = true;
+            SetMeleeToolDefaults(
+                46, 48, 19, 2.5f, 9, 12, Item.sellPrice(silver: 75), ItemRarityID.LightRed,
+                pickPower: 105, tileBoost: 1);
         }
 
         public override void AddRecipes()

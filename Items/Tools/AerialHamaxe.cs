@@ -6,28 +6,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class AerialHamaxe : ModItem, ILocalizedModType
+    public class AerialHamaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 44;
-            Item.height = 44;
-            Item.damage = 20;
-            Item.knockBack = 7f;
-            Item.useTime = 16;
-            Item.useAnimation = 26;
-            Item.hammer = 70;
-            Item.axe = 125 / 5;
-            Item.tileBoost += 1;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(silver: 60);
-            Item.rare = ItemRarityID.Orange;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                44, 44, 20, 7f, 16, 26, Item.sellPrice(silver: 60), ItemRarityID.Orange,
+                axePower: 125 / 5, hammerPower: 70, tileBoost: 1);
         }
 
         public override void AddRecipes()

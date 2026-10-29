@@ -6,27 +6,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class SkyfringePickaxe : ModItem, ILocalizedModType
+    public class SkyfringePickaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 44;
-            Item.height = 44;
-            Item.damage = 12;
-            Item.knockBack = 2.5f;
-            Item.useTime = 12;
-            Item.useAnimation = 16;
-            Item.pick = 105;
-            Item.tileBoost += 1;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(silver: 60);
-            Item.rare = ItemRarityID.Orange;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                44, 44, 12, 2.5f, 12, 16, Item.sellPrice(silver: 60), ItemRarityID.Orange,
+                pickPower: 105, tileBoost: 1);
         }
 
         public override void AddRecipes()

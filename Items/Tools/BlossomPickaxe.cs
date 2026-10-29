@@ -7,27 +7,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class BlossomPickaxe : ModItem, ILocalizedModType
+    public class BlossomPickaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 50;
-            Item.height = 52;
-            Item.damage = 92;
-            Item.knockBack = 6.5f;
-            Item.useTime = 4;
-            Item.useAnimation = 12;
-            Item.pick = 250;
-            Item.tileBoost += 5;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 10);
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
-            Item.rare = ModContent.RarityType<Turquoise>();
+            SetMeleeToolDefaults(
+                50, 52, 92, 6.5f, 4, 12, Item.sellPrice(gold: 10), ModContent.RarityType<Turquoise>(),
+                pickPower: 250, tileBoost: 5);
         }
 
         public override void AddRecipes()

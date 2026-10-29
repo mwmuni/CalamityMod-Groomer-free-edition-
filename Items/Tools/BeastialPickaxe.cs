@@ -6,26 +6,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class BeastialPickaxe : ModItem, ILocalizedModType
+    public class BeastialPickaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 48;
-            Item.height = 46;
-            Item.damage = 35;
-            Item.knockBack = 4.5f;
-            Item.useTime = 5;
-            Item.useAnimation = 15;
-            Item.pick = 200;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 4, silver: 35);
-            Item.rare = ItemRarityID.Lime;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                48, 46, 35, 4.5f, 5, 15, Item.sellPrice(gold: 4, silver: 35), ItemRarityID.Lime,
+                pickPower: 200);
         }
 
         public override void AddRecipes()

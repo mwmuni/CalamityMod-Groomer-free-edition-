@@ -8,9 +8,8 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class Grax : ModItem, ILocalizedModType
+    public class Grax : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         private const int HammerPower = 110;
         private const int AxePower = 180 / 5;
 
@@ -25,22 +24,9 @@ namespace CalamityMod.Items.Tools
 
         public override void SetDefaults()
         {
-            Item.width = 62;
-            Item.height = 62;
-            Item.damage = 472;
-            Item.knockBack = 8f;
-            Item.useTime = 4;
-            Item.useAnimation = 16;
-            Item.hammer = HammerPower;
-            Item.axe = AxePower;
-            Item.tileBoost += 5;
-            Item.DamageType = DamageClass.Melee;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.useTurn = true;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
-            Item.value = CalamityGlobalItem.RarityTurquoiseBuyPrice;
-            Item.rare = ModContent.RarityType<Turquoise>();
+            SetMeleeToolDefaults(
+                62, 62, 472, 8f, 4, 16, CalamityGlobalItem.RarityTurquoiseBuyPrice, ModContent.RarityType<Turquoise>(),
+                axePower: AxePower, hammerPower: HammerPower, tileBoost: 5);
         }
 
         public override bool AltFunctionUse(Player player) => true;

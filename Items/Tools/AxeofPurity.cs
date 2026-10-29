@@ -7,9 +7,8 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Tools
 {
     [LegacyName("PurityAxe")]
-    public class AxeofPurity : ModItem, ILocalizedModType
+    public class AxeofPurity : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         private static int AxePower = 125 / 5;
         private static float PowderSpeed = 21f;
 
@@ -20,21 +19,10 @@ namespace CalamityMod.Items.Tools
 
         public override void SetDefaults()
         {
-            Item.width = 58;
-            Item.height = 54;
-            Item.damage = 55;
-            Item.knockBack = 5f;
-            Item.useTime = 15;
-            Item.useAnimation = 15;
-            Item.axe = AxePower;
             Item.shoot = ProjectileID.PurificationPowder;
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = CalamityGlobalItem.RarityLightRedBuyPrice;
-            Item.rare = ItemRarityID.LightRed;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                58, 54, 55, 5f, 15, 15, CalamityGlobalItem.RarityLightRedBuyPrice, ItemRarityID.LightRed,
+                axePower: AxePower);
             Item.shootSpeed = PowderSpeed;
         }
 

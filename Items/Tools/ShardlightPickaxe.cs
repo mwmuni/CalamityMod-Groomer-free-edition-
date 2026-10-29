@@ -6,27 +6,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Tools
 {
-    public class ShardlightPickaxe : ModItem, ILocalizedModType
+    public class ShardlightPickaxe : BaseMeleeTool
     {
-        public new string LocalizationCategory => "Items.Tools";
         public override void SetDefaults()
         {
-            Item.width = 44;
-            Item.height = 44;
-            Item.damage = 28;
-            Item.knockBack = 4f;
-            Item.useTime = 8;
-            Item.useAnimation = 15;
-            Item.pick = 180;
-            Item.tileBoost += 1;
-
-            Item.DamageType = DamageClass.Melee;
-            Item.useTurn = true;
-            Item.useStyle = ItemUseStyleID.Swing;
-            Item.value = Item.sellPrice(gold: 3);
-            Item.rare = ItemRarityID.Pink;
-            Item.UseSound = SoundID.Item1;
-            Item.autoReuse = true;
+            SetMeleeToolDefaults(
+                44, 44, 28, 4f, 8, 15, Item.sellPrice(gold: 3), ItemRarityID.Pink,
+                pickPower: 180, tileBoost: 1);
         }
 
         public override void AddRecipes()
