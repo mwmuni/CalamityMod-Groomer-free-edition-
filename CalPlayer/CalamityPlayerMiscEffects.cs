@@ -4554,240 +4554,85 @@ namespace CalamityMod.CalPlayer
             // Because later tier shields are brighter, shields are handled from highest tier to lowest tier here.
             bool shieldAddedLight = false;
 
-            // If The Sponge is not equipped, obliterate its durability cooldown.
-            // The recharge cooldown is intentionally left in place to prevent hot swapping to recharge the shield
-            if (!sponge)
+            UpdateEnergyShield(sponge, ref SpongeShieldDurability, ref spongeShieldPartialRechargeProgress,
+                ref playedSpongeShieldSound, SpongeDurability.ID, SpongeRecharge.ID,
+                TheSponge.ShieldDurabilityMax, TheSponge.ShieldRechargeDelay, TheSponge.TotalShieldRechargeTime,
+                TheSponge.ActivationSound, Color.White, 0.75f, ref shieldAddedLight);
+
+            int maxDurability = 0;
+            int delay = 0;
+            int totalRecharge = 0;
+            if (pSoulArtifact)
             {
-                if (cooldowns.TryGetValue(SpongeDurability.ID, out var cdDurability))
-                    cdDurability.timeLeft = 0;
-
-                // As The Sponge's shield can be left in a partially recharged state, this is for safety.
-                // If the player does not have the accessory equipped for even one frame, discharge all shields.
-                SpongeShieldDurability = 0;
-            }
-            else
-            {
-                // If The Sponge's shield is discharged and hasn't started its recharge delay, start that.
-                if (SpongeShieldDurability == 0 && !cooldowns.ContainsKey(SpongeRecharge.ID))
-                    Player.AddCooldown(SpongeRecharge.ID, TheSponge.ShieldRechargeDelay);
-
-                // If the shield has greater than zero durability but that durability is not on the cooldown rack, add it to the cooldown rack.
-                if (SpongeShieldDurability > 0 && !cooldowns.ContainsKey(SpongeDurability.ID))
-                {
-                    var durabilityCooldown = Player.AddCooldown(SpongeDurability.ID, TheSponge.ShieldDurabilityMax);
-                    durabilityCooldown.timeLeft = SpongeShieldDurability;
-                }
-
-                // If the shield has greater than zero durability and isn't in its recharge delay, actively replenish shield points.
-                // Play a sound on the first frame this occurs.
-                if (SpongeShieldDurability > 0 && !cooldowns.ContainsKey(SpongeRecharge.ID))
-                {
-                    if (!playedSpongeShieldSound)
-                        SoundEngine.PlaySound(TheSponge.ActivationSound, Player.Center);
-                    playedSpongeShieldSound = true;
-
-                    // This number is not an integer, and stores exact per-frame recharge progress.
-                    spongeShieldPartialRechargeProgress += TheSponge.ShieldDurabilityMax / (float)TheSponge.TotalShieldRechargeTime;
-
-                    // Floor the value to get whole number of shield points recharged this frame.
-                    int pointsActuallyRecharged = (int)MathF.Floor(spongeShieldPartialRechargeProgress);
-
-                    // Give those points to the real shield durability, capping the result. Then remove them from recharge progress.
-                    SpongeShieldDurability = Math.Min(SpongeShieldDurability + pointsActuallyRecharged, TheSponge.ShieldDurabilityMax);
-                    spongeShieldPartialRechargeProgress -= pointsActuallyRecharged;
-
-                    // Update the cooldown rack's durability indicator.
-                    if (cooldowns.TryGetValue(SpongeDurability.ID, out var cdDurability))
-                        cdDurability.timeLeft = SpongeShieldDurability;
-                }
-
-                // Add light if this shield is currently active
-                if (SpongeShieldDurability > 0 && !shieldAddedLight)
-                {
-                    // The Sponge is much brigher than other shields
-                    Lighting.AddLight(Player.Center, Color.White.ToVector3() * 0.75f);
-                    shieldAddedLight = true;
-                }
-            }
-
-            // If PSA/PSC is not equipped, obliterate its durability cooldown.
-            // The recharge cooldown is intentionally left in place to prevent hot swapping to recharge the shield
-            if (!pSoulArtifact)
-            {
-                if (cooldowns.TryGetValue(Cooldowns.ProfanedSoulShield.ID, out var cdDurability))
-                    cdDurability.timeLeft = 0;
-
-                // As PSA/PSC's shield can be left in a partially recharged state, this is for safety.
-                // If the player does not have the accessory equipped for even one frame, discharge all shields.
-                pSoulShieldDurability = 0;
-            }
-            // Stuff to do if PSA/PSC is equipped
-            else
-            {
-                //Force check if profaned crystal buffs are active
+                // Force check if profaned crystal buffs are active.
                 ProfanedSoulCrystal.DetermineTransformationEligibility(Player);
-                int maxDurability = profanedCrystalBuffs
+                maxDurability = profanedCrystalBuffs
                     ? ProfanedSoulCrystal.ShieldDurabilityMax
                     : ProfanedSoulArtifact.ShieldDurabilityMax;
-                int delay = profanedCrystalBuffs
+                delay = profanedCrystalBuffs
                     ? ProfanedSoulCrystal.ShieldRechargeDelay
                     : ProfanedSoulArtifact.ShieldRechargeDelay;
-                int totalRecharge = profanedCrystalBuffs
+                totalRecharge = profanedCrystalBuffs
                     ? ProfanedSoulCrystal.TotalShieldRechargeTime
                     : ProfanedSoulArtifact.TotalShieldRechargeTime;
-
-                if (pSoulShieldDurability == 0 && !cooldowns.ContainsKey(Cooldowns.ProfanedSoulShieldRecharge.ID))
-                    Player.AddCooldown(ProfanedSoulShieldRecharge.ID, delay);
-
-                // If the shield has greater than zero durability but that durability is not on the cooldown rack, add it to the cooldown rack.
-                if (pSoulShieldDurability > 0 && !cooldowns.ContainsKey(Cooldowns.ProfanedSoulShield.ID))
-                {
-                    var durabilityCooldown = Player.AddCooldown(Cooldowns.ProfanedSoulShield.ID, maxDurability);
-                    durabilityCooldown.timeLeft = pSoulShieldDurability;
-                }
-
-                // If the shield has greater than zero durability and isn't in its recharge delay, actively replenish shield points.
-                // Play a sound on the first frame this occurs.
-                if (pSoulShieldDurability > 0 && !cooldowns.ContainsKey(ProfanedSoulShieldRecharge.ID))
-                {
-                    if (!playedProfanedSoulShieldSound)
-                        SoundEngine.PlaySound(ProvidenceBoss.BurnStartSound, Player.Center);
-                    playedProfanedSoulShieldSound = true;
-
-                    // This number is not an integer, and stores exact per-frame recharge progress.
-                    pSoulShieldPartialRechargeProgress += maxDurability / (float)totalRecharge;
-
-                    // Floor the value to get whole number of shield points recharged this frame.
-                    int pointsActuallyRecharged = (int)MathF.Floor(pSoulShieldPartialRechargeProgress);
-
-                    // Give those points to the real shield durability, capping the result. Then remove them from recharge progress.
-                    pSoulShieldDurability = Math.Min(pSoulShieldDurability + pointsActuallyRecharged, maxDurability);
-                    pSoulShieldPartialRechargeProgress -= pointsActuallyRecharged;
-
-                    // Update the cooldown rack's durability indicator.
-                    if (cooldowns.TryGetValue(Cooldowns.ProfanedSoulShield.ID, out var cdDurability))
-                        cdDurability.timeLeft = pSoulShieldDurability;
-                }
-
-                // Add light if this shield is currently active
-                if (pSoulShieldDurability > 0 && !shieldAddedLight)
-                {
-                    Lighting.AddLight(Player.Center, Color.Orange.ToVector3() * 0.4f);
-                    shieldAddedLight = true;
-                }
             }
-            // If the Lunic Corps armor is not equipped, obliterate its durability cooldown.
-            // The recharge cooldown is intentionally left in place to prevent hot swapping to recharge the shield
-            if (!lunicCorpsSet)
-            {
-                if (cooldowns.TryGetValue(Cooldowns.LunicCorpsShieldDurability.ID, out var cdDurability))
-                    cdDurability.timeLeft = 0;
+            UpdateEnergyShield(pSoulArtifact, ref pSoulShieldDurability, ref pSoulShieldPartialRechargeProgress,
+                ref playedProfanedSoulShieldSound, Cooldowns.ProfanedSoulShield.ID, ProfanedSoulShieldRecharge.ID,
+                maxDurability, delay, totalRecharge, ProvidenceBoss.BurnStartSound, Color.Orange, 0.4f, ref shieldAddedLight);
 
-                // As the Lunic Corps armor's shield can be left in a partially recharged state, this is for safety.
-                // If the player does not have the armor equipped for even one frame, discharge all shields.
-                LunicCorpsShieldDurability = 0;
+            UpdateEnergyShield(lunicCorpsSet, ref LunicCorpsShieldDurability, ref lunicCorpsShieldPartialRechargeProgress,
+                ref playedLunicCorpsShieldSound, Cooldowns.LunicCorpsShieldDurability.ID, LunicCorpsShieldRecharge.ID,
+                LunicCorpsHelmet.ShieldDurabilityMax, LunicCorpsHelmet.ShieldRechargeDelay, LunicCorpsHelmet.TotalShieldRechargeTime,
+                LunicCorpsHelmet.ActivationSound, Color.DeepSkyBlue, 0.2f, ref shieldAddedLight);
+
+            UpdateEnergyShield(roverDrive, ref RoverDriveShieldDurability, ref roverDriveShieldPartialRechargeProgress,
+                ref playedRoverDriveShieldSound, WulfrumRoverDriveDurability.ID, WulfrumRoverDriveRecharge.ID,
+                RoverDrive.ShieldDurabilityMax, RoverDrive.ShieldRechargeDelay, RoverDrive.TotalShieldRechargeTime,
+                RoverDrive.ActivationSound, Color.DeepSkyBlue, 0.2f, ref shieldAddedLight);
+        }
+
+        private void UpdateEnergyShield(bool equipped, ref int durability, ref float partialRechargeProgress, ref bool playedActivationSound,
+            string durabilityCooldownID, string rechargeCooldownID, int maxDurability, int rechargeDelay, int totalRechargeTime,
+            SoundStyle activationSound, Color lightColor, float lightIntensity, ref bool shieldAddedLight)
+        {
+            if (!equipped)
+            {
+                // Keep the recharge cooldown so swapping equipment cannot restart the shield's recharge.
+                if (cooldowns.TryGetValue(durabilityCooldownID, out var durabilityCooldown))
+                    durabilityCooldown.timeLeft = 0;
+
+                durability = 0;
+                return;
             }
 
-            // Stuff to do if the Lunic Corps armor is equipped
-            else
+            if (durability == 0 && !cooldowns.ContainsKey(rechargeCooldownID))
+                Player.AddCooldown(rechargeCooldownID, rechargeDelay);
+
+            if (durability > 0 && !cooldowns.ContainsKey(durabilityCooldownID))
             {
-                // If the Lunic Corps shield is discharged and hasn't started its recharge delay, start that.
-                if (LunicCorpsShieldDurability == 0 && !cooldowns.ContainsKey(LunicCorpsShieldRecharge.ID))
-                    Player.AddCooldown(LunicCorpsShieldRecharge.ID, LunicCorpsHelmet.ShieldRechargeDelay);
-
-                // If the shield has greater than zero durability but that durability is not on the cooldown rack, add it to the cooldown rack.
-                if (LunicCorpsShieldDurability > 0 && !cooldowns.ContainsKey(Cooldowns.LunicCorpsShieldDurability.ID))
-                {
-                    var durabilityCooldown = Player.AddCooldown(Cooldowns.LunicCorpsShieldDurability.ID, LunicCorpsHelmet.ShieldDurabilityMax);
-                    durabilityCooldown.timeLeft = LunicCorpsShieldDurability;
-                }
-
-                // If the shield has greater than zero durability and isn't in its recharge delay, actively replenish shield points.
-                // Play a sound on the first frame this occurs.
-                if (LunicCorpsShieldDurability > 0 && !cooldowns.ContainsKey(LunicCorpsShieldRecharge.ID))
-                {
-                    if (!playedLunicCorpsShieldSound)
-                        SoundEngine.PlaySound(LunicCorpsHelmet.ActivationSound, Player.Center);
-                    playedLunicCorpsShieldSound = true;
-
-                    // This number is not an integer, and stores exact per-frame recharge progress.
-                    lunicCorpsShieldPartialRechargeProgress += LunicCorpsHelmet.ShieldDurabilityMax / (float)LunicCorpsHelmet.TotalShieldRechargeTime;
-
-                    // Floor the value to get whole number of shield points recharged this frame.
-                    int pointsActuallyRecharged = (int)MathF.Floor(lunicCorpsShieldPartialRechargeProgress);
-
-                    // Give those points to the real shield durability, capping the result. Then remove them from recharge progress.
-                    LunicCorpsShieldDurability = Math.Min(LunicCorpsShieldDurability + pointsActuallyRecharged, LunicCorpsHelmet.ShieldDurabilityMax);
-                    lunicCorpsShieldPartialRechargeProgress -= pointsActuallyRecharged;
-
-                    // Update the cooldown rack's durability indicator.
-                    if (cooldowns.TryGetValue(Cooldowns.LunicCorpsShieldDurability.ID, out var cdDurability))
-                        cdDurability.timeLeft = LunicCorpsShieldDurability;
-                }
-
-                // Add light if this shield is currently active
-                if (LunicCorpsShieldDurability > 0 && !shieldAddedLight)
-                {
-                    Lighting.AddLight(Player.Center, Color.DeepSkyBlue.ToVector3() * 0.2f);
-                    shieldAddedLight = true;
-                }
+                var durabilityCooldown = Player.AddCooldown(durabilityCooldownID, maxDurability);
+                durabilityCooldown.timeLeft = durability;
             }
 
-            // If the Rover Drive is not equipped, obliterate its durability cooldown.
-            // The recharge cooldown is intentionally left in place to prevent hot swapping to recharge the shield
-            if (!roverDrive)
+            if (durability > 0 && !cooldowns.ContainsKey(rechargeCooldownID))
             {
-                if (cooldowns.TryGetValue(WulfrumRoverDriveDurability.ID, out var cdDurability))
-                    cdDurability.timeLeft = 0;
+                if (!playedActivationSound)
+                    SoundEngine.PlaySound(activationSound, Player.Center);
+                playedActivationSound = true;
 
-                // As Rover Drive's shield can be left in a partially recharged state, this is for safety.
-                // If the player does not have the accessory equipped for even one frame, discharge all shields.
-                RoverDriveShieldDurability = 0;
+                partialRechargeProgress += maxDurability / (float)totalRechargeTime;
+                int pointsActuallyRecharged = (int)MathF.Floor(partialRechargeProgress);
+                durability = Math.Min(durability + pointsActuallyRecharged, maxDurability);
+                partialRechargeProgress -= pointsActuallyRecharged;
+
+                if (cooldowns.TryGetValue(durabilityCooldownID, out var durabilityCooldown))
+                    durabilityCooldown.timeLeft = durability;
             }
 
-            // Stuff to do if the Rover Drive is equipped
-            else
+            if (durability > 0 && !shieldAddedLight)
             {
-                // If the Rover Drive shield is discharged and hasn't started its recharge delay, start that.
-                if (RoverDriveShieldDurability == 0 && !cooldowns.ContainsKey(WulfrumRoverDriveRecharge.ID))
-                    Player.AddCooldown(WulfrumRoverDriveRecharge.ID, RoverDrive.ShieldRechargeDelay);
-
-                // If the shield has greater than zero durability but that durability is not on the cooldown rack, add it to the cooldown rack.
-                if (RoverDriveShieldDurability > 0 && !cooldowns.ContainsKey(WulfrumRoverDriveDurability.ID))
-                {
-                    CooldownInstance durabilityCooldown = Player.AddCooldown(WulfrumRoverDriveDurability.ID, RoverDrive.ShieldDurabilityMax);
-                    durabilityCooldown.timeLeft = RoverDriveShieldDurability;
-                }
-
-                // If the shield has greater than zero durability and isn't in its recharge delay, actively replenish shield points.
-                // Play a sound on the first frame this occurs.
-                if (RoverDriveShieldDurability > 0 && !cooldowns.ContainsKey(WulfrumRoverDriveRecharge.ID))
-                {
-                    if (!playedRoverDriveShieldSound)
-                        SoundEngine.PlaySound(RoverDrive.ActivationSound, Player.Center);
-                    playedRoverDriveShieldSound = true;
-
-                    // This number is not an integer, and stores exact per-frame recharge progress.
-                    roverDriveShieldPartialRechargeProgress += RoverDrive.ShieldDurabilityMax / (float)RoverDrive.TotalShieldRechargeTime;
-
-                    // Floor the value to get whole number of shield points recharged this frame.
-                    int pointsActuallyRecharged = (int)MathF.Floor(roverDriveShieldPartialRechargeProgress);
-
-                    // Give those points to the real shield durability, capping the result. Then remove them from recharge progress.
-                    RoverDriveShieldDurability = Math.Min(RoverDriveShieldDurability + pointsActuallyRecharged, RoverDrive.ShieldDurabilityMax);
-                    roverDriveShieldPartialRechargeProgress -= pointsActuallyRecharged;
-
-                    // Update the cooldown rack's durability indicator.
-                    if (cooldowns.TryGetValue(WulfrumRoverDriveDurability.ID, out var cdDurability))
-                        cdDurability.timeLeft = RoverDriveShieldDurability;
-                }
-
-                // Add light if this shield is currently active
-                if (RoverDriveShieldDurability > 0 && !shieldAddedLight)
-                {
-                    Lighting.AddLight(Player.Center, Color.DeepSkyBlue.ToVector3() * 0.2f);
-                    shieldAddedLight = true;
-                }
+                Lighting.AddLight(Player.Center, lightColor.ToVector3() * lightIntensity);
+                shieldAddedLight = true;
             }
         }
         #endregion
