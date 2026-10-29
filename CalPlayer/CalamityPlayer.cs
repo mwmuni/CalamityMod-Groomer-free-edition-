@@ -4152,6 +4152,64 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region TeleportMethods
+        private static Point? FindTeleportAnchor(int xStart, int xEnd, int xStep, int yStart, int yEnd, int yStep,
+            bool scanRowsFirst, Func<Tile, bool> isAnchor)
+        {
+            if (scanRowsFirst)
+            {
+                for (int y = yStart; yStep > 0 ? y <= yEnd : y >= yEnd; y += yStep)
+                {
+                    for (int x = xStart; xStep > 0 ? x <= xEnd : x >= xEnd; x += xStep)
+                    {
+                        if (isAnchor(Framing.GetTileSafely(x, y)))
+                            return new Point(x, y);
+                    }
+                }
+            }
+            else
+            {
+                for (int x = xStart; xStep > 0 ? x <= xEnd : x >= xEnd; x += xStep)
+                {
+                    for (int y = yStart; yStep > 0 ? y <= yEnd : y >= yEnd; y += yStep)
+                    {
+                        if (isAnchor(Framing.GetTileSafely(x, y)))
+                            return new Point(x, y);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static Point FindRandomTeleportSpot(Player player, Point start, int rangeX, int rangeY, int randomFluff,
+            int xDirection, int yDirection, Point initialPosition, Func<Tile, bool> isInBiome)
+        {
+            Point finalTeleportPoint = initialPosition;
+            for (int attempt = 0; attempt < 25; attempt++)
+            {
+                for (int x = 0; x <= rangeX; x++)
+                {
+                    for (int y = 0; y <= rangeY; y++)
+                    {
+                        int teleportPosX = start.X + xDirection * x + Main.rand.Next(-randomFluff, randomFluff);
+                        int teleportPosY = start.Y + yDirection * y + Main.rand.Next(-randomFluff, randomFluff);
+                        Tile tile = Framing.GetTileSafely(teleportPosX, teleportPosY);
+                        Tile tileAbove = Framing.GetTileSafely(teleportPosX, teleportPosY - 1);
+                        Tile tileBelow = Framing.GetTileSafely(teleportPosX, teleportPosY + 1);
+
+                        if (!tileAbove.HasTile && WorldGen.ActiveAndWalkableTile(tileBelow.X(), tileBelow.Y()) && isInBiome(tile))
+                        {
+                            finalTeleportPoint = new(tile.X(), tile.Y());
+                            if (!Collision.SolidCollision(finalTeleportPoint.ToWorldCoordinates(), player.width, player.height))
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return finalTeleportPoint;
+        }
+
         // Used for Boss Rush WoF
         public static Vector2? GetUnderworldPosition(Player player)
         {
@@ -4191,79 +4249,17 @@ namespace CalamityMod.CalPlayer
         /// </summary>
         public static Vector2? GetTempleTeleportPosition(Player player)
         {
-            int foundX = -1;
-            int foundY = -1;
             bool templeOnLeftSide = Main.dungeonX > Main.spawnTileX;
             int xSearchEnd = templeOnLeftSide ? 20 : Main.maxTilesX - 20;
-
-            if (templeOnLeftSide)
-            {
-                for (int i = Main.spawnTileX; i >= xSearchEnd; i -= 2)
-                {
-                    for (int j = (int)Main.worldSurface; j < Main.maxTilesY - 210; j++)
-                    {
-                        Tile tile = Framing.GetTileSafely(i, j);
-                        if (tile.WallType == WallID.LihzahrdBrickUnsafe)
-                        {
-                            foundX = i;
-                            foundY = j;
-                            break;
-                        }
-                    }
-                    if (foundX != -1)
-                        break;
-                }
-            }
-            else
-            {
-                for (int i = Main.spawnTileX; i <= xSearchEnd; i += 2)
-                {
-                    for (int j = (int)Main.worldSurface; j < Main.maxTilesY - 210; j++)
-                    {
-                        Tile tile = Framing.GetTileSafely(i, j);
-                        if (tile.WallType == WallID.LihzahrdBrickUnsafe)
-                        {
-                            foundX = i;
-                            foundY = j;
-                            break;
-                        }
-                    }
-
-                    if (foundX != -1)
-                        break;
-                }
-            }
-
-            if (foundX == -1)
+            Point? anchor = FindTeleportAnchor(Main.spawnTileX, xSearchEnd, templeOnLeftSide ? -2 : 2,
+                (int)Main.worldSurface, Main.maxTilesY - 211, 1, false,
+                static tile => tile.WallType == WallID.LihzahrdBrickUnsafe);
+            if (anchor is null)
                 return null;
 
-            int attempts = 25;
-            int rangeX = 100;
-            int rangeY = 100;
-            int randomFluff = 400;
-            Point finalTeleportPoint = Point.Zero;
-            for (int i = 0; i < attempts; i++)
-            {
-                for (int x = 0; x <= rangeX; x++)
-                {
-                    for (int y = 0; y <= rangeY; y++)
-                    {
-                        int teleportPosX = foundX + (templeOnLeftSide ? x : -x) + Main.rand.Next(-randomFluff, randomFluff);
-                        int teleportPosY = foundY + y + Main.rand.Next(-randomFluff, randomFluff);
-                        Tile tile = Framing.GetTileSafely(teleportPosX, teleportPosY);
-                        Tile tileAbove = Framing.GetTileSafely(teleportPosX, teleportPosY - 1);
-                        Tile tileBelow = Framing.GetTileSafely(teleportPosX, teleportPosY + 1);
-
-                        if (!tileAbove.HasTile && WorldGen.ActiveAndWalkableTile(tileBelow.X(), tileBelow.Y()) && tile.WallType == WallID.LihzahrdBrickUnsafe)
-                        {
-                            finalTeleportPoint = new(tile.X(), tile.Y());
-                            if (!Collision.SolidCollision(finalTeleportPoint.ToWorldCoordinates(), player.width, player.height))
-                                break;
-                        }
-                    }
-                }
-            }
-
+            Point finalTeleportPoint = FindRandomTeleportSpot(player, anchor.Value, 100, 100, 400,
+                templeOnLeftSide ? 1 : -1, 1, Point.Zero,
+                static tile => tile.WallType == WallID.LihzahrdBrickUnsafe);
             return finalTeleportPoint.ToWorldCoordinates() - new Vector2(player.width, player.height);
         }
 
@@ -4273,82 +4269,19 @@ namespace CalamityMod.CalPlayer
         /// </summary>
         public static Vector2? GetAbyssVoidTeleportPosition(Player player)
         {
+            bool abyssOnLeftSide = Abyss.AtLeftSideOfWorld;
             int halfWorldWidth = Main.maxTilesX / 2;
-            int abyssStartX = Abyss.AtLeftSideOfWorld ? halfWorldWidth - (halfWorldWidth - 135) + 35 : halfWorldWidth + (halfWorldWidth - 135) - 35;
-            int abyssEndX = Abyss.AtLeftSideOfWorld ? 0 : Main.maxTilesX;
-
-            int foundX = -1;
-            int foundY = -1;
-
-            if (Abyss.AtLeftSideOfWorld)
-            {
-                for (int y = Main.maxTilesY; y >= (int)Main.worldSurface; y--)
-                {
-                    for (int x = abyssStartX; x >= abyssEndX; x -= 2)
-                    {
-                        Tile tile = Framing.GetTileSafely(x, y);
-                        if (tile.TileType == ModContent.TileType<Voidstone>())
-                        {
-                            foundX = x;
-                            foundY = y;
-                            break;
-                        }
-                    }
-
-                    if (foundY != -1)
-                        break;
-                }
-            }
-            else
-            {
-                for (int y = Main.maxTilesY; y >= (int)Main.worldSurface; y--)
-                {
-                    for (int x = abyssStartX; x <= abyssEndX; x += 2)
-                    {
-                        Tile tile = Framing.GetTileSafely(x, y);
-                        if (tile.TileType == ModContent.TileType<Voidstone>())
-                        {
-                            foundX = x;
-                            foundY = y;
-                            break;
-                        }
-                    }
-
-                    if (foundY != -1)
-                        break;
-                }
-            }
-
-            if (foundY == -1)
+            int abyssStartX = abyssOnLeftSide ? halfWorldWidth - (halfWorldWidth - 135) + 35 : halfWorldWidth + (halfWorldWidth - 135) - 35;
+            int abyssEndX = abyssOnLeftSide ? 0 : Main.maxTilesX;
+            Point? anchor = FindTeleportAnchor(abyssStartX, abyssEndX, abyssOnLeftSide ? -2 : 2,
+                Main.maxTilesY, (int)Main.worldSurface, -1, true,
+                static tile => tile.TileType == ModContent.TileType<Voidstone>());
+            if (anchor is null)
                 return null;
 
-            int attempts = 25;
-            int rangeX = 100;
-            int rangeY = 200;
-            int randomFluff = 200;
-            Point finalTeleportPoint = new(foundX, foundY);
-            for (int i = 0; i < attempts; i++)
-            {
-                for (int x = 0; x <= rangeX; x++)
-                {
-                    for (int y = 0; y <= rangeY; y++)
-                    {
-                        int teleportPosX = foundX + (Abyss.AtLeftSideOfWorld ? x : -x) + Main.rand.Next(-randomFluff, randomFluff);
-                        int teleportPosY = foundY - y + Main.rand.Next(-randomFluff, randomFluff);
-                        Tile tile = Framing.GetTileSafely(teleportPosX, teleportPosY);
-                        Tile tileAbove = Framing.GetTileSafely(teleportPosX, teleportPosY - 1);
-                        Tile tileBelow = Framing.GetTileSafely(teleportPosX, teleportPosY + 1);
-
-                        if (!tileAbove.HasTile && WorldGen.ActiveAndWalkableTile(tileBelow.X(), tileBelow.Y()) && tile.WallType == ModContent.WallType<UnsafeVoidstoneWall>())
-                        {
-                            finalTeleportPoint = new(tile.X(), tile.Y());
-                            if (!Collision.SolidCollision(finalTeleportPoint.ToWorldCoordinates(), player.width, player.height))
-                                break;
-                        }
-                    }
-                }
-            }
-
+            Point finalTeleportPoint = FindRandomTeleportSpot(player, anchor.Value, 100, 200, 200,
+                abyssOnLeftSide ? 1 : -1, -1, anchor.Value,
+                static tile => tile.WallType == ModContent.WallType<UnsafeVoidstoneWall>());
             return finalTeleportPoint.ToWorldCoordinates() - new Vector2(player.width, player.height);
         }
 
@@ -4366,84 +4299,21 @@ namespace CalamityMod.CalPlayer
             // Manually search for the Archives from the bottom of the world if the Archive position isn't saved.
             if (WorldgenManagementSystem.DungeonArchivePos == Point.Zero)
             {
-                int foundX = -1;
-                int foundY = -1;
                 int xSearchStart = dungeonOnRightSide ? Main.maxTilesX - 20 : 20;
-
-                if (dungeonOnRightSide)
-                {
-                    for (int y = Main.maxTilesY; y >= (int)Main.worldSurface; y--)
-                    {
-                        for (int x = xSearchStart; x >= Main.spawnTileX; x -= 2)
-                        {
-                            Tile tile = Framing.GetTileSafely(x, y);
-                            if (Main.wallDungeon[tile.WallType] && Main.tileDungeon[tile.TileType])
-                            {
-                                foundX = x;
-                                foundY = y;
-                                break;
-                            }
-                        }
-
-                        if (foundY != -1)
-                            break;
-                    }
-                }
-                else
-                {
-                    for (int y = Main.maxTilesY; y >= (int)Main.worldSurface; y--)
-                    {
-                        for (int x = xSearchStart; x <= Main.spawnTileX; x += 2)
-                        {
-                            Tile tile = Framing.GetTileSafely(x, y);
-                            if (Main.wallDungeon[tile.WallType] && Main.tileDungeon[tile.TileType])
-                            {
-                                foundX = x;
-                                foundY = y;
-                                break;
-                            }
-                        }
-
-                        if (foundY != -1)
-                            break;
-                    }
-                }
-
-                if (foundY == -1)
+                Point? anchor = FindTeleportAnchor(xSearchStart, Main.spawnTileX, dungeonOnRightSide ? -2 : 2,
+                    Main.maxTilesY, (int)Main.worldSurface, -1, true,
+                    static tile => Main.wallDungeon[tile.WallType] && Main.tileDungeon[tile.TileType]);
+                if (anchor is null)
                     return null;
 
-                teleportStartX = foundX;
-                teleportStartY = foundY;
+                teleportStartX = anchor.Value.X;
+                teleportStartY = anchor.Value.Y;
             }
 
 
-            int attempts = 25;
-            int rangeX = 50;
-            int rangeY = 50;
-            int randomFluff = 20;
-            Point finalTeleportPoint = Point.Zero;
-            for (int i = 0; i < attempts; i++)
-            {
-                for (int x = 0; x <= rangeX; x++)
-                {
-                    for (int y = 0; y <= rangeY; y++)
-                    {
-                        int teleportPosX = teleportStartX + (dungeonOnRightSide ? -x : x) + Main.rand.Next(-randomFluff, randomFluff);
-                        int teleportPosY = teleportStartY - y + Main.rand.Next(-randomFluff, randomFluff);
-                        Tile tile = Framing.GetTileSafely(teleportPosX, teleportPosY);
-                        Tile tileAbove = Framing.GetTileSafely(teleportPosX, teleportPosY - 1);
-                        Tile tileBelow = Framing.GetTileSafely(teleportPosX, teleportPosY + 1);
-
-                        if (!tileAbove.HasTile && WorldGen.ActiveAndWalkableTile(tileBelow.X(), tileBelow.Y()) && Main.tileDungeon[tile.TileType] && Main.wallDungeon[tile.WallType])
-                        {
-                            finalTeleportPoint = new(tile.X(), tile.Y());
-                            if (!Collision.SolidCollision(finalTeleportPoint.ToWorldCoordinates(), player.width, player.height))
-                                break;
-                        }
-                    }
-                }
-            }
-
+            Point finalTeleportPoint = FindRandomTeleportSpot(player, new Point(teleportStartX, teleportStartY), 50, 50, 20,
+                dungeonOnRightSide ? -1 : 1, -1, Point.Zero,
+                static tile => Main.tileDungeon[tile.TileType] && Main.wallDungeon[tile.WallType]);
             return finalTeleportPoint.ToWorldCoordinates() - new Vector2(player.width, player.height);
         }
 
