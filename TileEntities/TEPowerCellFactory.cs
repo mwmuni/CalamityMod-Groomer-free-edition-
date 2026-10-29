@@ -12,10 +12,13 @@ using Terraria.ModLoader.IO;
 
 namespace CalamityMod.TileEntities
 {
-    public class TEPowerCellFactory : ModTileEntity
+    public class TEPowerCellFactory : TEBasePlaceable
     {
         public Vector2 Center => Position.ToWorldCoordinates(8f * PowerCellFactory.Width, 8f * PowerCellFactory.Height);
         public long Time = 0;
+
+        protected override int PlacementTileWidth => PowerCellFactory.Width;
+        protected override int PlacementTileHeight => PowerCellFactory.Height;
 
         internal short Stack_Internal = 0;
 
@@ -82,28 +85,6 @@ namespace CalamityMod.TileEntities
                     CellStack++;
             }
         }
-
-        // This code is called as a hook when the player places the Power Cell Factory tile so that the tile entity may be placed.
-        public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternate)
-        {
-            // If in multiplayer, tell the server to place the tile entity and DO NOT place it yourself. That would mismatch IDs.
-            // Also tell the server that you placed the 4x4 tiles that make up the Power Cell Factory.
-            if (Main.netMode == NetmodeID.MultiplayerClient)
-            {
-                NetMessage.SendTileSquare(Main.myPlayer, i, j, PowerCellFactory.Width, PowerCellFactory.Height);
-                NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, null, i, j, Type);
-                return -1;
-            }
-
-            // If in single player, just place the tile entity, no problems.
-            int id = Place(i, j);
-            return id;
-        }
-
-        // This code is called on dedicated servers only. It is the server-side response to MessageID.TileEntityPlacement.
-        // When the server receives such a message from a client, it sends a MessageID.TileEntitySharing to all clients.
-        // This will cause them to Place the tile entity locally at that position, all with exactly the same ID.
-        public override void OnNetPlace() => NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, ID, Position.X, Position.Y);
 
         // If this factory breaks, anyone who's viewing it is no longer viewing it.
         public override void OnKill()

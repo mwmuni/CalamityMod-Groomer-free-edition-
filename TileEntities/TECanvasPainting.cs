@@ -9,41 +9,20 @@ using Terraria.ModLoader.IO;
 
 namespace CalamityMod.TileEntities
 {
-    public class TECanvasPainting : ModTileEntity
+    public class TECanvasPainting : TEBasePlaceable
     {
         public Vector2 framePosition = new Vector2(0, 0);
         public float scale = 1f;
+
+        protected override int PlacementTileWidth => 5;
+        protected override int PlacementTileHeight => 5;
+        protected override int PlacementOffsetX => -1;
+        protected override int PlacementOffsetY => -1;
 
         public override bool IsTileValidForEntity(int x, int y)
         {
             Tile tile = Main.tile[x, y];
             return tile.HasTile && TileLoader.GetTile(tile.TileType) is BaseCanvasPainting && tile.TileFrameX == 0 && tile.TileFrameY == 0;
-        }
-
-        public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternate)
-        {
-            // WHY do I need to subtract 1 from both????
-            // Todo: Figure out what the heckity heckering heckling heckereckering heckly heccing hecky heck heck is happening here
-            int iMinus = i - 1;
-            int jMinus = j - 1;
-
-            // If in multiplayer, tell the server to place the tile entity and DO NOT place it yourself. That would mismatch IDs.
-            // Also tell the server that you placed the 5x5 tiles that make up the painting.
-            if (Main.netMode == NetmodeID.MultiplayerClient)
-            {
-                NetMessage.SendTileSquare(Main.myPlayer, iMinus, jMinus, 5, 5);
-                NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, null, iMinus, jMinus, Type);
-                return -1;
-            }
-
-            // If in single player, just place the tile entity
-            int id = Place(iMinus, jMinus);
-            return id;
-        }
-
-        public override void OnNetPlace()
-        {
-            NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, ID, Position.X, Position.Y);
         }
 
         public override void NetSend(BinaryWriter writer)

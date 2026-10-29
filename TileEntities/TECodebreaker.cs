@@ -14,11 +14,14 @@ using Terraria.ModLoader.IO;
 
 namespace CalamityMod.TileEntities
 {
-    public class TECodebreaker : ModTileEntity
+    public class TECodebreaker : TEBasePlaceable
     {
         public int InputtedCellCount;
         public int InitialCellCountBeforeDecrypting;
         public int HeldSchematicID;
+
+        protected override int PlacementTileWidth => CodebreakerTile.Width;
+        protected override int PlacementTileHeight => CodebreakerTile.Height;
 
         public int DecryptionCountdown;
         public int DecryptionTotalTime
@@ -115,27 +118,6 @@ namespace CalamityMod.TileEntities
             Tile tile = CalamityUtils.ParanoidTileRetrieval(x, y);
             return tile.HasTile && tile.TileType == ModContent.TileType<CodebreakerTile>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
         }
-
-        // This code is called as a hook when the player places the Codebreaker tile so that the tile entity may be placed.
-        public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternate)
-        {
-            // If in multiplayer, tell the server to place the tile entity and DO NOT place it yourself. That would mismatch IDs.
-            // Also tell the server that you placed the 5x8 tiles that make up the Codebreaker.
-            if (Main.netMode == NetmodeID.MultiplayerClient)
-            {
-                NetMessage.SendTileSquare(Main.myPlayer, i, j, CodebreakerTile.Width, CodebreakerTile.Height);
-                NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, null, i, j, Type);
-                return -1;
-            }
-
-            // If in single player, just place the tile entity, no problems.
-            return Place(i, j);
-        }
-
-        // This code is called on dedicated servers only. It is the server-side response to MessageID.TileEntityPlacement.
-        // When the server receives such a message from a client, it sends a MessageID.TileEntitySharing to all clients.
-        // This will cause them to Place the tile entity locally at that position, all with exactly the same ID.
-        public override void OnNetPlace() => NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, ID, Position.X, Position.Y);
 
         public override void Update() => UpdateTime();
 

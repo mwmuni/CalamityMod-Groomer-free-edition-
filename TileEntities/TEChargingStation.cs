@@ -13,9 +13,12 @@ using Terraria.ModLoader.IO;
 
 namespace CalamityMod.TileEntities
 {
-    public class TEChargingStation : ModTileEntity
+    public class TEChargingStation : TEBasePlaceable
     {
         public Vector2 Center => Position.ToWorldCoordinates(8f * ChargingStation.Width, 8f * ChargingStation.Height);
+
+        protected override int PlacementTileWidth => ChargingStation.Width;
+        protected override int PlacementTileHeight => ChargingStation.Height;
 
         internal short Internal_ChargingTimer = 0;
         internal short Internal_Stack = 0;
@@ -116,28 +119,6 @@ namespace CalamityMod.TileEntities
                 d.noGravity = true;
             }
         }
-
-        // This code is called as a hook when the player places the Charging Station tile so that the tile entity may be placed.
-        public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternate)
-        {
-            // If in multiplayer, tell the server to place the tile entity and DO NOT place it yourself. That would mismatch IDs.
-            // Also tell the server that you placed the 3x2 tiles that make up the Charging Station.
-            if (Main.netMode == NetmodeID.MultiplayerClient)
-            {
-                NetMessage.SendTileSquare(Main.myPlayer, i, j, ChargingStation.Width, ChargingStation.Height);
-                NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, null, i, j, Type);
-                return -1;
-            }
-
-            // If in single player, just place the tile entity, no problems.
-            int id = Place(i, j);
-            return id;
-        }
-
-        // This code is called on dedicated servers only. It is the server-side response to MessageID.TileEntityPlacement.
-        // When the server receives such a message from a client, it sends a MessageID.TileEntitySharing to all clients.
-        // This will cause them to Place the tile entity locally at that position, all with exactly the same ID.
-        public override void OnNetPlace() => NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, ID, Position.X, Position.Y);
 
         // If this charging station breaks, anyone's who's viewing it is no longer viewing it.
         public override void OnKill()

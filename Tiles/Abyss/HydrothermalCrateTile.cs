@@ -1,29 +1,16 @@
 ﻿using CalamityMod.Items.Fishing.SulphurCatches;
+using CalamityMod.Tiles.BaseTiles;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ObjectData;
 
 namespace CalamityMod.Tiles.Abyss
 {
-    public class HydrothermalCrateTile : ModTile
+    public class HydrothermalCrateTile : BaseFishingCrateTile<HydrothermalCrate>
     {
-        public override void SetStaticDefaults()
-        {
-            Main.tileSolidTop[Type] = true;
-            Main.tileLighted[Type] = true;
-            Main.tileFrameImportant[Type] = true;
-            Main.tileNoAttach[Type] = true;
-            Main.tileTable[Type] = true;
-            Main.tileLavaDeath[Type] = true;
-            Main.tileWaterDeath[Type] = false;
-
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
-            TileObjectData.addTile(Type);
-            AddMapEntry(new Color(150, 109, 26), CalamityUtils.GetItemName<HydrothermalCrate>());
-            DustType = DustID.Flare;
-        }
+        protected override Color MapColor => new(150, 109, 26);
+        protected override int CrateDustType => DustID.Flare;
 
         public override bool CreateDust(int i, int j, ref int type)
         {
@@ -33,11 +20,6 @@ namespace CalamityMod.Tiles.Abyss
                 type = 127;
 
             return true;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
         }
     }
 }

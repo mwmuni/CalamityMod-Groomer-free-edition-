@@ -11,12 +11,15 @@ using Terraria.ObjectData;
 
 namespace CalamityMod.TileEntities
 {
-    public class TELabHologramProjector : ModTileEntity
+    public class TELabHologramProjector : TEBasePlaceable
     {
         public const float PopupDistance = 560f;
 
         public Vector2 Center => Position.ToWorldCoordinates(LabHologramProjector.Width * 8f, LabHologramProjector.Height * 8f);
         public bool PoppingUp = false;
+
+        protected override int PlacementTileWidth => LabHologramProjector.Width;
+        protected override int PlacementTileHeight => LabHologramProjector.Height;
 
         public override bool IsTileValidForEntity(int x, int y)
         {
@@ -59,24 +62,6 @@ namespace CalamityMod.TileEntities
             if (PoppingUp != wasPoppingUp)
                 SendSyncPacket();
         }
-
-        // This code is called as a hook when the player places the Lab Hologram Projector tile so that the tile entity may be placed.
-        public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternate)
-        {
-            // If in multiplayer, tell the server to place the tile entity and DO NOT place it yourself. That would mismatch IDs.
-            // Also tell the server that you placed the 6x7 tiles that make up the Lab Hologram Projector.
-            if (Main.netMode == NetmodeID.MultiplayerClient)
-            {
-                NetMessage.SendTileSquare(Main.myPlayer, i, j, LabHologramProjector.Width, LabHologramProjector.Height);
-                NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, null, i, j, Type);
-                return -1;
-            }
-            return Place(i, j);
-        }
-
-        // Sync the tile entity the moment it is place on the server.
-        // This is done to cause it to register among all clients.
-        public override void OnNetPlace() => NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, ID, Position.X, Position.Y);
 
         // If this projector breaks, anyone who's viewing it is no longer viewing it.
         public override void OnKill()
