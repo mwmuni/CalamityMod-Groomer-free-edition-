@@ -63,186 +63,42 @@ namespace CalamityMod
         internal static bool _downedDreadnautilus = false;
 
         #region Wrapper Properties for Lantern Nights
-        public static bool downedDesertScourge
-        {
-            get => _downedDesertScourge;
-            set => SetLanternNightFlag(ref _downedDesertScourge, value);
-        }
-        public static bool downedCrabulon
-        {
-            get => _downedCrabulon;
-            set => SetLanternNightFlag(ref _downedCrabulon, value);
-        }
-        public static bool downedHiveMind
-        {
-            get => _downedHiveMind;
-            set => SetLanternNightFlag(ref _downedHiveMind, value);
-        }
-        public static bool downedPerforator
-        {
-            get => _downedPerforator;
-            set => SetLanternNightFlag(ref _downedPerforator, value);
-        }
-        public static bool downedSlimeGod
-        {
-            get => _downedSlimeGod;
-            set => SetLanternNightFlag(ref _downedSlimeGod, value);
-        }
-        public static bool downedDreadnautilus
-        {
-            get => _downedDreadnautilus;
-            set => SetLanternNightFlag(ref _downedDreadnautilus, value);
-        }
-        public static bool downedCryogen
-        {
-            get => _downedCryogen;
-            set => SetLanternNightFlag(ref _downedCryogen, value);
-        }
-        public static bool downedAquaticScourge
-        {
-            get => _downedAquaticScourge;
-            set => SetLanternNightFlag(ref _downedAquaticScourge, value);
-        }
-        public static bool downedBrimstoneElemental
-        {
-            get => _downedBrimstoneElemental;
-            set => SetLanternNightFlag(ref _downedBrimstoneElemental, value);
-        }
-        public static bool downedCalamitasClone
-        {
-            get => _downedCalamitasClone;
-            set => SetLanternNightFlag(ref _downedCalamitasClone, value);
-        }
-        public static bool downedLeviathan
-        {
-            get => _downedLeviathan;
-            set => SetLanternNightFlag(ref _downedLeviathan, value);
-        }
-        public static bool downedAstrumAureus
-        {
-            get => _downedAstrumAureus;
-            set => SetLanternNightFlag(ref _downedAstrumAureus, value);
-        }
-        public static bool downedBetsy
-        {
-            get => _downedBetsy;
-            set => SetLanternNightFlag(ref _downedBetsy, value);
-        }
-        public static bool downedPlaguebringer
-        {
-            get => _downedPlaguebringer;
-            set => SetLanternNightFlag(ref _downedPlaguebringer, value);
-        }
-        public static bool downedRavager
-        {
-            get => _downedRavager;
-            set => SetLanternNightFlag(ref _downedRavager, value);
-        }
-        public static bool downedAstrumDeus
-        {
-            get => _downedAstrumDeus;
-            set => SetLanternNightFlag(ref _downedAstrumDeus, value);
-        }
-        public static bool downedGuardians
-        {
-            get => _downedGuardians;
-            set => SetLanternNightFlag(ref _downedGuardians, value);
-        }
-        public static bool downedDragonfolly
-        {
-            get => _downedDragonfolly;
-            set => SetLanternNightFlag(ref _downedDragonfolly, value);
-        }
-        public static bool downedProvidence
-        {
-            get => _downedProvidence;
-            set => SetLanternNightFlag(ref _downedProvidence, value);
-        }
-        public static bool downedCeaselessVoid
-        {
-            get => _downedCeaselessVoid;
-            set => SetLanternNightFlag(ref _downedCeaselessVoid, value);
-        }
-        public static bool downedStormWeaver
-        {
-            get => _downedStormWeaver;
-            set => SetLanternNightFlag(ref _downedStormWeaver, value);
-        }
-        public static bool downedSignus
-        {
-            get => _downedSignus;
-            set => SetLanternNightFlag(ref _downedSignus, value);
-        }
-        public static bool downedPolterghast
-        {
-            get => _downedPolterghast;
-            set => SetLanternNightFlag(ref _downedPolterghast, value);
-        }
-        public static bool downedBoomerDuke
-        {
-            get => _downedBoomerDuke;
-            set => SetLanternNightFlag(ref _downedBoomerDuke, value);
-        }
-        public static bool downedDoG
-        {
-            get => _downedDoG;
-            set => SetLanternNightFlag(ref _downedDoG, value);
-        }
-        public static bool downedYharon
-        {
-            get => _downedYharon;
-            set => SetLanternNightFlag(ref _downedYharon, value);
-        }
-        public static bool downedExoMechs
-        {
-            get => _downedExoMechs;
-            set => SetLanternNightFlag(ref _downedExoMechs, value);
-        }
-        public static bool downedCalamitas
-        {
-            get => _downedCalamitas;
-            set => SetLanternNightFlag(ref _downedCalamitas, value);
-        }
-        public static bool downedPrimordialWyrm
-        {
-            get => _downedPrimordialWyrm;
-            set => SetLanternNightFlag(ref _downedPrimordialWyrm, value);
-        }
-        public static bool downedHorribleHog
-        {
-            get => _downedHorribleHog;
-            set => SetLanternNightFlag(ref _downedHorribleHog, value);
-        }
-        public static bool downedCLAM
-        {
-            get => _downedCLAM;
-            set => SetLanternNightFlag(ref _downedCLAM, value);
-        }
-        public static bool downedCLAMHardMode
-        {
-            get => _downedCLAMHardMode;
-            set => SetLanternNightFlag(ref _downedCLAMHardMode, value);
-        }
-        public static bool downedCragmawMire
-        {
-            get => _downedCragmawMire;
-            set => SetLanternNightFlag(ref _downedCragmawMire, value);
-        }
-        public static bool downedGSS
-        {
-            get => _downedGSS;
-            set => SetLanternNightFlag(ref _downedGSS, value);
-        }
-        public static bool downedMauler
-        {
-            get => _downedMauler;
-            set => SetLanternNightFlag(ref _downedMauler, value);
-        }
-        public static bool downedNuclearTerror
-        {
-            get => _downedNuclearTerror;
-            set => SetLanternNightFlag(ref _downedNuclearTerror, value);
-        }
+        public static bool downedDesertScourge { get => _downedDesertScourge; set => SetLanternNightFlag(ref _downedDesertScourge, value); }
+        public static bool downedCrabulon { get => _downedCrabulon; set => SetLanternNightFlag(ref _downedCrabulon, value); }
+        public static bool downedHiveMind { get => _downedHiveMind; set => SetLanternNightFlag(ref _downedHiveMind, value); }
+        public static bool downedPerforator { get => _downedPerforator; set => SetLanternNightFlag(ref _downedPerforator, value); }
+        public static bool downedSlimeGod { get => _downedSlimeGod; set => SetLanternNightFlag(ref _downedSlimeGod, value); }
+        public static bool downedDreadnautilus { get => _downedDreadnautilus; set => SetLanternNightFlag(ref _downedDreadnautilus, value); }
+        public static bool downedCryogen { get => _downedCryogen; set => SetLanternNightFlag(ref _downedCryogen, value); }
+        public static bool downedAquaticScourge { get => _downedAquaticScourge; set => SetLanternNightFlag(ref _downedAquaticScourge, value); }
+        public static bool downedBrimstoneElemental { get => _downedBrimstoneElemental; set => SetLanternNightFlag(ref _downedBrimstoneElemental, value); }
+        public static bool downedCalamitasClone { get => _downedCalamitasClone; set => SetLanternNightFlag(ref _downedCalamitasClone, value); }
+        public static bool downedLeviathan { get => _downedLeviathan; set => SetLanternNightFlag(ref _downedLeviathan, value); }
+        public static bool downedAstrumAureus { get => _downedAstrumAureus; set => SetLanternNightFlag(ref _downedAstrumAureus, value); }
+        public static bool downedBetsy { get => _downedBetsy; set => SetLanternNightFlag(ref _downedBetsy, value); }
+        public static bool downedPlaguebringer { get => _downedPlaguebringer; set => SetLanternNightFlag(ref _downedPlaguebringer, value); }
+        public static bool downedRavager { get => _downedRavager; set => SetLanternNightFlag(ref _downedRavager, value); }
+        public static bool downedAstrumDeus { get => _downedAstrumDeus; set => SetLanternNightFlag(ref _downedAstrumDeus, value); }
+        public static bool downedGuardians { get => _downedGuardians; set => SetLanternNightFlag(ref _downedGuardians, value); }
+        public static bool downedDragonfolly { get => _downedDragonfolly; set => SetLanternNightFlag(ref _downedDragonfolly, value); }
+        public static bool downedProvidence { get => _downedProvidence; set => SetLanternNightFlag(ref _downedProvidence, value); }
+        public static bool downedCeaselessVoid { get => _downedCeaselessVoid; set => SetLanternNightFlag(ref _downedCeaselessVoid, value); }
+        public static bool downedStormWeaver { get => _downedStormWeaver; set => SetLanternNightFlag(ref _downedStormWeaver, value); }
+        public static bool downedSignus { get => _downedSignus; set => SetLanternNightFlag(ref _downedSignus, value); }
+        public static bool downedPolterghast { get => _downedPolterghast; set => SetLanternNightFlag(ref _downedPolterghast, value); }
+        public static bool downedBoomerDuke { get => _downedBoomerDuke; set => SetLanternNightFlag(ref _downedBoomerDuke, value); }
+        public static bool downedDoG { get => _downedDoG; set => SetLanternNightFlag(ref _downedDoG, value); }
+        public static bool downedYharon { get => _downedYharon; set => SetLanternNightFlag(ref _downedYharon, value); }
+        public static bool downedExoMechs { get => _downedExoMechs; set => SetLanternNightFlag(ref _downedExoMechs, value); }
+        public static bool downedCalamitas { get => _downedCalamitas; set => SetLanternNightFlag(ref _downedCalamitas, value); }
+        public static bool downedPrimordialWyrm { get => _downedPrimordialWyrm; set => SetLanternNightFlag(ref _downedPrimordialWyrm, value); }
+        public static bool downedHorribleHog { get => _downedHorribleHog; set => SetLanternNightFlag(ref _downedHorribleHog, value); }
+        public static bool downedCLAM { get => _downedCLAM; set => SetLanternNightFlag(ref _downedCLAM, value); }
+        public static bool downedCLAMHardMode { get => _downedCLAMHardMode; set => SetLanternNightFlag(ref _downedCLAMHardMode, value); }
+        public static bool downedCragmawMire { get => _downedCragmawMire; set => SetLanternNightFlag(ref _downedCragmawMire, value); }
+        public static bool downedGSS { get => _downedGSS; set => SetLanternNightFlag(ref _downedGSS, value); }
+        public static bool downedMauler { get => _downedMauler; set => SetLanternNightFlag(ref _downedMauler, value); }
+        public static bool downedNuclearTerror { get => _downedNuclearTerror; set => SetLanternNightFlag(ref _downedNuclearTerror, value); }
         private static void SetLanternNightFlag(ref bool flag, bool value)
         {
             if (!value)
@@ -276,26 +132,14 @@ namespace CalamityMod
             set => _downedArtemisAndApollo = value;
         }
 
-        public static bool downedEoCAcidRain
-        {
-            get => _downedEoCAcidRain;
-            set => SetLanternNightFlag(ref _downedEoCAcidRain, value);
-        }
-        public static bool downedAquaticScourgeAcidRain
-        {
-            get => _downedAquaticScourgeAcidRain;
-            set => SetLanternNightFlag(ref _downedAquaticScourgeAcidRain, value);
-        }
+        public static bool downedEoCAcidRain { get => _downedEoCAcidRain; set => SetLanternNightFlag(ref _downedEoCAcidRain, value); }
+        public static bool downedAquaticScourgeAcidRain { get => _downedAquaticScourgeAcidRain; set => SetLanternNightFlag(ref _downedAquaticScourgeAcidRain, value); }
         public static bool startedBossRushAtLeastOnce
         {
             get => _startedBossRushAtLeastOnce;
             set => _startedBossRushAtLeastOnce = value; // Starting Boss Rush for the first time does not trigger a Lantern Night
         }
-        public static bool downedBossRush
-        {
-            get => _downedBossRush;
-            set => SetLanternNightFlag(ref _downedBossRush, value);
-        }
+        public static bool downedBossRush { get => _downedBossRush; set => SetLanternNightFlag(ref _downedBossRush, value); }
 
         internal static void ResetAllFlags()
         {
