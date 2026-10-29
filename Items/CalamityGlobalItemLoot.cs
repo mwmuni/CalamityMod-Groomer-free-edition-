@@ -70,7 +70,7 @@ namespace CalamityMod.Items
                     break;
 
                 case ItemID.DeerclopsBossBag:
-                    loot.Remove(FindDeerclopsWeapons(loot));
+                    loot.Remove(FindRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot.Get(false), ItemID.LucyTheAxe));
                     int[] deerclopsWeapons = new int[]
                     {
                         ItemID.LucyTheAxe,
@@ -85,7 +85,7 @@ namespace CalamityMod.Items
                     break;
 
                 case ItemID.QueenBeeBossBag:
-                    loot.Remove(FindQueenBeeWeapons(loot));
+                    loot.Remove(FindRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot.Get(false), ItemID.BeeKeeper));
                     int[] queenBeeWeapons = new int[]
                     {
                         ItemID.BeeKeeper,
@@ -101,8 +101,8 @@ namespace CalamityMod.Items
                     break;
 
                 case ItemID.WallOfFleshBossBag:
-                    loot.Remove(FindWallOfFleshWeapons(loot));
-                    loot.Remove(FindWallOfFleshEmblems(loot));
+                    loot.Remove(FindRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot.Get(false), ItemID.BreakerBlade));
+                    loot.Remove(FindRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot.Get(false), ItemID.WarriorEmblem));
                     int[] wofWeapons = new int[]
                     {
                         ItemID.BreakerBlade,
@@ -137,28 +137,17 @@ namespace CalamityMod.Items
                     break;
 
                 case ItemID.DestroyerBossBag:
-                    loot.Remove(FindHallowedBars(loot));
-                    loot.AddIf(DropHelper.HallowedBarsCondition, ItemID.HallowedBar, 1, 20, 35);
-                    loot.AddRevBagAccessories();
-                    loot.Add(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
-                    break;
-
                 case ItemID.TwinsBossBag:
-                    loot.Remove(FindHallowedBars(loot));
-                    loot.AddIf(DropHelper.HallowedBarsCondition, ItemID.HallowedBar, 1, 20, 35);
-                    loot.AddRevBagAccessories();
-                    loot.Add(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
-                    break;
-
                 case ItemID.SkeletronPrimeBossBag:
-                    loot.Remove(FindHallowedBars(loot));
+                    loot.Remove(FindRuleWithItem<CommonDrop>(loot.Get(false), ItemID.HallowedBar));
                     loot.AddIf(DropHelper.HallowedBarsCondition, ItemID.HallowedBar, 1, 20, 35);
                     loot.AddRevBagAccessories();
                     loot.Add(ModContent.ItemType<ThankYouPainting>(), ThankYouPainting.DropInt);
                     break;
 
                 case ItemID.PlanteraBossBag:
-                    loot.Remove(FindPlanteraWeapons(loot));
+                    // Specifically look up the Grenade Launcher because it has unique rules for its ammo.
+                    loot.Remove(FindRuleWithItem<OneFromRulesRule>(loot.Get(false), ItemID.GrenadeLauncher));
                     int[] planteraWeapons = new int[]
                     {
                         ItemID.FlowerPow,
@@ -178,7 +167,8 @@ namespace CalamityMod.Items
                     break;
 
                 case ItemID.GolemBossBag:
-                    loot.Remove(FindGolemItems(loot));
+                    // Specifically look up the Stynger because it has unique rules for its ammo.
+                    loot.Remove(FindRuleWithItem<OneFromRulesRule>(loot.Get(false), ItemID.Stynger));
                     int[] golemItems = new int[]
                     {
                         ItemID.GolemFist,
@@ -197,7 +187,7 @@ namespace CalamityMod.Items
                     break;
 
                 case ItemID.BossBagBetsy:
-                    loot.Remove(FindBetsyWeapons(loot));
+                    loot.Remove(FindRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot.Get(false), ItemID.DD2SquireBetsySword));
                     int[] betsyWeapons = new int[]
                     {
                         ItemID.DD2SquireBetsySword, // Flying Dragon
@@ -243,7 +233,7 @@ namespace CalamityMod.Items
                     break;
 
                 case ItemID.MoonLordBossBag:
-                    loot.Remove(FindMoonLordWeapons(loot));
+                    loot.Remove(FindRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot.Get(false), ItemID.Terrarian));
                     int[] moonLordWeapons = new int[]
                     {
                         ItemID.Meowmere,
@@ -350,160 +340,68 @@ namespace CalamityMod.Items
         #endregion
 
         #region Calamity Style Items From Bosses
-        private static IItemDropRule FindDeerclopsWeapons(ItemLoot loot)
+        private static T FindRuleWithItem<T>(List<IItemDropRule> rules, int itemID, bool findLast = false) where T : class, IItemDropRule
         {
-            List<IItemDropRule> rules = loot.Get(false);
+            T found = null;
             foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.LucyTheAxe)
-                            return o;
-            return null;
+            {
+                if (rule is T candidate && RuleContainsItem(candidate, itemID))
+                {
+                    if (!findLast)
+                        return candidate;
+                    found = candidate;
+                }
+            }
+            return found;
         }
 
-        private static IItemDropRule FindQueenBeeWeapons(ItemLoot loot)
+        private static bool RuleContainsItem<T>(T rule, int itemID) where T : IItemDropRule
         {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.BeeKeeper)
-                            return o;
-            return null;
-        }
+            if (rule is OneFromOptionsNotScaledWithLuckDropRule optionsRule)
+            {
+                foreach (int optionID in optionsRule.dropIds)
+                    if (optionID == itemID)
+                        return true;
+            }
 
-        private static IItemDropRule FindWallOfFleshWeapons(ItemLoot loot)
-        {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.BreakerBlade)
-                            return o;
-            return null;
-        }
+            if (rule is OneFromRulesRule rulesRule)
+            {
+                foreach (IItemDropRule option in rulesRule.options)
+                    if (option is CommonDrop commonDrop && commonDrop.itemId == itemID)
+                        return true;
+            }
 
-        private static IItemDropRule FindWallOfFleshEmblems(ItemLoot loot)
-        {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.WarriorEmblem)
-                            return o;
-            return null;
-        }
+            if (rule is CommonDrop common)
+                return common.itemId == itemID;
+            if (rule is CommonDropNotScalingWithLuck commonNotScaling)
+                return commonNotScaling.itemId == itemID;
 
-        private static IItemDropRule FindHallowedBars(ItemLoot loot)
-        {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is CommonDrop c && c.itemId == ItemID.HallowedBar)
-                    return c;
-            return null;
-        }
-
-        private static IItemDropRule FindPlanteraWeapons(ItemLoot loot)
-        {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromRulesRule o)
-                    foreach (IItemDropRule r2 in o.options)
-                        // Specifically look up the Grenade Launcher because it has unique rules for its ammo.
-                        if (r2 is CommonDrop c && c.itemId == ItemID.GrenadeLauncher)
-                            return o;
-            return null;
-        }
-
-        private static IItemDropRule FindGolemItems(ItemLoot loot)
-        {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromRulesRule o)
-                    foreach (IItemDropRule r2 in o.options)
-                        // Specifically look up the Stynger because it has unique rules for its ammo.
-                        if (r2 is CommonDrop c && c.itemId == ItemID.Stynger)
-                            return o;
-            return null;
-        }
-
-        private static IItemDropRule FindBetsyWeapons(ItemLoot loot)
-        {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.DD2SquireBetsySword) // Flying Dragon
-                            return o;
-            return null;
+            return false;
         }
 
         private static void RemoveDukeRules(ItemLoot loot)
         {
             List<IItemDropRule> rules = loot.Get(false);
-            IItemDropRule toRemove = null;
-
-            // Step 1: Remove Fishron Wings loot rule
-            foreach (IItemDropRule rule in rules)
-                if (rule is CommonDropNotScalingWithLuck c && c.itemId == ItemID.FishronWings)
-                    toRemove = c;
-
-            if (toRemove is not null)
-                loot.Remove(toRemove);
-
-            // Step 2: Remove Fishron's weapons
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.Flairon)
-                            toRemove = o;
-
-            if (toRemove is not null)
-                loot.Remove(toRemove);
+            IItemDropRule toRemove = RemoveRuleWithItem<CommonDropNotScalingWithLuck>(loot, rules, ItemID.FishronWings, null);
+            RemoveRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot, rules, ItemID.Flairon, toRemove);
         }
 
         private static void RemoveEmpressRules(ItemLoot loot)
         {
             List<IItemDropRule> rules = loot.Get(false);
-            IItemDropRule toRemove = null;
-
-            // Step 1: Remove Empress Wings loot rule
-            foreach (IItemDropRule rule in rules)
-                if (rule is CommonDropNotScalingWithLuck c && c.itemId == ItemID.RainbowWings)
-                    toRemove = c;
-
-            if (toRemove is not null)
-                loot.Remove(toRemove);
-
-            // Step 2: Remove Empress of Light's weapons
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.PiercingStarlight)
-                            toRemove = o;
-
-            if (toRemove is not null)
-                loot.Remove(toRemove);
-
-            // Step 3: Remove Stellar Tune
-            foreach (IItemDropRule rule in rules)
-                if (rule is CommonDropNotScalingWithLuck c && c.itemId == ItemID.SparkleGuitar)
-                    toRemove = c;
-
-            if (toRemove is not null)
-                loot.Remove(toRemove);
+            IItemDropRule toRemove = RemoveRuleWithItem<CommonDropNotScalingWithLuck>(loot, rules, ItemID.RainbowWings, null);
+            toRemove = RemoveRuleWithItem<OneFromOptionsNotScaledWithLuckDropRule>(loot, rules, ItemID.PiercingStarlight, toRemove);
+            RemoveRuleWithItem<CommonDropNotScalingWithLuck>(loot, rules, ItemID.SparkleGuitar, toRemove);
         }
 
-        private static IItemDropRule FindMoonLordWeapons(ItemLoot loot)
+        private static IItemDropRule RemoveRuleWithItem<T>(ItemLoot loot, List<IItemDropRule> rules, int itemID, IItemDropRule previous) where T : class, IItemDropRule
         {
-            List<IItemDropRule> rules = loot.Get(false);
-            foreach (IItemDropRule rule in rules)
-                if (rule is OneFromOptionsNotScaledWithLuckDropRule o)
-                    foreach (int itemID in o.dropIds)
-                        if (itemID == ItemID.Terrarian)
-                            return o;
-            return null;
+            IItemDropRule toRemove = FindRuleWithItem<T>(rules, itemID, findLast: true) ?? previous;
+            if (toRemove is not null)
+                loot.Remove(toRemove);
+            return toRemove;
         }
+
         #endregion
 
         #region Fishing Crate Loot Rule Manipulation
@@ -567,13 +465,7 @@ namespace CalamityMod.Items
 
         private static void RemoveBaitFromGoldenCrates(ItemLoot loot)
         {
-            List<IItemDropRule> rules = loot.Get(false);
-            IItemDropRule toRemove = null;
-
-            foreach (IItemDropRule rule in rules)
-                if (rule is CommonDrop c && c.itemId == ItemID.MasterBait)
-                    toRemove = c;
-
+            IItemDropRule toRemove = FindRuleWithItem<CommonDrop>(loot.Get(false), ItemID.MasterBait, findLast: true);
             if (toRemove is not null)
                 loot.Remove(toRemove);
         }

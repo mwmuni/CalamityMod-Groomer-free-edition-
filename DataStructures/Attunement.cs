@@ -85,6 +85,23 @@ namespace CalamityMod.DataStructures
         }
     }
 
+    internal static class AttunementStats
+    {
+        internal static void ApplyProjectileStats<TProjectile>(Item item, float shootSpeed, bool channel = true, int useStyle = ItemUseStyleID.Shoot, int? reuseDelay = null)
+            where TProjectile : ModProjectile
+        {
+            item.channel = channel;
+            item.noUseGraphic = true;
+            item.useStyle = useStyle;
+            item.shoot = ProjectileType<TProjectile>();
+            item.shootSpeed = shootSpeed;
+            item.UseSound = null;
+            item.noMelee = true;
+            if (reuseDelay.HasValue)
+                item.reuseDelay = reuseDelay.Value;
+        }
+    }
+
 
     #region Broken Biome Blade Attunements
     public class DefaultAttunement : Attunement
@@ -100,16 +117,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => BrokenBiomeBlade.DefaultAttunement_BaseDamage / (float)BrokenBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<PureClarity>();
-            item.shootSpeed = 0f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<PureClarity>(item, 0f);
     }
     public class HotAttunement : Attunement
     {
@@ -124,16 +132,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => BrokenBiomeBlade.HotAttunement_BaseDamage / (float)BrokenBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<AridGrandeur>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<AridGrandeur>(item, 12f);
     }
     public class ColdAttunement : Attunement
     {
@@ -148,16 +147,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => BrokenBiomeBlade.ColdAttunement_BaseDamage / (float)BrokenBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<BitingEmbrace>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<BitingEmbrace>(item, 12f);
 
         public override bool Shoot(Player player, IEntitySource source, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack, ref int Combo, ref int CanLunge, ref int PowerLungeCounter)
         {
@@ -189,16 +179,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => BrokenBiomeBlade.EvilAttunement_BaseDamage / (float)BrokenBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = false;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Thrust;
-            item.shoot = ProjectileType<DecaysRetort>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<DecaysRetort>(item, 12f, channel: false, useStyle: ItemUseStyleID.Thrust);
 
         public override bool Shoot(Player player, IEntitySource source, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack, ref int Combo, ref int CanLunge, ref int PowerLungeCounter)
         {
@@ -224,16 +205,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => TrueBiomeBlade.DefaultAttunement_BaseDamage / (float)TrueBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<TruePureClarity>();
-            item.shootSpeed = 0f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<TruePureClarity>(item, 0f);
     }
     public class TrueHotAttunement : Attunement
     {
@@ -248,16 +220,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => TrueBiomeBlade.HotAttunement_BaseDamage / (float)TrueBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<TrueAridGrandeur>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<TrueAridGrandeur>(item, 12f);
     }
     public class TrueColdAttunement : Attunement
     {
@@ -271,16 +234,7 @@ namespace CalamityMod.DataStructures
         }
 
         public override float DamageMultiplier => TrueBiomeBlade.ColdAttunement_BaseDamage / (float)TrueBiomeBlade.BaseDamage;
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<TrueBitingEmbrace>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<TrueBitingEmbrace>(item, 12f);
 
         public override bool Shoot(Player player, IEntitySource source, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack, ref int Combo, ref int CanLunge, ref int PowerLungeCounter)
         {
@@ -312,16 +266,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => TrueBiomeBlade.TropicalAttunement_BaseDamage / (float)TrueBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = false;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Swing;
-            item.shoot = ProjectileType<TrueGrovetendersTouch>();
-            item.shootSpeed = 30;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<TrueGrovetendersTouch>(item, 30, channel: false, useStyle: ItemUseStyleID.Swing);
 
         public override bool Shoot(Player player, IEntitySource source, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack, ref int Combo, ref int CanLunge, ref int PowerLungeCounter)
         {
@@ -349,16 +294,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => TrueBiomeBlade.EvilAttunement_BaseDamage / (float)TrueBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = false;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Thrust;
-            item.shoot = ProjectileType<TrueDecaysRetort>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<TrueDecaysRetort>(item, 12f, channel: false, useStyle: ItemUseStyleID.Thrust);
 
         public override bool Shoot(Player player, IEntitySource source, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack, ref int Combo, ref int CanLunge, ref int PowerLungeCounter)
         {
@@ -392,16 +328,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => TrueBiomeBlade.HolyAttunement_BaseDamage / (float)TrueBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<HeavensMight>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<HeavensMight>(item, 12f);
     }
     #endregion
 
@@ -417,16 +344,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => OmegaBiomeBlade.WhirlwindAttunement_BaseDamage / (float)OmegaBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<SwordsmithsPride>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<SwordsmithsPride>(item, 12f);
 
         public override void PassiveEffect(Player player, IEntitySource source, ref int UseTimer, ref bool Procced, Projectile projectile = null)
         {
@@ -452,16 +370,7 @@ namespace CalamityMod.DataStructures
         }
 
         public override float DamageMultiplier => OmegaBiomeBlade.FlailBladeAttunement_BaseDamage / (float)OmegaBiomeBlade.BaseDamage;
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<LamentationsOfTheChained>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<LamentationsOfTheChained>(item, 12f);
 
         public override void PassiveEffect(Player player, IEntitySource source, ref int UseTimer, ref bool Procced, Projectile projectile = null)
         {
@@ -487,16 +396,7 @@ namespace CalamityMod.DataStructures
         }
 
         public override float DamageMultiplier => OmegaBiomeBlade.SuperPogoAttunement_BaseDamage / (float)OmegaBiomeBlade.BaseDamage;
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<SanguineFury>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<SanguineFury>(item, 12f);
 
         public override void PassiveEffect(Player player, IEntitySource source, ref int UseTimer, ref bool Procced, Projectile projectile = null)
         {
@@ -519,16 +419,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => OmegaBiomeBlade.ShockwaveAttunement_BaseDamage / (float)OmegaBiomeBlade.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<EarthenTides>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<EarthenTides>(item, 12f);
 
         public override void PassiveEffect(Player player, IEntitySource source, ref int UseTimer, ref bool Procced, Projectile projectile = null)
         {
@@ -558,17 +449,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => FourSeasonsGalaxia.PhoenixAttunement_BaseDamage / (float)FourSeasonsGalaxia.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<PhoenixsPride>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-            item.reuseDelay = 12;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<PhoenixsPride>(item, 12f, reuseDelay: 12);
     }
 
     public class AriesAttunement : Attunement
@@ -583,17 +464,7 @@ namespace CalamityMod.DataStructures
         }
 
         public override float DamageMultiplier => FourSeasonsGalaxia.AriesAttunement_BaseDamage / (float)FourSeasonsGalaxia.BaseDamage;
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<AriesWrath>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-            item.reuseDelay = 12;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<AriesWrath>(item, 12f, reuseDelay: 12);
     }
 
     public class PolarisAttunement : Attunement
@@ -608,17 +479,7 @@ namespace CalamityMod.DataStructures
         }
 
         public override float DamageMultiplier => FourSeasonsGalaxia.PolarisAttunement_BaseDamage / (float)FourSeasonsGalaxia.BaseDamage;
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<PolarisGaze>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-            item.reuseDelay = 12;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<PolarisGaze>(item, 12f, reuseDelay: 12);
     }
 
     public class AndromedaAttunement : Attunement
@@ -634,17 +495,7 @@ namespace CalamityMod.DataStructures
 
         public override float DamageMultiplier => FourSeasonsGalaxia.AndromedaAttunement_BaseDamage / (float)FourSeasonsGalaxia.BaseDamage;
 
-        public override void ApplyStats(Item item)
-        {
-            item.channel = true;
-            item.noUseGraphic = true;
-            item.useStyle = ItemUseStyleID.Shoot;
-            item.shoot = ProjectileType<AndromedasStride>();
-            item.shootSpeed = 12f;
-            item.UseSound = null;
-            item.noMelee = true;
-            item.reuseDelay = 12;
-        }
+        public override void ApplyStats(Item item) => AttunementStats.ApplyProjectileStats<AndromedasStride>(item, 12f, reuseDelay: 12);
     }
 
     #endregion
