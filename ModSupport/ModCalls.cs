@@ -29,310 +29,83 @@ namespace CalamityMod
         /// <returns>Whether the boss or event has been defeated.</returns>
         public static bool GetBossDowned(string boss)
         {
-            switch (boss.ToLower())
+            string normalizedBoss = boss.ToLower();
+            return normalizedBoss switch
             {
-                default:
-                    return false;
-
                 // Because this value will always be true if Acid Rain at any point in the game is beaten.
-                case "acid rain":
-                case "acidrain":
-
-                case "acid rain 1":
-                case "acidrain 1":
-                case "acidrain1":
-                case "acid rain eoc":
-                case "acidrain eoc":
-                case "acidraineoc":
-                    return DownedBossSystem.downedEoCAcidRain;
-
-                case "desertscourge":
-                case "desert scourge":
-                    return DownedBossSystem.downedDesertScourge;
-
-                case "horriblehog":
-                case "horrible hog":
-                case "thehorriblehog":
-                case "the horrible hog":
-                    return DownedBossSystem.downedHorribleHog;
-
-                case "clam":
-                case "giantclam":
-                case "giant clam":
-                    return DownedBossSystem.downedCLAM;
-
-                case "crabulon":
-                    return DownedBossSystem.downedCrabulon;
-
-                case "hivemind":
-                case "hive mind":
-                case "thehivemind":
-                case "the hive mind":
-                    return DownedBossSystem.downedHiveMind;
-
-                case "perforator":
-                case "perforators":
-                case "theperforators":
-                case "the perforators":
-                case "perforatorhive":
-                case "perforator hive":
-                case "theperforatorhive":
-                case "the perforator hive":
-                    return DownedBossSystem.downedPerforator;
-
-                case "slimegod":
-                case "slime god":
-                case "theslimegod":
-                case "the slime god":
-                    return DownedBossSystem.downedSlimeGod;
-
-                case "hmclam":
-                case "clamhm":
-                case "hm clam":
-                case "clam hm":
-                case "hmgiantclam":
-                case "giantclamhm":
-                case "hm giant clam":
-                case "giant clam hm":
-                case "hardmodeclam":
-                case "hardmode clam":
-                case "hardmodegiantclam":
-                case "hardmode giant clam":
-                    return DownedBossSystem.downedCLAMHardMode;
-
-                case "cryogen":
-                    return DownedBossSystem.downedCryogen;
-
-                case "acid rain 2":
-                case "acidrain 2":
-                case "acidrain2":
-                case "acid rain scourge":
-                case "acid rain aquatic scourge":
-                case "acid rain aquaticscourge":
-                case "acidrain scourge":
-                case "acidrain aquatic scourge":
-                case "acidrain aquaticscourge":
-                case "acidrainscourge":
-                case "acidrainaquaticscourge":
-                    return DownedBossSystem.downedAquaticScourgeAcidRain;
-
-                case "aquaticscourge":
-                case "aquatic scourge":
-                    return DownedBossSystem.downedAquaticScourge;
-
-                case "cragmaw":
-                case "cragmawmire":
-                case "cragmaw mire":
-                case "mire":
-                    return DownedBossSystem.downedCragmawMire;
-
-                case "brimstoneelemental":
-                case "brimstone elemental":
-                    return DownedBossSystem.downedBrimstoneElemental;
-
-                case "clone":
-                case "calamitasclone":
-                case "calamitas clone":
-                case "clonelamitas":
-                case "calamitasdoppelganger":
-                case "calamitas doppelganger":
-                    return DownedBossSystem.downedCalamitasClone;
-
-                case "gss":
-                case "greatsandshark":
-                case "great sand shark":
-                    return DownedBossSystem.downedGSS;
-
+                "acid rain" or "acidrain" or "acid rain 1" or "acidrain 1" or
+                    "acidrain1" or "acid rain eoc" or "acidrain eoc" or "acidraineoc" => DownedBossSystem.downedEoCAcidRain,
+                "desertscourge" or "desert scourge" => DownedBossSystem.downedDesertScourge,
+                "horriblehog" or "horrible hog" or "thehorriblehog" or "the horrible hog" => DownedBossSystem.downedHorribleHog,
+                "clam" or "giantclam" or "giant clam" => DownedBossSystem.downedCLAM,
+                "crabulon" => DownedBossSystem.downedCrabulon,
+                "hivemind" or "hive mind" or "thehivemind" or "the hive mind" => DownedBossSystem.downedHiveMind,
+                "perforator" or "perforators" or "theperforators" or "the perforators" or
+                    "perforatorhive" or "perforator hive" or "theperforatorhive" or "the perforator hive" => DownedBossSystem.downedPerforator,
+                "slimegod" or "slime god" or "theslimegod" or "the slime god" => DownedBossSystem.downedSlimeGod,
+                "hmclam" or "clamhm" or "hm clam" or "clam hm" or "hmgiantclam" or "giantclamhm" or
+                    "hm giant clam" or "giant clam hm" or "hardmodeclam" or "hardmode clam" or
+                    "hardmodegiantclam" or "hardmode giant clam" => DownedBossSystem.downedCLAMHardMode,
+                "cryogen" => DownedBossSystem.downedCryogen,
+                "acid rain 2" or "acidrain 2" or "acidrain2" or "acid rain scourge" or
+                    "acid rain aquatic scourge" or "acid rain aquaticscourge" or "acidrain scourge" or
+                    "acidrain aquatic scourge" or "acidrain aquaticscourge" or "acidrainscourge" or
+                    "acidrainaquaticscourge" => DownedBossSystem.downedAquaticScourgeAcidRain,
+                "aquaticscourge" or "aquatic scourge" => DownedBossSystem.downedAquaticScourge,
+                "cragmaw" or "cragmawmire" or "cragmaw mire" or "mire" => DownedBossSystem.downedCragmawMire,
+                "brimstoneelemental" or "brimstone elemental" => DownedBossSystem.downedBrimstoneElemental,
+                "clone" or "calamitasclone" or "calamitas clone" or "clonelamitas" or
+                    "calamitasdoppelganger" or "calamitas doppelganger" => DownedBossSystem.downedCalamitasClone,
+                "gss" or "greatsandshark" or "great sand shark" => DownedBossSystem.downedGSS,
                 // Don't remove the old references to "Siren" here to avoid breaking other mods
-                case "sirenleviathan":
-                case "siren leviathan":
-                case "sirenandleviathan":
-                case "siren and leviathan":
-                case "the siren and the leviathan":
-                case "siren":
-                case "thesiren":
-                case "the siren":
-                case "anahita":
-                case "leviathan":
-                case "theleviathan":
-                case "the leviathan":
-                case "anahitaleviathan":
-                case "anahita leviathan":
-                case "anahitaandleviathan":
-                case "anahita and leviathan":
-                case "anahita and the leviathan":
-                    return DownedBossSystem.downedLeviathan;
-
-                case "aureus":
-                case "astrumaureus":
-                case "astrum aureus":
-                    return DownedBossSystem.downedAstrumAureus;
-
-                case "pbg":
-                case "plaguebringer":
-                case "plaguebringergoliath":
-                case "plaguebringer goliath":
-                case "theplaguebringergoliath":
-                case "the plaguebringer goliath":
-                    return DownedBossSystem.downedPlaguebringer;
-
-                case "scavenger": // backwards compatibility
-                case "ravager":
-                    return DownedBossSystem.downedRavager;
-
-                case "stargod": // backwards compatibility
-                case "star god": // backwards compatibility
-                case "astrumdeus":
-                case "astrum deus":
-                    return DownedBossSystem.downedAstrumDeus;
-
-                case "guardians":
-                case "donuts":
-                case "profanedguardians":
-                case "profaned guardians":
-                case "theprofanedguardians":
-                case "the profaned guardians":
-                    return DownedBossSystem.downedGuardians;
-
-                case "dragonfolly":
-                case "the dragonfolly":
-                case "bumblebirb":
-                case "bumblefuck":
-                    return DownedBossSystem.downedDragonfolly;
-
-                case "providence":
-                case "providencetheprofanedgoddess":
-                case "providence the profaned goddess":
-                case "providence, the profaned goddess":
-                    return DownedBossSystem.downedProvidence;
-
-                case "polterghast":
-                case "necroghast":
-                case "necroplasm":
-                    return DownedBossSystem.downedPolterghast;
-
-                case "mauler":
-                    return DownedBossSystem.downedMauler;
-
-                case "nuclear terror":
-                case "nuclearterror":
-                    return DownedBossSystem.downedNuclearTerror;
-
+                "sirenleviathan" or "siren leviathan" or "sirenandleviathan" or "siren and leviathan" or
+                    "the siren and the leviathan" or "siren" or "thesiren" or "the siren" or "anahita" or
+                    "leviathan" or "theleviathan" or "the leviathan" or "anahitaleviathan" or "anahita leviathan" or
+                    "anahitaandleviathan" or "anahita and leviathan" or "anahita and the leviathan" => DownedBossSystem.downedLeviathan,
+                "aureus" or "astrumaureus" or "astrum aureus" => DownedBossSystem.downedAstrumAureus,
+                "pbg" or "plaguebringer" or "plaguebringergoliath" or "plaguebringer goliath" or
+                    "theplaguebringergoliath" or "the plaguebringer goliath" => DownedBossSystem.downedPlaguebringer,
+                // "scavenger" is retained for backwards compatibility.
+                "scavenger" or "ravager" => DownedBossSystem.downedRavager,
+                // "stargod" and "star god" are retained for backwards compatibility.
+                "stargod" or "star god" or "astrumdeus" or "astrum deus" => DownedBossSystem.downedAstrumDeus,
+                "guardians" or "donuts" or "profanedguardians" or "profaned guardians" or
+                    "theprofanedguardians" or "the profaned guardians" => DownedBossSystem.downedGuardians,
+                "dragonfolly" or "the dragonfolly" or "bumblebirb" or "bumblefuck" => DownedBossSystem.downedDragonfolly,
+                "providence" or "providencetheprofanedgoddess" or "providence the profaned goddess" or
+                    "providence, the profaned goddess" => DownedBossSystem.downedProvidence,
+                "polterghast" or "necroghast" or "necroplasm" => DownedBossSystem.downedPolterghast,
+                "mauler" => DownedBossSystem.downedMauler,
+                "nuclear terror" or "nuclearterror" => DownedBossSystem.downedNuclearTerror,
                 // Old Duke is also Acid Rain tier 3, so he gets those names too
-                case "oldduke":
-                case "old duke":
-                case "theoldduke":
-                case "the old duke":
-                case "boomerduke":
-                case "boomer duke":
-                case "sulphurduke":
-                case "sulphur duke":
-                case "sulfurduke":
-                case "sulfur duke":
-                case "acid rain 3":
-                case "acidrain 3":
-                case "acidrain3":
-                case "acid rain duke":
-                case "acidrain duke":
-                case "acidrainduke":
-                    return DownedBossSystem.downedBoomerDuke;
-
-                case "sentinel1": // backwards compatibility
-                case "void":
-                case "ceaselessvoid":
-                case "ceaseless void":
-                    return DownedBossSystem.downedCeaselessVoid;
-
-                case "sentinel2": // backwards compatibility
-                case "stormweaver":
-                case "storm weaver":
-                    return DownedBossSystem.downedStormWeaver;
-
-                case "sentinel3": // backwards compatibility
-                case "cosmicwraith":
-                case "cosmic wraith":
-                case "signus":
-                case "signusenvoyofthedevourer":
-                case "signus envoy of the devourer":
-                case "signus, envoy of the devourer":
-                    return DownedBossSystem.downedSignus;
-
-                case "sentinelany": // backwards compatibility
-                case "anysentinel":
-                case "any sentinel":
-                case "onesentinel":
-                case "one sentinel":
-                case "sentinel":
-                    return DownedBossSystem.downedCeaselessVoid || DownedBossSystem.downedStormWeaver || DownedBossSystem.downedSignus;
-
-                case "sentinelall": // backwards compatibility
-                case "sentinels":
-                case "allsentinel":
-                case "allsentinels":
-                case "all sentinels":
-                    return DownedBossSystem.downedCeaselessVoid && DownedBossSystem.downedStormWeaver && DownedBossSystem.downedSignus;
-
-                case "dog":
-                case "devourerofgods":
-                case "devourer of gods":
-                case "thedevourerofgods":
-                case "the devourer of gods":
-                    return DownedBossSystem.downedDoG;
-
-                case "yharon":
-                case "jungledragonyharon":
-                case "jungle dragon yharon":
-                case "jungle dragon, yharon":
-                case "yharondragonofrebirth":
-                case "yharon, dragon of rebirth":
-                case "yharon dragon of rebirth":
-                case "yharonresplendentphoenix":
-                case "yharon, resplendent phoenix":
-                case "yharon resplendent phoenix":
-                    return DownedBossSystem.downedYharon;
-
-                case "draedon":
-                case "exomechs":
-                case "exo mechs":
-                case "the exo mechs":
-                    return DownedBossSystem.downedExoMechs;
-
-                case "thanatos":
-                    return DownedBossSystem.downedThanatos;
-
-                case "ares":
-                    return DownedBossSystem.downedAres;
-
-                case "exotwins":
-                case "exo twins":
-                case "apollo":
-                case "artemis":
-                    return DownedBossSystem.downedArtemisAndApollo;
-
-                case "calamitas":
-                case "scal":
-                case "supremecalamitas":
-                case "supreme calamitas":
-                case "supremewitchcalamitas":
-                case "supreme witch calamitas":
-                case "supreme witch, calamitas":
-                    return DownedBossSystem.downedCalamitas;
-
-                case "adulteidolonwyrm":
-                case "adult eidolon wyrm":
-                case "adultwyrm":
-                case "adult wyrm":
-                case "adulteidolon":
-                case "adult eidolon":
-                case "primordialwyrm":
-                case "primordial wyrm":
-                    return DownedBossSystem.downedPrimordialWyrm;
-
-                case "bossrush":
-                case "boss rush":
-                case "terminus":
-                    return DownedBossSystem.downedBossRush;
-            }
+                "oldduke" or "old duke" or "theoldduke" or "the old duke" or "boomerduke" or "boomer duke" or
+                    "sulphurduke" or "sulphur duke" or "sulfurduke" or "sulfur duke" or "acid rain 3" or
+                    "acidrain 3" or "acidrain3" or "acid rain duke" or "acidrain duke" or "acidrainduke" => DownedBossSystem.downedBoomerDuke,
+                // Sentinel number aliases are retained for backwards compatibility.
+                "sentinel1" or "void" or "ceaselessvoid" or "ceaseless void" => DownedBossSystem.downedCeaselessVoid,
+                "sentinel2" or "stormweaver" or "storm weaver" => DownedBossSystem.downedStormWeaver,
+                "sentinel3" or "cosmicwraith" or "cosmic wraith" or "signus" or
+                    "signusenvoyofthedevourer" or "signus envoy of the devourer" or "signus, envoy of the devourer" => DownedBossSystem.downedSignus,
+                // Sentinel aggregate aliases are retained for backwards compatibility.
+                "sentinelany" or "anysentinel" or "any sentinel" or "onesentinel" or "one sentinel" or "sentinel" =>
+                    DownedBossSystem.downedCeaselessVoid || DownedBossSystem.downedStormWeaver || DownedBossSystem.downedSignus,
+                "sentinelall" or "sentinels" or "allsentinel" or "allsentinels" or "all sentinels" =>
+                    DownedBossSystem.downedCeaselessVoid && DownedBossSystem.downedStormWeaver && DownedBossSystem.downedSignus,
+                "dog" or "devourerofgods" or "devourer of gods" or "thedevourerofgods" or "the devourer of gods" => DownedBossSystem.downedDoG,
+                "yharon" or "jungledragonyharon" or "jungle dragon yharon" or "jungle dragon, yharon" or
+                    "yharondragonofrebirth" or "yharon, dragon of rebirth" or "yharon dragon of rebirth" or
+                    "yharonresplendentphoenix" or "yharon, resplendent phoenix" or "yharon resplendent phoenix" => DownedBossSystem.downedYharon,
+                "draedon" or "exomechs" or "exo mechs" or "the exo mechs" => DownedBossSystem.downedExoMechs,
+                "thanatos" => DownedBossSystem.downedThanatos,
+                "ares" => DownedBossSystem.downedAres,
+                "exotwins" or "exo twins" or "apollo" or "artemis" => DownedBossSystem.downedArtemisAndApollo,
+                "calamitas" or "scal" or "supremecalamitas" or "supreme calamitas" or
+                    "supremewitchcalamitas" or "supreme witch calamitas" or "supreme witch, calamitas" => DownedBossSystem.downedCalamitas,
+                "adulteidolonwyrm" or "adult eidolon wyrm" or "adultwyrm" or "adult wyrm" or
+                    "adulteidolon" or "adult eidolon" or "primordialwyrm" or "primordial wyrm" => DownedBossSystem.downedPrimordialWyrm,
+                "bossrush" or "boss rush" or "terminus" => DownedBossSystem.downedBossRush,
+                _ => false
+            };
         }
         #endregion
 
@@ -346,125 +119,34 @@ namespace CalamityMod
         public static bool GetInZone(Player p, string zone)
         {
             CalamityPlayer mp = p.Calamity();
-            switch (zone.ToLower())
+            string normalizedZone = zone.ToLower();
+            return normalizedZone switch
             {
-                default:
-                    return false;
-
-                case "calamity": // backwards compatibility
-                case "calamitybiome":
-                case "calamity biome":
-                case "crag":
-                case "crags":
-
-                case "profanedcrag": // remove these four when the actual profaned biome is added
-                case "profaned crag":
-                case "profanedcrags":
-                case "profaned crags":
-
-                case "brimstone":
-                case "brimstonecrag":
-                case "brimstone crag":
-                case "brimstonecrags":
-                case "brimstone crags":
-                    return mp.ZoneCalamity;
-
-                case "astral":
-                case "astralbiome":
-                case "astral biome":
-                case "astralinfection":
-                case "astral infection":
-                    return mp.ZoneAstral;
-
-                case "sunkensea":
-                case "sunken sea":
-                case "thesunkensea":
-                case "the sunken sea":
-                    return mp.ZoneSunkenSea;
-
-                case "sulfur":
-                case "sulphur":
-                case "sulfursea":
-                case "sulfur sea":
-                case "sulphursea":
-                case "sulphur sea":
-                case "sulfuroussea":
-                case "sulfurous sea":
-                case "sulphuroussea":
-                case "sulphurous sea":
-                    return mp.ZoneSulphur;
-
-                case "abyss":
-                case "theabyss":
-                case "the abyss":
-                case "anyabyss":
-                case "any abyss":
-                case "abyssany":
-                case "any abyss layer":
-                    return mp.ZoneAbyss;
-
-                case "abyss1":
-                case "abyss 1":
-                case "abyss_1":
-                case "layer1":
-                case "layer 1":
-                case "layer_1":
-                case "abysslayer1":
-                case "abyss layer 1":
-                case "sulfur depths":
-                case "sulfurdepths":
-                case "sulphur depths":
-                case "sulphurdepths":
-                case "sulfurous depths":
-                case "sulfurousdepths":
-                case "sulphurous depths":
-                case "sulphurousdepths":
-                case "sulfuric depths":
-                case "sulfuricdepths":
-                case "sulphuric depths":
-                case "sulphuricdepths":
-                    return mp.ZoneAbyssLayer1;
-
-                case "abyss2":
-                case "abyss 2":
-                case "abyss_2":
-                case "layer2":
-                case "layer 2":
-                case "layer_2":
-                case "abysslayer2":
-                case "abyss layer 2":
-                case "murky water":
-                case "murkywater":
-                case "murky waters":
-                case "murkywaters":
-                    return mp.ZoneAbyssLayer2;
-
-                case "abyss3":
-                case "abyss 3":
-                case "abyss_3":
-                case "layer3":
-                case "layer 3":
-                case "layer_3":
-                case "abysslayer3":
-                case "abyss layer 3":
-                case "thermalvents":
-                case "thermal vents":
-                case "vents":
-                    return mp.ZoneAbyssLayer3;
-
-                case "abyss4":
-                case "abyss 4":
-                case "abyss_4":
-                case "layer4":
-                case "layer 4":
-                case "layer_4":
-                case "abysslayer4":
-                case "abyss layer 4":
-                case "void":
-                case "the void":
-                case "thevoid":
-                    return mp.ZoneAbyssLayer4;
-            }
+                // "calamity" is retained for backwards compatibility.
+                // Remove the four profaned crag aliases when the actual profaned biome is added.
+                "calamity" or "calamitybiome" or "calamity biome" or "crag" or "crags" or
+                    "profanedcrag" or "profaned crag" or "profanedcrags" or "profaned crags" or
+                    "brimstone" or "brimstonecrag" or "brimstone crag" or "brimstonecrags" or "brimstone crags" => mp.ZoneCalamity,
+                "astral" or "astralbiome" or "astral biome" or "astralinfection" or "astral infection" => mp.ZoneAstral,
+                "sunkensea" or "sunken sea" or "thesunkensea" or "the sunken sea" => mp.ZoneSunkenSea,
+                "sulfur" or "sulphur" or "sulfursea" or "sulfur sea" or "sulphursea" or
+                    "sulphur sea" or "sulfuroussea" or "sulfurous sea" or "sulphuroussea" or
+                    "sulphurous sea" => mp.ZoneSulphur,
+                "abyss" or "theabyss" or "the abyss" or "anyabyss" or "any abyss" or "abyssany" or "any abyss layer" => mp.ZoneAbyss,
+                "abyss1" or "abyss 1" or "abyss_1" or "layer1" or "layer 1" or "layer_1" or
+                    "abysslayer1" or "abyss layer 1" or "sulfur depths" or "sulfurdepths" or "sulphur depths" or
+                    "sulphurdepths" or "sulfurous depths" or "sulfurousdepths" or "sulphurous depths" or
+                    "sulphurousdepths" or "sulfuric depths" or "sulfuricdepths" or "sulphuric depths" or
+                    "sulphuricdepths" => mp.ZoneAbyssLayer1,
+                "abyss2" or "abyss 2" or "abyss_2" or "layer2" or "layer 2" or "layer_2" or
+                    "abysslayer2" or "abyss layer 2" or "murky water" or "murkywater" or "murky waters" or
+                    "murkywaters" => mp.ZoneAbyssLayer2,
+                "abyss3" or "abyss 3" or "abyss_3" or "layer3" or "layer 3" or "layer_3" or
+                    "abysslayer3" or "abyss layer 3" or "thermalvents" or "thermal vents" or "vents" => mp.ZoneAbyssLayer3,
+                "abyss4" or "abyss 4" or "abyss_4" or "layer4" or "layer 4" or "layer_4" or
+                    "abysslayer4" or "abyss layer 4" or "void" or "the void" or "thevoid" => mp.ZoneAbyssLayer4,
+                _ => false
+            };
         }
         #endregion
 
@@ -476,37 +158,15 @@ namespace CalamityMod
         /// <returns>Whether the difficulty is currently active.</returns>
         public static bool GetDifficultyActive(string difficulty)
         {
-            switch (difficulty.ToLower())
+            string normalizedDifficulty = difficulty.ToLower();
+            return normalizedDifficulty switch
             {
-                default:
-                    return false;
-
-                case "revengeance":
-                case "rev":
-                case "revengeancemode":
-                case "revengeance mode":
-                    return CalamityWorld.revenge;
-
-                case "death":
-                case "deathmode":
-                case "death mode":
-                    return CalamityWorld.death;
-
-                case "br":
-                case "bossrush":
-                case "boss rush":
-                case "bossrushactive":
-                case "boss rush active":
-                    return BossRushEvent.BossRushActive;
-
-                case "armageddon":
-                case "arma":
-                case "instakill":
-                case "instagib":
-                case "armageddonmode":
-                case "armageddon mode":
-                    return CalamityWorld.armageddon;
-            }
+                "revengeance" or "rev" or "revengeancemode" or "revengeance mode" => CalamityWorld.revenge,
+                "death" or "deathmode" or "death mode" => CalamityWorld.death,
+                "br" or "bossrush" or "boss rush" or "bossrushactive" or "boss rush active" => BossRushEvent.BossRushActive,
+                "armageddon" or "arma" or "instakill" or "instagib" or "armageddonmode" or "armageddon mode" => CalamityWorld.armageddon,
+                _ => false
+            };
         }
 
         /// <summary>
@@ -518,37 +178,15 @@ namespace CalamityMod
         /// <returns></returns>
         public static bool SetDifficultyActive(string difficulty, bool enabled)
         {
-            switch (difficulty.ToLower())
+            string normalizedDifficulty = difficulty.ToLower();
+            return normalizedDifficulty switch
             {
-                default:
-                    return false;
-
-                case "revengeance":
-                case "rev":
-                case "revengeancemode":
-                case "revengeance mode":
-                    return CalamityWorld.revenge = enabled;
-
-                case "death":
-                case "deathmode":
-                case "death mode":
-                    return CalamityWorld.death = enabled;
-
-                case "br":
-                case "bossrush":
-                case "boss rush":
-                case "bossrushactive":
-                case "boss rush active":
-                    return BossRushEvent.BossRushActive = enabled;
-
-                case "armageddon":
-                case "arma":
-                case "instakill":
-                case "instagib":
-                case "armageddonmode":
-                case "armageddon mode":
-                    return CalamityWorld.armageddon = enabled;
-            }
+                "revengeance" or "rev" or "revengeancemode" or "revengeance mode" => CalamityWorld.revenge = enabled,
+                "death" or "deathmode" or "death mode" => CalamityWorld.death = enabled,
+                "br" or "bossrush" or "boss rush" or "bossrushactive" or "boss rush active" => BossRushEvent.BossRushActive = enabled,
+                "armageddon" or "arma" or "instakill" or "instagib" or "armageddonmode" or "armageddon mode" => CalamityWorld.armageddon = enabled,
+                _ => false
+            };
         }
 
         public static void AddCustomDifficulty(DifficultyMode newMode)

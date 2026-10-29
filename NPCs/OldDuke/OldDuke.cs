@@ -9,8 +9,8 @@ using CalamityMod.Items.Accessories;
 using CalamityMod.Items.Armor.Vanity;
 using CalamityMod.Items.LoreItems;
 using CalamityMod.Items.Placeables.Furniture.BossRelics;
-using CalamityMod.Items.Placeables.Furniture.Paintings;
 using CalamityMod.Items.Placeables.Furniture.Monoliths;
+using CalamityMod.Items.Placeables.Furniture.Paintings;
 using CalamityMod.Items.Placeables.Furniture.Trophies;
 using CalamityMod.Items.Potions;
 using CalamityMod.Items.TreasureBags;
@@ -1178,8 +1178,10 @@ namespace CalamityMod.NPCs.OldDuke
             }
 
             // Tooth Ball and Vortex spin
-            else if (NPC.ai[0] == 7f)
+            else if (NPC.ai[0] == 7f || NPC.ai[0] == 14f)
             {
+                bool phase3SpinAttack = NPC.ai[0] == 14f;
+
                 // Play sounds and spawn Tooth Balls and a Vortex
                 if (NPC.ai[2] == 0f)
                 {
@@ -1197,16 +1199,16 @@ namespace CalamityMod.NPCs.OldDuke
                     if (NPC.ai[2] != 0f)
                         SoundEngine.PlaySound(VomitSound, NPC.Center);
 
-                    Vector2 phase2ToothBallDirection = Vector2.Normalize(NPC.velocity) * (NPC.width + 20) / 2f + NPC.Center;
+                    Vector2 toothBallDirection = Vector2.Normalize(NPC.velocity) * (NPC.width + 20) / 2f + NPC.Center;
                     Vector2 toothBallVelocity = Vector2.Normalize(NPC.velocity).RotatedBy(MathHelper.PiOver2 * NPC.direction) * toothBallSpinToothBallVelocity;
-                    Vector2 toothBallSpawnPos = new Vector2(phase2ToothBallDirection.X, phase2ToothBallDirection.Y + 45f);
+                    Vector2 toothBallSpawnPos = new Vector2(toothBallDirection.X, toothBallDirection.Y + 45f);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         int toothBall = NPC.NewNPC(NPC.GetSource_FromAI(), (int)toothBallSpawnPos.X, (int)toothBallSpawnPos.Y, ModContent.NPCType<OldDukeToothBall>(), 0, toothBallVelocity.X, toothBallVelocity.Y);
                         Main.npc[toothBall].target = NPC.target;
                         Main.npc[toothBall].velocity = Vector2.Normalize(toothBallVelocity) * toothBallSpinToothBallVelocity * 0.5f;
                         Main.npc[toothBall].netUpdate = true;
-                        Main.npc[toothBall].ai[3] = 30f;
+                        Main.npc[toothBall].ai[3] = phase3SpinAttack ? 60f : 30f;
                     }
 
                     for (int i = 0; i < 50; i++)
@@ -1249,17 +1251,21 @@ namespace CalamityMod.NPCs.OldDuke
                 if (NPC.ai[2] >= toothBallSpinTimer)
                 {
                     calamityGlobalNPC.newAI[0] += exhaustionIncreasePerAttack;
-                    NPC.ai[0] = 5f;
+                    NPC.ai[0] = phase3SpinAttack ? 10f : 5f;
                     NPC.ai[1] = 0f;
                     NPC.ai[2] = 0f;
+                    if (phase3SpinAttack)
+                        NPC.ai[3]++;
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
                 }
             }
 
             // Vomit a huge amount of gore into the sky and call sharks from the sides of the screen
-            else if (NPC.ai[0] == 8f)
+            else if (NPC.ai[0] == 8f || NPC.ai[0] == 13f)
             {
+                bool phase3GoreAttack = NPC.ai[0] == 13f;
+
                 // Velocity
                 NPC.velocity *= 0.98f;
                 NPC.velocity.Y = MathHelper.Lerp(NPC.velocity.Y, 0f, 0.02f);
@@ -1271,7 +1277,7 @@ namespace CalamityMod.NPCs.OldDuke
 
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        Vector2 phase2GoreDirection = NPC.rotation.ToRotationVector2() * (Vector2.UnitX * NPC.direction) * (NPC.width + 20) / 2f + NPC.Center;
+                        Vector2 goreSpawnPosition = NPC.rotation.ToRotationVector2() * (Vector2.UnitX * NPC.direction) * (NPC.width + 20) / 2f + NPC.Center;
                         int type = ModContent.ProjectileType<OldDukeGore>();
                         int totalGore = Main.getGoodWorld ? 40 : 20;
                         for (int i = 0; i < totalGore; i++)
@@ -1285,7 +1291,7 @@ namespace CalamityMod.NPCs.OldDuke
                                 velocityY *= Main.rand.NextFloat() + 0.5f;
                             }
 
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), phase2GoreDirection.X, phase2GoreDirection.Y, velocityX, -velocityY, type, GoreDamage, 0f, Main.myPlayer, 0f, 0f);
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(), goreSpawnPosition.X, goreSpawnPosition.Y, velocityX, -velocityY, type, GoreDamage, 0f, Main.myPlayer, 0f, 0f);
                         }
                     }
                 }
@@ -1294,13 +1300,19 @@ namespace CalamityMod.NPCs.OldDuke
                 {
                     if (NPC.ai[2] % 18f == 0f)
                     {
-                        calamityGlobalNPC.newAI[2] += 100f;
+                        calamityGlobalNPC.newAI[2] += phase3GoreAttack ? 150f : 100f;
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
                             float x = 900f - calamityGlobalNPC.newAI[2];
                             NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2]), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
                             NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2]), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
+
+                            if (phase3GoreAttack && Main.getGoodWorld)
+                            {
+                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2] * 0.5f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
+                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2] * 0.5f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
+                            }
                         }
                     }
                 }
@@ -1310,9 +1322,11 @@ namespace CalamityMod.NPCs.OldDuke
                 {
                     calamityGlobalNPC.newAI[0] += exhaustionIncreasePerAttack;
                     calamityGlobalNPC.newAI[2] = 0f;
-                    NPC.ai[0] = 5f;
+                    NPC.ai[0] = phase3GoreAttack ? 10f : 5f;
                     NPC.ai[1] = 0f;
                     NPC.ai[2] = 0f;
+                    if (phase3GoreAttack)
+                        NPC.ai[3]++;
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
                 }
@@ -1611,155 +1625,6 @@ namespace CalamityMod.NPCs.OldDuke
                     NPC.ai[1] = 0f;
                     NPC.ai[2] = 0f;
                     NPC.ai[3]++;
-                    NPC.netUpdate = true;
-                }
-            }
-
-            // Vomit a huge amount of gore into the sky and call sharks from the sides of the screen
-            else if (NPC.ai[0] == 13f)
-            {
-                // Velocity
-                NPC.velocity *= 0.98f;
-                NPC.velocity.Y = MathHelper.Lerp(NPC.velocity.Y, 0f, 0.02f);
-
-                // Play sound
-                if (NPC.ai[2] == attackTimer - 30)
-                {
-                    SoundEngine.PlaySound(VomitSound, NPC.Center);
-
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        Vector2 phase3GoreDirection = NPC.rotation.ToRotationVector2() * (Vector2.UnitX * NPC.direction) * (NPC.width + 20) / 2f + NPC.Center;
-                        int type = ModContent.ProjectileType<OldDukeGore>();
-                        int totalGore = Main.getGoodWorld ? 40 : 20;
-                        for (int i = 0; i < totalGore; i++)
-                        {
-                            float velocityX = NPC.direction * goreVelocityX * (Main.rand.NextFloat(0.2f, 0.8f) + 0.5f);
-                            float velocityY = goreVelocityY * (Main.rand.NextFloat(0.2f, 0.8f) + 0.5f);
-
-                            if (Main.getGoodWorld)
-                            {
-                                velocityX *= Main.rand.NextFloat() + 0.5f;
-                                velocityY *= Main.rand.NextFloat() + 0.5f;
-                            }
-
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), phase3GoreDirection.X, phase3GoreDirection.Y, velocityX, -velocityY, type, GoreDamage, 0f, Main.myPlayer, 0f, 0f);
-                        }
-                    }
-                }
-
-                if (NPC.ai[2] >= attackTimer - 90)
-                {
-                    if (NPC.ai[2] % 18f == 0f)
-                    {
-                        calamityGlobalNPC.newAI[2] += 150f;
-
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
-                        {
-                            float x = 900f - calamityGlobalNPC.newAI[2];
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2]), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2]), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
-
-                            if (Main.getGoodWorld)
-                            {
-                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2] * 0.5f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
-                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - x), (int)(NPC.Center.Y - calamityGlobalNPC.newAI[2] * 0.5f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, NPC.whoAmI, 0f, 255);
-                            }
-                        }
-                    }
-                }
-
-                NPC.ai[2] += 1f;
-                if (NPC.ai[2] >= attackTimer)
-                {
-                    calamityGlobalNPC.newAI[0] += exhaustionIncreasePerAttack;
-                    calamityGlobalNPC.newAI[2] = 0f;
-                    NPC.ai[0] = 10f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3]++;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
-                }
-            }
-
-            // Tooth Ball and Vortex spin
-            else if (NPC.ai[0] == 14f)
-            {
-                // Play sounds and spawn Tooth Balls and a Vortex
-                if (NPC.ai[2] == 0f)
-                {
-                    RoarSoundSlot = SoundEngine.PlaySound(RoarSound, NPC.Center);
-
-                    SoundEngine.PlaySound(VortexSpawnSound, NPC.Center);
-                    int type = ModContent.ProjectileType<OldDukeVortex>();
-                    Vector2 vortexSpawn = NPC.Center + NPC.velocity.RotatedBy(MathHelper.PiOver2 * -NPC.direction) * spinTime / MathHelper.TwoPi;
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(), vortexSpawn, Vector2.Zero, type, VortexDamage, 0f, Main.myPlayer, vortexSpawn.X, vortexSpawn.Y);
-                }
-
-                if (NPC.ai[2] % toothBallSpinPhaseDivisor == 0f)
-                {
-                    if (NPC.ai[2] != 0f)
-                        SoundEngine.PlaySound(VomitSound, NPC.Center);
-
-                    Vector2 phase3ToothBallDirection = Vector2.Normalize(NPC.velocity) * (NPC.width + 20) / 2f + NPC.Center;
-                    Vector2 toothBallVelocity = Vector2.Normalize(NPC.velocity).RotatedBy(MathHelper.PiOver2 * NPC.direction) * toothBallSpinToothBallVelocity;
-                    Vector2 toothBallSpawnPos = new Vector2(phase3ToothBallDirection.X, phase3ToothBallDirection.Y + 45f);
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        int toothBall = NPC.NewNPC(NPC.GetSource_FromAI(), (int)toothBallSpawnPos.X, (int)toothBallSpawnPos.Y, ModContent.NPCType<OldDukeToothBall>(), 0, toothBallVelocity.X, toothBallVelocity.Y);
-                        Main.npc[toothBall].target = NPC.target;
-                        Main.npc[toothBall].velocity = Vector2.Normalize(toothBallVelocity) * toothBallSpinToothBallVelocity * 0.5f;
-                        Main.npc[toothBall].netUpdate = true;
-                        Main.npc[toothBall].ai[3] = 60f;
-                    }
-
-                    for (int i = 0; i < 50; i++)
-                    {
-                        int dustID;
-                        switch (Main.rand.Next(6))
-                        {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 3:
-                                dustID = (int)CalamityDusts.SulphurousSeaAcid;
-                                break;
-                            default:
-                                dustID = DustID.Blood;
-                                break;
-                        }
-
-                        // Choose a random speed and angle to belch out the vomit
-                        float dustSpeed = Main.rand.NextFloat(3.0f, 12.0f);
-                        float angleRandom = 0.06f;
-                        Vector2 dustVel = new Vector2(dustSpeed, 0.0f).RotatedBy(toothBallVelocity.ToRotation());
-                        dustVel = dustVel.RotatedBy(-angleRandom);
-                        dustVel = dustVel.RotatedByRandom(2.0f * angleRandom);
-
-                        // Pick a size for the vomit particles
-                        float scale = Main.rand.NextFloat(1f, 2f);
-
-                        // Actually spawn the vomit
-                        int idx = Dust.NewDust(toothBallSpawnPos, 40, 40, dustID, dustVel.X, dustVel.Y, 0, default, scale);
-                        Main.dust[idx].noGravity = true;
-                    }
-                }
-
-                // Velocity and rotation
-                NPC.velocity = NPC.velocity.RotatedBy(-(double)spinSpeed * NPC.direction);
-                NPC.rotation -= spinSpeed * NPC.direction;
-
-                NPC.ai[2] += 1f;
-                if (NPC.ai[2] >= toothBallSpinTimer)
-                {
-                    calamityGlobalNPC.newAI[0] += exhaustionIncreasePerAttack;
-                    NPC.ai[0] = 10f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3]++;
-                    NPC.TargetClosest();
                     NPC.netUpdate = true;
                 }
             }

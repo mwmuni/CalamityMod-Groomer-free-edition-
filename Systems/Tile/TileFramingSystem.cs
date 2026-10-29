@@ -519,223 +519,7 @@ namespace CalamityMod.Systems
                 randomFrame = Main.tile[x, y].TileFrameNumber;
             }
 
-            /*
-                8 2 9
-                4 - 5
-                6 3 7
-            */
-
-            #region L States
-            if (!up && down && !left && right && !downRight)
-            {
-                tile.TileFrameX = 13 * 18;
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (!up && down && left && !right && !downLeft)
-            {
-                tile.TileFrameX = 15 * 18;
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (up && !down && !left && right && !upRight)
-            {
-                tile.TileFrameX = 13 * 18;
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (up && !down && left && !right && !upLeft)
-            {
-                tile.TileFrameX = 15 * 18;
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            #endregion
-
-            #region T States
-            if (!up && down && left && right && !downLeft && !downRight)
-            {
-                tile.TileFrameX = 14 * 18;
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (up && !down && left && right && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 14 * 18;
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (up && down && !left && right && !downRight && !upRight)
-            {
-                tile.TileFrameX = 13 * 18;
-                tile.TileFrameY = 18;
-                return false;
-            }
-            if (up && down && left && !right && !downLeft && !upLeft)
-            {
-                tile.TileFrameX = 15 * 18;
-                tile.TileFrameY = 18;
-                return false;
-            }
-            #endregion
-
-            #region X State
-            if (up && down && left && right && !downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 14 * 18;
-                tile.TileFrameY = 18;
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x1
-            if (up && down && left && right && !downLeft && downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = 15 * 18;
-                tile.TileFrameY = 3 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = 14 * 18;
-                tile.TileFrameY = 3 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 15 * 18;
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 14 * 18;
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x2 (same side)
-            if (up && down && left && right && !downLeft && !downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(6 * 18 + randomFrame * 18);
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(6 * 18 + randomFrame * 18);
-                tile.TileFrameY = 1 * 18;
-                return false;
-            }
-            if (up && down && left && right && !downLeft && downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 10 * 18;
-                tile.TileFrameY = (short)(randomFrame * 18);
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 11 * 18;
-                tile.TileFrameY = (short)(randomFrame * 18);
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x2 (opposite corners)
-            if (up && down && left && right && !downLeft && downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 16 * 18;
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 17 * 18;
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x3
-            if (up && down && left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 12 * 18;
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            if (up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 12 * 18;
-                tile.TileFrameY = 3 * 18;
-                return false;
-            }
-            if (up && down && left && right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 13 * 18;
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 13 * 18;
-                tile.TileFrameY = 3 * 18;
-                return false;
-            }
-            #endregion
-
-            #region Corner and Side
-            if (!up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 17 * 18;
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (!up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 16 * 18;
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (up && !down && left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 17 * 18;
-                tile.TileFrameY = 3 * 18;
-                return false;
-            }
-            if (up && !down && left && right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 16 * 18;
-                tile.TileFrameY = 3 * 18;
-                return false;
-            }
-            if (up && down && !left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 16 * 18;
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (up && down && !left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 16 * 18;
-                tile.TileFrameY = 18;
-                return false;
-            }
-            if (up && down && left && !right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 17 * 18;
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (up && down && left && !right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 17 * 18;
-                tile.TileFrameY = 18;
-                return false;
-            }
-            #endregion
-
-            return true;
+            return GemsparkAndBrimstoneFraming(tile, randomFrame, false, up, down, left, right, upLeft, upRight, downLeft, downRight);
         }
 
         internal static bool BrimstoneFraming(int x, int y, bool resetFrame)
@@ -760,7 +544,14 @@ namespace CalamityMod.Systems
             }
             else
                 randomFrame = Main.tile[x, y].TileFrameNumber;
+            return GemsparkAndBrimstoneFraming(tile, randomFrame, true, up, down, left, right, upLeft, upRight, downLeft, downRight);
+        }
 
+        private static bool GemsparkAndBrimstoneFraming(
+            Tile tile, int randomFrame, bool brimstone,
+            bool up, bool down, bool left, bool right,
+            bool upLeft, bool upRight, bool downLeft, bool downRight)
+        {
             var randomFrameX54 = randomFrame * 54;
 
             /*
@@ -768,32 +559,28 @@ namespace CalamityMod.Systems
                 4 - 5
                 6 3 7
             */
-
             #region L States
             if (!up && down && !left && right && !downRight)
             {
-                tile.TileFrameX = (short)(16 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrameX54) : (13 * 18));
                 tile.TileFrameY = 0;
                 return false;
             }
-
             if (!up && down && left && !right && !downLeft)
             {
-                tile.TileFrameX = (short)(18 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (18 * 18 + randomFrameX54) : (15 * 18));
                 tile.TileFrameY = 0;
                 return false;
             }
-
             if (up && !down && !left && right && !upRight)
             {
-                tile.TileFrameX = (short)(16 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrameX54) : (13 * 18));
                 tile.TileFrameY = 2 * 18;
                 return false;
             }
-
             if (up && !down && left && !right && !upLeft)
             {
-                tile.TileFrameX = (short)(18 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (18 * 18 + randomFrameX54) : (15 * 18));
                 tile.TileFrameY = 2 * 18;
                 return false;
             }
@@ -802,28 +589,25 @@ namespace CalamityMod.Systems
             #region T States
             if (!up && down && left && right && !downLeft && !downRight)
             {
-                tile.TileFrameX = (short)(17 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrameX54) : (14 * 18));
                 tile.TileFrameY = 0;
                 return false;
             }
-
             if (up && !down && left && right && !upLeft && !upRight)
             {
-                tile.TileFrameX = (short)(17 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrameX54) : (14 * 18));
                 tile.TileFrameY = 2 * 18;
                 return false;
             }
-
             if (up && down && !left && right && !downRight && !upRight)
             {
-                tile.TileFrameX = (short)(16 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrameX54) : (13 * 18));
                 tile.TileFrameY = 18;
                 return false;
             }
-
             if (up && down && left && !right && !downLeft && !upLeft)
             {
-                tile.TileFrameX = (short)(18 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (18 * 18 + randomFrameX54) : (15 * 18));
                 tile.TileFrameY = 18;
                 return false;
             }
@@ -832,7 +616,7 @@ namespace CalamityMod.Systems
             #region X State
             if (up && down && left && right && !downLeft && !downRight && !upLeft && !upRight)
             {
-                tile.TileFrameX = (short)(17 * 18 + randomFrameX54);
+                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrameX54) : (14 * 18));
                 tile.TileFrameY = 18;
                 return false;
             }
@@ -841,29 +625,26 @@ namespace CalamityMod.Systems
             #region Inner Corner x1
             if (up && down && left && right && !downLeft && downRight && upLeft && upRight)
             {
-                tile.TileFrameX = 14 * 18;
-                tile.TileFrameY = (short)(5 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (14 * 18) : (15 * 18));
+                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
                 return false;
             }
-
             if (up && down && left && right && downLeft && !downRight && upLeft && upRight)
             {
-                tile.TileFrameX = 13 * 18;
-                tile.TileFrameY = (short)(5 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (13 * 18) : (14 * 18));
+                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
                 return false;
             }
-
             if (up && down && left && right && downLeft && downRight && !upLeft && upRight)
             {
-                tile.TileFrameX = 14 * 18;
-                tile.TileFrameY = (short)(6 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (14 * 18) : (15 * 18));
+                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
                 return false;
             }
-
             if (up && down && left && right && downLeft && downRight && upLeft && !upRight)
             {
-                tile.TileFrameX = 13 * 18;
-                tile.TileFrameY = (short)(6 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (13 * 18) : (14 * 18));
+                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
                 return false;
             }
             #endregion
@@ -875,21 +656,18 @@ namespace CalamityMod.Systems
                 tile.TileFrameY = 2 * 18;
                 return false;
             }
-
             if (up && down && left && right && downLeft && downRight && !upLeft && !upRight)
             {
                 tile.TileFrameX = (short)(6 * 18 + randomFrame * 18);
                 tile.TileFrameY = 1 * 18;
                 return false;
             }
-
             if (up && down && left && right && !downLeft && downRight && !upLeft && upRight)
             {
                 tile.TileFrameX = 10 * 18;
                 tile.TileFrameY = (short)(randomFrame * 18);
                 return false;
             }
-
             if (up && down && left && right && downLeft && !downRight && upLeft && !upRight)
             {
                 tile.TileFrameX = 11 * 18;
@@ -901,14 +679,13 @@ namespace CalamityMod.Systems
             #region Inner Corner x2 (opposite corners)
             if (up && down && left && right && !downLeft && downRight && upLeft && !upRight)
             {
-                tile.TileFrameX = (short)(10 * 18 + randomFrame * 18);
+                tile.TileFrameX = (short)(brimstone ? (10 * 18 + randomFrame * 18) : (16 * 18));
                 tile.TileFrameY = 4 * 18;
                 return false;
             }
-
             if (up && down && left && right && downLeft && !downRight && !upLeft && upRight)
             {
-                tile.TileFrameX = (short)(13 * 18 + randomFrame * 18);
+                tile.TileFrameX = (short)(brimstone ? (13 * 18 + randomFrame * 18) : (17 * 18));
                 tile.TileFrameY = 4 * 18;
                 return false;
             }
@@ -917,29 +694,26 @@ namespace CalamityMod.Systems
             #region Inner Corner x3
             if (up && down && left && right && !downLeft && !downRight && !upLeft && upRight)
             {
-                tile.TileFrameX = 15 * 18;
-                tile.TileFrameY = (short)(6 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (15 * 18) : (12 * 18));
+                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
                 return false;
             }
-
             if (up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
             {
-                tile.TileFrameX = 15 * 18;
-                tile.TileFrameY = (short)(5 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (15 * 18) : (12 * 18));
+                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
                 return false;
             }
-
             if (up && down && left && right && !downLeft && !downRight && upLeft && !upRight)
             {
-                tile.TileFrameX = 16 * 18;
-                tile.TileFrameY = (short)(6 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (16 * 18) : (13 * 18));
+                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
                 return false;
             }
-
             if (up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
             {
-                tile.TileFrameX = 16 * 18;
-                tile.TileFrameY = (short)(5 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (16 * 18) : (13 * 18));
+                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
                 return false;
             }
             #endregion
@@ -947,57 +721,50 @@ namespace CalamityMod.Systems
             #region Corner and Side
             if (!up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
             {
-                tile.TileFrameX = (short)(17 * 18 + randomFrame * 36);
-                tile.TileFrameY = 3 * 18;
+                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrame * 36) : (17 * 18));
+                tile.TileFrameY = (short)(brimstone ? (3 * 18) : (2 * 18));
                 return false;
             }
-
             if (!up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
             {
-                tile.TileFrameX = (short)(16 * 18 + randomFrame * 36);
-                tile.TileFrameY = 3 * 18;
+                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrame * 36) : (16 * 18));
+                tile.TileFrameY = (short)(brimstone ? (3 * 18) : (2 * 18));
                 return false;
             }
-
             if (up && !down && left && right && !downLeft && !downRight && !upLeft && upRight)
             {
-                tile.TileFrameX = (short)(17 * 18 + randomFrame * 36);
-                tile.TileFrameY = 4 * 18;
+                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrame * 36) : (17 * 18));
+                tile.TileFrameY = (short)(brimstone ? (4 * 18) : (3 * 18));
                 return false;
             }
-
             if (up && !down && left && right && !downLeft && !downRight && upLeft && !upRight)
             {
-                tile.TileFrameX = (short)(16 * 18 + randomFrame * 36);
-                tile.TileFrameY = 4 * 18;
+                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrame * 36) : (16 * 18));
+                tile.TileFrameY = (short)(brimstone ? (4 * 18) : (3 * 18));
                 return false;
             }
-
             if (up && down && !left && right && !downLeft && !downRight && !upLeft && upRight)
             {
-                tile.TileFrameX = 17 * 18;
-                tile.TileFrameY = (short)(5 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (17 * 18) : (16 * 18));
+                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (0));
                 return false;
             }
-
             if (up && down && !left && right && !downLeft && downRight && !upLeft && !upRight)
             {
-                tile.TileFrameX = 17 * 18;
-                tile.TileFrameY = (short)(6 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (17 * 18) : (16 * 18));
+                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (18));
                 return false;
             }
-
             if (up && down && left && !right && !downLeft && !downRight && upLeft && !upRight)
             {
-                tile.TileFrameX = 18 * 18;
-                tile.TileFrameY = (short)(5 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (18 * 18) : (17 * 18));
+                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (0));
                 return false;
             }
-
             if (up && down && left && !right && downLeft && !downRight && !upLeft && !upRight)
             {
-                tile.TileFrameX = 18 * 18;
-                tile.TileFrameY = (short)(6 * 18 + randomFrame * 36);
+                tile.TileFrameX = (short)(brimstone ? (18 * 18) : (17 * 18));
+                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (18));
                 return false;
             }
             #endregion
