@@ -1,6 +1,6 @@
-﻿using System;
 using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Items.Materials;
+using CalamityMod.Items.Weapons;
 using CalamityMod.Projectiles.Melee;
 using CalamityMod.Rarities;
 using CalamityMod.Systems.Collections;
@@ -13,7 +13,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Weapons.Melee
 {
-    public class RedSun : ModItem, ILocalizedModType
+    public class RedSun : BaseMouseTargetedProjectileWeapon, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Weapons.Melee";
         public override void SetStaticDefaults()
@@ -46,46 +46,12 @@ namespace CalamityMod.Items.Weapons.Melee
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             float flareSpeed = Item.shootSpeed;
-            Vector2 realPlayerPos = player.RotatedRelativePoint(player.MountedCenter, true);
-            float mouseXDist = (float)Main.mouseX + Main.screenPosition.X - realPlayerPos.X;
-            float mouseYDist = (float)Main.mouseY + Main.screenPosition.Y - realPlayerPos.Y;
-            if (player.gravDir == -1f)
-            {
-                mouseYDist = Main.screenPosition.Y + (float)Main.screenHeight - (float)Main.mouseY - realPlayerPos.Y;
-            }
-            float mouseDistance = (float)Math.Sqrt((double)(mouseXDist * mouseXDist + mouseYDist * mouseYDist));
-            if ((float.IsNaN(mouseXDist) && float.IsNaN(mouseYDist)) || (mouseXDist == 0f && mouseYDist == 0f))
-            {
-                mouseXDist = (float)player.direction;
-                mouseYDist = 0f;
-                mouseDistance = flareSpeed;
-            }
-            else
-            {
-                mouseDistance = flareSpeed / mouseDistance;
-            }
-
             for (int i = 0; i < 3; i++)
             {
-                realPlayerPos = new Vector2(player.position.X + (float)player.width * 0.5f + (float)(Main.rand.Next(201) * -(float)player.direction) + ((float)Main.mouseX + Main.screenPosition.X - player.position.X), player.MountedCenter.Y - 600f);
-                realPlayerPos.X = (realPlayerPos.X + player.Center.X) / 2f + (float)Main.rand.Next(-200, 201);
-                realPlayerPos.Y -= (float)(100 * i);
-                mouseXDist = (float)Main.mouseX + Main.screenPosition.X - realPlayerPos.X;
-                mouseYDist = (float)Main.mouseY + Main.screenPosition.Y - realPlayerPos.Y;
-                if (mouseYDist < 0f)
-                {
-                    mouseYDist *= -1f;
-                }
-                if (mouseYDist < 20f)
-                {
-                    mouseYDist = 20f;
-                }
-                mouseDistance = (float)Math.Sqrt((double)(mouseXDist * mouseXDist + mouseYDist * mouseYDist));
-                mouseDistance = flareSpeed / mouseDistance;
-                mouseXDist *= mouseDistance;
-                mouseYDist *= mouseDistance;
-                float speedX4 = mouseXDist + (float)Main.rand.Next(-1000, 1001) * 0.02f;
-                float speedY5 = mouseYDist + (float)Main.rand.Next(-1000, 1001) * 0.02f;
+                Vector2 realPlayerPos = GetRandomizedSpawnPosition(player, i);
+                Vector2 aimedVelocity = GetMouseTargetedVelocity(realPlayerPos, flareSpeed);
+                float speedX4 = aimedVelocity.X + (float)Main.rand.Next(-1000, 1001) * 0.02f;
+                float speedY5 = aimedVelocity.Y + (float)Main.rand.Next(-1000, 1001) * 0.02f;
                 Projectile.NewProjectile(source, realPlayerPos.X, realPlayerPos.Y, speedX4, speedY5, ModContent.ProjectileType<RSSolarFlare>(), (int)((double)damage * 0.7), knockback, player.whoAmI, 0f, (float)Main.rand.Next(10));
             }
             return false;

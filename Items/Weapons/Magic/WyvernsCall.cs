@@ -1,5 +1,5 @@
-﻿using System;
 using CalamityMod.Buffs.DamageOverTime;
+using CalamityMod.Items.Weapons;
 using CalamityMod.Projectiles.Magic;
 using CalamityMod.Systems.Collections;
 using Microsoft.Xna.Framework;
@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Weapons.Magic
 {
-    public class WyvernsCall : ModItem, ILocalizedModType
+    public class WyvernsCall : BaseMouseTargetedProjectileWeapon, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Weapons.Magic";
         public override void SetStaticDefaults()
@@ -41,25 +41,6 @@ namespace CalamityMod.Items.Weapons.Magic
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             float projSpeed = Item.shootSpeed;
-            Vector2 realPlayerPos = player.RotatedRelativePoint(player.MountedCenter, true);
-            float mouseXDist = (float)Main.mouseX + Main.screenPosition.X - realPlayerPos.X;
-            float mouseYDist = (float)Main.mouseY + Main.screenPosition.Y - realPlayerPos.Y;
-            if (player.gravDir == -1f)
-            {
-                mouseYDist = Main.screenPosition.Y + (float)Main.screenHeight - (float)Main.mouseY - realPlayerPos.Y;
-            }
-            float mouseDistance = (float)Math.Sqrt((double)(mouseXDist * mouseXDist + mouseYDist * mouseYDist));
-            if ((float.IsNaN(mouseXDist) && float.IsNaN(mouseYDist)) || (mouseXDist == 0f && mouseYDist == 0f))
-            {
-                mouseXDist = (float)player.direction;
-                mouseYDist = 0f;
-                mouseDistance = projSpeed;
-            }
-            else
-            {
-                mouseDistance = projSpeed / mouseDistance;
-            }
-
             for (int i = 0; i < 3; i++)
             {
                 float damageMult = 1f;
@@ -85,24 +66,9 @@ namespace CalamityMod.Items.Weapons.Magic
                 {
                     kbMult = 2f;
                 }
-                realPlayerPos = new Vector2(player.position.X + (float)player.width * 0.5f + (float)(Main.rand.Next(201) * -(float)player.direction) + ((float)Main.mouseX + Main.screenPosition.X - player.position.X), player.MountedCenter.Y - 600f);
-                realPlayerPos.X = (realPlayerPos.X + player.Center.X) / 2f + (float)Main.rand.Next(-200, 201);
-                realPlayerPos.Y -= (float)(100 * i);
-                mouseXDist = (float)Main.mouseX + Main.screenPosition.X - realPlayerPos.X;
-                mouseYDist = (float)Main.mouseY + Main.screenPosition.Y - realPlayerPos.Y;
-                if (mouseYDist < 0f)
-                {
-                    mouseYDist *= -1f;
-                }
-                if (mouseYDist < 20f)
-                {
-                    mouseYDist = 20f;
-                }
-                mouseDistance = (float)Math.Sqrt((double)(mouseXDist * mouseXDist + mouseYDist * mouseYDist));
-                mouseDistance = projSpeed / mouseDistance;
-                mouseXDist *= mouseDistance;
-                mouseYDist *= mouseDistance;
-                int feather = Projectile.NewProjectile(source, realPlayerPos.X, realPlayerPos.Y, mouseXDist, mouseYDist, type, (int)(damage * damageMult), (int)(knockback * kbMult), player.whoAmI, 0f, (float)Main.rand.Next(15));
+                Vector2 realPlayerPos = GetRandomizedSpawnPosition(player, i);
+                Vector2 aimedVelocity = GetMouseTargetedVelocity(realPlayerPos, projSpeed);
+                int feather = Projectile.NewProjectile(source, realPlayerPos.X, realPlayerPos.Y, aimedVelocity.X, aimedVelocity.Y, type, (int)(damage * damageMult), (int)(knockback * kbMult), player.whoAmI, 0f, (float)Main.rand.Next(15));
             }
             return false;
         }

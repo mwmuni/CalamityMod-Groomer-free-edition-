@@ -174,48 +174,7 @@ namespace CalamityMod.Projectiles.Boss
         }
 
         public override bool CanHitPlayer(Player target) => Projectile.Opacity == 1f;
-        public override void OnKill(int timeLeft)
-        {
-            SoundEngine.PlaySound(ImpactSound, Projectile.Center);
-
-            // Difficulty modes
-            bool death = CalamityWorld.death || BossRushEvent.BossRushActive;
-            bool revenge = CalamityWorld.revenge || BossRushEvent.BossRushActive;
-            bool expertMode = Main.expertMode || BossRushEvent.BossRushActive;
-
-            if (Projectile.ai[2] == 0f)
-            {
-                if (Projectile.owner == Main.myPlayer)
-                {
-                    int totalProjectiles = death ? 16 : revenge ? 14 : expertMode ? 12 : 8;
-                    float radians = MathHelper.TwoPi / totalProjectiles;
-                    int type = ModContent.ProjectileType<BurningBolt>();
-                    float velocity = 8f;
-                    Vector2 spinningPoint = new Vector2(0f, -velocity);
-                    for (int k = 0; k < totalProjectiles; k++)
-                    {
-                        Vector2 velocity2 = spinningPoint.RotatedBy(radians * k);
-                        Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, velocity2, type, DartDamage, 0f, Projectile.owner, 0f, Projectile.ai[1], velocity * 1.5f);
-                    }
-                }
-
-                if (Projectile.ai[1] == 2f)
-                {
-                    for (int i = 0; i < 18; i++)
-                    {
-                        Vector2 velocity = new Vector2(12, 12).RotatedByRandom(100);
-                        PointParticle spark2 = new PointParticle(Projectile.Center + velocity, velocity * Main.rand.NextFloat(0.3f, 1f), false, 15, 1.1f, (Main.rand.NextBool() ? Color.Lerp(Color.Red, Color.Magenta, 0.5f) : Color.Red) * 0.6f);
-                        GeneralParticleHandler.SpawnParticle(spark2);
-                    }
-                    for (int i = 0; i < 18; i++)
-                    {
-                        Dust failShotDust = Dust.NewDustPerfect(Projectile.Center, Main.rand.NextBool(3) ? 60 : 114);
-                        failShotDust.noGravity = true;
-                        failShotDust.velocity = new Vector2(16, 16).RotatedByRandom(100) * Main.rand.NextFloat(0.5f, 1.3f);
-                        failShotDust.scale = Main.rand.NextFloat(0.75f, 1.3f);
-                    }
-                }
-            }
-        }
+        public override void OnKill(int timeLeft) =>
+            BrimstoneBlastKillBehavior.HandleKill<BurningBolt>(Projectile, ImpactSound, DartDamage, gigablast: false);
     }
 }

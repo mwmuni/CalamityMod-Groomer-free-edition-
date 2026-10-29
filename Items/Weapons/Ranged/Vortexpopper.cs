@@ -1,4 +1,5 @@
 ﻿using System;
+using CalamityMod.Items.Weapons;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -7,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Weapons.Ranged
 {
-    public class Vortexpopper : ModItem, ILocalizedModType
+    public class Vortexpopper : BaseMouseTargetedProjectileWeapon, ILocalizedModType
     {
         public new string LocalizationCategory => "Items.Weapons.Ranged";
         public override void SetDefaults()
@@ -74,25 +75,10 @@ namespace CalamityMod.Items.Weapons.Ranged
             }
             for (int j = 0; j < 6; j++)
             {
-                realPlayerPos = new Vector2(player.position.X + (float)player.width * 0.5f + (float)(Main.rand.Next(201) * -(float)player.direction) + ((float)Main.mouseX + Main.screenPosition.X - player.position.X), player.MountedCenter.Y - 600f);
-                realPlayerPos.X = (realPlayerPos.X + player.Center.X) / 2f + (float)Main.rand.Next(-800, 801);
-                realPlayerPos.Y -= (float)(100 * j);
-                mouseXDist = (float)Main.mouseX + Main.screenPosition.X - realPlayerPos.X;
-                mouseYDist = (float)Main.mouseY + Main.screenPosition.Y - realPlayerPos.Y;
-                if (mouseYDist < 0f)
-                {
-                    mouseYDist *= -1f;
-                }
-                if (mouseYDist < 20f)
-                {
-                    mouseYDist = 20f;
-                }
-                mouseDistance = (float)Math.Sqrt((double)(mouseXDist * mouseXDist + mouseYDist * mouseYDist));
-                mouseDistance = bulletSpeed / mouseDistance;
-                mouseXDist *= mouseDistance;
-                mouseYDist *= mouseDistance;
-                float speedX4 = mouseXDist + (float)Main.rand.Next(-1000, 1001) * 0.02f;
-                float speedY5 = mouseYDist + (float)Main.rand.Next(-1000, 1001) * 0.02f;
+                realPlayerPos = GetRandomizedSpawnPosition(player, j, horizontalSpread: 800);
+                Vector2 aimedVelocity = GetMouseTargetedVelocity(realPlayerPos, bulletSpeed);
+                float speedX4 = aimedVelocity.X + (float)Main.rand.Next(-1000, 1001) * 0.02f;
+                float speedY5 = aimedVelocity.Y + (float)Main.rand.Next(-1000, 1001) * 0.02f;
                 int extraBullet = Projectile.NewProjectile(source, realPlayerPos.X, realPlayerPos.Y, speedX4, speedY5, ProjectileID.Xenopopper, damage, knockback, player.whoAmI, ai, 0f);
                 Main.projectile[extraBullet].localAI[0] = (float)type;
                 Main.projectile[extraBullet].localAI[1] = 12f;
