@@ -4,21 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class CorrodedFossil : ModItem, ILocalizedModType
+    public class CorrodedFossil : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 25;
-        }
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 30;
+        protected override int MaterialHeight => 28;
+        protected override int SellValue => Item.sellPrice(silver: 8);
+        protected override int MaterialRarity => ItemRarityID.Pink;
 
-        public override void SetDefaults()
-        {
-            Item.width = 30;
-            Item.height = 28;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 8);
-            Item.rare = ItemRarityID.Pink;
-        }
     }
 }

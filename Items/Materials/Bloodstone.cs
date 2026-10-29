@@ -6,22 +6,18 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Materials
 {
     [LegacyName("BloodstoneCore")]
-    public class Bloodstone : ModItem, ILocalizedModType
+    public class Bloodstone : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
+        protected override int ResearchCount => 100;
+        protected override int MaterialWidth => 13;
+        protected override int MaterialHeight => 10;
+        protected override int SellValue => Item.sellPrice(silver: 60);
+        protected override int MaterialRarity => ModContent.RarityType<Turquoise>();
         public override void SetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 100;
+            base.SetStaticDefaults();
             ItemID.Sets.SortingPriorityMaterials[Type] = 112;
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 13;
-            Item.height = 10;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 60);
-            Item.rare = ModContent.RarityType<Turquoise>();
-        }
     }
 }

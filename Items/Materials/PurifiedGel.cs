@@ -4,22 +4,18 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class PurifiedGel : ModItem, ILocalizedModType
+    public class PurifiedGel : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 20;
+        protected override int MaterialHeight => 36;
+        protected override int SellValue => Item.sellPrice(silver: 5);
+        protected override int MaterialRarity => ItemRarityID.LightRed;
         public override void SetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 25;
+            base.SetStaticDefaults();
             ItemID.Sets.SortingPriorityMaterials[Type] = 71; // Soul of Light
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 20;
-            Item.height = 36;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 5);
-            Item.rare = ItemRarityID.LightRed;
-        }
     }
 }

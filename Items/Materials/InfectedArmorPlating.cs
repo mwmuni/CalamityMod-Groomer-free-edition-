@@ -4,21 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class InfectedArmorPlating : ModItem, ILocalizedModType
+    public class InfectedArmorPlating : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 25;
-        }
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 20;
+        protected override int MaterialHeight => 20;
+        protected override int SellValue => Item.sellPrice(silver: 80);
+        protected override int MaterialRarity => ItemRarityID.Yellow;
 
-        public override void SetDefaults()
-        {
-            Item.width = 20;
-            Item.height = 20;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 80);
-            Item.rare = ItemRarityID.Yellow;
-        }
     }
 }

@@ -722,5 +722,181 @@ namespace CalamityMod.NPCs.NormalNPCs
             npc.rotation = MathHelper.Clamp(npc.rotation, -rotationLimit, rotationLimit);
         }
         #endregion
+
+        internal static void WalkAndHandleObstacles(NPC npc, int backUpTimer, bool noXMovement, bool unusedFlag)
+        {
+            bool isOnSolidTile = false;
+            if (npc.velocity.Y == 0f)
+            {
+                int yTile = (int)(npc.position.Y + (float)npc.height + 7f) / 16;
+                int initialXTile = (int)npc.position.X / 16;
+                int maxXTile = (int)(npc.position.X + (float)npc.width) / 16;
+                for (int xTile = initialXTile; xTile <= maxXTile; xTile++)
+                {
+                    if (Main.tile[xTile, yTile] == null)
+                    {
+                        return;
+                    }
+                    if (Main.tile[xTile, yTile].HasUnactuatedTile && Main.tileSolid[(int)Main.tile[xTile, yTile].TileType])
+                    {
+                        isOnSolidTile = true;
+                        break;
+                    }
+                }
+            }
+            if (npc.velocity.Y >= 0f)
+            {
+                int fallFaceDirection = 0;
+                if (npc.velocity.X < 0f)
+                {
+                    fallFaceDirection = -1;
+                }
+                if (npc.velocity.X > 0f)
+                {
+                    fallFaceDirection = 1;
+                }
+                Vector2 position = npc.position;
+                position.X += npc.velocity.X;
+                int xTileBelow = (int)((position.X + (float)(npc.width / 2) + (float)((npc.width / 2 + 1) * fallFaceDirection)) / 16f);
+                int yTileBelow = (int)((position.Y + (float)npc.height - 1f) / 16f);
+                if ((float)(xTileBelow * 16) < position.X + (float)npc.width && (float)(xTileBelow * 16 + 16) > position.X && ((Main.tile[xTileBelow, yTileBelow].HasUnactuatedTile && !Main.tile[xTileBelow, yTileBelow].TopSlope && !Main.tile[xTileBelow, yTileBelow - 1].TopSlope && Main.tileSolid[(int)Main.tile[xTileBelow, yTileBelow].TileType] && !Main.tileSolidTop[(int)Main.tile[xTileBelow, yTileBelow].TileType]) || (Main.tile[xTileBelow, yTileBelow - 1].IsHalfBlock && Main.tile[xTileBelow, yTileBelow - 1].HasUnactuatedTile)) && (!Main.tile[xTileBelow, yTileBelow - 1].HasUnactuatedTile || !Main.tileSolid[(int)Main.tile[xTileBelow, yTileBelow - 1].TileType] || Main.tileSolidTop[(int)Main.tile[xTileBelow, yTileBelow - 1].TileType] || (Main.tile[xTileBelow, yTileBelow - 1].IsHalfBlock && (!Main.tile[xTileBelow, yTileBelow - 4].HasUnactuatedTile || !Main.tileSolid[(int)Main.tile[xTileBelow, yTileBelow - 4].TileType] || Main.tileSolidTop[(int)Main.tile[xTileBelow, yTileBelow - 4].TileType]))) && (!Main.tile[xTileBelow, yTileBelow - 2].HasUnactuatedTile || !Main.tileSolid[(int)Main.tile[xTileBelow, yTileBelow - 2].TileType] || Main.tileSolidTop[(int)Main.tile[xTileBelow, yTileBelow - 2].TileType]) && (!Main.tile[xTileBelow, yTileBelow - 3].HasUnactuatedTile || !Main.tileSolid[(int)Main.tile[xTileBelow, yTileBelow - 3].TileType] || Main.tileSolidTop[(int)Main.tile[xTileBelow, yTileBelow - 3].TileType]) && (!Main.tile[xTileBelow - fallFaceDirection, yTileBelow - 3].HasUnactuatedTile || !Main.tileSolid[(int)Main.tile[xTileBelow - fallFaceDirection, yTileBelow - 3].TileType]))
+                {
+                    float yPixelDistance = (float)(yTileBelow * 16);
+                    if (Main.tile[xTileBelow, yTileBelow].IsHalfBlock)
+                    {
+                        yPixelDistance += 8f;
+                    }
+                    if (Main.tile[xTileBelow, yTileBelow - 1].IsHalfBlock)
+                    {
+                        yPixelDistance -= 8f;
+                    }
+                    if (yPixelDistance < position.Y + (float)npc.height)
+                    {
+                        float percentageTileRisen = position.Y + (float)npc.height - yPixelDistance;
+                        float fullTileAmt = 16.1f;
+                        if (percentageTileRisen <= fullTileAmt)
+                        {
+                            npc.gfxOffY += npc.position.Y + (float)npc.height - yPixelDistance;
+                            npc.position.Y = yPixelDistance - (float)npc.height;
+                            if (percentageTileRisen < 9f)
+                            {
+                                npc.stepSpeed = 1f;
+                            }
+                            else
+                            {
+                                npc.stepSpeed = 2f;
+                            }
+                        }
+                    }
+                }
+            }
+            if (isOnSolidTile)
+            {
+                int doorCheckX = (int)((npc.position.X + (float)(npc.width / 2) + (float)(15 * npc.direction)) / 16f);
+                int doorCheckY = (int)((npc.position.Y + (float)npc.height - 15f) / 16f);
+                if ((Main.tile[doorCheckX, doorCheckY - 1].HasUnactuatedTile && (Main.tile[doorCheckX, doorCheckY - 1].TileType == TileID.ClosedDoor || Main.tile[doorCheckX, doorCheckY - 1].TileType == TileID.TallGateClosed)) & unusedFlag)
+                {
+                    npc.ai[2] += 1f;
+                    npc.ai[3] = 0f;
+                    if (npc.ai[2] >= 60f)
+                    {
+                        npc.velocity.X = 0.5f * (float)-(float)npc.direction;
+                        int doorOpenInc = 5;
+                        if (Main.tile[doorCheckX, doorCheckY - 1].TileType == TileID.TallGateClosed)
+                        {
+                            doorOpenInc = 2;
+                        }
+                        npc.ai[1] += (float)doorOpenInc;
+                        npc.ai[2] = 0f;
+                        bool letMeIn = false;
+                        if (npc.ai[1] >= 10f)
+                        {
+                            letMeIn = true;
+                            npc.ai[1] = 10f;
+                        }
+                        WorldGen.KillTile(doorCheckX, doorCheckY - 1, true, false, false);
+                        if ((Main.netMode != NetmodeID.MultiplayerClient || !letMeIn) && letMeIn && Main.netMode != NetmodeID.MultiplayerClient)
+                        {
+                            if (Main.tile[doorCheckX, doorCheckY - 1].TileType == TileID.ClosedDoor)
+                            {
+                                bool canOpenDoor = WorldGen.OpenDoor(doorCheckX, doorCheckY - 1, npc.direction);
+                                if (!canOpenDoor)
+                                {
+                                    npc.ai[3] = (float)backUpTimer;
+                                    npc.netUpdate = true;
+                                }
+                                if (Main.dedServ & canOpenDoor)
+                                {
+                                    NetMessage.SendData(MessageID.ToggleDoorState, -1, -1, null, 0, (float)doorCheckX, (float)(doorCheckY - 1), (float)npc.direction, 0, 0, 0);
+                                }
+                            }
+                            if (Main.tile[doorCheckX, doorCheckY - 1].TileType == TileID.TallGateClosed)
+                            {
+                                bool canOpenTallGate = WorldGen.ShiftTallGate(doorCheckX, doorCheckY - 1, false);
+                                if (!canOpenTallGate)
+                                {
+                                    npc.ai[3] = (float)backUpTimer;
+                                    npc.netUpdate = true;
+                                }
+                                if (Main.dedServ & canOpenTallGate)
+                                {
+                                    NetMessage.SendData(MessageID.ToggleDoorState, -1, -1, null, 4, (float)doorCheckX, (float)(doorCheckY - 1), 0f, 0, 0, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    int faceDirection = npc.spriteDirection;
+                    if ((npc.velocity.X < 0f && faceDirection == -1) || (npc.velocity.X > 0f && faceDirection == 1))
+                    {
+                        if (npc.height >= 32 && Main.tile[doorCheckX, doorCheckY - 2].HasUnactuatedTile && Main.tileSolid[(int)Main.tile[doorCheckX, doorCheckY - 2].TileType])
+                        {
+                            if (Main.tile[doorCheckX, doorCheckY - 3].HasUnactuatedTile && Main.tileSolid[(int)Main.tile[doorCheckX, doorCheckY - 3].TileType])
+                            {
+                                npc.velocity.Y = -8f;
+                                npc.netUpdate = true;
+                            }
+                            else
+                            {
+                                npc.velocity.Y = -7f;
+                                npc.netUpdate = true;
+                            }
+                        }
+                        else if (Main.tile[doorCheckX, doorCheckY - 1].HasUnactuatedTile && Main.tileSolid[(int)Main.tile[doorCheckX, doorCheckY - 1].TileType])
+                        {
+                            npc.velocity.Y = -6f;
+                            npc.netUpdate = true;
+                        }
+                        else if (npc.position.Y + (float)npc.height - (float)(doorCheckY * 16) > 20f && Main.tile[doorCheckX, doorCheckY].HasUnactuatedTile && !Main.tile[doorCheckX, doorCheckY].TopSlope && Main.tileSolid[(int)Main.tile[doorCheckX, doorCheckY].TileType])
+                        {
+                            npc.velocity.Y = -5f;
+                            npc.netUpdate = true;
+                        }
+                        else if (npc.directionY < 0 && (!Main.tile[doorCheckX, doorCheckY + 1].HasUnactuatedTile || !Main.tileSolid[(int)Main.tile[doorCheckX, doorCheckY + 1].TileType]) && (!Main.tile[doorCheckX + npc.direction, doorCheckY + 1].HasUnactuatedTile || !Main.tileSolid[(int)Main.tile[doorCheckX + npc.direction, doorCheckY + 1].TileType]))
+                        {
+                            npc.velocity.Y = -8f;
+                            npc.velocity.X = npc.velocity.X * 1.5f;
+                            npc.netUpdate = true;
+                        }
+                        else if (unusedFlag)
+                        {
+                            npc.ai[1] = 0f;
+                            npc.ai[2] = 0f;
+                        }
+                        if ((npc.velocity.Y == 0f & noXMovement) && npc.ai[3] == 1f)
+                        {
+                            npc.velocity.Y = -5f;
+                        }
+                    }
+                }
+            }
+            else if (unusedFlag)
+            {
+                npc.ai[1] = 0f;
+                npc.ai[2] = 0f;
+            }
+        }
     }
 }

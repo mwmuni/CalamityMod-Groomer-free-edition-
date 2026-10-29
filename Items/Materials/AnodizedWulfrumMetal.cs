@@ -5,23 +5,14 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class AnodizedWulfrumMetal : ModItem, ILocalizedModType
+    public class AnodizedWulfrumMetal : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 18;
+        protected override int MaterialHeight => 18;
+        protected override int SellValue => Item.sellPrice(copper: 10);
+        protected override int MaterialRarity => ItemRarityID.Blue;
 
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 25;
-        }
-
-        public override void SetDefaults()
-        {
-            Item.width = 18;
-            Item.height = 18;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(copper: 10);
-            Item.rare = ItemRarityID.Blue;
-        }
         public override void AddRecipes()
         {
             CreateRecipe(1).

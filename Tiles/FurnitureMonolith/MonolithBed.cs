@@ -1,16 +1,18 @@
 ﻿using CalamityMod.Dusts;
+using CalamityMod.Tiles.BaseTiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
-using Terraria.GameContent.ObjectInteractions;
 using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureMonolith
 {
-    public class MonolithBed : ModTile
+    public class MonolithBed : BaseBedTile
     {
         public Asset<Texture2D> GlowTexture;
+
+        protected override int AssociatedItemType => ModContent.ItemType<Items.Placeables.FurnitureMonolith.MonolithBed>();
 
         public override void SetStaticDefaults() => this.SetUpBed(ModContent.ItemType<Items.Placeables.FurnitureMonolith.MonolithBed>(), true);
 
@@ -18,11 +20,6 @@ namespace CalamityMod.Tiles.FurnitureMonolith
         {
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, ModContent.DustType<AstralBasic>(), 0f, 0f, 1, new Color(255, 255, 255), 1f);
             return false;
-        }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
         }
 
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
@@ -42,10 +39,5 @@ namespace CalamityMod.Tiles.FurnitureMonolith
             Main.spriteBatch.Draw(glowmask, drawOffset, new Rectangle?(new Rectangle(xPos, yPos, 18, 18)), drawColour, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
         }
 
-        public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
-
-        public override bool RightClick(int i, int j) => FurnitureCommon.BedRightClick(i, j);
-
-        public override void MouseOver(int i, int j) => FurnitureCommon.MouseOver(i, j, ModContent.ItemType<Items.Placeables.FurnitureMonolith.MonolithBed>());
     }
 }

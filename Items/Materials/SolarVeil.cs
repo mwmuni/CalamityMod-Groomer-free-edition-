@@ -4,21 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class SolarVeil : ModItem, ILocalizedModType
+    public class SolarVeil : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 25;
-        }
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 46;
+        protected override int MaterialHeight => 32;
+        protected override int SellValue => Item.sellPrice(silver: 15);
+        protected override int MaterialRarity => ItemRarityID.Lime;
 
-        public override void SetDefaults()
-        {
-            Item.width = 46;
-            Item.height = 32;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 15);
-            Item.rare = ItemRarityID.Lime;
-        }
     }
 }

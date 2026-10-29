@@ -4,21 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class DepthCells : ModItem, ILocalizedModType
+    public class DepthCells : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 25;
-        }
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 26;
+        protected override int MaterialHeight => 26;
+        protected override int SellValue => Item.sellPrice(silver: 12);
+        protected override int MaterialRarity => ItemRarityID.Lime;
 
-        public override void SetDefaults()
-        {
-            Item.width = 26;
-            Item.height = 26;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 12);
-            Item.rare = ItemRarityID.Lime;
-        }
     }
 }

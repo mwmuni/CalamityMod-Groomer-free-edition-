@@ -6,24 +6,20 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class RuinousSoul : ModItem, ILocalizedModType
+    public class RuinousSoul : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 26;
+        protected override int MaterialHeight => 42;
+        protected override int SellValue => Item.sellPrice(gold: 1, silver: 50);
+        protected override int MaterialRarity => ModContent.RarityType<PureGreen>();
         public override void SetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 25;
+            base.SetStaticDefaults();
             Main.RegisterItemAnimation(Item.type, new DrawAnimationVertical(6, 6));
             ItemID.Sets.AnimatesAsSoul[Type] = true;
             ItemID.Sets.SortingPriorityMaterials[Type] = 111;
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 26;
-            Item.height = 42;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(gold: 1, silver: 50);
-            Item.rare = ModContent.RarityType<PureGreen>();
-        }
     }
 }

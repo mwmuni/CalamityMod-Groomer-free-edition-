@@ -4,21 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class DubiousPlating : ModItem, ILocalizedModType
+    public class DubiousPlating : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 25;
-        }
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 30;
+        protected override int MaterialHeight => 24;
+        protected override int SellValue => Item.sellPrice(silver: 3);
+        protected override int MaterialRarity => ModContent.RarityType<DarkOrange>();
 
-        public override void SetDefaults()
-        {
-            Item.width = 30;
-            Item.height = 24;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 3);
-            Item.rare = ModContent.RarityType<DarkOrange>();
-        }
     }
 }

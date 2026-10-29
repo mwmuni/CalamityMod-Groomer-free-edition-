@@ -4,21 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class LivingShard : ModItem, ILocalizedModType
+    public class LivingShard : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 25;
-        }
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 14;
+        protected override int MaterialHeight => 14;
+        protected override int SellValue => Item.sellPrice(silver: 50);
+        protected override int MaterialRarity => ItemRarityID.Lime;
 
-        public override void SetDefaults()
-        {
-            Item.width = 14;
-            Item.height = 14;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 50);
-            Item.rare = ItemRarityID.Lime;
-        }
     }
 }

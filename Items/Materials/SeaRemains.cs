@@ -5,23 +5,19 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Materials
 {
     [LegacyName("VictideBar")]
-    public class SeaRemains : ModItem, ILocalizedModType
+    public class SeaRemains : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 30;
+        protected override int MaterialHeight => 24;
+        protected override int SellValue => Item.sellPrice(silver: 36);
+        protected override int MaterialRarity => ItemRarityID.Green;
         public override void SetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 25;
+            base.SetStaticDefaults();
             ItemID.Sets.SortingPriorityMaterials[Type] = 60; // Meteorite
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 30;
-            Item.height = 24;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 36);
-            Item.rare = ItemRarityID.Green;
-        }
         public override void AddRecipes()
         {
             CreateRecipe().

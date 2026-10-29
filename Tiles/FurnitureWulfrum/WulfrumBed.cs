@@ -1,16 +1,18 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CalamityMod.Tiles.BaseTiles;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
-using Terraria.GameContent.ObjectInteractions;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityMod.Tiles.FurnitureWulfrum
 {
-    public class WulfrumBed : ModTile
+    public class WulfrumBed : BaseBedTile
     {
         public Asset<Texture2D> GlowTexture;
+
+        protected override int AssociatedItemType => ModContent.ItemType<Items.Placeables.FurnitureWulfrum.WulfrumBed>();
 
         public override void SetStaticDefaults() => this.SetUpBed(ModContent.ItemType<Items.Placeables.FurnitureWulfrum.WulfrumBed>());
 
@@ -21,17 +23,6 @@ namespace CalamityMod.Tiles.FurnitureWulfrum
             Dust.NewDust(new Vector2(i, j) * 16f, 16, 16, DustID.TerraBlade, 0f, 0f, 1, new Color(255, 255, 255), 1f);
             return false;
         }
-
-        public override void NumDust(int i, int j, bool fail, ref int num)
-        {
-            num = fail ? 1 : 3;
-        }
-
-        public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
-
-        public override bool RightClick(int i, int j) => FurnitureCommon.BedRightClick(i, j);
-
-        public override void MouseOver(int i, int j) => FurnitureCommon.MouseOver(i, j, ModContent.ItemType<Items.Placeables.FurnitureWulfrum.WulfrumBed>());
 
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
         {

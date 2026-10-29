@@ -5,21 +5,13 @@ using Terraria.ModLoader;
 namespace CalamityMod.Items.Materials
 {
     [LegacyName("Stardust")]
-    public class StarblightSoot : ModItem, ILocalizedModType
+    public class StarblightSoot : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 100;
-        }
+        protected override int ResearchCount => 100;
+        protected override int MaterialWidth => 30;
+        protected override int MaterialHeight => 26;
+        protected override int SellValue => Item.sellPrice(silver: 2);
+        protected override int MaterialRarity => ItemRarityID.LightRed;
 
-        public override void SetDefaults()
-        {
-            Item.width = 30;
-            Item.height = 26;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 2);
-            Item.rare = ItemRarityID.LightRed;
-        }
     }
 }

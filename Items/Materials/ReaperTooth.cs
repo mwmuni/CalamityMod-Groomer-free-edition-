@@ -4,21 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class ReaperTooth : ModItem, ILocalizedModType
+    public class ReaperTooth : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 5;
-        }
+        protected override int ResearchCount => 5;
+        protected override int MaterialWidth => 26;
+        protected override int MaterialHeight => 26;
+        protected override int SellValue => Item.sellPrice(gold: 1, silver: 50);
+        protected override int MaterialRarity => ModContent.RarityType<PureGreen>();
 
-        public override void SetDefaults()
-        {
-            Item.width = 26;
-            Item.height = 26;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(gold: 1, silver: 50);
-            Item.rare = ModContent.RarityType<PureGreen>();
-        }
     }
 }

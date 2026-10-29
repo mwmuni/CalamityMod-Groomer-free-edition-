@@ -5,23 +5,19 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class UnholyCore : ModItem, ILocalizedModType
+    public class UnholyCore : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
+        protected override int ResearchCount => 25;
+        protected override int MaterialWidth => 26;
+        protected override int MaterialHeight => 46;
+        protected override int SellValue => Item.sellPrice(silver: 80);
+        protected override int MaterialRarity => ItemRarityID.Pink;
         public override void SetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 25;
+            base.SetStaticDefaults();
             ItemID.Sets.SortingPriorityMaterials[Type] = 90; // Chlorophyte Ore
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 26;
-            Item.height = 46;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(silver: 80);
-            Item.rare = ItemRarityID.Pink;
-        }
         public override void AddRecipes()
         {
             CreateRecipe().

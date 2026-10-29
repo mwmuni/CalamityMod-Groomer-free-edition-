@@ -5,22 +5,18 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class ArmoredShell : ModItem, ILocalizedModType
+    public class ArmoredShell : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
+        protected override int ResearchCount => 5;
+        protected override int MaterialWidth => 46;
+        protected override int MaterialHeight => 34;
+        protected override int SellValue => Item.sellPrice(gold: 1, silver: 40);
+        protected override int MaterialRarity => ModContent.RarityType<Turquoise>();
         public override void SetStaticDefaults()
         {
-            Item.ResearchUnlockCount = 5;
+            base.SetStaticDefaults();
             ItemID.Sets.SortingPriorityMaterials[Type] = 107;
         }
 
-        public override void SetDefaults()
-        {
-            Item.width = 46;
-            Item.height = 34;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(gold: 1, silver: 40);
-            Item.rare = ModContent.RarityType<Turquoise>();
-        }
     }
 }

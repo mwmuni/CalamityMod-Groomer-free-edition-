@@ -4,20 +4,13 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.Items.Materials
 {
-    public class EnergyCore : ModItem, ILocalizedModType
+    public class EnergyCore : BaseMaterial
     {
-        public new string LocalizationCategory => "Items.Materials";
-        public override void SetStaticDefaults()
-        {
-            Item.ResearchUnlockCount = 5;
-        }
+        protected override int ResearchCount => 5;
+        protected override int MaterialWidth => 22;
+        protected override int MaterialHeight => 22;
+        protected override int SellValue => Item.sellPrice(copper: 40);
+        protected override int MaterialRarity => ItemRarityID.Blue;
 
-        public override void SetDefaults()
-        {
-            Item.width = Item.height = 22;
-            Item.maxStack = Item.CommonMaxStack;
-            Item.value = Item.sellPrice(copper: 40);
-            Item.rare = ItemRarityID.Blue;
-        }
     }
 }
