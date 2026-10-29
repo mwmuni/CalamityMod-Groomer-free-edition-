@@ -277,6 +277,14 @@ namespace CalamityMod
             loot.Add(lcr);
         }
 
+        private static IItemDropRule[] CreateCrateDropRules(int minQuantity, int maxQuantity, params int[] itemIDs)
+        {
+            IItemDropRule[] rules = new IItemDropRule[itemIDs.Length];
+            for (int i = 0; i < itemIDs.Length; ++i)
+                rules[i] = ItemDropRule.NotScalingWithLuck(itemIDs[i], 1, minQuantity, maxQuantity);
+            return rules;
+        }
+
         /// <summary>
         /// Adds all the common drops for Biome Crates.
         /// </summary>
@@ -290,56 +298,30 @@ namespace CalamityMod
             {
                 // Pre-Hardmode Ore/Bar loot pools
                 // 20-35 Ores @ 14.29%; Individually 1.79%
-                IItemDropRule[] phmOres = new IItemDropRule[8]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CopperOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TinOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.IronOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.LeadOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.GoldOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PlatinumOre, 1, 20, 35)
-                };
+                IItemDropRule[] phmOres = CreateCrateDropRules(20, 35,
+                    ItemID.CopperOre, ItemID.TinOre, ItemID.IronOre, ItemID.LeadOre,
+                    ItemID.SilverOre, ItemID.TungstenOre, ItemID.GoldOre, ItemID.PlatinumOre);
                 loot.Add(new OneFromRulesRule(7, phmOres));
 
                 // 6-16 Bars @ 25%; Individually 4.17%
-                IItemDropRule[] phmBars = new IItemDropRule[6]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.IronBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.LeadBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.GoldBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PlatinumBar, 1, 6, 16)
-                };
+                IItemDropRule[] phmBars = CreateCrateDropRules(6, 16,
+                    ItemID.IronBar, ItemID.LeadBar, ItemID.SilverBar,
+                    ItemID.TungstenBar, ItemID.GoldBar, ItemID.PlatinumBar);
                 loot.Add(new OneFromRulesRule(4, phmBars));
             }
 
             // 2-4 Buff Potions @ 25%; Individually 4.17%
-            loot.Add(new OneFromRulesRule(4, new IItemDropRule[6]
-            {
-                ItemDropRule.NotScalingWithLuck(ItemID.ObsidianSkinPotion, 1, 2, 4),
-                ItemDropRule.NotScalingWithLuck(ItemID.SpelunkerPotion, 1, 2, 4),
-                ItemDropRule.NotScalingWithLuck(ItemID.HunterPotion, 1, 2, 4),
-                ItemDropRule.NotScalingWithLuck(ItemID.GravitationPotion, 1, 2, 4),
-                ItemDropRule.NotScalingWithLuck(ItemID.MiningPotion, 1, 2, 4),
-                ItemDropRule.NotScalingWithLuck(ItemID.HeartreachPotion, 1, 2, 4)
-            }));
+            loot.Add(new OneFromRulesRule(4, CreateCrateDropRules(2, 4,
+                ItemID.ObsidianSkinPotion, ItemID.SpelunkerPotion, ItemID.HunterPotion,
+                ItemID.GravitationPotion, ItemID.MiningPotion, ItemID.HeartreachPotion)));
 
             // 5-17 (Regular) Recovery Potions @ 50%; 25% Healing 25% Mana
-            loot.Add(new OneFromRulesRule(2, new IItemDropRule[2]
-            {
-                ItemDropRule.NotScalingWithLuck(ItemID.HealingPotion, 1, 5, 17),
-                ItemDropRule.NotScalingWithLuck(ItemID.ManaPotion, 1, 5, 17)
-            }));
+            loot.Add(new OneFromRulesRule(2,
+                CreateCrateDropRules(5, 17, ItemID.HealingPotion, ItemID.ManaPotion)));
 
             // 2-6 Bait @ 50%; 25% Master 25% Journeyman
-            loot.Add(new OneFromRulesRule(2, new IItemDropRule[2]
-            {
-                ItemDropRule.NotScalingWithLuck(ItemID.MasterBait, 1, 2, 6),
-                ItemDropRule.NotScalingWithLuck(ItemID.JourneymanBait, 1, 2, 6)
-            }));
+            loot.Add(new OneFromRulesRule(2,
+                CreateCrateDropRules(2, 6, ItemID.MasterBait, ItemID.JourneymanBait)));
 
             // 5-12 Gold Coin @ 25%
             loot.Add(ItemID.GoldCoin, 4, 5, 12);
@@ -359,85 +341,41 @@ namespace CalamityMod
             {
                 // Pre-Hardmode loot pools
                 // 20-35 Ores @ 7.14%; Individually 0.89%
-                IItemDropRule[] phmOres = new IItemDropRule[8]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CopperOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TinOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.IronOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.LeadOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.GoldOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PlatinumOre, 1, 20, 35)
-                };
+                IItemDropRule[] phmOres = CreateCrateDropRules(20, 35,
+                    ItemID.CopperOre, ItemID.TinOre, ItemID.IronOre, ItemID.LeadOre,
+                    ItemID.SilverOre, ItemID.TungstenOre, ItemID.GoldOre, ItemID.PlatinumOre);
                 // 6-16 Bars @ 8.33%; Individually 1.39%
-                IItemDropRule[] phmBars = new IItemDropRule[6]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.IronBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.LeadBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.GoldBar, 1, 6, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PlatinumBar, 1, 6, 16)
-                };
+                IItemDropRule[] phmBars = CreateCrateDropRules(6, 16,
+                    ItemID.IronBar, ItemID.LeadBar, ItemID.SilverBar,
+                    ItemID.TungstenBar, ItemID.GoldBar, ItemID.PlatinumBar);
 
                 // Tier 3 loot pools
                 // 20-35 Ores @ 7.14%; Individually 1.19%
-                IItemDropRule[] hmOresThree = new IItemDropRule[6]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.AdamantiteOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TitaniumOre, 1, 20, 35)
-                };
+                IItemDropRule[] hmOresThree = CreateCrateDropRules(20, 35,
+                    ItemID.CobaltOre, ItemID.PalladiumOre, ItemID.MythrilOre,
+                    ItemID.OrichalcumOre, ItemID.AdamantiteOre, ItemID.TitaniumOre);
                 // 5-16 Bars @ 16.67%; Individually 2.78%
-                IItemDropRule[] hmBarsThree = new IItemDropRule[6]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.AdamantiteBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TitaniumBar, 1, 5, 16)
-                };
+                IItemDropRule[] hmBarsThree = CreateCrateDropRules(5, 16,
+                    ItemID.CobaltBar, ItemID.PalladiumBar, ItemID.MythrilBar,
+                    ItemID.OrichalcumBar, ItemID.AdamantiteBar, ItemID.TitaniumBar);
                 var adamantiteDropsOres = new SequentialRulesNotScalingWithLuckRule(7, new OneFromRulesRule(2, hmOresThree), new OneFromRulesRule(1, phmOres));
                 var adamantiteDropsBars = new SequentialRulesNotScalingWithLuckRule(4, new OneFromRulesRule(3, 2, hmBarsThree), new OneFromRulesRule(1, phmBars));
 
                 // Tier 2 loot pools
                 // 20-35 Ores @ 7.14%; Individually 1.79%
-                IItemDropRule[] hmOresTwo = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumOre, 1, 20, 35)
-                };
+                IItemDropRule[] hmOresTwo = CreateCrateDropRules(20, 35,
+                    ItemID.CobaltOre, ItemID.PalladiumOre, ItemID.MythrilOre, ItemID.OrichalcumOre);
                 // 5-16 Bars @ 16.67%; Individually 4.17%
-                IItemDropRule[] hmBarsTwo = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumBar, 1, 5, 16)
-                };
+                IItemDropRule[] hmBarsTwo = CreateCrateDropRules(5, 16,
+                    ItemID.CobaltBar, ItemID.PalladiumBar, ItemID.MythrilBar, ItemID.OrichalcumBar);
                 var mythrilDropsOres = new SequentialRulesNotScalingWithLuckRule(7, new OneFromRulesRule(2, hmOresTwo), new OneFromRulesRule(1, phmOres));
                 var mythrilDropsBars = new SequentialRulesNotScalingWithLuckRule(4, new OneFromRulesRule(3, 2, hmBarsTwo), new OneFromRulesRule(1, phmBars));
 
                 // Tier 1 loot pools
                 // 20-35 Ores @ 7.14%; Individually 3.57%
-                IItemDropRule[] hmOresOne = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltOre, 1, 20, 35),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumOre, 1, 20, 35)
-                };
+                IItemDropRule[] hmOresOne = CreateCrateDropRules(20, 35, ItemID.CobaltOre, ItemID.PalladiumOre);
                 // 5-16 Bars @ 16.67%; Individually 8.33%
-                IItemDropRule[] hmBarsOne = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltBar, 1, 5, 16),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumBar, 1, 5, 16)
-                };
+                IItemDropRule[] hmBarsOne = CreateCrateDropRules(5, 16, ItemID.CobaltBar, ItemID.PalladiumBar);
                 var cobaltDropsOres = new SequentialRulesNotScalingWithLuckRule(7, new OneFromRulesRule(2, hmOresOne), new OneFromRulesRule(1, phmOres));
                 var cobaltDropsBars = new SequentialRulesNotScalingWithLuckRule(4, new OneFromRulesRule(3, 2, hmBarsOne), new OneFromRulesRule(1, phmBars));
 
@@ -453,60 +391,30 @@ namespace CalamityMod
             {
                 // Pre-Hardmode loot pools
                 // 12-21 Ores @ 8.33%; Individually 1.39%
-                IItemDropRule[] phmOres = new IItemDropRule[6]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CopperOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TinOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.IronOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.LeadOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenOre, 1, 12, 21),
-                };
+                IItemDropRule[] phmOres = CreateCrateDropRules(12, 21,
+                    ItemID.CopperOre, ItemID.TinOre, ItemID.IronOre,
+                    ItemID.LeadOre, ItemID.SilverOre, ItemID.TungstenOre);
                 // 4-7 Bars @ 6.94%; Individually 1.16%
-                IItemDropRule[] phmBars = new IItemDropRule[6]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CopperBar, 1, 4, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TinBar, 1, 4, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.IronBar, 1, 4, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.LeadBar, 1, 4, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverBar, 1, 4, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenBar, 1, 4, 7),
-                };
+                IItemDropRule[] phmBars = CreateCrateDropRules(4, 7,
+                    ItemID.CopperBar, ItemID.TinBar, ItemID.IronBar,
+                    ItemID.LeadBar, ItemID.SilverBar, ItemID.TungstenBar);
 
                 // Tier 2 loot pools
                 // 12-21 Ores @ 8.33%; Individually 2.08%
-                IItemDropRule[] hmOresTwo = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumOre, 1, 12, 21)
-                };
+                IItemDropRule[] hmOresTwo = CreateCrateDropRules(12, 21,
+                    ItemID.CobaltOre, ItemID.PalladiumOre, ItemID.MythrilOre, ItemID.OrichalcumOre);
                 // 3-7 Bars @ 13.89%; Individually 3.47%
-                IItemDropRule[] hmBarsTwo = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltBar, 1, 3, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumBar, 1, 3, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilBar, 1, 3, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumBar, 1, 3, 7)
-                };
+                IItemDropRule[] hmBarsTwo = CreateCrateDropRules(3, 7,
+                    ItemID.CobaltBar, ItemID.PalladiumBar, ItemID.MythrilBar, ItemID.OrichalcumBar);
                 var mythrilDropsOres = new SequentialRulesNotScalingWithLuckRule(6, new OneFromRulesRule(2, hmOresTwo), new OneFromRulesRule(1, phmOres));
                 var mythrilDropsBars = new SequentialRulesNotScalingWithLuckRule(4, new OneFromRulesRule(3, 2, hmBarsTwo), new OneFromRulesRule(1, phmBars));
                 var mythrilDrops = new SequentialRulesNotScalingWithLuckRule(1, mythrilDropsOres, mythrilDropsBars);
 
                 // Tier 1 loot pools
                 // 12-21 Ores @ 8.33%; Individually 4.17%
-                IItemDropRule[] hmOresOne = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltOre, 1, 12, 21),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumOre, 1, 12, 21)
-                };
+                IItemDropRule[] hmOresOne = CreateCrateDropRules(12, 21, ItemID.CobaltOre, ItemID.PalladiumOre);
                 // 3-7 Bars @ 13.89%; Individually 6.94%
-                IItemDropRule[] hmBarsOne = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltBar, 1, 3, 7),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumBar, 1, 3, 7)
-                };
+                IItemDropRule[] hmBarsOne = CreateCrateDropRules(3, 7, ItemID.CobaltBar, ItemID.PalladiumBar);
                 var cobaltDropsOres = new SequentialRulesNotScalingWithLuckRule(6, new OneFromRulesRule(2, hmOresOne), new OneFromRulesRule(1, phmOres));
                 var cobaltDropsBars = new SequentialRulesNotScalingWithLuckRule(4, new OneFromRulesRule(3, 2, hmBarsOne), new OneFromRulesRule(1, phmBars));
                 var cobaltDrops = new SequentialRulesNotScalingWithLuckRule(1, cobaltDropsOres, cobaltDropsBars);
@@ -519,56 +427,28 @@ namespace CalamityMod
             {
                 // Pre-Hardmode loot pools
                 // 25-34 Ores @ 10%; Individually 2.5%
-                IItemDropRule[] phmOres = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.GoldOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PlatinumOre, 1, 25, 34)
-                };
+                IItemDropRule[] phmOres = CreateCrateDropRules(25, 34,
+                    ItemID.SilverOre, ItemID.TungstenOre, ItemID.GoldOre, ItemID.PlatinumOre);
                 // 8-11 Bars @ 8.89%; Individually 2.22%
-                IItemDropRule[] phmBars = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.SilverBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TungstenBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.GoldBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PlatinumBar, 1, 8, 11)
-                };
+                IItemDropRule[] phmBars = CreateCrateDropRules(8, 11,
+                    ItemID.SilverBar, ItemID.TungstenBar, ItemID.GoldBar, ItemID.PlatinumBar);
 
                 // Tier 3 loot pools
                 // 25-34 Ores @ 10%; Individually 2.5%
-                IItemDropRule[] hmOresThree = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.AdamantiteOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TitaniumOre, 1, 25, 34)
-                };
+                IItemDropRule[] hmOresThree = CreateCrateDropRules(25, 34,
+                    ItemID.MythrilOre, ItemID.OrichalcumOre, ItemID.AdamantiteOre, ItemID.TitaniumOre);
                 // 8-11 Bars @ 17.78%; Individually 4.44%
-                IItemDropRule[] hmBarsThree = new IItemDropRule[4]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.AdamantiteBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.TitaniumBar, 1, 8, 11)
-                };
+                IItemDropRule[] hmBarsThree = CreateCrateDropRules(8, 11,
+                    ItemID.MythrilBar, ItemID.OrichalcumBar, ItemID.AdamantiteBar, ItemID.TitaniumBar);
                 var adamantiteDropsOres = new SequentialRulesNotScalingWithLuckRule(5, new OneFromRulesRule(2, hmOresThree), new OneFromRulesRule(1, phmOres));
                 var adamantiteDropsBars = new SequentialRulesNotScalingWithLuckRule(3, new OneFromRulesRule(3, 2, hmBarsThree), new OneFromRulesRule(1, phmBars));
                 var adamantiteDrops = new SequentialRulesNotScalingWithLuckRule(1, adamantiteDropsOres, adamantiteDropsBars);
 
                 // Tier 2 loot pools
                 // 25-34 Ores @ 10%; Individually 5%
-                IItemDropRule[] hmOresTwo = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumOre, 1, 25, 34)
-                };
+                IItemDropRule[] hmOresTwo = CreateCrateDropRules(25, 34, ItemID.MythrilOre, ItemID.OrichalcumOre);
                 // 8-11 Bars @ 17.78%; Individually 8.89%
-                IItemDropRule[] hmBarsTwo = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.MythrilBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.OrichalcumBar, 1, 8, 11)
-                };
+                IItemDropRule[] hmBarsTwo = CreateCrateDropRules(8, 11, ItemID.MythrilBar, ItemID.OrichalcumBar);
                 var mythrilDropsOres = new SequentialRulesNotScalingWithLuckRule(5, new OneFromRulesRule(2, hmOresTwo), new OneFromRulesRule(1, phmOres));
                 var mythrilDropsBars = new SequentialRulesNotScalingWithLuckRule(3, new OneFromRulesRule(3, 2, hmBarsTwo), new OneFromRulesRule(1, phmBars));
                 var mythrilDrops = new SequentialRulesNotScalingWithLuckRule(1, mythrilDropsOres, mythrilDropsBars);
@@ -576,17 +456,9 @@ namespace CalamityMod
                 // Tier 1 loot pools
                 // EXCEPTION: Titanium Crates do not drop Cobalt. This is added to make it not entirely useless to get early.
                 // 25-34 Ores @ 10%; Individually 5%
-                IItemDropRule[] hmOresOne = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltOre, 1, 25, 34),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumOre, 1, 25, 34)
-                };
+                IItemDropRule[] hmOresOne = CreateCrateDropRules(25, 34, ItemID.CobaltOre, ItemID.PalladiumOre);
                 // 8-11 Bars @ 17.78%; Individually 8.89%
-                IItemDropRule[] hmBarsOne = new IItemDropRule[2]
-                {
-                    ItemDropRule.NotScalingWithLuck(ItemID.CobaltBar, 1, 8, 11),
-                    ItemDropRule.NotScalingWithLuck(ItemID.PalladiumBar, 1, 8, 11)
-                };
+                IItemDropRule[] hmBarsOne = CreateCrateDropRules(8, 11, ItemID.CobaltBar, ItemID.PalladiumBar);
                 var cobaltDropsOres = new SequentialRulesNotScalingWithLuckRule(5, new OneFromRulesRule(2, hmOresOne), new OneFromRulesRule(1, phmOres));
                 var cobaltDropsBars = new SequentialRulesNotScalingWithLuckRule(3, new OneFromRulesRule(3, 2, hmBarsOne), new OneFromRulesRule(1, phmBars));
                 var cobaltDrops = new SequentialRulesNotScalingWithLuckRule(1, cobaltDropsOres, cobaltDropsBars);
