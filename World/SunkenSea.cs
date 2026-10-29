@@ -251,9 +251,7 @@ namespace CalamityMod.World
                         tile.LiquidAmount = 192;
                         if (clusterAmt % 5 == 2)
                         {
-                            tile.ResetToType((ushort)ModContent.TileType<EutrophicSand>());
-                            tile.Get<TileWallWireStateData>().HasTile = true;
-                            tile.LiquidAmount = 0;
+                            ResetToEutrophicSand(tile, num6, num7, smoothBeforeLiquid: false, setSandWall: false);
                         }
                         Tile.SmoothSlope(num6, num7, true);
                     }
@@ -263,10 +261,7 @@ namespace CalamityMod.World
                         tile.LiquidAmount = 192;
                         if (!flag || tile.HasTile)
                         {
-                            tile.ResetToType((ushort)ModContent.TileType<EutrophicSand>());
-                            tile.Get<TileWallWireStateData>().HasTile = true;
-                            Tile.SmoothSlope(num6, num7, true);
-                            tile.LiquidAmount = 0;
+                            ResetToEutrophicSand(tile, num6, num7, smoothBeforeLiquid: true, setSandWall: false);
                         }
                     }
                     else if (num10 > 0.7f || !flag)
@@ -274,10 +269,7 @@ namespace CalamityMod.World
                         tile.LiquidAmount = 192;
                         if (!flag || tile.HasTile)
                         {
-                            tile.ResetToType((ushort)ModContent.TileType<EutrophicSand>());
-                            tile.Get<TileWallWireStateData>().HasTile = true;
-                            Tile.SmoothSlope(num6, num7, true);
-                            tile.LiquidAmount = 0;
+                            ResetToEutrophicSand(tile, num6, num7, smoothBeforeLiquid: true, setSandWall: false);
                         }
                         tile.WallType = (ushort)ModContent.WallType<EutrophicSandWall>();
                     }
@@ -288,11 +280,7 @@ namespace CalamityMod.World
                         {
                             if (tile.HasTile)
                             {
-                                tile.ResetToType((ushort)ModContent.TileType<EutrophicSand>());
-                                tile.Get<TileWallWireStateData>().HasTile = true;
-                                Tile.SmoothSlope(num6, num7, true);
-                                tile.WallType = (ushort)ModContent.WallType<EutrophicSandWall>();
-                                tile.LiquidAmount = 0;
+                                ResetToEutrophicSand(tile, num6, num7, smoothBeforeLiquid: true, setSandWall: true);
                             }
                             else
                             {
@@ -336,8 +324,7 @@ namespace CalamityMod.World
                     }
 
                     //place extra caves throughout the biome for variance
-                    if (WorldGen.genRand.NextBool(1000) && tile != null && tile.HasTile &&
-                    (tile.TileType == ModContent.TileType<Navystone>() || tile.TileType == ModContent.TileType<EutrophicSand>()))
+                    if (WorldGen.genRand.NextBool(1000) && tile != null && tile.HasTile && IsNavystoneOrSand(tile))
                     {
                         TileRunner runner = new TileRunner(new Vector2(x, y), new Vector2(0, 5), new Point16(-35, 35),
                         new Point16(-35, 35), 15f, WorldGen.genRand.Next(25, 50), 0, false, true);
@@ -345,7 +332,7 @@ namespace CalamityMod.World
                     }
 
                     //kill any random floating tiles
-                    if (tile.TileType == ModContent.TileType<Navystone>() || tile.TileType == ModContent.TileType<EutrophicSand>())
+                    if (IsNavystoneOrSand(tile))
                     {
                         //kill any individual floating tiles
                         if (!tileUp.HasTile && !tileDown.HasTile && !tileLeft.HasTile && !tileRight.HasTile)
@@ -403,55 +390,8 @@ namespace CalamityMod.World
                         genCentalHole = false;
                         rectangle = new Rectangle(start.X + totalClusterZoneWidth / 2 - radius, start.Y + (int)(totalClusterZoneHeight * 0.33f) - radius, diameter, diameter);
 
-                        WorldUtils.Gen(point, new Shapes.Circle(radius), Actions.Chain(new GenAction[]
-                        {
-                            new Modifiers.Blotches(2, 0.6).Output(holeShape), //Adds uneven shape to the outer tiles
-                            new Actions.ClearTile(true), //Clear all tiles
-                            new Actions.SetLiquid(0, 192) //Leave some air pockets
-                        }));
-
-                        WorldUtils.Gen(point, new ModShapes.OuterOutline(holeShape, true, true), Actions.Chain(new GenAction[] //Smooth the outer parts
-                        {
-                            new CustomActions.DistanceFromOrigin(true, radius * 16f - 48),
-                            new Modifiers.Conditions(new CustomConditions.RandomChance(4)),
-                            new Actions.Smooth(),
-                            new Actions.SetFrames(true)
-                        }));
-
-                        WorldUtils.Gen(point, new Shapes.Circle((int)((float)radius * outerRadiusPercentage)), Actions.Chain(new GenAction[] //Smallest is 6
-                        {
-                            new Modifiers.Blotches(2, 0.3).Output(holeShape),
-                            new Actions.SetTile((ushort)ModContent.TileType<Navystone>(), true) //Place outer shell
-                        }));
-
-                        WorldUtils.Gen(point, new ModShapes.OuterOutline(holeShape, true, true), Actions.Chain(new GenAction[] //Smooth outer shell
-                        {
-                            new CustomActions.DistanceFromOrigin(true, radius * 16f - 48),
-                            new Modifiers.Conditions(new CustomConditions.RandomChance(3)),
-                            new Actions.Smooth(),
-                            new Actions.SetFrames(true)
-                        }));
-
-                        WorldUtils.Gen(point, new Shapes.Circle((int)((float)radius * (outerRadiusPercentage * 0.6f))), Actions.Chain(new GenAction[] //Smallest is 4
-                        {
-                            new Modifiers.Blotches(2, 0.3),
-                            new Actions.SetTile((ushort)ModContent.TileType<SeaPrism>(), true) //Place prism
-                        }));
-
-                        WorldUtils.Gen(point, new Shapes.Circle((int)((float)radius * (outerRadiusPercentage * 0.3f))), Actions.Chain(new GenAction[] //Smallest is 2
-                        {
-                            new Modifiers.Blotches(2, 0.3).Output(holeShape),
-                            new Actions.ClearTile(true), //Clear all tiles
-                            new Actions.SetLiquid(0, 255)
-                        }));
-
-                        WorldUtils.Gen(point, new ModShapes.OuterOutline(holeShape, true, true), Actions.Chain(new GenAction[] //Smooth inner shell
-                        {
-                            new CustomActions.DistanceFromOrigin(true, radius * 16f - 48),
-                            new Modifiers.Conditions(new CustomConditions.RandomChance(2)),
-                            new Actions.Smooth(),
-                            new Actions.SetFrames(true)
-                        }));
+                        GenerateHoleOpening(point, radius, holeShape, 0.6, 4);
+                        GenerateHoleShell(point, radius, outerRadiusPercentage, holeShape, radius, 3);
                     }
 
                     // Set the point for non-central holes
@@ -463,56 +403,10 @@ namespace CalamityMod.World
                     {
                         smallHoles++;
                         int radiusSmall = (int)(((float)WorldGen.genRand.Next(8, 11)) * overallBiomeScale);
-                        WorldUtils.Gen(point, new Shapes.Circle(radiusSmall), Actions.Chain(new GenAction[]
-                        {
-                            new Modifiers.Blotches(2, 0.45).Output(holeShape),
-                            new Actions.ClearTile(true),
-                            new Actions.SetLiquid(0, 192)
-                        }));
-
-                        WorldUtils.Gen(point, new ModShapes.OuterOutline(holeShape, true, true), Actions.Chain(new GenAction[]
-                        {
-                            new CustomActions.DistanceFromOrigin(true, radiusSmall * 16f - 48),
-                            new Modifiers.Conditions(new CustomConditions.RandomChance(3)),
-                            new Actions.Smooth(),
-                            new Actions.SetFrames(true)
-                        }));
+                        GenerateHoleOpening(point, radiusSmall, holeShape, 0.45, 3);
 
                         outerRadiusPercentage = (float)((double)WorldGen.genRand.Next(65, 81) * 0.01);
-                        WorldUtils.Gen(point, new Shapes.Circle((int)((float)radiusSmall * outerRadiusPercentage)), Actions.Chain(new GenAction[] //Smallest is 4
-                        {
-                            new Modifiers.Blotches(2, 0.3).Output(holeShape),
-                            new Actions.SetTile((ushort)ModContent.TileType<Navystone>(), true) //Place outer shell
-                        }));
-
-                        WorldUtils.Gen(point, new ModShapes.OuterOutline(holeShape, true, true), Actions.Chain(new GenAction[] //Smooth outer shell
-                        {
-                            new CustomActions.DistanceFromOrigin(true, radiusSmall * 16f - 48),
-                            new Modifiers.Conditions(new CustomConditions.RandomChance(3)),
-                            new Actions.Smooth(),
-                            new Actions.SetFrames(true)
-                        }));
-
-                        WorldUtils.Gen(point, new Shapes.Circle((int)((float)radiusSmall * (outerRadiusPercentage * 0.6f))), Actions.Chain(new GenAction[] //Smallest is 2
-                        {
-                            new Modifiers.Blotches(2, 0.3),
-                            new Actions.SetTile((ushort)ModContent.TileType<SeaPrism>(), true) //Place prism
-                        }));
-
-                        WorldUtils.Gen(point, new Shapes.Circle((int)((float)radiusSmall * (outerRadiusPercentage * 0.3f))), Actions.Chain(new GenAction[] //Smallest is 1
-                        {
-                            new Modifiers.Blotches(2, 0.3).Output(holeShape),
-                            new Actions.ClearTile(true), //Clear center
-                            new Actions.SetLiquid(0, 255)
-                        }));
-
-                        WorldUtils.Gen(point, new ModShapes.OuterOutline(holeShape, true, true), Actions.Chain(new GenAction[] //Smooth inner shell
-                        {
-                            new CustomActions.DistanceFromOrigin(true, radius * 16f - 48),
-                            new Modifiers.Conditions(new CustomConditions.RandomChance(2)),
-                            new Actions.Smooth(),
-                            new Actions.SetFrames(true)
-                        }));
+                        GenerateHoleShell(point, radiusSmall, outerRadiusPercentage, holeShape, radius, 3);
                     }
 
                     int num3 = i + start.X;
@@ -528,6 +422,129 @@ namespace CalamityMod.World
             }
         }
 
+        private static bool IsNavystoneOrSand(Tile tile) => tile.TileType == ModContent.TileType<Navystone>() || tile.TileType == ModContent.TileType<EutrophicSand>();
+
+        private static void ResetToEutrophicSand(Tile tile, int x, int y, bool smoothBeforeLiquid, bool setSandWall)
+        {
+            tile.ResetToType((ushort)ModContent.TileType<EutrophicSand>());
+            tile.Get<TileWallWireStateData>().HasTile = true;
+            if (smoothBeforeLiquid)
+                Tile.SmoothSlope(x, y, true);
+            if (setSandWall)
+                tile.WallType = (ushort)ModContent.WallType<EutrophicSandWall>();
+            tile.LiquidAmount = 0;
+        }
+
+        private static void PlaceDecoration<T>(int x, int y, int chance, bool placeAsObject = false, int styleCount = 0) where T : ModTile
+        {
+            if (!WorldGen.genRand.NextBool(chance))
+            {
+                return;
+            }
+
+            int tileType = ModContent.TileType<T>();
+            int style = styleCount > 0 ? WorldGen.genRand.Next(styleCount) : 0;
+            if (placeAsObject)
+                WorldGen.PlaceObject(x, y, tileType, style: style);
+            else
+                WorldGen.PlaceTile(x, y, (ushort)tileType, true, false, -1, style);
+        }
+
+        private static bool HasThreeOpenTiles(int x, int y, int offsetX, int offsetY)
+        {
+            for (int distance = 1; distance <= 3; distance++)
+            {
+                if (Main.tile[x + offsetX * distance, y + offsetY * distance].HasTile)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static void PlaceCrystalOnExposedSide(Tile source, bool exposedFirst, bool exposedSecond, int x, int y, bool horizontal, int firstFrame, int secondFrame)
+        {
+            if (!(exposedFirst ^ exposedSecond) || source.Slope != 0 || source.IsHalfBlock)
+            {
+                return;
+            }
+
+            int firstX = x + (horizontal ? -1 : 0);
+            int firstY = y + (horizontal ? 0 : -1);
+            int secondX = x + (horizontal ? 1 : 0);
+            int secondY = y + (horizontal ? 0 : 1);
+            Tile crystal = Main.tile[x + (horizontal ? (exposedFirst ? -1 : 1) : 0), y + (horizontal ? 0 : (exposedFirst ? -1 : 1))];
+            ushort crystalType = (ushort)ModContent.TileType<SeaPrismCrystals>();
+            crystal.TileType = crystalType;
+
+            Tile firstNeighbor = Main.tile[firstX, firstY];
+            if (firstNeighbor.TileType == crystalType)
+            {
+                firstNeighbor.TileFrameY = (short)firstFrame;
+            }
+            else
+            {
+                Tile secondNeighbor = Main.tile[secondX, secondY];
+                if (secondNeighbor.TileType == crystalType)
+                {
+                    secondNeighbor.TileFrameY = (short)secondFrame;
+                }
+            }
+
+            crystal.TileFrameX = (short)(WorldGen.genRand.Next(18) * 18);
+            crystal.Get<TileWallWireStateData>().HasTile = true;
+        }
+
+        private static void GenerateHoleOpening(Point point, int radius, ShapeData holeShape, double blotchChance, int smoothingChance)
+        {
+            WorldUtils.Gen(point, new Shapes.Circle(radius), Actions.Chain(new GenAction[]
+            {
+                new Modifiers.Blotches(2, blotchChance).Output(holeShape),
+                new Actions.ClearTile(true),
+                new Actions.SetLiquid(0, 192)
+            }));
+
+            SmoothHoleOutline(point, holeShape, radius, smoothingChance);
+        }
+
+        private static void GenerateHoleShell(Point point, int radius, float outerRadiusPercentage, ShapeData holeShape, int innerOutlineRadius, int smoothingChance)
+        {
+            WorldUtils.Gen(point, new Shapes.Circle((int)((float)radius * outerRadiusPercentage)), Actions.Chain(new GenAction[]
+            {
+                new Modifiers.Blotches(2, 0.3).Output(holeShape),
+                new Actions.SetTile((ushort)ModContent.TileType<Navystone>(), true)
+            }));
+
+            SmoothHoleOutline(point, holeShape, radius, smoothingChance);
+
+            WorldUtils.Gen(point, new Shapes.Circle((int)((float)radius * (outerRadiusPercentage * 0.6f))), Actions.Chain(new GenAction[]
+            {
+                new Modifiers.Blotches(2, 0.3),
+                new Actions.SetTile((ushort)ModContent.TileType<SeaPrism>(), true)
+            }));
+
+            WorldUtils.Gen(point, new Shapes.Circle((int)((float)radius * (outerRadiusPercentage * 0.3f))), Actions.Chain(new GenAction[]
+            {
+                new Modifiers.Blotches(2, 0.3).Output(holeShape),
+                new Actions.ClearTile(true),
+                new Actions.SetLiquid(0, 255)
+            }));
+
+            SmoothHoleOutline(point, holeShape, innerOutlineRadius, 2);
+        }
+
+        private static void SmoothHoleOutline(Point point, ShapeData holeShape, int radius, int chance)
+        {
+            WorldUtils.Gen(point, new ModShapes.OuterOutline(holeShape, true, true), Actions.Chain(new GenAction[]
+            {
+                new CustomActions.DistanceFromOrigin(true, radius * 16f - 48),
+                new Modifiers.Conditions(new CustomConditions.RandomChance(chance)),
+                new Actions.Smooth(),
+                new Actions.SetFrames(true)
+            }));
+        }
+
         private static void AddTileVariance(ClusterGroup clusters, Point start, Vector2 terrainApplicationScaleVector, float overallBiomeScale)
         {
             int totalClusterZoneWidth = (int)(terrainApplicationScaleVector.X * clusters.Width);
@@ -539,162 +556,44 @@ namespace CalamityMod.World
                     int num5 = k + start.X;
                     int num6 = l + start.Y;
                     Tile tile = Main.tile[num5, num6];
-                    if (tile.HasTile && (tile.TileType == ModContent.TileType<SeaPrism>() ||
-                    tile.TileType == ModContent.TileType<Navystone>() || tile.TileType == ModContent.TileType<EutrophicSand>()))
+                    if (tile.HasTile && (tile.TileType == ModContent.TileType<SeaPrism>() || IsNavystoneOrSand(tile)))
                     {
-                        bool flag = true;
-                        for (int m = -1; m >= -3; m--)
+                        bool flag = HasThreeOpenTiles(num5, num6, 0, -1);
+                        bool flag2 = HasThreeOpenTiles(num5, num6, 0, 1);
+                        bool flag3 = HasThreeOpenTiles(num5, num6, -1, 0);
+                        bool flag4 = HasThreeOpenTiles(num5, num6, 1, 0);
+                        if (tile.TileType == ModContent.TileType<SeaPrism>() || (IsNavystoneOrSand(tile) && WorldGen.genRand.NextBool(8)))
                         {
-                            if (Main.tile[num5, num6 + m].HasTile)
-                            {
-                                flag = false;
-                                break;
-                            }
-                        }
-                        bool flag2 = true;
-                        for (int n = 1; n <= 3; n++)
-                        {
-                            if (Main.tile[num5, num6 + n].HasTile)
-                            {
-                                flag2 = false;
-                                break;
-                            }
-                        }
-                        bool flag3 = true;
-                        for (int o = -1; o >= -3; o--)
-                        {
-                            if (Main.tile[num5 + o, num6].HasTile)
-                            {
-                                flag3 = false;
-                                break;
-                            }
-                        }
-                        bool flag4 = true;
-                        for (int p = 1; p <= 3; p++)
-                        {
-                            if (Main.tile[num5 + p, num6].HasTile)
-                            {
-                                flag4 = false;
-                                break;
-                            }
-                        }
-                        if (tile.TileType == ModContent.TileType<SeaPrism>() || ((tile.TileType == ModContent.TileType<Navystone>() ||
-                        tile.TileType == ModContent.TileType<EutrophicSand>()) && WorldGen.genRand.NextBool(8)))
-                        {
-                            if (flag3 ^ flag4)
-                            {
-                                if (tile.Slope == 0 && !tile.IsHalfBlock)
-                                {
-                                    Tile tile3 = Main.tile[num5 + (flag3 ? -1 : 1), num6];
-                                    tile3.TileType = (ushort)ModContent.TileType<SeaPrismCrystals>();
-                                    if (Main.tile[num5 - 1, num6].TileType == ModContent.TileType<SeaPrismCrystals>())
-                                    {
-                                        Main.tile[num5 - 1, num6].TileFrameY = (short)(2 * 18);
-                                    }
-                                    else if (Main.tile[num5 + 1, num6].TileType == ModContent.TileType<SeaPrismCrystals>())
-                                    {
-                                        Main.tile[num5 + 1, num6].TileFrameY = (short)(3 * 18);
-                                    }
-                                    tile3.TileFrameX = (short)(WorldGen.genRand.Next(18) * 18);
-                                    tile3.Get<TileWallWireStateData>().HasTile = true;
-                                }
-                            }
-                            if (flag ^ flag2)
-                            {
-                                if (tile.Slope == 0 && !tile.IsHalfBlock)
-                                {
-                                    Tile tile3 = Main.tile[num5, num6 + (flag ? -1 : 1)];
-                                    tile3.TileType = (ushort)ModContent.TileType<SeaPrismCrystals>();
-                                    if (Main.tile[num5, num6 - 1].TileType == ModContent.TileType<SeaPrismCrystals>())
-                                    {
-                                        Main.tile[num5, num6 - 1].TileFrameY = (short)(0 * 18);
-                                    }
-                                    else if (Main.tile[num5, num6 + 1].TileType == ModContent.TileType<SeaPrismCrystals>())
-                                    {
-                                        Main.tile[num5, num6 + 1].TileFrameY = (short)(1 * 18);
-                                    }
-                                    tile3.TileFrameX = (short)(WorldGen.genRand.Next(18) * 18);
-                                    tile3.Get<TileWallWireStateData>().HasTile = true;
-                                }
-                            }
+                            PlaceCrystalOnExposedSide(tile, flag3, flag4, num5, num6, true, 2 * 18, 3 * 18);
+                            PlaceCrystalOnExposedSide(tile, flag, flag2, num5, num6, false, 0, 1 * 18);
                         }
                     }
                     if (tile.TileType == ModContent.TileType<Navystone>() || tile.TileType == ModContent.TileType<EutrophicSand>())
                     {
-                        if (WorldGen.genRand.NextBool(10))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<BrainCoral>(), true, false, -1, 0);
-                        }
-                        if (WorldGen.genRand.NextBool(20))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<SmallBrainCoral>(), true, false, -1, 0);
-                        }
-                        if (WorldGen.genRand.NextBool(8))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<FanCoral>(), true, false, -1, 0);
-                        }
-                        if (WorldGen.genRand.NextBool(30))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<TubeCoral>(), true, false, -1, 0);
-                        }
-                        if (WorldGen.genRand.NextBool(30))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<SmallTubeCoral>(), true, false, -1, 0);
-                        }
-                        if (WorldGen.genRand.NextBool(20))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<SeaAnemone>(), true, false, -1, 0);
-                        }
+                        PlaceDecoration<BrainCoral>(num5, num6 - 1, 10);
+                        PlaceDecoration<SmallBrainCoral>(num5, num6 - 1, 20);
+                        PlaceDecoration<FanCoral>(num5, num6 - 1, 8);
+                        PlaceDecoration<TubeCoral>(num5, num6 - 1, 30);
+                        PlaceDecoration<SmallTubeCoral>(num5, num6 - 1, 30);
+                        PlaceDecoration<SeaAnemone>(num5, num6 - 1, 20);
 
                         //colorful corals
-                        if (WorldGen.genRand.NextBool(20))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<MediumCoral>(), true, false, -1, 0);
-                        }
-                        if (WorldGen.genRand.NextBool(20))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<MediumCoral2>(), true, false, -1, 0);
-                        }
-
-                        if (WorldGen.genRand.NextBool(20))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<SmallWideCoral>(), true, false, -1, 0);
-                        }
-
-                        if (WorldGen.genRand.NextBool(20))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, (ushort)ModContent.TileType<CoralPileLarge>(), true, false, -1, 0);
-                        }
+                        PlaceDecoration<MediumCoral>(num5, num6 - 1, 20);
+                        PlaceDecoration<MediumCoral2>(num5, num6 - 1, 20);
+                        PlaceDecoration<SmallWideCoral>(num5, num6 - 1, 20);
+                        PlaceDecoration<CoralPileLarge>(num5, num6 - 1, 20);
 
                         //stalactites
-                        if (WorldGen.genRand.NextBool(15))
-                        {
-                            WorldGen.PlaceObject(num5, num6 + 2, ModContent.TileType<SunkenStalactites>(), style: WorldGen.genRand.Next(3));
-                        }
-                        if (WorldGen.genRand.NextBool(15))
-                        {
-                            WorldGen.PlaceTile(num5, num6 + 1, ModContent.TileType<SmallSunkenStalactites>(), true, false, -1, style: WorldGen.genRand.Next(3));
-                        }
+                        PlaceDecoration<SunkenStalactites>(num5, num6 + 2, 15, placeAsObject: true, styleCount: 3);
+                        PlaceDecoration<SmallSunkenStalactites>(num5, num6 + 1, 15, placeAsObject: false, styleCount: 3);
 
                         //stalagmites
-                        if (WorldGen.genRand.NextBool(10))
-                        {
-                            WorldGen.PlaceObject(num5, num6 - 2, ModContent.TileType<SunkenStalagmites>(), style: WorldGen.genRand.Next(3));
-                        }
-                        if (WorldGen.genRand.NextBool(10))
-                        {
-                            WorldGen.PlaceTile(num5, num6 - 1, ModContent.TileType<SmallSunkenStalagmites>(), true, false, -1, style: WorldGen.genRand.Next(3));
-                        }
+                        PlaceDecoration<SunkenStalagmites>(num5, num6 - 2, 10, placeAsObject: true, styleCount: 3);
+                        PlaceDecoration<SmallSunkenStalagmites>(num5, num6 - 1, 10, placeAsObject: false, styleCount: 3);
                     }
-                    if (!tile.HasTile)
+                    if (!tile.HasTile && (tile.TileType == ModContent.TileType<Navystone>() || tile.WallType == ModContent.WallType<EutrophicSandWall>()))
                     {
-                        if (tile.TileType == ModContent.TileType<Navystone>() || tile.WallType == ModContent.WallType<EutrophicSandWall>())
-                        {
-                            if (WorldGen.genRand.NextBool(10))
-                            {
-                                WorldGen.PlaceTile(num5, num6 + 1, (ushort)ModContent.TileType<TableCoral>(), true, false, -1, 0);
-                            }
-                        }
+                        PlaceDecoration<TableCoral>(num5, num6 + 1, 10);
                     }
                 }
             }
