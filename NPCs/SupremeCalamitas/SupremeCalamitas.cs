@@ -938,23 +938,9 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             #region FirstAttack
             if (!FinishedBH1)
             {
-                despawnProj = true;
-                bulletHellCounter2++;
-                NPC.damage = 0;
-                NPC.chaseable = false;
-                NPC.dontTakeDamage = true;
+                PrepareBulletHell();
 
-                #region BulletHellEndTelegraphBH1
-                if (bulletHellCounter2 == (BulletHellDuration - 360))
-                    BulletHellRumbleSlot = SoundEngine.PlaySound(BulletHellSound, player.Center);
-                if (bulletHellCounter2 > (BulletHellDuration - 360))
-                {
-                    if (SoundEngine.TryGetActiveSound(BulletHellRumbleSlot, out var BHSound) && BHSound.IsPlaying)
-                    {
-                        BHSound.Position = player.MountedCenter;
-                    }
-                }
-                #endregion
+                UpdateBulletHellEndTelegraph(player, BulletHellDuration, false);
 
                 if (!canDespawn)
                     NPC.velocity *= 0.95f;
@@ -1019,11 +1005,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             #region SecondAttack
             if (!FinishedBH2 && startSecondAttack) // Bullet hell lasts 1800
             {
-                despawnProj = true;
-                bulletHellCounter2++;
-                NPC.damage = 0;
-                NPC.chaseable = false;
-                NPC.dontTakeDamage = true;
+                PrepareBulletHell();
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
@@ -1035,36 +1017,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                     GeneralParticleHandler.SpawnParticle(pulse);
                     teleport = true;
                 }
-                #region BulletHellEndTelegraphBH2
-                if (bulletHellCounter2 == (SecondBulletHellEndValue - 360))
-                    BulletHellRumbleSlot = SoundEngine.PlaySound(BulletHellSound, player.Center);
-                if (bulletHellCounter2 > (SecondBulletHellEndValue - 360))
-                {
-                    if (SoundEngine.TryGetActiveSound(BulletHellRumbleSlot, out var BHSound) && BHSound.IsPlaying)
-                    {
-                        BHSound.Position = player.MountedCenter;
-                    }
-                }
-                if (bulletHellCounter2 == SecondBulletHellEndValue)
-                {
-                    for (int i = 0; i < 100; i++)
-                    {
-                        Vector2 dustVel = new Vector2(15, 15).RotatedByRandom(100);
-                        Dust failShotDust = Dust.NewDustPerfect(NPC.Center + dustVel * 3, Main.rand.NextBool(3) ? 60 : 114);
-                        failShotDust.noGravity = true;
-                        failShotDust.velocity = dustVel * Main.rand.NextFloat(0.3f, 1.3f);
-                        failShotDust.scale = Main.rand.NextFloat(2f, 3.2f);
-                    }
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    Particle pulse2 = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Lerp(Color.Red, Color.Magenta, 0.3f), new Vector2(1f, 1f), 0, 0.05f, 4f, 18);
-                    GeneralParticleHandler.SpawnParticle(pulse2);
-
-                    SoundEngine.PlaySound(BulletHellEndSound, NPC.Center);
-                    //Reset the teleport bool for the next bullet hell
-                    teleport = false;
-                }
-                #endregion
+                UpdateBulletHellEndTelegraph(player, SecondBulletHellEndValue);
 
                 if (!canDespawn)
                     NPC.velocity *= 0.95f;
@@ -1162,11 +1115,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             #region ThirdAttack
             if (!FinishedBH3 && startThirdAttack)
             {
-                despawnProj = true;
-                bulletHellCounter2++;
-                NPC.damage = 0;
-                NPC.chaseable = false;
-                NPC.dontTakeDamage = true;
+                PrepareBulletHell();
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
@@ -1178,36 +1127,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                     GeneralParticleHandler.SpawnParticle(pulse);
                     teleport = true;
                 }
-                #region BulletHellEndTelegraphBH3
-                if (bulletHellCounter2 == (ThirdBulletHellEndValue - 360))
-                    BulletHellRumbleSlot = SoundEngine.PlaySound(BulletHellSound, player.Center);
-                if (bulletHellCounter2 > (ThirdBulletHellEndValue - 360))
-                {
-                    if (SoundEngine.TryGetActiveSound(BulletHellRumbleSlot, out var BHSound) && BHSound.IsPlaying)
-                    {
-                        BHSound.Position = player.MountedCenter;
-                    }
-                }
-                if (bulletHellCounter2 == ThirdBulletHellEndValue)
-                {
-                    for (int i = 0; i < 100; i++)
-                    {
-                        Vector2 dustVel = new Vector2(15, 15).RotatedByRandom(100);
-                        Dust failShotDust = Dust.NewDustPerfect(NPC.Center + dustVel * 3, Main.rand.NextBool(3) ? 60 : 114);
-                        failShotDust.noGravity = true;
-                        failShotDust.velocity = dustVel * Main.rand.NextFloat(0.3f, 1.3f);
-                        failShotDust.scale = Main.rand.NextFloat(2f, 3.2f);
-                    }
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    Particle pulse2 = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Lerp(Color.Red, Color.Magenta, 0.3f), new Vector2(1f, 1f), 0, 0.05f, 4f, 18);
-                    GeneralParticleHandler.SpawnParticle(pulse2);
-
-                    SoundEngine.PlaySound(BulletHellEndSound, NPC.Center);
-                    //Reset the teleport bool for the next bullet hell
-                    teleport = false;
-                }
-                #endregion
+                UpdateBulletHellEndTelegraph(player, ThirdBulletHellEndValue);
 
                 if (permafrost)
                 {
@@ -1350,11 +1270,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
             if (!FinishedBH4 && startFourthAttack)
             {
-                despawnProj = true;
-                bulletHellCounter2++;
-                NPC.damage = 0;
-                NPC.chaseable = false;
-                NPC.dontTakeDamage = true;
+                PrepareBulletHell();
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
@@ -1367,36 +1283,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                     teleport = true;
                 }
 
-                #region BulletHellEndTelegraphBH4
-                if (bulletHellCounter2 == (FourthBulletHellEndValue - 360))
-                    BulletHellRumbleSlot = SoundEngine.PlaySound(BulletHellSound, player.Center);
-                if (bulletHellCounter2 > (FourthBulletHellEndValue - 360))
-                {
-                    if (SoundEngine.TryGetActiveSound(BulletHellRumbleSlot, out var BHSound) && BHSound.IsPlaying)
-                    {
-                        BHSound.Position = player.MountedCenter;
-                    }
-                }
-                if (bulletHellCounter2 == FourthBulletHellEndValue)
-                {
-                    for (int i = 0; i < 100; i++)
-                    {
-                        Vector2 dustVel = new Vector2(15, 15).RotatedByRandom(100);
-                        Dust failShotDust = Dust.NewDustPerfect(NPC.Center + dustVel * 3, Main.rand.NextBool(3) ? 60 : 114);
-                        failShotDust.noGravity = true;
-                        failShotDust.velocity = dustVel * Main.rand.NextFloat(0.3f, 1.3f);
-                        failShotDust.scale = Main.rand.NextFloat(2f, 3.2f);
-                    }
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    Particle pulse2 = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Lerp(Color.Red, Color.Magenta, 0.3f), new Vector2(1f, 1f), 0, 0.05f, 4f, 18);
-                    GeneralParticleHandler.SpawnParticle(pulse2);
-
-                    SoundEngine.PlaySound(BulletHellEndSound, NPC.Center);
-                    //Reset the teleport bool for the next bullet hell
-                    teleport = false;
-                }
-                #endregion
+                UpdateBulletHellEndTelegraph(player, FourthBulletHellEndValue);
 
                 if (!canDespawn)
                     NPC.velocity *= 0.95f;
@@ -1518,11 +1405,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             #region FifthAttack
             if (!FinishedBH5 && startFifthAttack)
             {
-                despawnProj = true;
-                bulletHellCounter2++;
-                NPC.damage = 0;
-                NPC.chaseable = false;
-                NPC.dontTakeDamage = true;
+                PrepareBulletHell();
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
@@ -1534,37 +1417,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                     GeneralParticleHandler.SpawnParticle(pulse);
                     teleport = true;
                 }
-                #region BulletHellEndTelegraphBH5
-                if (bulletHellCounter2 == (FifthBulletHellEndValue - 360))
-                    BulletHellRumbleSlot = SoundEngine.PlaySound(BulletHellSound, player.Center);
-                if (bulletHellCounter2 > (FifthBulletHellEndValue - 360))
-                {
-                    if (SoundEngine.TryGetActiveSound(BulletHellRumbleSlot, out var BHSound) && BHSound.IsPlaying)
-                    {
-                        BHSound.Position = player.MountedCenter;
-                    }
-                }
-                if (bulletHellCounter2 == FifthBulletHellEndValue)
-                {
-                    for (int i = 0; i < 100; i++)
-                    {
-                        Vector2 dustVel = new Vector2(15, 15).RotatedByRandom(100);
-                        Dust failShotDust = Dust.NewDustPerfect(NPC.Center + dustVel * 3, Main.rand.NextBool(3) ? 60 : 114);
-                        failShotDust.noGravity = true;
-                        failShotDust.velocity = dustVel * Main.rand.NextFloat(0.3f, 1.3f);
-                        failShotDust.scale = Main.rand.NextFloat(2f, 3.2f);
-                    }
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    Particle pulse2 = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Lerp(Color.Red, Color.Magenta, 0.3f), new Vector2(1f, 1f), 0, 0.05f, 4f, 18);
-                    GeneralParticleHandler.SpawnParticle(pulse2);
-
-                    SoundEngine.PlaySound(BulletHellEndSound, NPC.Center);
-                    //Reset the teleport bool for the next bullet hell
-                    //Technically not needed but I wanted to be safe
-                    teleport = false;
-                }
-                #endregion
+                UpdateBulletHellEndTelegraph(player, FifthBulletHellEndValue);
 
                 if (permafrost)
                 {
@@ -2942,6 +2795,47 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 dashVisualCounter = 0;
             }
             #endregion
+        }
+
+        private void PrepareBulletHell()
+        {
+            despawnProj = true;
+            bulletHellCounter2++;
+            NPC.damage = 0;
+            NPC.chaseable = false;
+            NPC.dontTakeDamage = true;
+        }
+
+        private void UpdateBulletHellEndTelegraph(Player player, int endValue, bool playEndEffects = true)
+        {
+            if (bulletHellCounter2 == endValue - 360)
+                BulletHellRumbleSlot = SoundEngine.PlaySound(BulletHellSound, player.Center);
+
+            if (bulletHellCounter2 > endValue - 360)
+            {
+                if (SoundEngine.TryGetActiveSound(BulletHellRumbleSlot, out var rumbleSound) && rumbleSound.IsPlaying)
+                    rumbleSound.Position = player.MountedCenter;
+            }
+
+            if (!playEndEffects || bulletHellCounter2 != endValue)
+                return;
+
+            for (int i = 0; i < 100; i++)
+            {
+                Vector2 dustVel = new Vector2(15, 15).RotatedByRandom(100);
+                Dust failShotDust = Dust.NewDustPerfect(NPC.Center + dustVel * 3, Main.rand.NextBool(3) ? 60 : 114);
+                failShotDust.noGravity = true;
+                failShotDust.velocity = dustVel * Main.rand.NextFloat(0.3f, 1.3f);
+                failShotDust.scale = Main.rand.NextFloat(2f, 3.2f);
+            }
+
+            Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
+            GeneralParticleHandler.SpawnParticle(pulse);
+            Particle pulse2 = new DirectionalPulseRing(NPC.Center, Vector2.Zero, permafrost ? Color.Cyan : Color.Lerp(Color.Red, Color.Magenta, 0.3f), new Vector2(1f, 1f), 0, 0.05f, 4f, 18);
+            GeneralParticleHandler.SpawnParticle(pulse2);
+
+            SoundEngine.PlaySound(BulletHellEndSound, NPC.Center);
+            teleport = false;
         }
 
         private int GetNextAttackPhase()
