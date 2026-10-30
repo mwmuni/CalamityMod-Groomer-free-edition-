@@ -514,13 +514,6 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             float speedUpTime = 30;
             float slowDownMult = 0.96f;
             float speedUpMult = 1.025f;
-            if(AIState == BrainAIState.IllusionDash)
-            {
-                startUpTime = 20;
-                speedUpTime = 30;
-                slowDownMult = 0.96f;
-                speedUpMult = 1.025f;
-            }
 
             if (p.ai[2] <= startUpTime)
                 p.velocity *= slowDownMult;
@@ -571,16 +564,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             {
                 float shakeIntensity = CalamityUtils.CircOutEasing(spawnCounter / 180f, 1) * 3f * distanceScaleFactor;
                 Main.LocalPlayer.SetScreenshake(shakeIntensity);
-                for (int i = 0; i < shakeIntensity; i++)
-                {
-                    Point start = Target.Center.ToTileCoordinates() + new Point(Main.rand.Next(-64, 65), 48);
-                    for (int j = 0; j < 96; j++)
-                    {
-                        Point current = start - new Point(0, j);
-                        if (!Main.tile[current].IsTileSolid() && Main.tile[current - new Point(0, 1)].TileType == TileID.Crimstone)
-                            Dust.NewDust(current.ToWorldCoordinates(0, -16), 16, 16, DustID.Crimstone, 0, 3);
-                    }
-                }
+                SpawnCrimsonDustColumns(shakeIntensity);
             }
             if (spawnCounter == 180)
                 NPC.velocity = Vector2.UnitY * (AIState == BrainAIState.UndergroundSpawnAnimation ? 32 : -50);
@@ -608,16 +592,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
                     BoCDrawOffset = Main.rand.NextVector2Circular(4, 4);
 
-                    for (int i = 0; i < 3; i++)
-                    {
-                        Point start = Target.Center.ToTileCoordinates() + new Point(Main.rand.Next(-64, 65), 48);
-                        for (int j = 0; j < 96; j++)
-                        {
-                            Point current = start - new Point(0, j);
-                            if (!Main.tile[current].IsTileSolid() && Main.tile[current - new Point(0, 1)].TileType == TileID.Crimstone)
-                                Dust.NewDust(current.ToWorldCoordinates(0, -16), 16, 16, DustID.Crimstone, 0, 3);
-                        }
-                    }
+                    SpawnCrimsonDustColumns(3);
 
                     Main.LocalPlayer.SetScreenshake(6 * BrainOfCthulhuSystem.ScreenBlurStrength * distanceScaleFactor);
 
@@ -871,16 +846,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
                 NPC.frameCounter += 1f;
 
-                for (int i = 0; i < 3; i++)
-                {
-                    Point start = Target.Center.ToTileCoordinates() + new Point(Main.rand.Next(-64, 65), 48);
-                    for (int j = 0; j < 96; j++)
-                    {
-                        Point current = start - new Point(0, j);
-                        if (!Main.tile[current].IsTileSolid() && Main.tile[current - new Point(0, 1)].TileType == TileID.Crimstone)
-                            Dust.NewDust(current.ToWorldCoordinates(0, -16), 16, 16, DustID.Crimstone, 0, 3);
-                    }
-                }
+                SpawnCrimsonDustColumns(3);
 
                 float d = Main.LocalPlayer.DistanceSQ(NPC.Center);
                 float distanceScaleFactor = 1;
@@ -1594,17 +1560,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
                     Dust.NewDustPerfect(Main.rand.NextVector2FromRectangle(NPC.Hitbox), DustID.Blood, Main.rand.NextVector2Circular(6f, 6f));
                 }
 
-                for (int i = 1; i <= 3; i++)
-                {
-                    Color color = i switch
-                    {
-                        1 => Color.Yellow,
-                        2 => Color.Orange,
-                        _ => Color.Red,
-                    };
-                    PulseRing ring = new(NPC.Center, NPC.velocity * 0.5f, color, 0f, 1f + i * 0.5f, 24);
-                    GeneralParticleHandler.SpawnParticle(ring);
-                }
+                SpawnPulseRings();
                 
                 BoCAfterImages = [];
 
@@ -1698,20 +1654,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             {
                 if (Time % 4 == 0)
                 {
-                    Vector2 startPoint = NPC.Center;
-
-                    Vector2 direction = endPoint - startPoint;
-                    float curveIntensity = Main.rand.NextFloat(-0.2f, 0.2f);
-                    Vector2 perpindicular = direction.RotatedBy(MathHelper.PiOver2);
-
-                    Vector2 controlPoint1 = startPoint + (direction * 0.25f) + (perpindicular * curveIntensity);
-                    Vector2 controlPoint2 = startPoint + (direction * 0.75f) + (perpindicular * curveIntensity);
-
-                    BezierCurve path = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
-
-                    BrainOfCthulhuAfterImage afterimage = new(path, NPC.rotation, Vector2.One, (int)(ChaseTime + (TeleportDuration * 0.75f) - Time), BoCFrame);
-                    BoCAfterImages.Add(afterimage);
-                    GeneralParticleHandler.SpawnParticle(afterimage);
+                    SpawnTeleportAfterImage(NPC.Center, endPoint, (int)(ChaseTime + (TeleportDuration * 0.75f) - Time));
                 }
                 TeleportTime++;
             }
@@ -2037,17 +1980,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             {
                 SoundEngine.PlaySound(Roar, NPC.Center);
 
-                for (int i = 1; i <= 3; i++)
-                {
-                    Color color = i switch
-                    {
-                        1 => Color.Yellow,
-                        2 => Color.Orange,
-                        _ => Color.Red,
-                    };
-                    PulseRing ring = new(NPC.Center, NPC.velocity * 0.5f, color, 0f, 1f + i * 0.5f, 24);
-                    GeneralParticleHandler.SpawnParticle(ring);
-                }
+                SpawnPulseRings();
             }
             if (Time == -1)
             {
@@ -2069,20 +2002,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             {
                 if (Time % 4 == 0)
                 {
-                    Vector2 startPoint = NPC.Center;
-
-                    Vector2 direction = endPoint - startPoint;
-                    float curveIntensity = Main.rand.NextFloat(-0.2f, 0.2f);
-                    Vector2 perpindicular = direction.RotatedBy(MathHelper.PiOver2);
-
-                    Vector2 controlPoint1 = startPoint + (direction * 0.25f) + (perpindicular * curveIntensity);
-                    Vector2 controlPoint2 = startPoint + (direction * 0.75f) + (perpindicular * curveIntensity);
-
-                    BezierCurve path = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
-
-                    BrainOfCthulhuAfterImage afterimage = new(path, NPC.rotation, Vector2.One, (int)((TeleportDuration * 0.75f) - Time), BoCFrame);
-                    BoCAfterImages.Add(afterimage);
-                    GeneralParticleHandler.SpawnParticle(afterimage);
+                    SpawnTeleportAfterImage(NPC.Center, endPoint, (int)((TeleportDuration * 0.75f) - Time));
                 }
                 TeleportTime++;
             }
@@ -2155,31 +2075,12 @@ public class BrainOfCthulhuAI : VanillaAIOverride
                 {
                     SoundEngine.PlaySound(Roar, NPC.Center);
 
-                    for (int i = 1; i <= 3; i++)
-                    {
-                        Color color = i switch
-                        {
-                            1 => Color.Yellow,
-                            2 => Color.Orange,
-                            _ => Color.Red,
-                        };
-                        PulseRing ring = new(NPC.Center, NPC.velocity * 0.5f, color, 0f, 1f + i * 0.5f, 24);
-                        GeneralParticleHandler.SpawnParticle(ring);
-                    }
+                    SpawnPulseRings();
 
                     CalamityUtils.AddScreenshakeAt(NPC.Center, 10f);
                 }
 
-                for (int i = 0; i < 12; i++)
-                {
-                    Point start = Target.Center.ToTileCoordinates() + new Point(Main.rand.Next(-64, 65), 48);
-                    for (int j = 0; j < 96; j++)
-                    {
-                        Point current = start - new Point(0, j);
-                        if (!Main.tile[current].IsTileSolid() && Main.tile[current - new Point(0, 1)].IsTileSolid())
-                            Dust.NewDust(current.ToWorldCoordinates(0, 0), 16, 16, DustID.Crimstone, 0, 3);
-                    }
-                }
+                SpawnCrimsonDustColumns(12, requireSolidBelow: true);
             }
         }
         #endregion
@@ -2326,19 +2227,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
                     for (int i = 0; i < (CalamityWorld.death ? 8 : 4); i++)
                     {
                         Vector2 myEndPoint = AttackPosition + ((AttackRotation + (CalamityWorld.death ? MathHelper.PiOver4 : MathHelper.PiOver2) * i).ToRotationVector2() * IllusionDashTeleportDistance);
-                        Vector2 direction = myEndPoint - startPoint;
-
-                        float curveIntensity = Main.rand.NextFloat(-0.2f, 0.2f);
-                        Vector2 perpindicular = direction.RotatedBy(MathHelper.PiOver2);
-
-                        Vector2 controlPoint1 = startPoint + (direction * 0.25f) + (perpindicular * curveIntensity);
-                        Vector2 controlPoint2 = startPoint + (direction * 0.75f) + (perpindicular * curveIntensity);
-
-                        BezierCurve path = new BezierCurve(startPoint, controlPoint1, controlPoint2, myEndPoint);
-
-                        BrainOfCthulhuAfterImage afterimage = new(path, NPC.rotation, Vector2.One, (int)((TeleportDuration * 0.75f) - Time), BoCFrame);
-                        BoCAfterImages.Add(afterimage);
-                        GeneralParticleHandler.SpawnParticle(afterimage);
+                        SpawnTeleportAfterImage(startPoint, myEndPoint, (int)((TeleportDuration * 0.75f) - Time));
                     }
                 }
                 TeleportTime++;
@@ -2460,21 +2349,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
                 {
                     if (wrappedCounter % 2 == 0)
                     {
-                        Vector2 startPoint = NPC.Center;
-
-                        Vector2 direction = endPoint - startPoint;
-
-                        float curveIntensity = Main.rand.NextFloat(-0.2f, 0.2f);
-                        Vector2 perpindicular = direction.RotatedBy(MathHelper.PiOver2);
-
-                        Vector2 controlPoint1 = startPoint + (direction * 0.25f) + (perpindicular * curveIntensity);
-                        Vector2 controlPoint2 = startPoint + (direction * 0.75f) + (perpindicular * curveIntensity);
-
-                        BezierCurve path = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
-
-                        BrainOfCthulhuAfterImage afterimage = new(path, NPC.rotation, Vector2.One, (int)((TeleportDuration * 0.75f) - wrappedCounter), BoCFrame);
-                        BoCAfterImages.Add(afterimage);
-                        GeneralParticleHandler.SpawnParticle(afterimage);
+                        SpawnTeleportAfterImage(NPC.Center, endPoint, (int)((TeleportDuration * 0.75f) - wrappedCounter));
                     }
                     TeleportTime++;
                 }
@@ -2647,17 +2522,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
                         n.netUpdate = true;
                     }
 
-                    for (int i = 1; i <= 3; i++)
-                    {
-                        Color color = i switch
-                        {
-                            1 => Color.Yellow,
-                            2 => Color.Orange,
-                            _ => Color.Red,
-                        };
-                        PulseRing ring = new(NPC.Center, NPC.velocity * 0.5f, color, 0f, 1f + i * 0.5f, 24);
-                        GeneralParticleHandler.SpawnParticle(ring);
-                    }
+                    SpawnPulseRings();
 
                     NPC.netUpdate = true;
                 }
@@ -2714,21 +2579,8 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
             if (Time < 50)
             {
-                Vector2 startPoint = NPC.Center;
                 Vector2 endPoint = NPC.Center + Vector2.UnitX.RotatedBy(Main.rand.NextFloat(0, MathHelper.TwoPi)) * Main.rand.NextFloat(240, 480);
-
-                Vector2 direction = endPoint - startPoint;
-                float curveIntensity = Main.rand.NextFloat(-0.2f, 0.2f);
-                Vector2 perpindicular = direction.RotatedBy(MathHelper.PiOver2);
-
-                Vector2 controlPoint1 = startPoint + (direction * 0.25f) + (perpindicular * curveIntensity);
-                Vector2 controlPoint2 = startPoint + (direction * 0.75f) + (perpindicular * curveIntensity);
-
-                BezierCurve path = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
-
-                BrainOfCthulhuAfterImage afterimage = new(path, NPC.rotation, Vector2.One, (int)(60 - Time), BoCFrame);
-                BoCAfterImages.Add(afterimage);
-                GeneralParticleHandler.SpawnParticle(afterimage);
+                SpawnTeleportAfterImage(NPC.Center, endPoint, (int)(60 - Time));
             }
         }
         else
@@ -3120,6 +2972,51 @@ public class BrainOfCthulhuAI : VanillaAIOverride
     }
 
     public static bool ValidateTarget(Player p, Vector2 brainPosition) => !p.dead && p.ZoneCrimson && p.Center.DistanceSQ(brainPosition) <= DespawnRangeSQ;
+
+    private void SpawnTeleportAfterImage(Vector2 startPoint, Vector2 endPoint, int lifetime)
+    {
+        Vector2 direction = endPoint - startPoint;
+        float curveIntensity = Main.rand.NextFloat(-0.2f, 0.2f);
+        Vector2 perpendicular = direction.RotatedBy(MathHelper.PiOver2);
+        Vector2 controlPoint1 = startPoint + (direction * 0.25f) + (perpendicular * curveIntensity);
+        Vector2 controlPoint2 = startPoint + (direction * 0.75f) + (perpendicular * curveIntensity);
+        BezierCurve path = new(startPoint, controlPoint1, controlPoint2, endPoint);
+        BrainOfCthulhuAfterImage afterimage = new(path, NPC.rotation, Vector2.One, lifetime, BoCFrame);
+        BoCAfterImages.Add(afterimage);
+        GeneralParticleHandler.SpawnParticle(afterimage);
+    }
+
+    private void SpawnCrimsonDustColumns(float columnCount, bool requireSolidBelow = false)
+    {
+        for (int i = 0; i < columnCount; i++)
+        {
+            Point start = Target.Center.ToTileCoordinates() + new Point(Main.rand.Next(-64, 65), 48);
+            for (int j = 0; j < 96; j++)
+            {
+                Point current = start - new Point(0, j);
+                if (!Main.tile[current].IsTileSolid() &&
+                    (requireSolidBelow
+                        ? Main.tile[current - new Point(0, 1)].IsTileSolid()
+                        : Main.tile[current - new Point(0, 1)].TileType == TileID.Crimstone))
+                    Dust.NewDust(current.ToWorldCoordinates(requireSolidBelow ? 0 : -16), 16, 16, DustID.Crimstone, 0, 3);
+            }
+        }
+    }
+
+    private void SpawnPulseRings()
+    {
+        for (int i = 1; i <= 3; i++)
+        {
+            Color color = i switch
+            {
+                1 => Color.Yellow,
+                2 => Color.Orange,
+                _ => Color.Red,
+            };
+            PulseRing ring = new(NPC.Center, NPC.velocity * 0.5f, color, 0f, 1f + i * 0.5f, 24);
+            GeneralParticleHandler.SpawnParticle(ring);
+        }
+    }
 
     private void SelectNewTarget()
     {

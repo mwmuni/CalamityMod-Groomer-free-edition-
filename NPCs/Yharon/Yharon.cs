@@ -524,9 +524,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= spawnPhaseTimer)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(0f);
                     NPC.ai[3] = Main.rand.Next(4);
                     NPC.netUpdate = true;
                 }
@@ -594,10 +592,7 @@ namespace CalamityMod.NPCs.Yharon
 
                     if (aiState == 1)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(1f, true);
 
                         NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * chargeSpeed;
                         NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X);
@@ -614,24 +609,15 @@ namespace CalamityMod.NPCs.Yharon
                     }
                     else if (aiState == 2)
                     {
-                        NPC.ai[0] = 2f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(2f, true);
                     }
                     else if (aiState == 3)
                     {
-                        NPC.ai[0] = 3f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(3f, true);
                     }
                     else if (aiState == 4)
                     {
-                        NPC.ai[0] = 4f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(4f, true);
                     }
                     else if (aiState == 5)
                     {
@@ -640,9 +626,7 @@ namespace CalamityMod.NPCs.Yharon
 
                         if (doFastCharge)
                         {
-                            NPC.ai[0] = 5f;
-                            NPC.ai[1] = 0f;
-                            NPC.ai[2] = 0f;
+                            SetAIState(5f);
                             NPC.localAI[1] = 0f;
                             NPC.netUpdate = true;
 
@@ -676,12 +660,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3] += 2f;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
+                    FinishCharge(0f, 2f);
                 }
             }
 
@@ -729,9 +708,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= flareBombPhaseTimer)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(0f);
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
                 }
@@ -758,9 +735,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= fireTornadoPhaseTimer)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(0f);
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
                 }
@@ -781,9 +756,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= newPhaseTimer)
                 {
-                    NPC.ai[0] = 6f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(6f);
                     NPC.ai[3] = Main.rand.Next(5);
                     NPC.localAI[1] = 0f;
                     NPC.TargetClosest();
@@ -802,12 +775,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3] += 2f;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
+                    FinishCharge(0f, 2f);
                 }
             }
             #endregion
@@ -881,10 +849,7 @@ namespace CalamityMod.NPCs.Yharon
 
                     if (aiState == 1)
                     {
-                        NPC.ai[0] = 7f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(7f, true);
 
                         NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * chargeSpeed;
                         NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X);
@@ -946,25 +911,17 @@ namespace CalamityMod.NPCs.Yharon
                         if (NPC.ai[2] < phaseSwitchTimer + teleportPhaseTimer)
                             return;
 
-                        NPC.ai[0] = 8f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        SetAIState(8f);
                         NPC.ai[3] = 1f;
                         NPC.netUpdate = true;
                     }
                     else if (aiState == 3)
                     {
-                        NPC.ai[0] = 9f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(9f, true);
                     }
                     else if (aiState == 4)
                     {
-                        NPC.ai[0] = 10f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(10f, true);
                     }
                     else if (aiState == 5)
                     {
@@ -973,9 +930,7 @@ namespace CalamityMod.NPCs.Yharon
 
                         if (doFastCharge)
                         {
-                            NPC.ai[0] = 11f;
-                            NPC.ai[1] = 0f;
-                            NPC.ai[2] = 0f;
+                            SetAIState(11f);
                             NPC.localAI[1] = 0f;
                             NPC.netUpdate = true;
 
@@ -1010,10 +965,7 @@ namespace CalamityMod.NPCs.Yharon
                             NPC.spriteDirection = -NPC.direction;
                         }
 
-                        NPC.ai[0] = 12f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(12f, true);
                     }
                 }
             }
@@ -1029,12 +981,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 6f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3] += 2f;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
+                    FinishCharge(6f, 2f);
                 }
             }
 
@@ -1090,9 +1037,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= fireTornadoPhaseTimer)
                 {
-                    NPC.ai[0] = 6f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(6f);
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
                 }
@@ -1113,9 +1058,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= newPhaseTimer)
                 {
-                    NPC.ai[0] = 13f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(13f);
                     NPC.ai[3] = Main.rand.Next(5);
                     NPC.localAI[1] = 0f;
                     NPC.TargetClosest();
@@ -1134,12 +1077,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 6f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3] += 2f;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
+                    FinishCharge(6f, 2f);
                 }
             }
 
@@ -1172,12 +1110,7 @@ namespace CalamityMod.NPCs.Yharon
 
                 if (NPC.ai[2] >= flareDustPhaseTimer2)
                 {
-                    NPC.ai[0] = 6f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3] += 2f;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
+                    FinishCharge(6f, 2f);
                 }
             }
             #endregion
@@ -1254,10 +1187,7 @@ namespace CalamityMod.NPCs.Yharon
 
                     if (aiState == 1)
                     {
-                        NPC.ai[0] = 14f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(14f, true);
 
                         NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * chargeSpeed;
                         NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X);
@@ -1319,25 +1249,17 @@ namespace CalamityMod.NPCs.Yharon
                         if (NPC.ai[2] < phaseSwitchTimer + teleportPhaseTimer)
                             return;
 
-                        NPC.ai[0] = 15f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        SetAIState(15f);
                         NPC.ai[3] = 0f;
                         NPC.netUpdate = true;
                     }
                     else if (aiState == 3)
                     {
-                        NPC.ai[0] = 16f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(16f, true);
                     }
                     else if (aiState == 4)
                     {
-                        NPC.ai[0] = 17f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(17f, true);
                     }
                     else if (aiState == 5)
                     {
@@ -1346,9 +1268,7 @@ namespace CalamityMod.NPCs.Yharon
 
                         if (doFastCharge)
                         {
-                            NPC.ai[0] = 18f;
-                            NPC.ai[1] = 0f;
-                            NPC.ai[2] = 0f;
+                            SetAIState(18f);
                             NPC.localAI[1] = 0f;
                             NPC.netUpdate = true;
 
@@ -1383,17 +1303,11 @@ namespace CalamityMod.NPCs.Yharon
                             NPC.spriteDirection = -NPC.direction;
                         }
 
-                        NPC.ai[0] = 19f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(19f, true);
                     }
                     else if (aiState == 7)
                     {
-                        NPC.ai[0] = 20f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.netUpdate = true;
+                        SetAIState(20f, true);
                     }
                 }
             }
@@ -1409,12 +1323,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 13f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3] += 2f;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
+                    FinishCharge(13f, 2f);
                 }
             }
 
@@ -1470,9 +1379,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= fireTornadoPhaseTimer)
                 {
-                    NPC.ai[0] = 13f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(13f);
                     NPC.ai[3] += 3f;
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
@@ -1495,9 +1402,7 @@ namespace CalamityMod.NPCs.Yharon
                 if (NPC.ai[2] >= newPhaseTimer)
                 {
                     startSecondAI = true;
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(0f);
                     NPC.ai[3] = 0f;
                     NPC.localAI[1] = 0f;
                     NPC.TargetClosest();
@@ -1516,12 +1421,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 13f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.ai[3] += 2f;
-                    NPC.TargetClosest();
-                    NPC.netUpdate = true;
+                    FinishCharge(13f, 2f);
                 }
             }
 
@@ -1554,9 +1454,7 @@ namespace CalamityMod.NPCs.Yharon
 
                 if (NPC.ai[2] >= flareDustPhaseTimer2 - 50)
                 {
-                    NPC.ai[0] = 13f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(13f);
                     NPC.ai[3] += 1f;
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
@@ -1607,11 +1505,8 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= flareBombPhaseTimer - 15)
                 {
-                    NPC.ai[0] = 13f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(13f, true);
                     NPC.TargetClosest();
-                    NPC.netUpdate = true;
                 }
             }
             #endregion
@@ -2071,9 +1966,7 @@ namespace CalamityMod.NPCs.Yharon
                         return;
                     }
 
-                    NPC.ai[0] = phase2AttackType;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(phase2AttackType);
                     NPC.ai[3] += 1f;
                     NPC.localAI[1] = 0f;
 
@@ -2083,9 +1976,7 @@ namespace CalamityMod.NPCs.Yharon
                             if (phase2)
                             {
                                 secondPhasePhase = 2;
-                                NPC.ai[0] = 9f;
-                                NPC.ai[1] = 0f;
-                                NPC.ai[2] = 0f;
+                                SetAIState(9f);
                                 NPC.ai[3] = Main.rand.Next(11);
                             }
                             break;
@@ -2094,9 +1985,7 @@ namespace CalamityMod.NPCs.Yharon
                             if (phase3)
                             {
                                 secondPhasePhase = 3;
-                                NPC.ai[0] = 9f;
-                                NPC.ai[1] = 0f;
-                                NPC.ai[2] = 0f;
+                                SetAIState(9f);
                                 NPC.ai[3] = Main.rand.Next(16);
                             }
                             break;
@@ -2105,9 +1994,7 @@ namespace CalamityMod.NPCs.Yharon
                             if (phase4)
                             {
                                 secondPhasePhase = 4;
-                                NPC.ai[0] = 9f;
-                                NPC.ai[1] = 0f;
-                                NPC.ai[2] = 0f;
+                                SetAIState(9f);
                                 NPC.ai[3] = 0f;
                             }
                             break;
@@ -2191,9 +2078,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[1] += 1f;
                 if (NPC.ai[1] >= chargeTime)
                 {
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(1f);
                     NPC.TargetClosest();
                 }
             }
@@ -2322,9 +2207,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[1] += 1f;
                 if (NPC.ai[1] >= splittingFireballBreathPhaseTimer)
                 {
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(1f);
                     NPC.TargetClosest();
                 }
             }
@@ -2452,9 +2335,7 @@ namespace CalamityMod.NPCs.Yharon
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                         Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<BigFlare2>(), 0, 0f, Main.myPlayer, 1f, NPC.target + 1);
 
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(1f);
                     NPC.TargetClosest();
                 }
             }
@@ -2473,9 +2354,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[1] += 1f;
                 if (NPC.ai[1] >= chargeTime)
                 {
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(1f);
                     NPC.TargetClosest();
                 }
             }
@@ -2512,9 +2391,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= teleportPhaseTimer)
                 {
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(1f);
                     NPC.localAI[1] = fastChargeTelegraphTime + 1f;
                     NPC.netUpdate = true;
                 }
@@ -2563,9 +2440,7 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= 180f)
                 {
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    SetAIState(1f);
                     NPC.ai[3] = 0f;
                     NPC.TargetClosest();
                     NPC.netUpdate = true;
@@ -2615,6 +2490,23 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.rotation = NPC.rotation.AngleTowards(facingAngle, rotationSpeed);
         }
         #endregion
+
+        private void SetAIState(float state, bool updateNet = false)
+        {
+            NPC.ai[0] = state;
+            NPC.ai[1] = 0f;
+            NPC.ai[2] = 0f;
+            if (updateNet)
+                NPC.netUpdate = true;
+        }
+
+        private void FinishCharge(float state, float attackIndexIncrement)
+        {
+            SetAIState(state);
+            NPC.ai[3] += attackIndexIncrement;
+            NPC.TargetClosest();
+            NPC.netUpdate = true;
+        }
 
         #region Charge Dust
         private void ChargeDust(int dustAmt)

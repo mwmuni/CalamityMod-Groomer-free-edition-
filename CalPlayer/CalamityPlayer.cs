@@ -2631,97 +2631,17 @@ namespace CalamityMod.CalPlayer
 
             ResetDebuffFlags();
             enraged = false;
-            snowmanNoseless = false;
-            sulphurPoison = false;
-            nightwither = false;
-            voidfrost = false;
-            eutrophication = false;
-            frozenLungs = false;
-            searingLava = false;
-            vaporfied = false;
-            banishingFire = false;
-            wither = false;
-            windChilled = false;
+            ResetCommonDebuffFlags();
             ManaBurn = false;
 
-            TypelessDebuffMultiplier = new();
-            HeatDebuffMultiplier = new();
-            ColdDebuffMultiplier = new();
-            SicknessDebuffMultiplier = new();
-            WaterDebuffMultiplier = new();
-            ElectricDebuffMultiplier = new();
-
-            sandsWindBuff = false;
-            aeolianEarthBuff = false;
-            corrEffigy = false;
-            crimEffigy = false;
             decayEffigy = false;
-            rRage = false;
-            xWrath = false;
-            graxDefense = false;
-            encased = false;
-            omniscience = false;
-            zerg = false;
-            zen = false;
-            isNearbyBoss = false;
-            permafrostsConcoction = false;
-            flaskCrumbling = false;
-            ceaselessHunger = false;
-            calcium = false;
-            soaring = false;
-            bounding = false;
-            shadow = false;
-            photosynthesis = false;
-            astralInjection = false;
-            gravityNormalizer = false;
-            flaskHoly = false;
-            galvanicCorrosion = false;
-            sulphurskin = false;
-            baguette = false;
+            ResetCommonBuffFlags();
             trippy = false;
             amidiasBlessing = false;
-            flaskBrimstone = false;
-            purpleHaze = false;
             if (purpleHazeStealthTimer > 0)
                 purpleHazeStealthTimer--;
-            shine = false;
-            anechoicCoating = false;
-            mushy = false;
-            PinkJellyRegen = false;
-            GreenJellyRegen = false;
-            AbsorberRegen = false;
-            cFreeze = false;
-            tRegen = false;
             bloodfinBoost = false;
             divineBless = false;
-
-            vodka = false;
-            redWine = false;
-            grapeBeer = false;
-            moonshine = false;
-            rum = false;
-            whiskey = false;
-            fireball = false;
-            everclear = false;
-            bloodyMary = false;
-            tequila = false;
-            caribbeanRum = false;
-            cinnamonRoll = false;
-            tequilaSunrise = false;
-            margarita = false;
-            oldFashioned = false;
-            starBeamRye = false;
-            screwdriver = false;
-            moscowMule = false;
-            whiteWine = false;
-            evergreenGin = false;
-            baconOil = false;
-
-            tranquilityCandle = false;
-            chaosCandle = false;
-            blueCandle = false;
-            pinkCandle = false;
-            yellowCandle = false;
 
             
             //Disable Lockon when not on gamepad to prevent it being left on forever by The Pointer
@@ -2968,6 +2888,94 @@ namespace CalamityMod.CalPlayer
             clamity = false;
             NOU = false;
         }
+
+        private void ResetCommonDebuffFlags()
+        {
+            snowmanNoseless = false;
+            sulphurPoison = false;
+            nightwither = false;
+            voidfrost = false;
+            eutrophication = false;
+            frozenLungs = false;
+            searingLava = false;
+            vaporfied = false;
+            banishingFire = false;
+            wither = false;
+            windChilled = false;
+
+            TypelessDebuffMultiplier = new();
+            HeatDebuffMultiplier = new();
+            ColdDebuffMultiplier = new();
+            SicknessDebuffMultiplier = new();
+            WaterDebuffMultiplier = new();
+            ElectricDebuffMultiplier = new();
+        }
+
+        private void ResetCommonBuffFlags()
+        {
+            sandsWindBuff = false;
+            aeolianEarthBuff = false;
+            corrEffigy = false;
+            crimEffigy = false;
+            rRage = false;
+            xWrath = false;
+            graxDefense = false;
+            encased = false;
+            omniscience = false;
+            zerg = false;
+            zen = false;
+            isNearbyBoss = false;
+            permafrostsConcoction = false;
+            flaskCrumbling = false;
+            ceaselessHunger = false;
+            calcium = false;
+            soaring = false;
+            bounding = false;
+            shadow = false;
+            photosynthesis = false;
+            astralInjection = false;
+            gravityNormalizer = false;
+            flaskHoly = false;
+            galvanicCorrosion = false;
+            sulphurskin = false;
+            baguette = false;
+            flaskBrimstone = false;
+            purpleHaze = false;
+            shine = false;
+            anechoicCoating = false;
+            mushy = false;
+            PinkJellyRegen = false;
+            GreenJellyRegen = false;
+            AbsorberRegen = false;
+            cFreeze = false;
+            tRegen = false;
+            vodka = false;
+            redWine = false;
+            grapeBeer = false;
+            moonshine = false;
+            rum = false;
+            whiskey = false;
+            fireball = false;
+            everclear = false;
+            bloodyMary = false;
+            tequila = false;
+            caribbeanRum = false;
+            cinnamonRoll = false;
+            tequilaSunrise = false;
+            margarita = false;
+            oldFashioned = false;
+            starBeamRye = false;
+            screwdriver = false;
+            moscowMule = false;
+            whiteWine = false;
+            evergreenGin = false;
+            baconOil = false;
+            tranquilityCandle = false;
+            chaosCandle = false;
+            blueCandle = false;
+            pinkCandle = false;
+            yellowCandle = false;
+        }
         #endregion
 
         #region Modify Max Health and Mana
@@ -3131,24 +3139,8 @@ namespace CalamityMod.CalPlayer
             resetHeightandWidth = false;
             noLifeRegen = false;
             ResetDebuffFlags();
-            snowmanNoseless = false;
-            sulphurPoison = false;
-            nightwither = false;
-            voidfrost = false;
-            eutrophication = false;
-            frozenLungs = false;
-            searingLava = false;
-            vaporfied = false;
-            banishingFire = false;
-            wither = false;
-            windChilled = false;
+            ResetCommonDebuffFlags();
             ImmobilityDebuffImmunityTimer = 0;
-            TypelessDebuffMultiplier = new();
-            HeatDebuffMultiplier = new();
-            ColdDebuffMultiplier = new();
-            SicknessDebuffMultiplier = new();
-            WaterDebuffMultiplier = new();
-            ElectricDebuffMultiplier = new();
             #endregion
 
             #region Rogue
@@ -3182,74 +3174,13 @@ namespace CalamityMod.CalPlayer
             ExoChair = false;
             aquaticHeartWaterBuff = false;
             aquaticHeartIce = false;
-            sandsWindBuff = false;
-            aeolianEarthBuff = false;
+            ResetCommonBuffFlags();
             chiBuffTimer = 0;
-            corrEffigy = false;
-            crimEffigy = false;
-            rRage = false;
-            xWrath = false;
-            graxDefense = false;
-            encased = false;
-            omniscience = false;
-            zerg = false;
-            zen = false;
-            isNearbyBoss = false;
-            permafrostsConcoction = false;
-            flaskCrumbling = false;
-            ceaselessHunger = false;
-            calcium = false;
-            soaring = false;
-            bounding = false;
-            shadow = false;
             adrenalinePauseTimer = 0;
-            photosynthesis = false;
-            astralInjection = false;
-            gravityNormalizer = false;
-            flaskHoly = false;
-            galvanicCorrosion = false;
-            sulphurskin = false;
-            baguette = false;
-            flaskBrimstone = false;
-            purpleHaze = false;
-            shine = false;
-            anechoicCoating = false;
-            mushy = false;
-            PinkJellyRegen = false;
-            GreenJellyRegen = false;
-            AbsorberRegen = false;
             enraged = false;
-            cFreeze = false;
-            tRegen = false;
             rageModeActive = false;
             adrenalineModeActive = false;
-            vodka = false;
-            redWine = false;
-            grapeBeer = false;
-            moonshine = false;
-            rum = false;
-            whiskey = false;
-            fireball = false;
-            everclear = false;
-            bloodyMary = false;
-            tequila = false;
-            caribbeanRum = false;
-            cinnamonRoll = false;
-            tequilaSunrise = false;
-            margarita = false;
-            oldFashioned = false;
-            starBeamRye = false;
-            screwdriver = false;
-            moscowMule = false;
-            whiteWine = false;
-            evergreenGin = false;
-            baconOil = false;
-            tranquilityCandle = false;
-            chaosCandle = false;
-            blueCandle = false;
-            pinkCandle = false;
             pinkCandleHealFraction = 0D;
-            yellowCandle = false;
             trippy = false;
             amidiasBlessing = false;
             bloodfinBoost = false;
@@ -4943,110 +4874,52 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region PostUpdateEquips
+        private void UpdateWhiskeyClassEffects(Item item, IVDripPlayer dripPlayer, DamageClass damageClass, ref int timeHolding)
+        {
+            if (item.DamageType.CountsAsClass(damageClass))
+            {
+                timeHolding++;
+                if (timeHolding > Whiskey.TimeToDischarge)
+                    timeHolding = (int)Whiskey.TimeToDischarge;
+
+                if (dripPlayer.HasAlcohol(AlcoholType.Whiskey) && whiskey)
+                    Player.GetDamage(damageClass) += MathHelper.Lerp(Whiskey.CombinedDamageCeiling, Whiskey.CombinedDamageFloor, timeHolding / Whiskey.TimeToDischarge);
+                else if (whiskey || dripPlayer.HasAlcohol(AlcoholType.Whiskey))
+                    Player.GetDamage(damageClass) += MathHelper.Lerp(Whiskey.StandardDamageCeiling, Whiskey.StandardDamageFloor, timeHolding / Whiskey.TimeToDischarge);
+            }
+            else
+            {
+                timeHolding -= 2;
+                if (timeHolding < 0)
+                    timeHolding = 0;
+            }
+        }
+
+        private static void DecreaseWhiskeyTimer(ref int timeHolding)
+        {
+            if (timeHolding-- < 0)
+                timeHolding = 0;
+        }
+
         public override void PostUpdateEquips()
         {
             var dripPlayer = Player.GetModPlayer<IVDripPlayer>();
             var item = Player.HeldItem;
             if (!(item.IsAir || item.damage <= 0))
             {
-                if (item.DamageType.CountsAsClass(DamageClass.Melee))
-                {
-                    TimeHoldingMelee++;
-                    if (TimeHoldingMelee > Whiskey.TimeToDischarge)
-                        TimeHoldingMelee = (int)Whiskey.TimeToDischarge;
-
-                    if (dripPlayer.HasAlcohol(AlcoholType.Whiskey) && whiskey)
-                        Player.GetDamage(DamageClass.Melee) += MathHelper.Lerp(Whiskey.CombinedDamageCeiling, Whiskey.CombinedDamageFloor, TimeHoldingMelee / Whiskey.TimeToDischarge);
-                    else if (whiskey || dripPlayer.HasAlcohol(AlcoholType.Whiskey))
-                        Player.GetDamage(DamageClass.Melee) += MathHelper.Lerp(Whiskey.StandardDamageCeiling, Whiskey.StandardDamageFloor, TimeHoldingMelee / Whiskey.TimeToDischarge);
-                } 
-                else
-                {
-                    TimeHoldingMelee -= 2;
-                    if (TimeHoldingMelee < 0)
-                        TimeHoldingMelee = 0;
-                }
-                if (item.DamageType.CountsAsClass(DamageClass.Ranged))
-                {
-                    TimeHoldingRanged++;
-                    if (TimeHoldingRanged > Whiskey.TimeToDischarge)
-                        TimeHoldingRanged = (int)Whiskey.TimeToDischarge;
-
-                    if (dripPlayer.HasAlcohol(AlcoholType.Whiskey) && whiskey)
-                        Player.GetDamage(DamageClass.Ranged) += MathHelper.Lerp(Whiskey.CombinedDamageCeiling, Whiskey.CombinedDamageFloor, TimeHoldingRanged / Whiskey.TimeToDischarge);
-                    else if (whiskey || dripPlayer.HasAlcohol(AlcoholType.Whiskey))
-                        Player.GetDamage(DamageClass.Ranged) += MathHelper.Lerp(Whiskey.StandardDamageCeiling, Whiskey.StandardDamageFloor, TimeHoldingRanged / Whiskey.TimeToDischarge);
-                }
-                else
-                {
-                    TimeHoldingRanged -= 2;
-                    if (TimeHoldingRanged < 0)
-                        TimeHoldingRanged = 0;
-                }
-                if (item.DamageType.CountsAsClass(DamageClass.Magic))
-                {
-                    TimeHoldingMagic++;
-                    if (TimeHoldingMagic > Whiskey.TimeToDischarge)
-                        TimeHoldingMagic = (int)Whiskey.TimeToDischarge;
-
-                    if (dripPlayer.HasAlcohol(AlcoholType.Whiskey) && whiskey)
-                        Player.GetDamage(DamageClass.Magic) += MathHelper.Lerp(Whiskey.CombinedDamageCeiling, Whiskey.CombinedDamageFloor, TimeHoldingMagic / Whiskey.TimeToDischarge);
-                    else if (whiskey || dripPlayer.HasAlcohol(AlcoholType.Whiskey))
-                        Player.GetDamage(DamageClass.Magic) += MathHelper.Lerp(Whiskey.StandardDamageCeiling, Whiskey.StandardDamageFloor, TimeHoldingMagic / Whiskey.TimeToDischarge);
-                }
-                else
-                {
-                    TimeHoldingMagic -= 2;
-                    if (TimeHoldingMagic < 0)
-                        TimeHoldingMagic = 0;
-                }
-                if (item.DamageType.CountsAsClass(DamageClass.Summon))
-                {
-                    TimeHoldingSummon++;
-                    if (TimeHoldingSummon > Whiskey.TimeToDischarge)
-                        TimeHoldingSummon = (int)Whiskey.TimeToDischarge;
-
-                    if (dripPlayer.HasAlcohol(AlcoholType.Whiskey) && whiskey)
-                        Player.GetDamage(DamageClass.Summon) += MathHelper.Lerp(Whiskey.CombinedDamageCeiling, Whiskey.CombinedDamageFloor, TimeHoldingSummon / Whiskey.TimeToDischarge);
-                    else if (whiskey || dripPlayer.HasAlcohol(AlcoholType.Whiskey))
-                        Player.GetDamage(DamageClass.Summon) += MathHelper.Lerp(Whiskey.StandardDamageCeiling, Whiskey.StandardDamageFloor, TimeHoldingSummon / Whiskey.TimeToDischarge);
-                }
-                else
-                {
-                    TimeHoldingSummon -= 2;
-                    if (TimeHoldingSummon < 0)
-                        TimeHoldingSummon = 0;
-                }
-                if (item.DamageType.CountsAsClass(RogueDamageClass.Instance))
-                {
-                    TimeHoldingRogue++;
-                    if (TimeHoldingRogue > Whiskey.TimeToDischarge)
-                        TimeHoldingRogue = (int)Whiskey.TimeToDischarge;
-
-                    if (dripPlayer.HasAlcohol(AlcoholType.Whiskey) && whiskey)
-                        Player.GetDamage(RogueDamageClass.Instance) += MathHelper.Lerp(Whiskey.CombinedDamageCeiling, Whiskey.CombinedDamageFloor, TimeHoldingRogue / Whiskey.TimeToDischarge);
-                    else if (whiskey || dripPlayer.HasAlcohol(AlcoholType.Whiskey))
-                        Player.GetDamage(RogueDamageClass.Instance) += MathHelper.Lerp(Whiskey.StandardDamageCeiling, Whiskey.StandardDamageFloor, TimeHoldingRogue / Whiskey.TimeToDischarge);
-                    
-                }
-                else
-                {
-                    TimeHoldingRogue -= 2;
-                    if (TimeHoldingRogue < 0)
-                        TimeHoldingRogue = 0;
-                }
-            } else
+                UpdateWhiskeyClassEffects(item, dripPlayer, DamageClass.Melee, ref TimeHoldingMelee);
+                UpdateWhiskeyClassEffects(item, dripPlayer, DamageClass.Ranged, ref TimeHoldingRanged);
+                UpdateWhiskeyClassEffects(item, dripPlayer, DamageClass.Magic, ref TimeHoldingMagic);
+                UpdateWhiskeyClassEffects(item, dripPlayer, DamageClass.Summon, ref TimeHoldingSummon);
+                UpdateWhiskeyClassEffects(item, dripPlayer, RogueDamageClass.Instance, ref TimeHoldingRogue);
+            }
+            else
             {
-                if (TimeHoldingMelee-- < 0)
-                    TimeHoldingMelee = 0;
-                if (TimeHoldingRanged-- < 0)
-                    TimeHoldingRanged = 0;
-                if (TimeHoldingMagic-- < 0)
-                    TimeHoldingMagic = 0;
-                if (TimeHoldingSummon-- < 0)
-                    TimeHoldingSummon = 0;
-                if (TimeHoldingRogue-- < 0)
-                    TimeHoldingRogue = 0;
+                DecreaseWhiskeyTimer(ref TimeHoldingMelee);
+                DecreaseWhiskeyTimer(ref TimeHoldingRanged);
+                DecreaseWhiskeyTimer(ref TimeHoldingMagic);
+                DecreaseWhiskeyTimer(ref TimeHoldingSummon);
+                DecreaseWhiskeyTimer(ref TimeHoldingRogue);
             }
             if (dripPlayer.HasAlcohol(AlcoholType.Moonshine))
             {

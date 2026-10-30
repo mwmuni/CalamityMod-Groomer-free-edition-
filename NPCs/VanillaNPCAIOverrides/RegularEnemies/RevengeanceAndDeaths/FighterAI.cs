@@ -2537,75 +2537,23 @@ PrepareToShoot:
                         NPC.ai[1] = 30f;
                         NPC.ai[2] = 0f;
                     }
-                    int attackTimeMax = 70;
-                    if (npcType == NPCID.CultistArcherBlue || npcType == NPCID.CultistArcherWhite)
+                    int attackTimeMax = npcType switch
                     {
-                        attackTimeMax = 80;
-                    }
-                    if (npcType == NPCID.BrainScrambler || npcType == NPCID.RayGunner)
-                    {
-                        attackTimeMax = 80;
-                    }
-                    if (npcType == NPCID.MartianWalker)
-                    {
-                        attackTimeMax = 15;
-                    }
-                    if (npcType == NPCID.ElfArcher)
-                    {
-                        attackTimeMax = 110;
-                    }
-                    if (npcType == NPCID.SkeletonSniper)
-                    {
-                        attackTimeMax = 200;
-                    }
-                    if (npcType == NPCID.TacticalSkeleton)
-                    {
-                        attackTimeMax = 120;
-                    }
-                    if (npcType == NPCID.SkeletonCommando)
-                    {
-                        attackTimeMax = 90;
-                    }
-                    if (npcType == NPCID.GoblinArcher)
-                    {
-                        attackTimeMax = 180;
-                    }
-                    if (npcType == NPCID.IcyMerman)
-                    {
-                        attackTimeMax = 50;
-                    }
-                    if (npcType == NPCID.GreekSkeleton)
-                    {
-                        attackTimeMax = 100;
-                    }
-                    if (npcType == NPCID.PirateDeadeye)
-                    {
-                        attackTimeMax = 40;
-                    }
-                    if (npcType == NPCID.PirateCrossbower)
-                    {
-                        attackTimeMax = 80;
-                    }
-                    if (npcType == NPCID.Paladin)
-                    {
-                        attackTimeMax = 30;
-                    }
-                    if (npcType == NPCID.StardustSoldier)
-                    {
-                        attackTimeMax = 300;
-                    }
-                    if (npcType == NPCID.StardustSpiderBig)
-                    {
-                        attackTimeMax = 60;
-                    }
-                    if (npcType == NPCID.NebulaSoldier)
-                    {
-                        attackTimeMax = 180;
-                    }
-                    if (npcType == NPCID.VortexHornetQueen)
-                    {
-                        attackTimeMax = 60;
-                    }
+                        NPCID.CultistArcherBlue or NPCID.CultistArcherWhite or NPCID.BrainScrambler or NPCID.RayGunner or NPCID.PirateCrossbower => 80,
+                        NPCID.MartianWalker => 15,
+                        NPCID.ElfArcher => 110,
+                        NPCID.SkeletonSniper => 200,
+                        NPCID.TacticalSkeleton => 120,
+                        NPCID.SkeletonCommando => 90,
+                        NPCID.GoblinArcher or NPCID.NebulaSoldier => 180,
+                        NPCID.IcyMerman => 50,
+                        NPCID.GreekSkeleton => 100,
+                        NPCID.PirateDeadeye => 40,
+                        NPCID.Paladin => 30,
+                        NPCID.StardustSoldier => 300,
+                        NPCID.StardustSpiderBig or NPCID.VortexHornetQueen => 60,
+                        _ => 70
+                    };
                     bool priateCaptainBoost = false;
                     if (npcType == NPCID.PirateCaptain)
                     {
@@ -2647,63 +2595,22 @@ PrepareToShoot:
                             {
                                 NPC.localAI[2] += 1f;
                             }
-                            float projSpeed = CalamityWorld.death ? 6f : 11f;
-                            if (npcType == NPCID.GoblinArcher)
+                            float projSpeed = npcType switch
                             {
-                                projSpeed = CalamityWorld.death ? 5f : 9f;
-                            }
-                            if (npcType == NPCID.IcyMerman)
-                            {
-                                projSpeed = CalamityWorld.death ? 4f : 7f;
-                            }
-                            if (npcType == NPCID.Paladin)
-                            {
-                                projSpeed = CalamityWorld.death ? 5f : 9f;
-                            }
-                            if (npcType == NPCID.SkeletonCommando)
-                            {
-                                projSpeed = CalamityWorld.death ? 2.5f : 4f;
-                            }
-                            if (npcType == NPCID.PirateDeadeye)
-                            {
-                                projSpeed = CalamityWorld.death ? 8f : 14f;
-                            }
-                            if (npcType == NPCID.PirateCrossbower)
-                            {
-                                projSpeed = CalamityWorld.death ? 9f : 16f;
-                            }
-                            if (npcType == NPCID.RayGunner)
-                            {
-                                projSpeed = CalamityWorld.death ? 4f : 7f;
-                            }
-                            if (npcType == NPCID.MartianWalker)
-                            {
-                                projSpeed = CalamityWorld.death ? 5f : 8f;
-                            }
-                            if (npcType == NPCID.StardustSpiderBig)
-                            {
-                                projSpeed = 4f;
-                            }
-                            if (npcType >= 449 && npcType <= 452)
-                            {
-                                projSpeed = CalamityWorld.death ? 4f : 7f;
-                            }
-                            if (npcType == NPCID.GreekSkeleton)
-                            {
-                                projSpeed = CalamityWorld.death ? 5f : 8f;
-                            }
-                            if (npcType == NPCID.DrManFly)
-                            {
-                                projSpeed = CalamityWorld.death ? 4.5f : 7.5f;
-                            }
-                            if (npcType == NPCID.StardustSoldier)
-                            {
-                                projSpeed = 1f;
-                            }
-                            if (npcType >= 498 && npcType <= 506)
-                            {
-                                projSpeed = CalamityWorld.death ? 4f : 7f;
-                            }
+                                _ when npcType >= 498 && npcType <= 506 => CalamityWorld.death ? 4f : 7f,
+                                NPCID.StardustSoldier => 1f,
+                                NPCID.DrManFly => CalamityWorld.death ? 4.5f : 7.5f,
+                                NPCID.GreekSkeleton => CalamityWorld.death ? 5f : 8f,
+                                _ when npcType >= 449 && npcType <= 452 => CalamityWorld.death ? 4f : 7f,
+                                NPCID.StardustSpiderBig => 4f,
+                                NPCID.MartianWalker => CalamityWorld.death ? 5f : 8f,
+                                NPCID.RayGunner or NPCID.IcyMerman => CalamityWorld.death ? 4f : 7f,
+                                NPCID.PirateCrossbower => CalamityWorld.death ? 9f : 16f,
+                                NPCID.PirateDeadeye => CalamityWorld.death ? 8f : 14f,
+                                NPCID.SkeletonCommando => CalamityWorld.death ? 2.5f : 4f,
+                                NPCID.Paladin or NPCID.GoblinArcher => CalamityWorld.death ? 5f : 9f,
+                                _ => CalamityWorld.death ? 6f : 11f
+                            };
 
                             if (CalamityWorld.revenge)
                                 projSpeed *= 1.25f;
@@ -2778,117 +2685,35 @@ PrepareToShoot:
                             magnitude = projSpeed / magnitude;
                             distX *= magnitude;
                             distY *= magnitude;
-                            int damage = 35;
-                            int projectileType = ProjectileID.FlamingArrow;
-                            if (npcType == NPCID.ElfArcher)
+                            var (projectileType, damage) = npcType switch
                             {
-                                damage = 45;
-                            }
-                            if (npcType == NPCID.GoblinArcher)
+                                NPCID.PirateCaptain when priateCaptainBoost => (ProjectileID.CannonballHostile, 100),
+                                NPCID.PirateCaptain => (ProjectileID.BulletDeadeye, 30),
+                                NPCID.TacticalSkeleton => (ProjectileID.BulletDeadeye, 50),
+                                NPCID.PirateCrossbower => (ProjectileID.FlamingArrow, 40),
+                                NPCID.PirateDeadeye => (ProjectileID.BulletDeadeye, 25),
+                                NPCID.SkeletonCommando => (ProjectileID.RocketSkeleton, 60),
+                                NPCID.Paladin => (ProjectileID.PaladinsHammerHostile, 60),
+                                NPCID.SkeletonSniper => (ProjectileID.SniperBullet, 100),
+                                NPCID.VortexHornetQueen => (ProjectileID.VortexAcid, Main.expertMode ? 45 : 60),
+                                NPCID.NebulaSoldier => (ProjectileID.NebulaBolt, Main.expertMode ? 45 : 60),
+                                NPCID.StardustSoldier => (ProjectileID.StardustSoldierLaser, Main.expertMode ? 45 : 60),
+                                NPCID.DrManFly => (ProjectileID.DrManFlyFlask, 50),
+                                NPCID.IcyMerman => (ProjectileID.IcewaterSpit, 37),
+                                NPCID.GreekSkeleton => (ProjectileID.JavelinHostile, 18),
+                                _ when npcType >= NPCID.Salamander && npcType <= NPCID.Salamander9 => (ProjectileID.SalamanderSpit, 14),
+                                _ when npcType >= NPCID.BoneThrowingSkeleton && npcType <= NPCID.BoneThrowingSkeleton4 => (ProjectileID.SkeletonBone, 20),
+                                NPCID.MartianWalker => (ProjectileID.MartianWalkerLaser, 35),
+                                NPCID.RayGunner => (ProjectileID.RayGunnerLaser, 30),
+                                NPCID.BrainScrambler => (ProjectileID.BrainScramblerBolt, 24),
+                                NPCID.CultistArcherBlue or NPCID.CultistArcherWhite => (ProjectileID.WoodenArrowHostile, 40),
+                                NPCID.GoblinArcher => (ProjectileID.WoodenArrowHostile, 11),
+                                NPCID.ElfArcher => (ProjectileID.FlamingArrow, 45),
+                                _ => (ProjectileID.FlamingArrow, 35)
+                            };
+                            if (npcType == NPCID.PirateCaptain && priateCaptainBoost)
                             {
-                                projectileType = ProjectileID.WoodenArrowHostile;
-                                damage = 11;
-                            }
-                            if (npcType == NPCID.CultistArcherBlue || npcType == NPCID.CultistArcherWhite)
-                            {
-                                projectileType = ProjectileID.WoodenArrowHostile;
-                                damage = 40;
-                            }
-                            if (npcType == NPCID.BrainScrambler)
-                            {
-                                projectileType = ProjectileID.BrainScramblerBolt;
-                                damage = 24;
-                            }
-                            if (npcType == NPCID.RayGunner)
-                            {
-                                projectileType = ProjectileID.RayGunnerLaser;
-                                damage = 30;
-                            }
-                            if (npcType == NPCID.MartianWalker)
-                            {
-                                projectileType = ProjectileID.MartianWalkerLaser;
-                                damage = 35;
-                            }
-                            if (npcType >= NPCID.BoneThrowingSkeleton && npcType <= NPCID.BoneThrowingSkeleton4)
-                            {
-                                projectileType = ProjectileID.SkeletonBone;
-                                damage = 20;
-                            }
-                            if (npcType >= NPCID.Salamander && npcType <= NPCID.Salamander9)
-                            {
-                                projectileType = ProjectileID.SalamanderSpit;
-                                damage = 14;
-                            }
-                            if (npcType == NPCID.GreekSkeleton)
-                            {
-                                projectileType = ProjectileID.JavelinHostile;
-                                damage = 18;
-                            }
-                            if (npcType == NPCID.IcyMerman)
-                            {
-                                projectileType = ProjectileID.IcewaterSpit;
-                                damage = 37;
-                            }
-                            if (npcType == NPCID.DrManFly)
-                            {
-                                projectileType = ProjectileID.DrManFlyFlask;
-                                damage = 50;
-                            }
-                            if (npcType == NPCID.StardustSoldier)
-                            {
-                                projectileType = ProjectileID.StardustSoldierLaser;
-                                damage = (Main.expertMode ? 45 : 60);
-                            }
-                            if (npcType == NPCID.NebulaSoldier)
-                            {
-                                projectileType = ProjectileID.NebulaBolt;
-                                damage = (Main.expertMode ? 45 : 60);
-                            }
-                            if (npcType == NPCID.VortexHornetQueen)
-                            {
-                                projectileType = ProjectileID.VortexAcid;
-                                damage = (Main.expertMode ? 45 : 60);
-                            }
-                            if (npcType == NPCID.SkeletonSniper)
-                            {
-                                projectileType = ProjectileID.SniperBullet;
-                                damage = 100;
-                            }
-                            if (npcType == NPCID.Paladin)
-                            {
-                                projectileType = ProjectileID.PaladinsHammerHostile;
-                                damage = 60;
-                            }
-                            if (npcType == NPCID.SkeletonCommando)
-                            {
-                                projectileType = ProjectileID.RocketSkeleton;
-                                damage = 60;
-                            }
-                            if (npcType == NPCID.PirateDeadeye)
-                            {
-                                projectileType = ProjectileID.BulletDeadeye;
-                                damage = 25;
-                            }
-                            if (npcType == NPCID.PirateCrossbower)
-                            {
-                                projectileType = ProjectileID.FlamingArrow;
-                                damage = 40;
-                            }
-                            if (npcType == NPCID.TacticalSkeleton)
-                            {
-                                damage = 50;
-                                projectileType = ProjectileID.BulletDeadeye;
-                            }
-                            if (npcType == NPCID.PirateCaptain)
-                            {
-                                projectileType = ProjectileID.BulletDeadeye;
-                                damage = 30;
-                                if (priateCaptainBoost)
-                                {
-                                    damage = 100;
-                                    projectileType = ProjectileID.CannonballHostile;
-                                    NPC.localAI[2] = 0f;
-                                }
+                                NPC.localAI[2] = 0f;
                             }
                             spawnPosition.X += distX;
                             spawnPosition.Y += distY;
