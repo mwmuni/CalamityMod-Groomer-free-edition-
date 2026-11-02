@@ -89,37 +89,7 @@ namespace CalamityMod.Projectiles.Melee
                 if (time > fadeOutTime * 0.7f)
                     Projectile.velocity *= 0.93f;
 
-                if (stuckInTarget)
-                {
-                    Projectile.tileCollide = false;
-                    time--;
-                    Projectile.timeLeft++;
-                    if (stuckTimer > 0)
-                        stuckTimer--;
-                    else
-                    {
-                        Projectile.velocity *= 0.01f;
-                        stabbedTarget.Calamity().demonSwordImpales--;
-                        stuckInTarget = false;
-                        FadeOutEffect();
-                    }
-
-                    Projectile.Center = stabbedTarget.Center + impalePos;
-                    if ((stabbedTarget.life <= 0) || stabbedTarget == null || Projectile.localAI[0] == 5 || !stabbedTarget.active)
-                    {
-                        Projectile.timeLeft = Lifetime;
-                        stabbedTarget.Calamity().demonSwordImpales--;
-                        stuckInTarget = false;
-                        exitedTarget = true;
-                        Projectile.tileCollide = true;
-                        Projectile.rotation += Main.rand.NextFloat(-1.5f, 1.5f);
-                        for (int i = 0; i < Main.maxNPCs; i++)
-                            Projectile.localNPCImmunity[i] = 0;
-                        Projectile.numHits = 0;
-                        SoundStyle unstuck = new("CalamityMod/Sounds/NPCHit/PerfLargeHit", 3);
-                        SoundEngine.PlaySound(unstuck with { Volume = 0.85f, Pitch = Main.rand.NextFloat(0.3f, 0.4f), MaxInstances = 3 }, Projectile.Center);
-                    }
-                }
+                UpdateImpaledTarget(collideAfterExit: true, exitRotation: 1.5f);
                 if (exitedTarget && !stuckInGround)
                 {
                     if (Projectile.velocity.Y < 14 && Projectile.timeLeft < (bounces == 1 ? Lifetime - 20 : Lifetime))

@@ -10,60 +10,27 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using static CalamityMod.CalamityUtils;
 
 namespace CalamityMod.Projectiles.Melee
 {
-    public class ExaltedOathbladeThrownBlade : ModProjectile, ILocalizedModType
+    public class ExaltedOathbladeThrownBlade : BaseImpalingSwordThrownBlade
     {
-        public new string LocalizationCategory => "Projectiles.Melee";
         public override string Texture => "CalamityMod/Items/Weapons/Melee/ExaltedOathblade";
+        protected override float HeldBladeOffset => -65f;
+        protected override Color FadeDustSecondaryColor => Color.BlueViolet;
 
-        public int ChargeupTime => (int)Projectile.localAI[2];
-        public int Lifetime = 150;
-        public float OverallProgress => 1 - Projectile.timeLeft / (float)Lifetime;
-        public float ThrowProgress => 1 - Projectile.timeLeft / (float)(Lifetime);
-        public float ChargeProgress => 1 - (Projectile.timeLeft - Lifetime) / (float)(ChargeupTime);
-        public Player Owner => Main.player[Projectile.owner];
+        public ExaltedOathbladeThrownBlade() : base(150, 120)
+        {
+        }
 
-        // Real variables here
-        public ref float time => ref Projectile.ai[0];
-        public ref float stabOrder => ref Projectile.ai[1];
-        public ref NPC stabbedTarget => ref Main.npc[(int)Projectile.ai[2]];
-
-        public bool thrown = false;
-        public int fadeOutTime = 120;
-        public bool stuckInTarget = false;
-        public int stuckTimer = 0;
-        public bool exitedTarget = false;
-        public bool stuckInGround = false;
-        public Vector2 impalePos;
-        public int bounces = 0;
-        public Vector2 tipPosition = Vector2.Zero;
-        public bool fadingOut => Projectile.timeLeft <= (Lifetime - fadeOutTime);
         public override void SetDefaults()
         {
             Projectile.width = 22;
             Projectile.height = 22;
-            Projectile.friendly = true;
-            Projectile.tileCollide = false;
-            Projectile.penetrate = -1;
-            Projectile.timeLeft = Lifetime + ChargeupTime;
-            Projectile.DamageType = DamageClass.Melee;
-            Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = -1;
-            Projectile.noEnchantmentVisuals = true;
+            base.SetDefaults();
         }
 
-        public override bool ShouldUpdatePosition()
-        {
-            return (ChargeProgress >= 1 && !stuckInGround && !stuckInTarget);
-        }
-
-        //Swing animation keys
-        public CurveSegment pullback = new CurveSegment(EasingType.PolyOut, 0f, 0f, MathHelper.PiOver4 * -1.2f, 2);
-        public CurveSegment throwout = new CurveSegment(EasingType.PolyOut, 0.7f, MathHelper.PiOver4 * -1.2f, MathHelper.PiOver4 * 1.2f + MathHelper.PiOver2, 3);
-        internal float ArmAnticipationMovement() => PiecewiseAnimation(ChargeProgress, new CurveSegment[] { pullback, throwout });
+        internal float ArmAnticipationMovement() => base.ArmAnticipationMovement(ChargeProgress);
 
         public override void AI()
         {
@@ -106,37 +73,7 @@ namespace CalamityMod.Projectiles.Melee
                 if (time > fadeOutTime * 0.7f && !exitedTarget)
                     Projectile.velocity *= 0.93f;
 
-                if (stuckInTarget)
-                {
-                    Projectile.tileCollide = false;
-                    time--;
-                    Projectile.timeLeft++;
-                    if (stuckTimer > 0)
-                        stuckTimer--;
-                    else
-                    {
-                        Projectile.velocity *= 0.01f;
-                        stabbedTarget.Calamity().demonSwordImpales--;
-                        stuckInTarget = false;
-                        fadeOutEffect();
-                    }
-
-                    Projectile.Center = stabbedTarget.Center + impalePos;
-                    if ((stabbedTarget.life <= 0) || stabbedTarget == null || Projectile.localAI[0] == 5 || !stabbedTarget.active)
-                    {
-                        Projectile.timeLeft = Lifetime;
-                        stabbedTarget.Calamity().demonSwordImpales--;
-                        stuckInTarget = false;
-                        exitedTarget = true;
-                        Projectile.tileCollide = true;
-                        Projectile.rotation += Main.rand.NextFloat(-1.5f, 1.5f);
-                        for (int i = 0; i < Main.maxNPCs; i++)
-                            Projectile.localNPCImmunity[i] = 0;
-                        Projectile.numHits = 0;
-                        SoundStyle unstuck = new("CalamityMod/Sounds/NPCHit/PerfLargeHit", 3);
-                        SoundEngine.PlaySound(unstuck with { Volume = 0.85f, Pitch = Main.rand.NextFloat(0.3f, 0.4f), MaxInstances = 3 }, Projectile.Center);
-                    }
-                }
+                UpdateImpaledTarget(collideAfterExit: true, exitRotation: 1.5f);
                 if (exitedTarget && !stuckInGround)
                 {
                     Projectile.extraUpdates = 2;
@@ -189,41 +126,12 @@ namespace CalamityMod.Projectiles.Melee
             else
                 time++;
         }
-        public void fadeOutEffect()
-        {
-            Projectile.tileCollide = false;
-            if (Projectile.timeLeft > Lifetime - fadeOutTime)
-                Projectile.timeLeft = Lifetime - fadeOutTime;
-            Projectile.Opacity = Utils.GetLerpValue(0, Lifetime - fadeOutTime, Projectile.timeLeft, true);
+        public void fadeOutEffect() => FadeOutEffect();
 
-            Vector2 dustVel = new Vector2(10, 10).RotatedByRandom(Math.PI) * Main.rand.NextFloat(0.2f, 1f) * Projectile.Opacity;
-            if (Main.rand.NextBool(4))
-            {
-                Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<SquashDust>(), dustVel, 0, default, Main.rand.NextFloat(1.1f, 1.4f) * Projectile.scale);
-                dust.noGravity = true;
-                dust.color = Main.rand.NextBool() ? Color.MediumOrchid : Color.BlueViolet;
-                dust.noLight = true;
-                dust.noLightEmittence = true;
-                dust.alpha = 100;
-                dust.velocity += Projectile.velocity;
-                dust.fadeIn = Projectile.scale - 1;
-            }
-        }
         public void throwAnimation()
         {
             Owner.ChangeDir(MathF.Sign(Main.MouseWorld.X - Owner.Center.X));
-
-            float armRotation = ArmAnticipationMovement() * Owner.direction;
-
-            Owner.heldProj = Projectile.whoAmI;
-            Projectile.spriteDirection = Owner.direction;
-            Projectile.direction = Owner.direction;
-
-            Projectile.Center = Owner.MountedCenter + Vector2.UnitY.RotatedBy(armRotation * Owner.gravDir) * -65f * Owner.gravDir * Projectile.scale;
-            Projectile.rotation = (-MathHelper.PiOver4 * Projectile.direction + armRotation) * Owner.gravDir;
-
-            Owner.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, MathHelper.Pi + armRotation);
-
+            PositionHeldBlade(ChargeProgress);
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -327,13 +235,6 @@ namespace CalamityMod.Projectiles.Melee
             Projectile.tileCollide = false;
             SoundStyle stuck = new("CalamityMod/Sounds/Item/DemonSwordImpact", 2);
             SoundEngine.PlaySound(stuck with { Volume = 0.75f, Pitch = Main.rand.NextFloat(0.2f, 0.3f), MaxInstances = 3 }, Projectile.Center);
-        }
-        public override bool? CanDamage()
-        {
-            if (ChargeProgress < 1 || fadingOut || stuckInGround || stuckInTarget || (Projectile.numHits > 0 && !exitedTarget))
-                return false;
-
-            return base.CanDamage();
         }
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox) => (Projectile.numHits > 0 && !exitedTarget) ? false : CalamityUtils.CircularHitboxCollision(Projectile.Center, Projectile.width / (exitedTarget ? 0.25f : 1) * Projectile.scale, targetHitbox); // After exiting a target, the hitbox is larger
         public override bool PreDraw(ref Color lightColor)
