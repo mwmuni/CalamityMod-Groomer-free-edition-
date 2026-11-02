@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Dusts;
-using CalamityMod.Packets.Entities;
 using CalamityMod.Particles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
-using Terraria.ID;
 using Terraria.ModLoader;
 using static CalamityMod.CalamityUtils;
 
@@ -20,6 +17,9 @@ namespace CalamityMod.Projectiles.Melee
         public override string Texture => "CalamityMod/Items/Weapons/Melee/DevilsDevastation";
         protected override float HeldBladeOffset => -80f;
         protected override Color FadeDustSecondaryColor => clr;
+        protected override int DemonicFlamesDamage => 1000;
+        protected override int MaximumImpales => 5;
+        protected override float EjectionSpread => 0f;
 
         public Color clr = Color.Lerp(Color.DeepPink, Color.Orange, 0.5f);
         public Color usedColor = Color.White;
@@ -94,17 +94,7 @@ namespace CalamityMod.Projectiles.Melee
 
             if (thrown)
             {
-                Projectile.spriteDirection = Projectile.direction;
-
-                if (!stuckInGround && exitedTarget)
-                    Projectile.rotation += (0.15f * (MathF.Abs(Projectile.velocity.Y) * 0.03f + 0.85f)) * Main.rand.NextFloat(0.7f, 1f) * Projectile.direction * Projectile.Opacity;
-                else
-                    Projectile.rotation = (Projectile.velocity.ToRotation() + MathHelper.PiOver4 * (Projectile.direction == 1 ? 1 : 3));
-
-                if (time > fadeOutTime * 0.7f && !exitedTarget)
-                    Projectile.velocity *= 0.93f;
-
-                UpdateImpaledTarget(collideAfterExit: false, exitRotation: 1.2f);
+                UpdateThrownMotion(0.15f, slowAfterExit: false, collideAfterExit: false, exitRotation: 1.2f);
                 if (exitedTarget && !stuckInGround)
                 {
                     Projectile.extraUpdates = 5;
@@ -153,81 +143,44 @@ namespace CalamityMod.Projectiles.Melee
 
         public void ThrowAnimation(float chargeProgress) => AnimateThrow(chargeProgress);
 
-        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        protected override void PlayImpaleSound()
         {
-            int bonusDamage = 1000;
-            if (target.Calamity().demonicFlamesBonusDamage <= bonusDamage)
+            SoundStyle stuck = new("CalamityMod/Sounds/Item/HellkiteSmallHit", 3);
+            SoundEngine.PlaySound(stuck with { Volume = 0.65f, Pitch = Main.rand.NextFloat(0.4f, 0.5f), MaxInstances = 3 }, Projectile.Center);
+            SoundStyle stuck2 = new("CalamityMod/Sounds/Item/DemonSwordImpact", 2);
+            SoundEngine.PlaySound(stuck2 with { Volume = 0.8f, Pitch = Main.rand.NextFloat(-0.3f, -0.2f), MaxInstances = 3 }, Projectile.Center);
+        }
+
+        protected override void OnImpaleEffects(NPC target, bool ejected)
+        {
+            if (ejected)
             {
-                target.Calamity().demonicFlamesBonusDamage = bonusDamage;
-                target.AddBuff(ModContent.BuffType<DemonicFlames>(), 120);
-                // Demonic Flames damage must be synced, because OnHitNPC is only run for the client that hit the NPC
-                if (Main.netMode != NetmodeID.SinglePlayer)
-                    DemonicFlamesSyncPacket.Send(target);
-            }
+                for (int i = 0; i < 12; i++)
+                {
+                    Particle spark2 = new SparkParticle(target.Center, Projectile.velocity.RotatedByRandom(0.45) * Main.rand.NextFloat(2.5f, 4.5f), false, 50, Main.rand.NextFloat(0.2f, 1.3f), Main.rand.NextBool() ? clr : Color.BlueViolet);
+                    GeneralParticleHandler.SpawnParticle(spark2);
 
-            if (!exitedTarget)
+                    Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<LightDust>(), Projectile.velocity.RotatedByRandom(0.35) * Main.rand.NextFloat(2f, 4f), 0, default, Main.rand.NextFloat(1.3f, 1.6f));
+                    dust.noGravity = true;
+                    dust.noLight = true;
+                    dust.color = Main.rand.NextBool() ? Color.MediumOrchid : clr;
+                }
+            }
+            else
             {
-                SoundStyle stuck = new("CalamityMod/Sounds/Item/HellkiteSmallHit", 3);
-                SoundEngine.PlaySound(stuck with { Volume = 0.65f, Pitch = Main.rand.NextFloat(0.4f, 0.5f), MaxInstances = 3 }, Projectile.Center);
-                SoundStyle stuck2 = new("CalamityMod/Sounds/Item/DemonSwordImpact", 2);
-                SoundEngine.PlaySound(stuck2 with { Volume = 0.8f, Pitch = Main.rand.NextFloat(-0.3f, -0.2f), MaxInstances = 3 }, Projectile.Center);
-
-                Projectile.ai[2] = target.whoAmI;
-
-                if (target.Calamity().demonSwordImpales < 0)
-                    target.Calamity().demonSwordImpales = 0;
-                if (target.Calamity().demonSwordImpales >= 5)
+                for (int i = 0; i < 8; i++)
                 {
-                    float bladeValue = -1;
-                    Projectile ejectedBlade = null;
-                    for (int x = 0; x < Main.maxProjectiles; x++)
-                    {
-                        Projectile projectile = Main.projectile[x];
-                        if (projectile.owner == Projectile.owner && projectile.type == Projectile.type && Projectile.localAI[0] != 5 && projectile.ai[2] == Projectile.ai[2] && projectile.timeLeft > (Lifetime - fadeOutTime) && (bladeValue == -1 || bladeValue > projectile.ai[1]))
-                        {
-                            bladeValue = projectile.ai[1];
-                            ejectedBlade = projectile;
-                        }
-                    }
-                    ejectedBlade.localAI[0] = 5;
-                    ejectedBlade.ai[1] += 1000;
-                    ejectedBlade.velocity = Projectile.velocity;
+                    Particle spark2 = new SparkParticle(target.Center, Projectile.velocity.RotatedByRandom(0.3) * Main.rand.NextFloat(0.4f, 2.5f), false, 50, Main.rand.NextFloat(0.2f, 1.3f), Main.rand.NextBool() ? Color.MediumOrchid : clr);
+                    GeneralParticleHandler.SpawnParticle(spark2);
 
-                    for (int i = 0; i < 12; i++)
-                    {
-                        Particle spark2 = new SparkParticle(target.Center, Projectile.velocity.RotatedByRandom(0.45) * Main.rand.NextFloat(2.5f, 4.5f), false, 50, Main.rand.NextFloat(0.2f, 1.3f), Main.rand.NextBool() ? clr : Color.BlueViolet);
-                        GeneralParticleHandler.SpawnParticle(spark2);
-
-                        Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<LightDust>(), Projectile.velocity.RotatedByRandom(0.35) * Main.rand.NextFloat(2f, 4f), 0, default, Main.rand.NextFloat(1.3f, 1.6f));
-                        dust.noGravity = true;
-                        dust.noLight = true;
-                        dust.color = Main.rand.NextBool() ? Color.MediumOrchid : clr;
-                    }
+                    Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<LightDust>(), Projectile.velocity.RotatedByRandom(0.2) * Main.rand.NextFloat(0.5f, 2f), 0, default, Main.rand.NextFloat(1.1f, 1.4f));
+                    dust.noGravity = false;
+                    dust.noLight = true;
+                    dust.color = Main.rand.NextBool() ? clr : Color.BlueViolet;
                 }
-                else
-                {
-                    for (int i = 0; i < 8; i++)
-                    {
-                        Particle spark2 = new SparkParticle(target.Center, Projectile.velocity.RotatedByRandom(0.3) * Main.rand.NextFloat(0.4f, 2.5f), false, 50, Main.rand.NextFloat(0.2f, 1.3f), Main.rand.NextBool() ? Color.MediumOrchid : clr);
-                        GeneralParticleHandler.SpawnParticle(spark2);
-
-                        Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<LightDust>(), Projectile.velocity.RotatedByRandom(0.2) * Main.rand.NextFloat(0.5f, 2f), 0, default, Main.rand.NextFloat(1.1f, 1.4f));
-                        dust.noGravity = false;
-                        dust.noLight = true;
-                        dust.color = Main.rand.NextBool() ? clr : Color.BlueViolet;
-                    }
-                }
-                Projectile crack = Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), Projectile.Center, (Projectile.velocity.SafeNormalize(Vector2.UnitX) * 2).RotatedByRandom(0.3f), ModContent.ProjectileType<DevilsStrike>(), 0, 0f, Projectile.owner, 0.8f, 1);
-                crack.timeLeft = 200;
-                target.Calamity().demonSwordImpales++;
-
-                stuckInTarget = true;
-                impalePos = Projectile.Center - stabbedTarget.Center;
-                stuckTimer = 3600;
             }
-            Projectile.netUpdate = true;
-            if (Main.netMode != NetmodeID.SinglePlayer)
-                DemonSwordImpalesSyncPacket.Send(target);
+            Projectile crack = Projectile.NewProjectileDirect(Projectile.GetSource_FromThis(), Projectile.Center, (Projectile.velocity.SafeNormalize(Vector2.UnitX) * 2).RotatedByRandom(0.3f), ModContent.ProjectileType<DevilsStrike>(), 0, 0f, Projectile.owner, 0.8f, 1);
+            crack.timeLeft = 200;
         }
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {
