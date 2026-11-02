@@ -11,33 +11,84 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 {
+    /// <summary>Provides Empress-specific damage scaling.</summary>
     public static class EmpressOfLightAIUtils
     {
+        /// <summary>Applies the Empress's daytime damage override.</summary>
+        /// <param name="damage">Damage to use when the Empress is not enraged.</param>
+        /// <returns>The original damage, or 9999 while enraged.</returns>
         public static int CalculateDamageForEnrage(this int damage) => NPC.ShouldEmpressBeEnraged() ? 9999 : damage;
     }
 
+    /// <summary>Controls the Empress of Light's attacks, transitions, and visual effects.</summary>
     public class EmpressofLightAI : VanillaAIOverride
     {
+        private enum AttackState
+        {
+            Introduction = 0,
+            Idle = 1,
+            RainbowStreaks = 2,
+            EtherealLances = 4,
+            EverlastingRainbow = 5,
+            SunDance = 6,
+            LanceWalls = 7,
+            ChargeLeft = 8,
+            ChargeRight = 9,
+            Phase2Transition = 10,
+            PredictiveLances = 11,
+            SpinningRainbowStreaks = 12,
+            Despawn = 13
+        }
+
         // NOTE: This is applied to all difficulties, in CalamityPlayerHitHurt
+        /// <summary>Damage multiplier for Everlasting Rainbow trails in every difficulty.</summary>
         public static float EverlastingRainbowTrailDamageMult = 0.75f;
 
         // Vanilla values
+        /// <summary>Contact-damage multiplier during a dash.</summary>
         public static float DashDamageMult = 1.5f; // 165
+        /// <summary>Base prismatic bolt damage before enrage scaling.</summary>
         public static int PrismaticBoltDamage = 30; // 120
+        /// <summary>Base Everlasting Rainbow damage before enrage scaling.</summary>
         public static int EverlastingRainbowDamage = 30; // 120
+        /// <summary>Base Ethereal Lance damage before enrage scaling.</summary>
         public static int EtherealLanceDamage = 30; // 120
+        /// <summary>Base Sun Dance damage before enrage scaling.</summary>
         public static int SunDanceDamage = 35; // 140
+        /// <summary>Second-phase prismatic bolt damage before enrage scaling.</summary>
         public static int Phase2PrismaticBoltDamage = 35; // 140
+        /// <summary>Second-phase Everlasting Rainbow damage before enrage scaling.</summary>
         public static int Phase2EverlastingRainbowDamage = 35; // 140
+        /// <summary>Second-phase Ethereal Lance damage before enrage scaling.</summary>
         public static int Phase2EtherealLanceDamage = 35; // 140
+        /// <summary>Second-phase Sun Dance damage before enrage scaling.</summary>
         public static int Phase2SunDanceDamage = 40; // 160
 
         // Vanilla sets her defDamage to 184 (80 * 2 * 1.15) in Expert Mode
         // However, some weird contraption in her Expert AI that knocks her base contact damage to the intended value of 110
         // This hasn't been found anywhere so our solution for now is avoid using defDamage altogether
+        /// <summary>Corrected contact damage, independent of vanilla's expert-mode base damage.</summary>
         public static int ContactDamageCorrection = Main.masterMode ? 248 : 110;
 
-        private void MoveTowardsHoverPosition(ref Vector2 center, bool death)
+        private static readonly int[] Phase1Attacks = { 2, 8, 6, 8, 5, 2, 8, 4, 8, 5 };
+        private static readonly int[] Phase2Attacks = { 7, 2, 8, 11, 5, 2, 6, 4, 8, 12 };
+
+        private enum SpawnDustClock
+        {
+            Introduction,
+            Phase3
+        }
+
+        private enum MagicEffect
+        {
+            RainbowStreaks = 1,
+            LeftLance = 2,
+            RainbowSpiral = 3,
+            RightLance = 4,
+            SunDance = 5
+        }
+
+        private void MoveTowardsHoverPosition(Vector2 center, bool death)
         {
             if (NPC.Distance(center) > 200f)
                 center -= NPC.DirectionTo(center) * 100f;
@@ -54,6 +105,59 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             NPC.netUpdate = true;
         }
 
+        private void UpdatePhase3Visuals(CalamityGlobalNPC calamityGlobalNPC, float playSpawnSoundTime, float stopSpawningDustTime)
+        {
+            if (calamityGlobalNPC.newAI[0] == playSpawnSoundTime)
+                SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
+
+            if (calamityGlobalNPC.newAI[0] > playSpawnSoundTime && calamityGlobalNPC.newAI[0] < stopSpawningDustTime)
+                CreateSpawnDust(NPC, SpawnDustClock.Phase3);
+
+            calamityGlobalNPC.newAI[0] += 1f;
+            if (calamityGlobalNPC.newAI[0] >= stopSpawningDustTime)
+            {
+                calamityGlobalNPC.newAI[0] = playSpawnSoundTime + 1f;
+                NPC.SyncExtraAI();
+            }
+        }
+
+        private void UpdateDefenseAndVisuals(bool phase2, bool phase3, bool visible)
+        {
+            if (phase3)
+                NPC.defense = (int)Math.Round(NPC.defDefense * 0.8);
+            else if (phase2)
+                NPC.defense = (int)Math.Round(NPC.defDefense * 1.2);
+            else
+                NPC.defense = NPC.defDefense;
+
+            if ((NPC.localAI[0] += 1f) >= 44f)
+                NPC.localAI[0] = 0f;
+
+            if (visible)
+                NPC.alpha = Utils.Clamp(NPC.alpha - 5, 0, 255);
+
+            Lighting.AddLight(NPC.Center, Vector3.One * NPC.Opacity);
+        }
+
+        private void UpdateSpawnEffects(float playSpawnSoundTime, float stopSpawningDustTime)
+        {
+            if (NPC.ai[1] == 0f)
+            {
+                NPC.velocity = new Vector2(0f, 5f);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + new Vector2(0f, -80f), Vector2.Zero, ProjectileID.HallowBossDeathAurora, 0, 0f, Main.myPlayer);
+            }
+
+            if (NPC.ai[1] == playSpawnSoundTime)
+                SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
+
+            NPC.velocity *= 0.95f;
+
+            if (NPC.ai[1] > playSpawnSoundTime && NPC.ai[1] < stopSpawningDustTime)
+                CreateSpawnDust(NPC);
+        }
+
+        /// <inheritdoc/>
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -84,7 +188,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             if (shouldBeInPhase2ButIsStillInPhase1)
                 calamityGlobalNPC.DR = 0.99f;
 
-            calamityGlobalNPC.CurrentlyIncreasingDefenseOrDR = shouldBeInPhase2ButIsStillInPhase1 || NPC.ai[0] == 6f;
+            calamityGlobalNPC.CurrentlyIncreasingDefenseOrDR = shouldBeInPhase2ButIsStillInPhase1 || NPC.ai[0] == (float)AttackState.SunDance;
 
             bool dayTimeEnrage = NPC.ShouldEmpressBeEnraged();
             if (NPC.life == NPC.lifeMax && dayTimeEnrage && !NPC.AI_120_HallowBoss_IsGenuinelyEnraged())
@@ -133,42 +237,19 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             int minAlpha = 255 - (int)(255 * maxOpacity);
             if (phase3)
             {
-                if (calamityGlobalNPC.newAI[0] == playSpawnSoundTime)
-                    SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
-
-                if (calamityGlobalNPC.newAI[0] > playSpawnSoundTime && calamityGlobalNPC.newAI[0] < stopSpawningDustTime)
-                    CreateSpawnDust(NPC, false);
-
-                calamityGlobalNPC.newAI[0] += 1f;
-                if (calamityGlobalNPC.newAI[0] >= stopSpawningDustTime)
-                {
-                    calamityGlobalNPC.newAI[0] = playSpawnSoundTime + 1f;
-                    NPC.SyncExtraAI();
-                }
+                UpdatePhase3Visuals(calamityGlobalNPC, playSpawnSoundTime, stopSpawningDustTime);
             }
 
-            switch ((int)NPC.ai[0])
+            // Preserve vanilla's integer-cast dispatch, including fractional synchronized states.
+            switch ((AttackState)(int)NPC.ai[0])
             {
                 // Spawn animation.
-                case 0:
+                case AttackState.Introduction:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
 
-                    if (NPC.ai[1] == 0f)
-                    {
-                        NPC.velocity = new Vector2(0f, 5f);
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + new Vector2(0f, -80f), Vector2.Zero, ProjectileID.HallowBossDeathAurora, 0, 0f, Main.myPlayer);
-                    }
-
-                    if (NPC.ai[1] == playSpawnSoundTime)
-                        SoundEngine.PlaySound(SoundID.Item161, NPC.Center);
-
-                    NPC.velocity *= 0.95f;
-
-                    if (NPC.ai[1] > playSpawnSoundTime && NPC.ai[1] < stopSpawningDustTime)
-                        CreateSpawnDust(NPC);
+                    UpdateSpawnEffects(playSpawnSoundTime, stopSpawningDustTime);
 
                     NPC.ai[1] += 1f;
                     visible = false;
@@ -180,8 +261,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         if (dayTimeEnrage && !NPC.AI_120_HallowBoss_IsGenuinelyEnraged())
                             NPC.ai[3] += 2f;
 
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         NPC.netUpdate = true;
                         CalamityUtils.CalamityTargeting(NPC, CalamityTargetingParameters.BossDefaults);
                     }
@@ -189,7 +269,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     break;
 
                 // Phase switch.
-                case 1:
+                case AttackState.Idle:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -209,8 +289,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         NPCAimedTarget targetData4 = NPC.GetTargetData();
                         if (targetData4.Invalid)
                         {
-                            NPC.ai[0] = 13f;
-                            NPC.ai[1] = 0f;
+                            NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Despawn);
                             NPC.ai[2] += 1f;
                             NPC.velocity /= 4f;
                             NPC.netUpdate = true;
@@ -219,7 +298,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                         Vector2 center = targetData4.Center;
                         center += new Vector2(0f, -400f);
-                        MoveTowardsHoverPosition(ref center, death);
+                        MoveTowardsHoverPosition(center, death);
                     }
 
                     NPC.velocity *= 0.92f;
@@ -228,136 +307,30 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         break;
 
                     int attackPatternLength = (int)NPC.ai[2];
-                    int attackType = 2;
-                    int attackIncrement = 0;
-
-                    if (!phase2)
+                    int[] attackCycle = phase2 ? Phase2Attacks : Phase1Attacks;
+                    int cycleStep = attackPatternLength % attackCycle.Length;
+                    int attackType = BossAttackCycle.Select(attackCycle, cycleStep, 2);
+                    if (phase2 && phase3)
                     {
-                        int phase1Attack1 = attackIncrement++;
-                        int phase1Attack2 = attackIncrement++;
-                        int phase1Attack3 = attackIncrement++;
-                        int phase1Attack4 = attackIncrement++;
-                        int phase1Attack5 = attackIncrement++;
-                        int phase1Attack6 = attackIncrement++;
-                        int phase1Attack7 = attackIncrement++;
-                        int phase1Attack8 = attackIncrement++;
-                        int phase1Attack9 = attackIncrement++;
-                        int phase1Attack10 = attackIncrement++;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack1)
-                            attackType = 2;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack2)
+                        if (cycleStep == 1)
                             attackType = 8;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack3)
-                            attackType = 6;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack4)
-                            attackType = 8;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack5)
-                            attackType = 5;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack6)
-                            attackType = 2;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack7)
-                            attackType = 8;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack8)
-                        {
+                        if (cycleStep == 6)
                             attackType = 4;
-
-                            // Adjust the upcoming Ethereal Lance attack depending on what random variable is chosen here.
-                            calamityGlobalNPC.newAI[3] = Main.rand.Next(2);
-
-                            // Sync the Calamity AI variables.
-                            NPC.SyncExtraAI();
-                        }
-
-                        if (attackPatternLength % attackIncrement == phase1Attack9)
-                            attackType = 8;
-
-                        if (attackPatternLength % attackIncrement == phase1Attack10)
-                            attackType = 5;
-
-                        if (lifeRatio <= phase2LifeRatio)
-                            attackType = 10;
                     }
 
-                    if (phase2)
+                    // Choose the lance variant before a health transition can override the selected attack.
+                    if (phase2 && cycleStep == 0)
                     {
-                        int phase2Attack1 = attackIncrement++;
-                        int phase2Attack2 = attackIncrement++;
-                        int phase2Attack3 = attackIncrement++;
-                        int phase2Attack4 = attackIncrement++;
-                        int phase2Attack5 = attackIncrement++;
-                        int phase2Attack6 = attackIncrement++;
-                        int phase2Attack7 = attackIncrement++;
-                        int phase2Attack8 = attackIncrement++;
-                        int phase2Attack9 = attackIncrement++;
-                        int phase2Attack10 = attackIncrement++;
-
-                        if (attackPatternLength % attackIncrement == phase2Attack1)
-                        {
-                            attackType = 7;
-
-                            // Adjust the upcoming Ethereal Lance attack depending on what random variable is chosen here.
-                            calamityGlobalNPC.newAI[2] = Main.rand.Next(2);
-
-                            // Sync the Calamity AI variables.
-                            NPC.SyncExtraAI();
-                        }
-
-                        if (attackPatternLength % attackIncrement == phase2Attack2)
-                            attackType = phase3 ? 8 : 2;
-
-                        if (attackPatternLength % attackIncrement == phase2Attack3)
-                            attackType = 8;
-
-                        if (attackPatternLength % attackIncrement == phase2Attack4)
-                            attackType = 11;
-
-                        if (attackPatternLength % attackIncrement == phase2Attack5)
-                            attackType = 5;
-
-                        if (attackPatternLength % attackIncrement == phase2Attack6)
-                            attackType = 2;
-
-                        if (attackPatternLength % attackIncrement == phase2Attack7)
-                        {
-                            if (phase3)
-                            {
-                                attackType = 4;
-
-                                // Adjust the upcoming Ethereal Lance attack depending on what random variable is chosen here.
-                                calamityGlobalNPC.newAI[3] = Main.rand.Next(2);
-
-                                // Sync the Calamity AI variables.
-                                NPC.SyncExtraAI();
-                            }
-                            else
-                                attackType = 6;
-                        }
-
-                        if (attackPatternLength % attackIncrement == phase2Attack8)
-                        {
-                            attackType = 4;
-
-                            // Adjust the upcoming Ethereal Lance attack depending on what random variable is chosen here.
-                            calamityGlobalNPC.newAI[3] = Main.rand.Next(2);
-
-                            // Sync the Calamity AI variables.
-                            NPC.SyncExtraAI();
-                        }
-
-                        if (attackPatternLength % attackIncrement == phase2Attack9)
-                            attackType = 8;
-
-                        if (attackPatternLength % attackIncrement == phase2Attack10)
-                            attackType = 12;
+                        calamityGlobalNPC.newAI[2] = Main.rand.Next(2);
+                        NPC.SyncExtraAI();
                     }
+                    else if (cycleStep == 7 || (phase2 && phase3 && cycleStep == 6))
+                    {
+                        calamityGlobalNPC.newAI[3] = Main.rand.Next(2);
+                        NPC.SyncExtraAI();
+                    }
+                    if (!phase2 && lifeRatio <= phase2LifeRatio)
+                        attackType = 10;
 
                     CalamityUtils.CalamityTargeting(NPC, CalamityTargetingParameters.BossDefaults);
                     NPCAimedTarget targetData5 = NPC.GetTargetData();
@@ -382,15 +355,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if (attackType != 5 && attackType != 12)
                         NPC.velocity = NPC.DirectionFrom(targetData5.Center).SafeNormalize(Vector2.Zero).RotatedBy(MathHelper.PiOver2 * (targetData5.Center.X > NPC.Center.X).ToDirectionInt()) * 24f;
 
-                    NPC.ai[0] = attackType;
-                    NPC.ai[1] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, attackType);
                     NPC.ai[2] += 1f;
                     NPC.netUpdate = true;
 
                     break;
 
                 // Spawn homing Rainbow Streaks.
-                case 2:
+                case AttackState.RainbowStreaks:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -405,7 +377,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         NPC.SimpleFlyMovement(NPC.DirectionTo(targetCenter + rainbowStreakDistance).SafeNormalize(Vector2.Zero) * velocity, acceleration);
 
                     if (NPC.ai[1] < 60f)
-                        AI_120_HallowBoss_DoMagicEffect(NPC.Center + randomStreakOffset, 1, Utils.GetLerpValue(0f, 60f, NPC.ai[1], clamped: true), NPC);
+                        CreateMagicEffect(NPC.Center + randomStreakOffset, MagicEffect.RainbowStreaks, Utils.GetLerpValue(0f, 60f, NPC.ai[1], clamped: true), NPC);
 
                     int streakSpawnFrequency = Main.getGoodWorld ? 1 : 2;
                     if (phase3)
@@ -449,40 +421,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     extraPhaseTime = (dayTimeEnrage ? (death ? 30f : 36f) : (death ? 60f : 72f)) + 30f * lessTimeSpentPerPhaseMultiplier;
                     if (NPC.ai[1] >= 60f + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         NPC.netUpdate = true;
                     }
 
                     break;
 
-                // This is never fucking used.
-                /*case 3:
-                    {
-                        npc.ai[1] += 1f;
-                        NPCAimedTarget targetData8 = npc.GetTargetData();
-                        Vector2 targetCenter = targetData8.Invalid ? npc.Center : targetData8.Center;
-                        if (npc.Distance(targetCenter + phase2AnimationDistance) > 0.5f)
-                            npc.SimpleFlyMovement(npc.DirectionTo(targetCenter + phase2AnimationDistance).SafeNormalize(Vector2.Zero) * scaleFactor, 4f);
-
-                        if ((int)npc.ai[1] % 180 == 0)
-                        {
-                            Vector2 auroraVector = new Vector2(0f, -100f);
-                            Projectile.NewProjectile(npc.GetSource_FromAI(), targetData8.Center + auroraVector, Vector2.Zero, ProjectileID.HallowBossDeathAurora, magicAmt, 0f, Main.myPlayer);
-                        }
-
-                        if (npc.ai[1] >= 120f)
-                        {
-                            npc.ai[0] = 1f;
-                            npc.ai[1] = 0f;
-                            npc.netUpdate = true;
-                        }
-
-                        break;
-                    }*/
-
                 // Spawn Ethereal Lances around the target in seemingly random places (they will be made slower to make this easier to deal with).
-                case 4:
+                case AttackState.EtherealLances:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -494,8 +440,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                     if (NPC.ai[1] >= 6f && NPC.ai[1] < 54f)
                     {
-                        AI_120_HallowBoss_DoMagicEffect(NPC.Center + new Vector2(-55f, -20f), 2, Utils.GetLerpValue(0f, lanceGateValue, NPC.ai[1], clamped: true), NPC);
-                        AI_120_HallowBoss_DoMagicEffect(NPC.Center + new Vector2(55f, -20f), 4, Utils.GetLerpValue(0f, lanceGateValue, NPC.ai[1], clamped: true), NPC);
+                        CreateMagicEffect(NPC.Center + new Vector2(-55f, -20f), MagicEffect.LeftLance, Utils.GetLerpValue(0f, lanceGateValue, NPC.ai[1], clamped: true), NPC);
+                        CreateMagicEffect(NPC.Center + new Vector2(55f, -20f), MagicEffect.RightLance, Utils.GetLerpValue(0f, lanceGateValue, NPC.ai[1], clamped: true), NPC);
                     }
 
                     NPCAimedTarget targetData10 = NPC.GetTargetData();
@@ -578,8 +524,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     extraPhaseTime = (dayTimeEnrage ? 24f : 48f) + 20f * lessTimeSpentPerPhaseMultiplier;
                     if (NPC.ai[1] >= lanceGateValue + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         calamityGlobalNPC.newAI[3] = 0f;
                         NPC.netUpdate = true;
 
@@ -590,7 +535,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     break;
 
                 // Spawn Everlasting Rainbow spiral.
-                case 5:
+                case AttackState.EverlastingRainbow:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -601,7 +546,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     Vector2 magicSpawnOffset = new Vector2(55f, -30f);
                     Vector2 everlastingRainbowSpawn = NPC.Center + magicSpawnOffset;
                     if (NPC.ai[1] < 42f)
-                        AI_120_HallowBoss_DoMagicEffect(NPC.Center + magicSpawnOffset, 3, Utils.GetLerpValue(0f, 42f, NPC.ai[1], clamped: true), NPC);
+                        CreateMagicEffect(NPC.Center + magicSpawnOffset, MagicEffect.RainbowSpiral, Utils.GetLerpValue(0f, 42f, NPC.ai[1], clamped: true), NPC);
 
                     NPCAimedTarget targetData7 = NPC.GetTargetData();
                     targetCenter = targetData7.Invalid ? NPC.Center : targetData7.Center;
@@ -659,15 +604,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     extraPhaseTime = (dayTimeEnrage ? 36f : 72f) + 30f * lessTimeSpentPerPhaseMultiplier;
                     if (NPC.ai[1] >= 72f + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         NPC.netUpdate = true;
                     }
 
                     break;
 
                 // Use Sun Dance.
-                case 6:
+                case AttackState.SunDance:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -709,15 +653,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     extraPhaseTime = (dayTimeEnrage ? (death ? 105f : 110f) : (death ? 140f : 150f)) + 30f * lessTimeSpentPerPhaseMultiplier; // 112.5 is too little
                     if (NPC.ai[1] >= totalSunDancePhaseTime + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         NPC.netUpdate = true;
                     }
 
                     break;
 
                 // Spawn rows of Ethereal Lances.
-                case 7:
+                case AttackState.LanceWalls:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -786,8 +729,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     extraPhaseTime = (dayTimeEnrage ? 24f : 48f) + 20f * lessTimeSpentPerPhaseMultiplier;
                     if (NPC.ai[1] >= lanceWallPhaseTime + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         calamityGlobalNPC.newAI[3] = 0f;
                         calamityGlobalNPC.newAI[1] = 0f;
                         calamityGlobalNPC.newAI[2] = 0f;
@@ -798,12 +740,12 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     break;
 
                 // Charge either left or right.
-                case 8:
-                case 9:
+                case AttackState.ChargeLeft:
+                case AttackState.ChargeRight:
 
-                    int chargeDirection = (NPC.ai[0] != 8f) ? 1 : (-1);
+                    int chargeDirection = (NPC.ai[0] != (float)AttackState.ChargeLeft) ? 1 : (-1);
 
-                    AI_120_HallowBoss_DoMagicEffect(NPC.Center, 5, Utils.GetLerpValue(40f, 90f, NPC.ai[1], clamped: true), NPC);
+                    CreateMagicEffect(NPC.Center, MagicEffect.SunDance, Utils.GetLerpValue(40f, 90f, NPC.ai[1], clamped: true), NPC);
 
                     float chargeGateValue = 40f;
                     float playChargeSoundTime = 20f;
@@ -891,19 +833,18 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     {
                         Vector2 center = NPC.GetTargetData().Center;
                         center += new Vector2(0f, -200f);
-                        MoveTowardsHoverPosition(ref center, death);
+                        MoveTowardsHoverPosition(center, death);
                     }
                     if (NPC.ai[1] >= totalPhaseTime + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         NPC.netUpdate = true;
                     }
 
                     break;
 
                 // Phase 2 animation.
-                case 10:
+                case AttackState.Phase2Transition:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -930,16 +871,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     NPC.ai[1] += 1f;
                     if (NPC.ai[1] >= 180f)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle, ai2: 0f);
                         NPC.netUpdate = true;
                     }
 
                     break;
 
                 // Spawn Ethereal Lances ahead of the target.
-                case 11:
+                case AttackState.PredictiveLances:
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
 
@@ -950,8 +889,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                     if (NPC.ai[1] >= 6f && NPC.ai[1] < 54f)
                     {
-                        AI_120_HallowBoss_DoMagicEffect(NPC.Center + new Vector2(-55f, -20f), 2, Utils.GetLerpValue(0f, lanceGateValue2, NPC.ai[1], clamped: true), NPC);
-                        AI_120_HallowBoss_DoMagicEffect(NPC.Center + new Vector2(55f, -20f), 4, Utils.GetLerpValue(0f, lanceGateValue2, NPC.ai[1], clamped: true), NPC);
+                        CreateMagicEffect(NPC.Center + new Vector2(-55f, -20f), MagicEffect.LeftLance, Utils.GetLerpValue(0f, lanceGateValue2, NPC.ai[1], clamped: true), NPC);
+                        CreateMagicEffect(NPC.Center + new Vector2(55f, -20f), MagicEffect.RightLance, Utils.GetLerpValue(0f, lanceGateValue2, NPC.ai[1], clamped: true), NPC);
                     }
 
                     NPCAimedTarget targetData6 = NPC.GetTargetData();
@@ -1031,15 +970,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     extraPhaseTime = (dayTimeEnrage ? 24f : 48f) * lessTimeSpentPerPhaseMultiplier;
                     if (NPC.ai[1] >= lanceGateValue2 + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         NPC.netUpdate = true;
                     }
 
                     break;
 
                 // Spawn homing Rainbow Streaks.
-                case 12:
+                case AttackState.SpinningRainbowStreaks:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -1056,7 +994,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                     bool shouldSpawnStreaks = NPC.ai[1] < 60f && NPC.ai[1] >= 10f;
                     if (shouldSpawnStreaks)
-                        AI_120_HallowBoss_DoMagicEffect(NPC.Center + projRandomOffset, 1, Utils.GetLerpValue(0f, 60f, NPC.ai[1], clamped: true), NPC);
+                        CreateMagicEffect(NPC.Center + projRandomOffset, MagicEffect.RainbowStreaks, Utils.GetLerpValue(0f, 60f, NPC.ai[1], clamped: true), NPC);
 
                     int stationaryStreakSpawnFrequency = 4;
                     if (dayTimeEnrage)
@@ -1096,15 +1034,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     extraPhaseTime = (dayTimeEnrage ? 36f : 72f) + 30f * lessTimeSpentPerPhaseMultiplier;
                     if (NPC.ai[1] >= (death ? 105f : 120f) + extraPhaseTime)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                         NPC.netUpdate = true;
                     }
 
                     break;
 
                 // Despawn.
-                case 13:
+                case AttackState.Despawn:
 
                     // Avoid cheap bullshit.
                     NPC.damage = 0;
@@ -1182,36 +1119,22 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         return false;
                     }
 
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Idle);
                     NPC.netUpdate = true;
                     break;
             }
 
             NPC.dontTakeDamage = !takeDamage;
 
-            if (phase3)
-                NPC.defense = (int)Math.Round(NPC.defDefense * 0.8);
-            else if (phase2)
-                NPC.defense = (int)Math.Round(NPC.defDefense * 1.2);
-            else
-                NPC.defense = NPC.defDefense;
-
-            if ((NPC.localAI[0] += 1f) >= 44f)
-                NPC.localAI[0] = 0f;
-
-            if (visible)
-                NPC.alpha = Utils.Clamp(NPC.alpha - 5, 0, 255);
-
-            Lighting.AddLight(NPC.Center, Vector3.One * NPC.Opacity);
+            UpdateDefenseAndVisuals(phase2, phase3, visible);
 
             return false;
         }
 
-        private static void CreateSpawnDust(NPC npc, bool useAI = true)
+        private static void CreateSpawnDust(NPC npc, SpawnDustClock clock = SpawnDustClock.Introduction)
         {
             int spawnDustAmount = 2;
-            float timer = useAI ? npc.ai[1] : npc.Calamity().newAI[0];
+            float timer = clock == SpawnDustClock.Introduction ? npc.ai[1] : npc.Calamity().newAI[0];
             float spawnTime = 180f;
             for (int i = 0; i < spawnDustAmount; i++)
             {
@@ -1234,7 +1157,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
         }
 
-        private static void AI_120_HallowBoss_DoMagicEffect(Vector2 spot, int effectType, float progress, NPC npc)
+        private static void CreateMagicEffect(Vector2 spot, MagicEffect effectType, float progress, NPC npc)
         {
             float magicDustSpawnArea = 4f;
             float magicDustColorMult = 1f;
@@ -1244,26 +1167,26 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             int magicDustType = 267;
             switch (effectType)
             {
-                case 1:
+                case MagicEffect.RainbowStreaks:
                     magicDustColorMult = 0.5f;
                     fadeIn = 2f;
                     magicDustPosChange = 0f;
                     break;
-                case 2:
-                case 4:
+                case MagicEffect.LeftLance:
+                case MagicEffect.RightLance:
                     magicDustSpawnArea = 50f;
                     magicDustColorMult = 0.5f;
                     fadeIn = 0f;
                     magicDustPosChange = 0f;
                     magicAmt = 4;
                     break;
-                case 3:
+                case MagicEffect.RainbowSpiral:
                     magicDustSpawnArea = 30f;
                     magicDustColorMult = 0.1f;
                     fadeIn = 2.5f;
                     magicDustPosChange = 0f;
                     break;
-                case 5:
+                case MagicEffect.SunDance:
                     if (progress == 0f)
                     {
                         magicAmt = 0;
@@ -1285,15 +1208,15 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 dust.noGravity = true;
                 switch (effectType)
                 {
-                    case 2:
-                    case 4:
+                    case MagicEffect.LeftLance:
+                    case MagicEffect.RightLance:
                         {
                             dust.velocity *= 0.005f;
                             dust.scale = 3f * Utils.GetLerpValue(0.7f, 0f, progress, clamped: true) * Utils.GetLerpValue(0f, 0.3f, progress, clamped: true);
                             dust.velocity = (MathHelper.TwoPi * (i / 4f) + MathHelper.PiOver4).ToRotationVector2() * 8f * Utils.GetLerpValue(1f, 0f, progress, clamped: true);
                             dust.velocity += npc.velocity * 0.3f;
                             float magicDustColorChange = 0f;
-                            if (effectType == 4)
+                            if (effectType == MagicEffect.RightLance)
                                 magicDustColorChange = 0.5f;
 
                             dust.color = Main.hslToRgb((i / 5f + magicDustColorChange + progress * 0.5f) % 1f, 1f, 0.5f);
@@ -1301,7 +1224,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             dust.alpha = 127;
                             break;
                         }
-                    case 5:
+                    case MagicEffect.SunDance:
                         if (progress == 0f)
                         {
                             dust.customData = npc;

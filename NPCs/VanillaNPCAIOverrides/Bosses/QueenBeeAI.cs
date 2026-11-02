@@ -13,12 +13,29 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 {
+    /// <summary>Controls Queen Bee's attacks and the minions spawned during the encounter.</summary>
     public class QueenBeeAI : VanillaAIOverride
     {
+        // Keep exact float comparisons; truncating synchronized states would change dispatch.
+        private bool IsAttack(AttackState state) => NPC.ai[0] == (float)state;
+
+        private enum AttackState
+        {
+            ChooseAttack = -1,
+            Charge = 0,
+            SpawnBees = 1,
+            MoveAboveTarget = 2,
+            StingerBombardment = 3,
+            ReturnToTarget = 4,
+            StingerArcs = 5,
+            Despawn = 7
+        }
+
         // Vanilla values
+        /// <summary>Base stinger damage, also used by Zenith-world replacement projectiles.</summary>
         public static int StingerDamage = 11; // 44; Also applies to GFB stinger replacements
 
-        private static void ChooseBeeSpawnType(bool phase3, bool death, bool hornetLimitReached, bool beeLimitReached, ref int spawnType)
+        private static int SelectBeeSpawnType(int spawnType, bool phase3, bool death, bool hornetLimitReached, bool beeLimitReached)
         {
             if (Main.zenithWorld)
             {
@@ -30,33 +47,15 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             else if (death)
             {
                 int random = hornetLimitReached ? 0 : beeLimitReached ? Main.rand.Next(6, 12) : Main.rand.Next(12);
-                switch (random)
+                return random switch
                 {
-                    default:
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        break;
-
-                    case 6:
-                    case 7:
-                    case 8:
-                        spawnType = NPCID.LittleHornetHoney;
-                        break;
-
-                    case 9:
-                    case 10:
-                        spawnType = NPCID.HornetHoney;
-                        break;
-
-                    case 11:
-                        spawnType = NPCID.BigHornetHoney;
-                        break;
-                }
+                    6 or 7 or 8 => NPCID.LittleHornetHoney,
+                    9 or 10 => NPCID.HornetHoney,
+                    11 => NPCID.BigHornetHoney,
+                    _ => spawnType
+                };
             }
+            return spawnType;
         }
 
         private void ConfigureSpawnedBee(int spawn, float enrageScale)
@@ -73,46 +72,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             Main.npc[spawn].netUpdate = true;
         }
 
-        public override bool AI(Mod mod)
+        private static (bool BeesReached, bool HornetsReached) GetMinionLimits(bool death)
         {
-            CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
-
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                CalamityUtils.CalamityTargeting(NPC, CalamityTargetingParameters.BossDefaults);
-
-            bool death = CalamityWorld.death || BossRushEvent.BossRushActive;
-
-            bool enrage = !BossRushEvent.BossRushActive;
-            int targetTileX = (int)Main.player[NPC.target].Center.X / 16;
-            int targetTileY = (int)Main.player[NPC.target].Center.Y / 16;
-
-            Tile tile = Framing.GetTileSafely(targetTileX, targetTileY);
-            if (tile.WallType == WallID.HiveUnsafe)
-                enrage = false;
-
-            float maxEnrageScale = 2f;
-            float enrageScale = death ? 0.5f : 0f;
-            if ((NPC.position.Y / 16f) < Main.worldSurface && enrage)
-            {
-                calamityGlobalNPC.CurrentlyEnraged = true;
-                enrageScale += 1f;
-            }
-            if (!Main.player[NPC.target].ZoneJungle && enrage)
-            {
-                calamityGlobalNPC.CurrentlyEnraged = true;
-                enrageScale += 1f;
-            }
-
-            if (Main.getGoodWorld)
-                enrageScale += 0.5f;
-
-            if (enrageScale > maxEnrageScale)
-                enrageScale = maxEnrageScale;
-
-            // Percent life remaining
-            float lifeRatio = NPC.life / (float)NPC.lifeMax;
-
             // Bee spawn limit
             int beeLimit = death ? 9 : 15;
 
@@ -161,6 +122,88 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
             else
                 hornetLimitReached = true;
+            return (beeLimitReached, hornetLimitReached);
+        }
+
+        private void UpdateDespawn()
+        {
+            // Avoid cheap bullshit
+            NPC.damage = 0;
+
+            NPC.velocity.Y *= 0.98f;
+
+            if (NPC.velocity.X < 0f)
+                NPC.direction = -1;
+            else
+                NPC.direction = 1;
+
+            NPC.spriteDirection = NPC.direction;
+
+            if (NPC.position.X < (Main.maxTilesX * 8))
+            {
+                if (NPC.velocity.X > 0f)
+                    NPC.velocity.X *= 0.98f;
+                else
+                    NPC.localAI[0] = 1f;
+
+                NPC.velocity.X -= 0.08f;
+            }
+            else
+            {
+                if (NPC.velocity.X < 0f)
+                    NPC.velocity.X *= 0.98f;
+                else
+                    NPC.localAI[0] = 1f;
+
+                NPC.velocity.X += 0.08f;
+            }
+
+            if (NPC.timeLeft > 10)
+                NPC.timeLeft = 10;
+        }
+
+        /// <inheritdoc/>
+        public override bool AI(Mod mod)
+        {
+            CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
+
+            // Get a target
+            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
+                CalamityUtils.CalamityTargeting(NPC, CalamityTargetingParameters.BossDefaults);
+
+            bool death = CalamityWorld.death || BossRushEvent.BossRushActive;
+
+            bool enrage = !BossRushEvent.BossRushActive;
+            int targetTileX = (int)Main.player[NPC.target].Center.X / 16;
+            int targetTileY = (int)Main.player[NPC.target].Center.Y / 16;
+
+            Tile tile = Framing.GetTileSafely(targetTileX, targetTileY);
+            if (tile.WallType == WallID.HiveUnsafe)
+                enrage = false;
+
+            float maxEnrageScale = 2f;
+            float enrageScale = death ? 0.5f : 0f;
+            if ((NPC.position.Y / 16f) < Main.worldSurface && enrage)
+            {
+                calamityGlobalNPC.CurrentlyEnraged = true;
+                enrageScale += 1f;
+            }
+            if (!Main.player[NPC.target].ZoneJungle && enrage)
+            {
+                calamityGlobalNPC.CurrentlyEnraged = true;
+                enrageScale += 1f;
+            }
+
+            if (Main.getGoodWorld)
+                enrageScale += 0.5f;
+
+            if (enrageScale > maxEnrageScale)
+                enrageScale = maxEnrageScale;
+
+            // Percent life remaining
+            float lifeRatio = NPC.life / (float)NPC.lifeMax;
+
+            (bool beeLimitReached, bool hornetLimitReached) = GetMinionLimits(death);
 
             // Phases
 
@@ -181,65 +224,33 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
             // Despawn
             float distanceFromTarget = Vector2.Distance(NPC.Center, Main.player[NPC.target].Center);
-            if (NPC.ai[0] != 7f)
+            if (!IsAttack(AttackState.Despawn))
             {
                 if (NPC.timeLeft < 60)
                     NPC.timeLeft = 60;
                 if (distanceFromTarget > 3000f)
-                    NPC.ai[0] = 4f;
+                    NPC.ai[0] = (float)AttackState.ReturnToTarget;
             }
             if (Main.player[NPC.target].dead)
-                NPC.ai[0] = 7f;
+                NPC.ai[0] = (float)AttackState.Despawn;
 
             // Always start in enemy spawning phase
             if (calamityGlobalNPC.newAI[3] == 0f)
             {
                 calamityGlobalNPC.newAI[3] = 1f;
-                NPC.ai[0] = 2f;
+                NPC.ai[0] = (float)AttackState.MoveAboveTarget;
                 NPC.netUpdate = true;
                 NPC.SyncExtraAI();
             }
 
             // Despawn phase
-            if (NPC.ai[0] == 7f)
+            if (IsAttack(AttackState.Despawn))
             {
-                // Avoid cheap bullshit
-                NPC.damage = 0;
-
-                NPC.velocity.Y *= 0.98f;
-
-                if (NPC.velocity.X < 0f)
-                    NPC.direction = -1;
-                else
-                    NPC.direction = 1;
-
-                NPC.spriteDirection = NPC.direction;
-
-                if (NPC.position.X < (Main.maxTilesX * 8))
-                {
-                    if (NPC.velocity.X > 0f)
-                        NPC.velocity.X *= 0.98f;
-                    else
-                        NPC.localAI[0] = 1f;
-
-                    NPC.velocity.X -= 0.08f;
-                }
-                else
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X *= 0.98f;
-                    else
-                        NPC.localAI[0] = 1f;
-
-                    NPC.velocity.X += 0.08f;
-                }
-
-                if (NPC.timeLeft > 10)
-                    NPC.timeLeft = 10;
+                UpdateDespawn();
             }
 
             // Pick a random phase
-            else if (NPC.ai[0] == -1f)
+            else if (IsAttack(AttackState.ChooseAttack))
             {
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
@@ -256,8 +267,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         phase = 5;
 
                     CalamityUtils.CalamityTargeting(NPC, CalamityTargetingParameters.BossDefaults);
-                    NPC.ai[0] = phase;
-                    NPC.ai[1] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, phase);
 
                     // Movement direction for the stinger arcs
                     NPC.ai[2] = (phase == 5 && phase5) ? (Main.rand.NextBool() ? 1f : -1f) : phase == 5 ? 1f : 0f;
@@ -279,7 +289,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
 
             // Charging phase
-            else if (NPC.ai[0] == 0f)
+            else if (IsAttack(AttackState.Charge))
             {
                 // Charging distance from player
                 int chargeDistanceX = (int)calamityGlobalNPC.newAI[1];
@@ -296,9 +306,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 // Switch to a random phase if chargeAmt has been exceeded
                 if (NPC.ai[1] > (2 * chargeAmt) && NPC.ai[1] % 2f == 0f)
                 {
-                    NPC.ai[0] = -1f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.ChooseAttack, ai2: 0f);
                     NPC.netUpdate = true;
                     return false;
                 }
@@ -464,7 +472,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
                                 int spawnType = Main.rand.Next(NPCID.Bee, NPCID.BeeSmall + 1);
-                                ChooseBeeSpawnType(phase3, death, hornetLimitReached, beeLimitReached, ref spawnType);
+                                spawnType = SelectBeeSpawnType(spawnType, phase3, death, hornetLimitReached, beeLimitReached);
 
                                 if (!beeLimitReached || !hornetLimitReached)
                                 {
@@ -516,7 +524,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
 
             // Fly above target before bee spawning phase
-            else if (NPC.ai[0] == 2f)
+            else if (IsAttack(AttackState.MoveAboveTarget))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -542,8 +550,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 calamityGlobalNPC.newAI[0] += 1f;
                 if ((Vector2.Distance(NPC.Center, hoverDestination) < 400f && canHitTarget) || calamityGlobalNPC.newAI[0] >= (death ? 90f : 180f))
                 {
-                    NPC.ai[0] = 1f;
-                    NPC.ai[1] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.SpawnBees);
                     calamityGlobalNPC.newAI[0] = 0f;
                     NPC.netUpdate = true;
                     NPC.SyncExtraAI();
@@ -554,7 +561,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
 
             // Bee spawn phase
-            else if (NPC.ai[0] == 1f)
+            else if (IsAttack(AttackState.SpawnBees))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -604,7 +611,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     {
 
                         int spawnType = Main.rand.Next(NPCID.Bee, NPCID.BeeSmall + 1);
-                        ChooseBeeSpawnType(phase3, death, hornetLimitReached, beeLimitReached, ref spawnType);
+                        spawnType = SelectBeeSpawnType(spawnType, phase3, death, hornetLimitReached, beeLimitReached);
 
                         int spawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)beeSpawnLocation.X, (int)beeSpawnLocation.Y, spawnType);
                         ConfigureSpawnedBee(spawn, enrageScale);
@@ -627,15 +634,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 float numSpawns = death ? 3f : 5f;
                 if (NPC.ai[2] > numSpawns || (beeLimitReached && hornetLimitReached))
                 {
-                    NPC.ai[0] = -1f;
-                    NPC.ai[1] = 2f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.ChooseAttack, ai1: 2f, ai2: 0f);
                     NPC.netUpdate = true;
                 }
             }
 
             // Stinger phase
-            else if (NPC.ai[0] == 3f)
+            else if (IsAttack(AttackState.StingerBombardment))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -715,13 +720,12 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 if (NPC.ai[1] > stingerAttackTimer * numStingerShots)
                 {
-                    NPC.ai[0] = -1f;
-                    NPC.ai[1] = 3f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.ChooseAttack, ai1: 3f);
                     NPC.netUpdate = true;
                 }
             }
 
-            else if (NPC.ai[0] == 4f)
+            else if (IsAttack(AttackState.ReturnToTarget))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -742,13 +746,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 if (distanceFromTarget < 2000f)
                 {
-                    NPC.ai[0] = -1f;
+                    NPC.ai[0] = (float)AttackState.ChooseAttack;
                     NPC.localAI[0] = 0f;
                 }
             }
 
             // Stinger arcs above the player
-            else if (NPC.ai[0] == 5f)
+            else if (IsAttack(AttackState.StingerArcs))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -846,9 +850,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     float idleTime = death ? 140f : 180f;
                     if (NPC.ai[1] >= phaseLimit + idleTime)
                     {
-                        NPC.ai[0] = -1f;
-                        NPC.ai[1] = 4f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.ChooseAttack, ai1: 4f, ai2: 0f);
                         NPC.netUpdate = true;
                     }
                 }

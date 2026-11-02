@@ -9,20 +9,49 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 {
+    /// <summary>Controls Duke Fishron's attacks, phase transitions, and presentation.</summary>
     public class DukeFishronAI : VanillaAIOverride
     {
+        // Keep exact float comparisons; truncating synchronized states would change dispatch.
+        private bool IsAttack(AttackState state) => NPC.ai[0] == (float)state;
+
+        private enum AttackState
+        {
+            Introduction = -1,
+            Phase1Idle = 0,
+            Phase1Charge = 1,
+            BubbleBelch = 2,
+            Sharknado = 3,
+            Phase2Transition = 4,
+            Phase2Idle = 5,
+            Phase2Charge = 6,
+            BubbleSpin = 7,
+            Cthulhunado = 8,
+            Phase3Transition = 9,
+            Phase3Idle = 10,
+            Phase3Charge = 11,
+            Teleport = 12
+        }
+
         // Vanilla values
+        /// <summary>Contact-damage multiplier during Duke Fishron's second phase.</summary>
         public static float Phase2ContactDamageMult = 1.436f; // 201
+        /// <summary>Contact-damage multiplier during Duke Fishron's third phase.</summary>
         public static float Phase3ContactDamageMult = 1.315f; // 184
+
+        private static readonly int[] Phase1Attacks = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3 };
+        private static readonly int[] Phase2Attacks = { 1, 1, 1, 1, 1, 1, 2, 3 };
+        private static readonly int[] Phase3Attacks = { 1, 2, 1, 1, 2, 1, 1, 1, 2 };
+        private static readonly int[] Phase4Attacks = { 1, 1, 1, 2, 1, 1, 1, 1, 2 };
 
         private void SpawnChargeDust()
         {
             int chargeDustAmt = 7;
             for (int j = 0; j < chargeDustAmt; j++)
             {
-                Vector2 arg_E1C_0 = (Vector2.Normalize(NPC.velocity) * new Vector2((NPC.width + 50) / 2f, NPC.height) * 0.75f).RotatedBy((j - (chargeDustAmt / 2 - 1)) * MathHelper.Pi / chargeDustAmt) + NPC.Center;
+                Vector2 dustOrigin = (Vector2.Normalize(NPC.velocity) * new Vector2((NPC.width + 50) / 2f, NPC.height) * 0.75f).RotatedBy((j - (chargeDustAmt / 2 - 1)) * MathHelper.Pi / chargeDustAmt) + NPC.Center;
                 Vector2 chargeDustDirection = ((float)(Main.rand.NextDouble() * MathHelper.Pi) - MathHelper.PiOver2).ToRotationVector2() * Main.rand.Next(3, 8);
-                int chargeDust = Dust.NewDust(arg_E1C_0 + chargeDustDirection, 0, 0, DustID.DungeonWater, chargeDustDirection.X * 2f, chargeDustDirection.Y * 2f, 100, default, 1.4f);
+                int chargeDust = Dust.NewDust(dustOrigin + chargeDustDirection, 0, 0, DustID.DungeonWater, chargeDustDirection.X * 2f, chargeDustDirection.Y * 2f, 100, default, 1.4f);
                 Main.dust[chargeDust].noGravity = true;
                 Main.dust[chargeDust].noLight = true;
                 Main.dust[chargeDust].velocity /= 4f;
@@ -50,6 +79,147 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
         }
 
+        private void UpdateRotation(Player player)
+        {
+            // Rotation
+            float rateOfRotation = 0.04f;
+            if (IsAttack(AttackState.Phase1Charge) || IsAttack(AttackState.Phase2Charge) || IsAttack(AttackState.BubbleSpin))
+                rateOfRotation = 0f;
+            if (IsAttack(AttackState.Sharknado) || IsAttack(AttackState.Phase2Transition) || IsAttack(AttackState.Cthulhunado))
+                rateOfRotation = 0.01f;
+
+            Vector2 rotationVector = player.Center - NPC.Center;
+
+            float rotationSpeed = (float)Math.Atan2(rotationVector.Y, rotationVector.X);
+            if (NPC.spriteDirection == 1)
+                rotationSpeed += MathHelper.Pi;
+            if (rotationSpeed < 0f)
+                rotationSpeed += MathHelper.TwoPi;
+            if (rotationSpeed > MathHelper.TwoPi)
+                rotationSpeed -= MathHelper.TwoPi;
+            if (IsAttack(AttackState.Introduction) || IsAttack(AttackState.Sharknado) || IsAttack(AttackState.Phase2Transition) || IsAttack(AttackState.Cthulhunado))
+                rotationSpeed = 0f;
+
+            if (rateOfRotation != 0f)
+                NPC.rotation = NPC.rotation.AngleTowards(rotationSpeed, rateOfRotation);
+        }
+
+        private void UpdateCollisionAlpha()
+        {
+            if (Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
+                NPC.alpha += 15;
+            else
+                NPC.alpha -= 15;
+
+            if (NPC.alpha < 0)
+                NPC.alpha = 0;
+            if (NPC.alpha > 150)
+                NPC.alpha = 150;
+        }
+
+        private void UpdateSpawnAnimation(Player player, int sharknadoPhaseTimer, int spawnEffectPhaseTimer)
+        {
+            // Disable contact damage while spawning
+            NPC.damage = 0;
+
+            // Velocity
+            NPC.velocity *= 0.98f;
+
+            // Direction
+            int faceDirection = Math.Sign(player.Center.X - NPC.Center.X);
+            if (faceDirection != 0)
+            {
+                NPC.direction = faceDirection;
+                NPC.spriteDirection = -NPC.direction;
+            }
+
+            // Alpha
+            if (NPC.ai[2] > 20f)
+            {
+                NPC.velocity.Y = -2f;
+
+                NPC.alpha -= 5;
+                if (Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
+                    NPC.alpha += 15;
+                if (NPC.alpha < 0)
+                    NPC.alpha = 0;
+                if (NPC.alpha > 150)
+                    NPC.alpha = 150;
+            }
+
+            // Spawn dust and play sound
+            if (NPC.ai[2] == sharknadoPhaseTimer - 30)
+            {
+                int dustAmt = 36;
+                for (int i = 0; i < dustAmt; i++)
+                {
+                    Vector2 dust = (Vector2.Normalize(NPC.velocity) * new Vector2(NPC.width / 2f, NPC.height) * 0.75f * 0.5f).RotatedBy((i - (dustAmt / 2 - 1)) * MathHelper.TwoPi / dustAmt) + NPC.Center;
+                    Vector2 sharknadoDustDirection = dust - NPC.Center;
+                    int sharknadoDust = Dust.NewDust(dust + sharknadoDustDirection, 0, 0, DustID.DungeonWater, sharknadoDustDirection.X * 2f, sharknadoDustDirection.Y * 2f, 100, default, 1.4f);
+                    Main.dust[sharknadoDust].noGravity = true;
+                    Main.dust[sharknadoDust].noLight = true;
+                    Main.dust[sharknadoDust].velocity = Vector2.Normalize(sharknadoDustDirection) * 3f;
+                }
+
+                SoundEngine.PlaySound(SoundID.Zombie20, NPC.Center);
+            }
+
+            NPC.ai[2] += 1f;
+            if (NPC.ai[2] >= spawnEffectPhaseTimer)
+            {
+                NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase1Idle, ai2: 0f);
+                NPC.netUpdate = true;
+            }
+        }
+
+        private void UpdateTeleport(Player player, int teleportPhaseTimer)
+        {
+            // Disable contact damage during the teleporting phase
+            NPC.damage = 0;
+
+            // Alpha
+            if (NPC.alpha < 255)
+            {
+                NPC.alpha += 17;
+                if (NPC.alpha > 255)
+                    NPC.alpha = 255;
+            }
+
+            // Velocity
+            NPC.velocity *= 0.98f;
+            NPC.velocity.Y = MathHelper.Lerp(NPC.velocity.Y, 0f, 0.02f);
+
+            // Play sound
+            if (NPC.ai[2] == teleportPhaseTimer / 2)
+                SoundEngine.PlaySound(SoundID.Zombie20, NPC.Center);
+
+            if (Main.netMode != NetmodeID.MultiplayerClient && NPC.ai[2] == teleportPhaseTimer / 2)
+            {
+                // Teleport location
+                if (NPC.ai[1] == 0f)
+                    NPC.ai[1] = 300 * Math.Sign((NPC.Center - player.Center).X);
+
+                // Rotation and direction
+                Vector2 center = player.Center + new Vector2(-NPC.ai[1], -200f);
+                NPC.Center = center;
+                int phase3PlayerDirection = Math.Sign(player.Center.X - NPC.Center.X);
+                UpdatePhase3Direction(phase3PlayerDirection);
+            }
+
+            NPC.ai[2] += 1f;
+            if (NPC.ai[2] >= teleportPhaseTimer)
+            {
+                NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase3Idle, ai2: 0f);
+
+                NPC.ai[3] += 1f;
+                if (NPC.ai[3] >= 9f)
+                    NPC.ai[3] = 0f;
+
+                NPC.netUpdate = true;
+            }
+        }
+
+        /// <inheritdoc/>
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -62,8 +232,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             bool phase2 = lifeRatio < 0.7f;
             bool phase3 = lifeRatio < 0.4f;
             bool phase4 = lifeRatio < 0.2f;
-            bool phase2AI = NPC.ai[0] > 4f;
-            bool phase3AI = NPC.ai[0] > 9f;
+            bool phase2AI = NPC.ai[0] > (float)AttackState.Phase2Transition;
+            bool phase3AI = NPC.ai[0] > (float)AttackState.Phase3Transition;
             bool charging = NPC.ai[3] < 10f;
 
             // Adjust stats
@@ -172,10 +342,10 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if (NPC.timeLeft > 10)
                     NPC.timeLeft = 10;
 
-                if (NPC.ai[0] > 4f)
-                    NPC.ai[0] = 5f;
+                if (NPC.ai[0] > (float)AttackState.Phase2Transition)
+                    NPC.ai[0] = (float)AttackState.Phase2Idle;
                 else
-                    NPC.ai[0] = 0f;
+                    NPC.ai[0] = (float)AttackState.Phase1Idle;
 
                 NPC.ai[2] = 0f;
             }
@@ -191,8 +361,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             NPC.dontTakeDamage = false;
 
             // Increased DR during phase transitions
-            calamityGlobalNPC.DR = (NPC.ai[0] == -1f || NPC.ai[0] == 4f || NPC.ai[0] == 9f) ? 0.625f : 0.15f;
-            calamityGlobalNPC.CurrentlyIncreasingDefenseOrDR = NPC.ai[0] == -1f || NPC.ai[0] == 4f || NPC.ai[0] == 9f;
+            calamityGlobalNPC.DR = (IsAttack(AttackState.Introduction) || IsAttack(AttackState.Phase2Transition) || IsAttack(AttackState.Phase3Transition)) ? 0.625f : 0.15f;
+            calamityGlobalNPC.CurrentlyIncreasingDefenseOrDR = IsAttack(AttackState.Introduction) || IsAttack(AttackState.Phase2Transition) || IsAttack(AttackState.Phase3Transition);
 
             // Enrage
             if (enrage)
@@ -246,107 +416,27 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.rotation = 0f;
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    NPC.ai[0] = -1f;
+                    NPC.ai[0] = (float)AttackState.Introduction;
                     NPC.netUpdate = true;
                 }
             }
 
-            // Rotation
-            float rateOfRotation = 0.04f;
-            if (NPC.ai[0] == 1f || NPC.ai[0] == 6f || NPC.ai[0] == 7f)
-                rateOfRotation = 0f;
-            if (NPC.ai[0] == 3f || NPC.ai[0] == 4f || NPC.ai[0] == 8f)
-                rateOfRotation = 0.01f;
-
-            Vector2 rotationVector = player.Center - NPC.Center;
-
-            float rotationSpeed = (float)Math.Atan2(rotationVector.Y, rotationVector.X);
-            if (NPC.spriteDirection == 1)
-                rotationSpeed += MathHelper.Pi;
-            if (rotationSpeed < 0f)
-                rotationSpeed += MathHelper.TwoPi;
-            if (rotationSpeed > MathHelper.TwoPi)
-                rotationSpeed -= MathHelper.TwoPi;
-            if (NPC.ai[0] == -1f || NPC.ai[0] == 3f || NPC.ai[0] == 4f || NPC.ai[0] == 8f)
-                rotationSpeed = 0f;
-
-            if (rateOfRotation != 0f)
-                NPC.rotation = NPC.rotation.AngleTowards(rotationSpeed, rateOfRotation);
+            UpdateRotation(player);
 
             // Alpha adjustments
-            if (NPC.ai[0] != -1f && NPC.ai[0] < 9f)
+            if (!IsAttack(AttackState.Introduction) && NPC.ai[0] < (float)AttackState.Phase3Transition)
             {
-                if (Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-                    NPC.alpha += 15;
-                else
-                    NPC.alpha -= 15;
-
-                if (NPC.alpha < 0)
-                    NPC.alpha = 0;
-                if (NPC.alpha > 150)
-                    NPC.alpha = 150;
+                UpdateCollisionAlpha();
             }
 
             // Spawn effects
-            if (NPC.ai[0] == -1f)
+            if (IsAttack(AttackState.Introduction))
             {
-                // Disable contact damage while spawning
-                NPC.damage = 0;
-
-                // Velocity
-                NPC.velocity *= 0.98f;
-
-                // Direction
-                int faceDirection = Math.Sign(player.Center.X - NPC.Center.X);
-                if (faceDirection != 0)
-                {
-                    NPC.direction = faceDirection;
-                    NPC.spriteDirection = -NPC.direction;
-                }
-
-                // Alpha
-                if (NPC.ai[2] > 20f)
-                {
-                    NPC.velocity.Y = -2f;
-
-                    NPC.alpha -= 5;
-                    if (Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-                        NPC.alpha += 15;
-                    if (NPC.alpha < 0)
-                        NPC.alpha = 0;
-                    if (NPC.alpha > 150)
-                        NPC.alpha = 150;
-                }
-
-                // Spawn dust and play sound
-                if (NPC.ai[2] == sharknadoPhaseTimer - 30)
-                {
-                    int dustAmt = 36;
-                    for (int i = 0; i < dustAmt; i++)
-                    {
-                        Vector2 dust = (Vector2.Normalize(NPC.velocity) * new Vector2(NPC.width / 2f, NPC.height) * 0.75f * 0.5f).RotatedBy((i - (dustAmt / 2 - 1)) * MathHelper.TwoPi / dustAmt) + NPC.Center;
-                        Vector2 sharknadoDustDirection = dust - NPC.Center;
-                        int sharknadoDust = Dust.NewDust(dust + sharknadoDustDirection, 0, 0, DustID.DungeonWater, sharknadoDustDirection.X * 2f, sharknadoDustDirection.Y * 2f, 100, default, 1.4f);
-                        Main.dust[sharknadoDust].noGravity = true;
-                        Main.dust[sharknadoDust].noLight = true;
-                        Main.dust[sharknadoDust].velocity = Vector2.Normalize(sharknadoDustDirection) * 3f;
-                    }
-
-                    SoundEngine.PlaySound(SoundID.Zombie20, NPC.Center);
-                }
-
-                NPC.ai[2] += 1f;
-                if (NPC.ai[2] >= spawnEffectPhaseTimer)
-                {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.netUpdate = true;
-                }
+                UpdateSpawnAnimation(player, sharknadoPhaseTimer, spawnEffectPhaseTimer);
             }
 
             // Phase 1
-            else if (NPC.ai[0] == 0f && !player.dead)
+            else if (IsAttack(AttackState.Phase1Idle) && !player.dead)
             {
                 // Velocity
                 if (NPC.ai[1] == 0f)
@@ -374,30 +464,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= idlePhaseTimer || Main.zenithWorld)
                 {
-                    int attackPicker = 0;
-                    switch ((int)NPC.ai[3])
-                    {
-                        case 0:
-                        case 1:
-                        case 2:
-                        case 3:
-                        case 4:
-                        case 5:
-                        case 6:
-                        case 7:
-                        case 8:
-                        case 9:
-                            attackPicker = 1;
-                            break;
-                        case 10:
-                            NPC.ai[3] = 1f;
-                            attackPicker = 2;
-                            break;
-                        case 11:
-                            NPC.ai[3] = 0f;
-                            attackPicker = 3;
-                            break;
-                    }
+                    int attackPicker = BossAttackCycle.Select(Phase1Attacks, (int)NPC.ai[3], 0);
+                    if (attackPicker == 2)
+                        NPC.ai[3] = 1f;
+                    else if (attackPicker == 3)
+                        NPC.ai[3] = 0f;
 
                     if (enrage && attackPicker == 2)
                         attackPicker = 3;
@@ -408,9 +479,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     // Set velocity for charge
                     if (attackPicker == 1)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase1Charge, ai2: 0f);
 
                         // Velocity
                         NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * chargeVelocity;
@@ -431,17 +500,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     // Bubbles
                     else if (attackPicker == 2)
                     {
-                        NPC.ai[0] = 2f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.BubbleBelch, ai2: 0f);
                     }
 
                     // Spawn sharknadoes
                     else if (attackPicker == 3)
                     {
-                        NPC.ai[0] = 3f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Sharknado, ai2: 0f);
                         if (enrage)
                             NPC.ai[2] = sharknadoPhaseTimer - 40;
                         else if (death)
@@ -451,9 +516,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     // Go to phase 2
                     else if (attackPicker == 4)
                     {
-                        NPC.ai[0] = 4f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase2Transition, ai2: 0f);
                     }
 
                     NPC.netUpdate = true;
@@ -461,7 +524,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
 
             // Charge
-            else if (NPC.ai[0] == 1f)
+            else if (IsAttack(AttackState.Phase1Charge))
             {
                 // Accelerate
                 NPC.velocity *= 1.01f;
@@ -472,16 +535,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase1Idle, ai2: 0f);
                     NPC.ai[3] += 2f;
                     NPC.netUpdate = true;
                 }
             }
 
             // Bubble belch
-            else if (NPC.ai[0] == 2f)
+            else if (IsAttack(AttackState.BubbleBelch))
             {
                 // Velocity
                 if (NPC.ai[1] == 0f)
@@ -518,15 +579,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= bubbleBelchPhaseTimer)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase1Idle, ai2: 0f);
                     NPC.netUpdate = true;
                 }
             }
 
             // Sharknado spawn
-            else if (NPC.ai[0] == 3f)
+            else if (IsAttack(AttackState.Sharknado))
             {
                 // Velocity
                 NPC.velocity *= 0.98f;
@@ -554,15 +613,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= sharknadoPhaseTimer)
                 {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase1Idle, ai2: 0f);
                     NPC.netUpdate = true;
                 }
             }
 
             // Transition to phase 2
-            else if (NPC.ai[0] == 4f)
+            else if (IsAttack(AttackState.Phase2Transition))
             {
                 // Velocity
                 NPC.velocity *= 0.98f;
@@ -575,16 +632,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= phaseTransitionTimer)
                 {
-                    NPC.ai[0] = 5f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase2Idle, ai2: 0f);
                     NPC.ai[3] = 0f;
                     NPC.netUpdate = true;
                 }
             }
 
             // Phase 2
-            else if (NPC.ai[0] == 5f && !player.dead)
+            else if (IsAttack(AttackState.Phase2Idle) && !player.dead)
             {
                 // Velocity
                 if (NPC.ai[1] == 0f)
@@ -612,26 +667,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= idlePhaseTimer || Main.zenithWorld)
                 {
-                    int phase2AttackPicker = 0;
-                    switch ((int)NPC.ai[3])
-                    {
-                        case 0:
-                        case 1:
-                        case 2:
-                        case 3:
-                        case 4:
-                        case 5:
-                            phase2AttackPicker = 1;
-                            break;
-                        case 6:
-                            NPC.ai[3] = 1f;
-                            phase2AttackPicker = 2;
-                            break;
-                        case 7:
-                            NPC.ai[3] = 0f;
-                            phase2AttackPicker = 3;
-                            break;
-                    }
+                    int phase2AttackPicker = BossAttackCycle.Select(Phase2Attacks, (int)NPC.ai[3], 0);
+                    if (phase2AttackPicker == 2)
+                        NPC.ai[3] = 1f;
+                    else if (phase2AttackPicker == 3)
+                        NPC.ai[3] = 0f;
 
                     if (enrage && phase2AttackPicker == 2)
                         phase2AttackPicker = 3;
@@ -642,9 +682,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     // Set velocity for charge
                     if (phase2AttackPicker == 1)
                     {
-                        NPC.ai[0] = 6f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase2Charge, ai2: 0f);
 
                         // Velocity and rotation
                         NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * chargeVelocity;
@@ -680,25 +718,19 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             NPC.spriteDirection = -NPC.direction;
                         }
 
-                        NPC.ai[0] = 7f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.BubbleSpin, ai2: 0f);
                     }
 
                     // Spawn cthulhunado
                     else if (phase2AttackPicker == 3)
                     {
-                        NPC.ai[0] = 8f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Cthulhunado, ai2: 0f);
                     }
 
                     // Go to next phase
                     else if (phase2AttackPicker == 4)
                     {
-                        NPC.ai[0] = 9f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase3Transition, ai2: 0f);
                     }
 
                     NPC.netUpdate = true;
@@ -706,7 +738,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
 
             // Charge
-            else if (NPC.ai[0] == 6f)
+            else if (IsAttack(AttackState.Phase2Charge))
             {
                 // Accelerate
                 NPC.velocity *= 1.01f;
@@ -717,16 +749,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 5f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase2Idle, ai2: 0f);
                     NPC.ai[3] += 2f;
                     NPC.netUpdate = true;
                 }
             }
 
             // Bubble spin
-            else if (NPC.ai[0] == 7f)
+            else if (IsAttack(AttackState.BubbleSpin))
             {
                 // Play sounds and spawn bubbles
                 if (NPC.ai[2] == 0f)
@@ -760,15 +790,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= bubbleSpinPhaseTimer)
                 {
-                    NPC.ai[0] = 5f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase2Idle, ai2: 0f);
                     NPC.netUpdate = true;
                 }
             }
 
             // Spawn cthulhunado
-            else if (NPC.ai[0] == 8f)
+            else if (IsAttack(AttackState.Cthulhunado))
             {
                 // Velocity
                 NPC.velocity *= 0.98f;
@@ -784,15 +812,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= sharknadoPhaseTimer)
                 {
-                    NPC.ai[0] = 5f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase2Idle, ai2: 0f);
                     NPC.netUpdate = true;
                 }
             }
 
             // Transition to phase 3
-            else if (NPC.ai[0] == 9f)
+            else if (IsAttack(AttackState.Phase3Transition))
             {
                 // Alpha adjustments
                 if (NPC.ai[2] < phaseTransitionTimer - 90)
@@ -825,16 +851,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= phaseTransitionTimer)
                 {
-                    NPC.ai[0] = 10f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase3Idle, ai2: 0f);
                     NPC.ai[3] = 0f;
                     NPC.netUpdate = true;
                 }
             }
 
             // Phase 3
-            else if (NPC.ai[0] == 10f && !player.dead)
+            else if (IsAttack(AttackState.Phase3Idle) && !player.dead)
             {
                 // Alpha
                 if (NPC.alpha < 255)
@@ -859,55 +883,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= idlePhaseTimer || Main.zenithWorld)
                 {
-                    int phase3AttackPicker = 0;
-                    if (phase4)
-                    {
-                        switch ((int)NPC.ai[3])
-                        {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 4:
-                            case 5:
-                            case 6:
-                            case 7:
-                                phase3AttackPicker = 1;
-                                break;
-                            case 3:
-                            case 8:
-                                phase3AttackPicker = 2;
-                                break;
-                        }
-
-                        if (death)
-                            phase3AttackPicker = 1;
-                    }
-                    else
-                    {
-                        switch ((int)NPC.ai[3])
-                        {
-                            case 0:
-                            case 2:
-                            case 3:
-                            case 5:
-                            case 6:
-                            case 7:
-                                phase3AttackPicker = 1;
-                                break;
-                            case 1:
-                            case 4:
-                            case 8:
-                                phase3AttackPicker = 2;
-                                break;
-                        }
-                    }
+                    int phase3AttackPicker = BossAttackCycle.Select(phase4 ? Phase4Attacks : Phase3Attacks, (int)NPC.ai[3], 0);
+                    if (phase4 && death)
+                        phase3AttackPicker = 1;
 
                     // Set velocity for charge
                     if (phase3AttackPicker == 1)
                     {
-                        NPC.ai[0] = 11f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase3Charge, ai2: 0f);
 
                         // Velocity and rotation
                         NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * chargeVelocity;
@@ -928,17 +911,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     // Pause
                     else if (phase3AttackPicker == 2)
                     {
-                        NPC.ai[0] = 12f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Teleport, ai2: 0f);
                     }
 
                     // Go to next phase
                     else if (phase3AttackPicker == 3)
                     {
-                        NPC.ai[0] = -1f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
+                        NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Introduction, ai2: 0f);
                     }
 
                     NPC.netUpdate = true;
@@ -946,7 +925,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
 
             // Charge
-            else if (NPC.ai[0] == 11f)
+            else if (IsAttack(AttackState.Phase3Charge))
             {
                 // Accelerate
                 NPC.velocity *= 1.01f;
@@ -962,9 +941,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
                 {
-                    NPC.ai[0] = 10f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Phase3Idle, ai2: 0f);
 
                     if (!phase4 || !death)
                         NPC.ai[3] += 1f;
@@ -974,60 +951,18 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
 
             // Pause before teleport
-            else if (NPC.ai[0] == 12f)
+            else if (IsAttack(AttackState.Teleport))
             {
-                // Disable contact damage during the teleporting phase
-                NPC.damage = 0;
-
-                // Alpha
-                if (NPC.alpha < 255)
-                {
-                    NPC.alpha += 17;
-                    if (NPC.alpha > 255)
-                        NPC.alpha = 255;
-                }
-
-                // Velocity
-                NPC.velocity *= 0.98f;
-                NPC.velocity.Y = MathHelper.Lerp(NPC.velocity.Y, 0f, 0.02f);
-
-                // Play sound
-                if (NPC.ai[2] == teleportPhaseTimer / 2)
-                    SoundEngine.PlaySound(SoundID.Zombie20, NPC.Center);
-
-                if (Main.netMode != NetmodeID.MultiplayerClient && NPC.ai[2] == teleportPhaseTimer / 2)
-                {
-                    // Teleport location
-                    if (NPC.ai[1] == 0f)
-                        NPC.ai[1] = 300 * Math.Sign((NPC.Center - player.Center).X);
-
-                    // Rotation and direction
-                    Vector2 center = player.Center + new Vector2(-NPC.ai[1], -200f);
-                    NPC.Center = center;
-                    int phase3PlayerDirection = Math.Sign(player.Center.X - NPC.Center.X);
-                    UpdatePhase3Direction(phase3PlayerDirection);
-                }
-
-                NPC.ai[2] += 1f;
-                if (NPC.ai[2] >= teleportPhaseTimer)
-                {
-                    NPC.ai[0] = 10f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-
-                    NPC.ai[3] += 1f;
-                    if (NPC.ai[3] >= 9f)
-                        NPC.ai[3] = 0f;
-
-                    NPC.netUpdate = true;
-                }
+                UpdateTeleport(player, teleportPhaseTimer);
             }
 
             return false;
         }
 
+        /// <summary>Controls drifting, homing, and detonation of Duke Fishron's bubbles.</summary>
         public class DetonatingBubbleAI : VanillaAIOverride
         {
+            /// <inheritdoc/>
             public override bool AI(Mod mod)
             {
                 bool driftUpward = NPC.ai[1] < 0f;
@@ -1061,9 +996,6 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 NPC.scale = NPC.ai[3];
 
-                NPC.alpha -= 30;
-                if (NPC.alpha < 50)
-                    NPC.alpha = 50;
                 NPC.alpha = 50;
 
                 float inertia2 = inertia + 10f;
@@ -1102,8 +1034,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         Player player = Main.player[i];
                         if (player.active && !player.dead && rect.Intersects(player.getRect()))
                         {
-                            NPC.ai[0] = 1f;
-                            NPC.ai[1] = 4f;
+                            NPCBehaviorUtils.SetAIState(NPC, 1f, ai1: 4f);
                             NPC.netUpdate = true;
                             break;
                         }
@@ -1116,8 +1047,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     float timeBeforePopping = 300f;
                     if (NPC.ai[1] >= timeBeforePopping)
                     {
-                        NPC.ai[0] = 1f;
-                        NPC.ai[1] = 4f;
+                        NPCBehaviorUtils.SetAIState(NPC, 1f, ai1: 4f);
                     }
                 }
 

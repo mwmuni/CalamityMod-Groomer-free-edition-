@@ -36,41 +36,70 @@ using Terraria.ModLoader;
 
 namespace CalamityMod.NPCs.Cryogen
 {
+    /// <summary>Controls Cryogen's encounter, rendering, network state, and rewards.</summary>
     [LongDistanceNetSync] // Cryogen follows you forever like Queen Bee in vanilla, So we need this to sync its position on minimap
     public class Cryogen : ModNPC
     {
+        // Keep exact float comparisons; truncating synchronized states would change dispatch.
+        private bool IsAttack(AttackState state) => NPC.ai[0] == (float)state;
+
+        private enum AttackState
+        {
+            Opening = 0,
+            FirstCharge = 1,
+            SecondCharge = 2,
+            Teleport = 3,
+            RapidCharge = 4
+        }
+
         private int currentPhase = 1;
         private int teleportLocationX = 0;
 
+        /// <summary>Tint used for Cryogen's icy backglow.</summary>
         public static Color BackglowColor => new Color(24, 100, 255, 80) * 0.6f;
 
+        /// <inheritdoc/>
         public override string Texture => "CalamityMod/NPCs/Cryogen/Cryogen_Phase1";
 
+        /// <summary>Sound variants played when Cryogen is hit.</summary>
         public static readonly SoundStyle HitSound = new("CalamityMod/Sounds/NPCHit/CryogenHit", 3);
+        /// <summary>Sound played when Cryogen changes phase.</summary>
         public static readonly SoundStyle TransitionSound = new("CalamityMod/Sounds/NPCHit/CryogenPhaseTransitionCrack");
+        /// <summary>Sound played when Cryogen regenerates its shield.</summary>
         public static readonly SoundStyle ShieldRegenSound = new("CalamityMod/Sounds/Custom/CryogenShieldRegenerate");
+        /// <summary>Sound played when Cryogen dies.</summary>
         public static readonly SoundStyle DeathSound = new("CalamityMod/Sounds/NPCKilled/CryogenDeath");
 
+        /// <summary>Client-side texture used during the second phase.</summary>
         public static Asset<Texture2D> Phase2Texture;
+        /// <summary>Client-side texture used during the third phase.</summary>
         public static Asset<Texture2D> Phase3Texture;
+        /// <summary>Client-side texture used during the fourth phase.</summary>
         public static Asset<Texture2D> Phase4Texture;
+        /// <summary>Client-side texture used during the fifth phase.</summary>
         public static Asset<Texture2D> Phase5Texture;
+        /// <summary>Client-side texture used during the sixth phase.</summary>
         public static Asset<Texture2D> Phase6Texture;
 
+        /// <summary>Client-side fire particles used by the Zenith-world variant.</summary>
         public FireParticleSet FireDrawer = null;
 
+        /// <summary>Registered boss-head icon index for Cryogen.</summary>
         public static int cryoIconIndex;
+        /// <summary>Registered boss-head icon index for Pyrogen.</summary>
         public static int pyroIconIndex;
 
+        /// <inheritdoc/>
         public override void Load()
         {
             string cryoIconPath = "CalamityMod/NPCs/Cryogen/Cryogen_Phase1_Head_Boss";
             string pyroIconPath = "CalamityMod/NPCs/Cryogen/Pyrogen_Head_Boss";
-            
+
             cryoIconIndex = CalamityMod.Instance.AddBossHeadTexture(cryoIconPath, -1);
             pyroIconIndex = CalamityMod.Instance.AddBossHeadTexture(pyroIconPath, -1);
         }
 
+        /// <inheritdoc/>
         public override void SetStaticDefaults()
         {
             NPCID.Sets.BossBestiaryPriority.Add(Type);
@@ -85,10 +114,14 @@ namespace CalamityMod.NPCs.Cryogen
             }
         }
 
+        /// <summary>Base ice-blast damage, also used by Zenith-world darts.</summary>
         public static int IceBlastDamage = 23; // 92; Also applies to GFB darts
+        /// <summary>Base ice-rain damage, also used by Zenith-world darts.</summary>
         public static int IceRainDamage = 23; // 92; Also applies to GFB darts
+        /// <summary>Base ice-bomb damage, also used by Zenith-world fireblasts.</summary>
         public static int IceBombDamage = 28; // 112; Also applies to GFB fireblasts
 
+        /// <inheritdoc/>
         public override void SetDefaults()
         {
             NPC.Calamity().canBreakPlayerDefense = true;
@@ -128,6 +161,7 @@ namespace CalamityMod.NPCs.Cryogen
             }
         }
 
+        /// <inheritdoc/>
         public override void BossHeadSlot(ref int index)
         {
             if (Main.zenithWorld)
@@ -136,6 +170,7 @@ namespace CalamityMod.NPCs.Cryogen
                 index = cryoIconIndex;
         }
 
+        /// <inheritdoc/>
         public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
         {
             bestiaryEntry.Info.AddRange(new IBestiaryInfoElement[]
@@ -145,6 +180,7 @@ namespace CalamityMod.NPCs.Cryogen
             });
         }
 
+        /// <inheritdoc/>
         public override void SendExtraAI(BinaryWriter writer)
         {
             writer.Write(teleportLocationX);
@@ -154,6 +190,7 @@ namespace CalamityMod.NPCs.Cryogen
                 writer.Write(NPC.Calamity().newAI[i]);
         }
 
+        /// <inheritdoc/>
         public override void ReceiveExtraAI(BinaryReader reader)
         {
             teleportLocationX = reader.ReadInt32();
@@ -163,6 +200,75 @@ namespace CalamityMod.NPCs.Cryogen
                 NPC.Calamity().newAI[i] = reader.ReadSingle();
         }
 
+        private static void UpdateWeather()
+        {
+            if (CalamityServerConfig.Instance.BossesStopWeather)
+                CalamityWorld.StopRain();
+            else if (!Main.raining && !BossRushEvent.BossRushActive)
+                CalamityWorld.StartRain();
+        }
+
+        private void UpdateDespawn(CalamityGlobalNPC calamityGlobalNPC)
+        {
+            if (NPC.velocity.Y > 3f)
+                NPC.velocity.Y = 3f;
+            NPC.velocity.Y -= 0.1f;
+            if (NPC.velocity.Y < -12f)
+                NPC.velocity.Y = -12f;
+
+            if (NPC.timeLeft > 60)
+                NPC.timeLeft = 60;
+
+            if (NPC.ai[1] != 0f)
+            {
+                NPC.ai[1] = 0f;
+                teleportLocationX = 0;
+                calamityGlobalNPC.newAI[2] = 0f;
+                NPC.netUpdate = true;
+            }
+        }
+
+        private void SpawnLegendaryEnemy()
+        {
+            int spawnType = Main.zenithWorld ? NPCID.RedDevil : NPCID.IceGolem;
+            if (!NPC.AnyNPCs(spawnType))
+            {
+                for (int i = 0; i < 1000; i++)
+                {
+                    int enemySpawnX = (int)(NPC.Center.X / 16f) + Main.rand.Next(-50, 51);
+                    int enemySpawnY;
+                    for (enemySpawnY = (int)(NPC.Center.Y / 16f) + Main.rand.Next(-50, 51); enemySpawnY < Main.maxTilesY - 10 && !WorldGen.SolidTile(enemySpawnX, enemySpawnY); enemySpawnY++)
+                    {
+                    }
+
+                    enemySpawnY--;
+                    if (!WorldGen.SolidTile(enemySpawnX, enemySpawnY))
+                    {
+                        int legendEnemySpawn = NPC.NewNPC(NPC.GetSource_FromAI(), enemySpawnX * 16 + 8, enemySpawnY * 16, spawnType);
+                        if (Main.dedServ && legendEnemySpawn < Main.maxNPCs)
+                            NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, legendEnemySpawn);
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void FireIceBombs(bool phase5, int iceBomb)
+        {
+            int totalProjectiles = phase5 ? 2 : 3;
+            float radians = MathHelper.TwoPi / totalProjectiles;
+            int type = iceBomb;
+            float velocity = 2f + NPC.ai[0];
+            Vector2 spinningPoint = Vector2.UnitY.RotatedByRandom(MathHelper.Pi) * -velocity;
+            for (int k = 0; k < totalProjectiles; k++)
+            {
+                Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceBombDamage, 0f, Main.myPlayer);
+            }
+        }
+
+        /// <inheritdoc/>
         public override void AI()
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -231,10 +337,7 @@ namespace CalamityMod.NPCs.Cryogen
                 NPC.ai[2] = 0f;
             }
 
-            if (CalamityServerConfig.Instance.BossesStopWeather)
-                CalamityWorld.StopRain();
-            else if (!Main.raining && !BossRushEvent.BossRushActive)
-                CalamityWorld.StartRain();
+            UpdateWeather();
 
             if (!player.active || player.dead)
             {
@@ -242,22 +345,7 @@ namespace CalamityMod.NPCs.Cryogen
                 player = Main.player[NPC.target];
                 if (!player.active || player.dead)
                 {
-                    if (NPC.velocity.Y > 3f)
-                        NPC.velocity.Y = 3f;
-                    NPC.velocity.Y -= 0.1f;
-                    if (NPC.velocity.Y < -12f)
-                        NPC.velocity.Y = -12f;
-
-                    if (NPC.timeLeft > 60)
-                        NPC.timeLeft = 60;
-
-                    if (NPC.ai[1] != 0f)
-                    {
-                        NPC.ai[1] = 0f;
-                        teleportLocationX = 0;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        NPC.netUpdate = true;
-                    }
+                    UpdateDespawn(calamityGlobalNPC);
                     return;
                 }
             }
@@ -266,33 +354,12 @@ namespace CalamityMod.NPCs.Cryogen
 
             if (Main.getGoodWorld)
             {
-                int spawnType = Main.zenithWorld ? NPCID.RedDevil : NPCID.IceGolem;
-                if (!NPC.AnyNPCs(spawnType))
-                {
-                    for (int i = 0; i < 1000; i++)
-                    {
-                        int enemySpawnX = (int)(NPC.Center.X / 16f) + Main.rand.Next(-50, 51);
-                        int enemySpawnY;
-                        for (enemySpawnY = (int)(NPC.Center.Y / 16f) + Main.rand.Next(-50, 51); enemySpawnY < Main.maxTilesY - 10 && !WorldGen.SolidTile(enemySpawnX, enemySpawnY); enemySpawnY++)
-                        {
-                        }
-
-                        enemySpawnY--;
-                        if (!WorldGen.SolidTile(enemySpawnX, enemySpawnY))
-                        {
-                            int legendEnemySpawn = NPC.NewNPC(NPC.GetSource_FromAI(), enemySpawnX * 16 + 8, enemySpawnY * 16, spawnType);
-                            if (Main.dedServ && legendEnemySpawn < Main.maxNPCs)
-                                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, legendEnemySpawn);
-
-                            break;
-                        }
-                    }
-                }
+                SpawnLegendaryEnemy();
             }
 
             float chargePhaseGateValue = 360f;
             float chargeDuration = 60f;
-            float chargeTelegraphTime = NPC.ai[0] == 2f ? (Main.getGoodWorld ? 60f : 80f) : (Main.getGoodWorld ? 90f : 120f);
+            float chargeTelegraphTime = IsAttack(AttackState.SecondCharge) ? (Main.getGoodWorld ? 60f : 80f) : (Main.getGoodWorld ? 90f : 120f);
             float chargeTelegraphMaxRotationIncrement = 1f;
             float chargeTelegraphRotationIncrement = chargeTelegraphMaxRotationIncrement / chargeTelegraphTime;
             float chargeSlowDownTime = 15f;
@@ -320,21 +387,12 @@ namespace CalamityMod.NPCs.Cryogen
 
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        int totalProjectiles = phase5 ? 2 : 3;
-                        float radians = MathHelper.TwoPi / totalProjectiles;
-                        int type = iceBomb;
-                        float velocity = 2f + NPC.ai[0];
-                        Vector2 spinningPoint = Vector2.UnitY.RotatedByRandom(MathHelper.Pi) * -velocity;
-                        for (int k = 0; k < totalProjectiles; k++)
-                        {
-                            Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceBombDamage, 0f, Main.myPlayer);
-                        }
+                        FireIceBombs(phase5, iceBomb);
                     }
                 }
             }
 
-            if (NPC.ai[0] == 0f)
+            if (IsAttack(AttackState.Opening))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -355,14 +413,14 @@ namespace CalamityMod.NPCs.Cryogen
                 if (phase2)
                 {
                     NPC.TargetClosest();
-                    NPC.ai[0] = 1f;
+                    NPC.ai[0] = (float)AttackState.FirstCharge;
                     NPC.localAI[0] = 0f;
                     NPC.netUpdate = true;
 
                     RegenerateShield();
                 }
             }
-            else if (NPC.ai[0] == 1f)
+            else if (IsAttack(AttackState.FirstCharge))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -443,8 +501,7 @@ namespace CalamityMod.NPCs.Cryogen
                 if (phase3)
                 {
                     NPC.TargetClosest();
-                    NPC.ai[0] = 2f;
-                    NPC.ai[1] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.SecondCharge);
                     NPC.localAI[0] = 0f;
                     calamityGlobalNPC.newAI[0] = 0f;
                     calamityGlobalNPC.newAI[2] = 0f;
@@ -453,7 +510,7 @@ namespace CalamityMod.NPCs.Cryogen
                     RegenerateShield();
                 }
             }
-            else if (NPC.ai[0] == 2f)
+            else if (IsAttack(AttackState.SecondCharge))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -544,15 +601,14 @@ namespace CalamityMod.NPCs.Cryogen
                 if (phase4)
                 {
                     NPC.TargetClosest();
-                    NPC.ai[0] = 3f;
-                    NPC.ai[1] = 0f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.Teleport);
                     NPC.localAI[0] = 0f;
                     calamityGlobalNPC.newAI[0] = 0f;
                     calamityGlobalNPC.newAI[1] = 0f;
                     NPC.netUpdate = true;
                 }
             }
-            else if (NPC.ai[0] == 3f)
+            else if (IsAttack(AttackState.Teleport))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -686,8 +742,7 @@ namespace CalamityMod.NPCs.Cryogen
                 if (phase5)
                 {
                     NPC.TargetClosest();
-                    NPC.ai[0] = 4f;
-                    NPC.ai[1] = 150f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.RapidCharge, ai1: 150f);
                     NPC.ai[3] = 0f;
                     NPC.localAI[0] = 0f;
                     NPC.localAI[2] = 0f;
@@ -715,7 +770,7 @@ namespace CalamityMod.NPCs.Cryogen
                     }
                 }
             }
-            else if (NPC.ai[0] == 4f)
+            else if (IsAttack(AttackState.RapidCharge))
             {
                 // Avoid cheap bullshit
                 NPC.damage = 0;
@@ -769,8 +824,7 @@ namespace CalamityMod.NPCs.Cryogen
                         NPC.ai[3] += 1f;
                         if (NPC.ai[3] > 2f)
                         {
-                            NPC.ai[0] = 5f;
-                            NPC.ai[1] = 0f;
+                            NPCBehaviorUtils.SetAIState(NPC, 5f);
                             NPC.ai[3] = 0f;
                             calamityGlobalNPC.newAI[3] = 0f;
                         }
@@ -883,8 +937,7 @@ namespace CalamityMod.NPCs.Cryogen
                 if (NPC.ai[1] >= 180f)
                 {
                     NPC.TargetClosest();
-                    NPC.ai[0] = 4f;
-                    NPC.ai[1] = 60f;
+                    NPCBehaviorUtils.SetAIState(NPC, (float)AttackState.RapidCharge, ai1: 60f);
                     calamityGlobalNPC.newAI[3] = 0f;
                     calamityGlobalNPC.newAI[2] = 0f;
                     NPC.netUpdate = true;
@@ -1079,6 +1132,7 @@ namespace CalamityMod.NPCs.Cryogen
             }
         }
 
+        /// <inheritdoc/>
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (Main.zenithWorld)
@@ -1143,11 +1197,13 @@ namespace CalamityMod.NPCs.Cryogen
             return false;
         }
 
+        /// <inheritdoc/>
         public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)
         {
             NPC.lifeMax = (int)(NPC.lifeMax * 0.8f * balance * bossAdjustment);
         }
 
+        /// <inheritdoc/>
         public override void ModifyTypeName(ref string typeName)
         {
             if (Main.zenithWorld)
@@ -1156,6 +1212,7 @@ namespace CalamityMod.NPCs.Cryogen
             }
         }
 
+        /// <inheritdoc/>
         public override void HitEffect(NPC.HitInfo hit)
         {
             int dusttype = Main.zenithWorld ? 235 : 67;
@@ -1195,11 +1252,13 @@ namespace CalamityMod.NPCs.Cryogen
             }
         }
 
+        /// <inheritdoc/>
         public override void BossLoot(ref int potionType)
         {
             potionType = ItemID.GreaterHealingPotion;
         }
 
+        /// <inheritdoc/>
         public override void ModifyNPCLoot(NPCLoot npcLoot)
         {
             // Boss bag
@@ -1246,6 +1305,7 @@ namespace CalamityMod.NPCs.Cryogen
             npcLoot.AddConditionalPerPlayer(() => !DownedBossSystem.downedCryogen, ModContent.ItemType<LoreArchmage>(), desc: DropHelper.FirstKillText);
         }
 
+        /// <inheritdoc/>
         public override void OnKill()
         {
             // Don't bother running any of this in Boss Rush.
@@ -1286,6 +1346,7 @@ namespace CalamityMod.NPCs.Cryogen
         }
 
         // Can only hit the target if within certain distance
+        /// <inheritdoc/>
         public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         {
             Rectangle targetHitbox = target.Hitbox;
@@ -1306,6 +1367,7 @@ namespace CalamityMod.NPCs.Cryogen
             return minDist <= 40f * NPC.scale;
         }
 
+        /// <inheritdoc/>
         public override void OnHitPlayer(Player target, Player.HurtInfo hurtInfo)
         {
             if (hurtInfo.Damage > 0)
