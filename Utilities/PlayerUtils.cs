@@ -721,17 +721,7 @@ namespace CalamityMod
         /// <param name="mp">The player whose Adrenaline damage should be calculated.</param>
         /// <returns>Adrenaline damage multiplier. 1.0 would be no change.</returns>
         public static float GetAdrenalineDamage(this CalamityPlayer mp)
-        {
-            float adrenalineBoost = BalancingConstants.AdrenalineDamageBoost;
-            if (mp.adrenalineBoostOne)
-                adrenalineBoost += BalancingConstants.AdrenalineDamagePerBooster;
-            if (mp.adrenalineBoostTwo)
-                adrenalineBoost += BalancingConstants.AdrenalineDamagePerBooster;
-            if (mp.adrenalineBoostThree)
-                adrenalineBoost += BalancingConstants.AdrenalineDamagePerBooster;
-
-            return adrenalineBoost;
-        }
+            => ApplyAdrenalineBoosters(mp, BalancingConstants.AdrenalineDamageBoost, BalancingConstants.AdrenalineDamagePerBooster);
 
         /// <summary>
         /// Returns the damage reduction that holding full Adrenaline provides for the given player.
@@ -739,16 +729,19 @@ namespace CalamityMod
         /// <param name="mp">The player whose Adrenaline DR should be calculated.</param>
         /// <returns>Adrenaline DR. 0f is no DR.</returns>
         public static float GetAdrenalineDR(this CalamityPlayer mp)
-        {
-            float dr = BalancingConstants.FullAdrenalineDR;
-            if (mp.adrenalineBoostOne)
-                dr += BalancingConstants.AdrenalineDRPerBooster;
-            if (mp.adrenalineBoostTwo)
-                dr += BalancingConstants.AdrenalineDRPerBooster;
-            if (mp.adrenalineBoostThree)
-                dr += BalancingConstants.AdrenalineDRPerBooster;
+            => ApplyAdrenalineBoosters(mp, BalancingConstants.FullAdrenalineDR, BalancingConstants.AdrenalineDRPerBooster);
 
-            return dr;
+        private static float ApplyAdrenalineBoosters(CalamityPlayer mp, float value, float perBooster)
+        {
+            // Keep each addition separate: counting then multiplying changes float rounding.
+            if (mp.adrenalineBoostOne)
+                value += perBooster;
+            if (mp.adrenalineBoostTwo)
+                value += perBooster;
+            if (mp.adrenalineBoostThree)
+                value += perBooster;
+
+            return value;
         }
 
         /// <summary>

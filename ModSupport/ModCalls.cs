@@ -398,45 +398,39 @@ namespace CalamityMod
         #endregion
 
         #region Debuff Vulnerabilities
+        private static string GetDebuffVulnerabilityKey(string debuffName) => debuffName.ToLower() switch
+        {
+            "cold" or "ice" or "frozen" or "freezing" => "cold",
+            "electricity" or "electric" or "lightning" or "thunder" => "electricity",
+            "heat" or "hot" or "fire" or "burning" => "heat",
+            "sickness" or "sick" or "poison" or "poisoned" or "venom" => "sickness",
+            "water" or "wet" or "drown" or "drowning" => "water",
+            _ => ""
+        };
+
         public static void SetDebuffVulnerability(NPC npc, string debuffName, bool? enabled)
         {
             if (npc != null)
             {
-                switch (debuffName.ToLower())
+                switch (GetDebuffVulnerabilityKey(debuffName))
                 {
                     case "cold":
-                    case "ice":
-                    case "frozen":
-                    case "freezing":
                         npc.Calamity().VulnerableToCold = enabled;
                         break;
 
                     case "electricity":
-                    case "electric":
-                    case "lightning":
-                    case "thunder":
                         npc.Calamity().VulnerableToElectricity = enabled;
                         break;
 
                     case "heat":
-                    case "hot":
-                    case "fire":
-                    case "burning":
                         npc.Calamity().VulnerableToHeat = enabled;
                         break;
 
                     case "sickness":
-                    case "sick":
-                    case "poison":
-                    case "poisoned":
-                    case "venom":
                         npc.Calamity().VulnerableToSickness = enabled;
                         break;
 
                     case "water":
-                    case "wet":
-                    case "drown":
-                    case "drowning":
                         npc.Calamity().VulnerableToWater = enabled;
                         break;
                 }
@@ -446,40 +440,24 @@ namespace CalamityMod
         {
             if (npc != null)
             {
-                switch (debuffName.ToLower())
+                switch (GetDebuffVulnerabilityKey(debuffName))
                 {
                     default:
                         return false;
 
                     case "cold":
-                    case "ice":
-                    case "frozen":
-                    case "freezing":
                         return npc?.Calamity()?.VulnerableToCold ?? null;
 
                     case "electricity":
-                    case "electric":
-                    case "lightning":
-                    case "thunder":
                         return npc?.Calamity()?.VulnerableToElectricity ?? null;
 
                     case "heat":
-                    case "hot":
-                    case "fire":
-                    case "burning":
                         return npc?.Calamity()?.VulnerableToHeat ?? null;
 
                     case "sickness":
-                    case "sick":
-                    case "poison":
-                    case "poisoned":
-                    case "venom":
                         return npc?.Calamity()?.VulnerableToSickness ?? null;
 
                     case "water":
-                    case "wet":
-                    case "drown":
-                    case "drowning":
                         return npc?.Calamity()?.VulnerableToWater ?? null;
                 }
             }

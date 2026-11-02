@@ -271,19 +271,14 @@ namespace CalamityMod.UI.DraedonSummoning
             Rectangle clickArea = Utils.CenteredRectangle(drawPosition, cancelButton.Size() * VerificationButtonScale);
 
             // Check if the mouse is hovering over the exit button area.
-            if (MouseScreenArea.Intersects(clickArea))
+            bool hovering = MouseScreenArea.Intersects(clickArea);
+            ExitButtonScale = UpdateButtonScale(hovering, ExitButtonScale, 1f, 1.4f);
+            if (hovering)
             {
-                // If so, cause the button to inflate a little bit.
-                ExitButtonScale = MathHelper.Clamp(ExitButtonScale + 0.035f, 1f, 1.4f);
-
                 // If a click is done, leave the Codebreaker UI.
                 if (Main.mouseLeft && Main.mouseLeftRelease)
                     ViewedTileEntityID = -1;
             }
-
-            // Otherwise, if not hovering, cause the button to deflate back to its normal size.
-            else
-                ExitButtonScale = MathHelper.Clamp(ExitButtonScale - 0.05f, 1f, 1.4f);
 
             // Draw the exit button.
             Main.spriteBatch.Draw(cancelButton, drawPosition, null, Color.White, 0f, cancelButton.Size() * 0.5f, ExitButtonScale * GeneralScale, 0, 0f);
@@ -488,11 +483,10 @@ namespace CalamityMod.UI.DraedonSummoning
             Rectangle clickArea = Utils.CenteredRectangle(drawPosition, confirmationTexture.Size() * VerificationButtonScale);
 
             // Check if the mouse is hovering over the cost button area.
-            if (MouseScreenArea.Intersects(clickArea))
+            bool hovering = MouseScreenArea.Intersects(clickArea);
+            VerificationButtonScale = UpdateButtonScale(hovering, VerificationButtonScale, 1f, 1.35f);
+            if (hovering)
             {
-                // If so, cause the button to inflate a little bit.
-                VerificationButtonScale = MathHelper.Clamp(VerificationButtonScale + 0.035f, 1f, 1.35f);
-
                 // If a click is done, begin the decryption process.
                 // This will "lock" various things and make the Codebreaker unbreakable, to prevent complications with lost items.
                 // Also play a cool sound.
@@ -507,10 +501,6 @@ namespace CalamityMod.UI.DraedonSummoning
                 }
             }
 
-            // Otherwise, if not hovering, cause the button to deflate back to its normal size.
-            else
-                VerificationButtonScale = MathHelper.Clamp(VerificationButtonScale - 0.05f, 1f, 1.35f);
-
             // Draw the confirmation icon.
             Main.spriteBatch.Draw(confirmationTexture, drawPosition, null, Color.White, 0f, confirmationTexture.Size() * 0.5f, VerificationButtonScale * GeneralScale, 0, 0f);
         }
@@ -522,11 +512,10 @@ namespace CalamityMod.UI.DraedonSummoning
             Rectangle clickArea = Utils.CenteredRectangle(drawPosition, cancelTexture.Size() * CancelButtonScale * 1.2f);
 
             // Check if the mouse is hovering over the decrypt button area.
-            if (MouseScreenArea.Intersects(clickArea))
+            bool hovering = MouseScreenArea.Intersects(clickArea);
+            CancelButtonScale = UpdateButtonScale(hovering, CancelButtonScale, 0.9f, 1.2f);
+            if (hovering)
             {
-                // If so, cause the button to inflate a little bit.
-                CancelButtonScale = MathHelper.Clamp(CancelButtonScale + 0.035f, 0.9f, 1.2f);
-
                 // If a click is done, cancel the decryption process.
                 // This will cause already consumed cells to be lost.
                 if (clickingMouse)
@@ -550,7 +539,6 @@ namespace CalamityMod.UI.DraedonSummoning
             // Otherwise, if not hovering, cause the button to deflate back to its normal size.
             else
             {
-                CancelButtonScale = MathHelper.Clamp(CancelButtonScale - 0.05f, 0.9f, 1.2f);
                 if (clickingMouse)
                     AwaitingCloseConfirmation = false;
             }
@@ -637,11 +625,10 @@ namespace CalamityMod.UI.DraedonSummoning
             float iconrotation = codebreakerTileEntity.ContainsBloodyVein ? Main.GlobalTimeWrappedHourly * 20f : 0f;
 
             // Check if the mouse is hovering over the contact button area.
-            if (MouseScreenArea.Intersects(clickArea))
+            bool hovering = MouseScreenArea.Intersects(clickArea);
+            ContactButtonScale = UpdateButtonScale(hovering, ContactButtonScale, 1f, 1.35f);
+            if (hovering)
             {
-                // If so, cause the button to inflate a little bit.
-                ContactButtonScale = MathHelper.Clamp(ContactButtonScale + 0.035f, 1f, 1.35f);
-
                 // If a click is done, do a check.
                 // Prepare the summoning process by defining the countdown and current summon position. The mech will be summoned by the Draedon NPC.
                 // Also play a cool sound.
@@ -661,10 +648,6 @@ namespace CalamityMod.UI.DraedonSummoning
                     }
                 }
             }
-
-            // Otherwise, if not hovering, cause the button to deflate back to its normal size.
-            else
-                ContactButtonScale = MathHelper.Clamp(ContactButtonScale - 0.05f, 1f, 1.35f);
 
             // Draw the contact button.
             Main.spriteBatch.Draw(contactButton, drawPosition, null, Color.White, iconrotation, contactButton.Size() * 0.5f, ContactButtonScale * GeneralScale, 0, 0f);
@@ -693,19 +676,14 @@ namespace CalamityMod.UI.DraedonSummoning
             Rectangle clickArea = Utils.CenteredRectangle(drawPosition, communicateButton.Size() * VerificationButtonScale);
 
             // Check if the mouse is hovering over the communicate button area.
-            if (MouseScreenArea.Intersects(clickArea))
+            bool hovering = MouseScreenArea.Intersects(clickArea);
+            CommunicateButtonScale = UpdateButtonScale(hovering, CommunicateButtonScale, 1f, 1.35f);
+            if (hovering)
             {
-                // If so, cause the button to inflate a little bit.
-                CommunicateButtonScale = MathHelper.Clamp(CommunicateButtonScale + 0.035f, 1f, 1.35f);
-
                 // If a click is done, do a check. This triggers the communicate panel opening animation.
                 if (Main.mouseLeft && Main.mouseLeftRelease)
                     DisplayingCommunicationText = true;
             }
-
-            // Otherwise, if not hovering, cause the button to deflate back to its normal size.
-            else
-                CommunicateButtonScale = MathHelper.Clamp(CommunicateButtonScale - 0.05f, 1f, 1.35f);
 
             // Draw the communication button.
             Main.spriteBatch.Draw(communicateButton, drawPosition, null, Color.White, 0f, communicateButton.Size() * 0.5f, CommunicateButtonScale * GeneralScale, 0, 0f);
@@ -718,6 +696,13 @@ namespace CalamityMod.UI.DraedonSummoning
             drawPosition.X -= FontAssets.MouseText.Value.MeasureString(communicateText).X * GeneralScale * 0.5f;
             drawPosition.Y += GeneralScale * 20f;
             Utils.DrawBorderStringFourWay(Main.spriteBatch, FontAssets.MouseText.Value, communicateText, drawPosition.X, drawPosition.Y, Draedon.TextColor, Color.Black, Vector2.Zero, GeneralScale);
+        }
+
+        private static float UpdateButtonScale(bool hovering, float scale, float minimum, float maximum)
+        {
+            return hovering
+                ? MathHelper.Clamp(scale + 0.035f, minimum, maximum)
+                : MathHelper.Clamp(scale - 0.05f, minimum, maximum);
         }
 
         public static void DisplayNotStrongEnoughErrorText(Vector2 drawPosition)

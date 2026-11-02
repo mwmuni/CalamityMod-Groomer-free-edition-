@@ -98,19 +98,22 @@ namespace CalamityMod.World
             MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceWorkshop(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
+            => PlaceOutpost(out placementPoint, workshopPoints, structures, true);
+
+        private static void PlaceOutpost(out Point placementPoint, List<Point> workshopPoints, StructureMap structures, bool workshop)
         {
             int tries = 0;
-            string mapKey = RustedWorkshopKey;
+            string mapKey = workshop ? RustedWorkshopKey : ResearchOutpostKey;
 
             do
             {
                 int underworldTop = Main.UnderworldLayer;
-                int placementPositionX = WorldGen.genRand.Next((int)(Main.maxTilesX * 0.1f), (int)(Main.maxTilesX * 0.9f));
-                int placementPositionY = WorldGen.genRand.Next(underworldTop - 550, underworldTop - 50);
+                int placementPositionX = WorldGen.genRand.Next((int)(Main.maxTilesX * (workshop ? 0.1f : 0.15f)), (int)(Main.maxTilesX * (workshop ? 0.9f : 0.85f)));
+                int placementPositionY = WorldGen.genRand.Next(underworldTop - (workshop ? 550 : 400), underworldTop - 50);
 
                 placementPoint = new Point(placementPositionX, placementPositionY);
                 Vector2 schematicSize = new Vector2(TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1));
-                int xCheckArea = 40;
+                int xCheckArea = workshop ? 40 : 30;
                 bool canGenerateInLocation = true;
 
                 // new Vector2 is used here since a lambda expression cannot capture a ref, out, or in parameter.
@@ -130,7 +133,7 @@ namespace CalamityMod.World
                 else
                 {
                     bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillWorkshopChest));
+                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, workshop ? new Action<Chest>(FillWorkshopChest) : new Action<Chest>(FillLaboratoryChest));
                     CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 20);
                     break;
                 }
@@ -143,45 +146,7 @@ namespace CalamityMod.World
         public static void FillLaboratoryChest(Chest chest)
             => FillOutpostChest(chest, false);
         public static void PlaceResearchFacility(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
-        {
-            int tries = 0;
-            string mapKey = ResearchOutpostKey;
-
-            do
-            {
-                int underworldTop = Main.UnderworldLayer;
-                int placementPositionX = WorldGen.genRand.Next((int)(Main.maxTilesX * 0.15f), (int)(Main.maxTilesX * 0.85f));
-                int placementPositionY = WorldGen.genRand.Next(underworldTop - 400, underworldTop - 50);
-
-                placementPoint = new Point(placementPositionX, placementPositionY);
-                Vector2 schematicSize = new Vector2(TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1));
-                int xCheckArea = 30;
-                bool canGenerateInLocation = true;
-
-                // new Vector2 is used here since a lambda expression cannot capture a ref, out, or in parameter.
-                bool nearbyOtherWorkshop = workshopPoints.Any(point => Vector2.Distance(point.ToVector2(), new Vector2(placementPositionX, placementPositionY)) < 240f);
-                float totalTiles = (schematicSize.X + xCheckArea * 2) * schematicSize.Y;
-                for (int x = placementPoint.X - xCheckArea; x < placementPoint.X + schematicSize.X + xCheckArea; x++)
-                {
-                    for (int y = placementPoint.Y; y < placementPoint.Y + schematicSize.Y; y++)
-                    {
-                        Tile tile = CalamityUtils.ParanoidTileRetrieval(x, y);
-                        if (ShouldAvoidLocation(new Point(x, y)))
-                            canGenerateInLocation = false;
-                    }
-                }
-                if (!canGenerateInLocation || nearbyOtherWorkshop || !structures.CanPlace(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y)))
-                    tries++;
-                else
-                {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillLaboratoryChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 20);
-                    break;
-                }
-            }
-            while (tries <= 10000);
-        }
+            => PlaceOutpost(out placementPoint, workshopPoints, structures, false);
         #endregion
 
         #region Hell Lab
@@ -381,9 +346,12 @@ namespace CalamityMod.World
         }
 
         public static void PlaceIceLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
+            => PlaceBiomeLab(out placementPoint, workshopPoints, structures, false);
+
+        private static void PlaceBiomeLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures, bool plague)
         {
             int tries = 0;
-            string mapKey = IceLabKey;
+            string mapKey = plague ? PlagueLabKey : IceLabKey;
             PilePlacementMaps.TryGetValue(mapKey, out PilePlacementFunction pilePlacementFunction);
             SchematicMetaTile[,] schematic = TileMaps[mapKey];
 
@@ -401,36 +369,49 @@ namespace CalamityMod.World
                 bool canGenerateInLocation = true;
 
                 // new Vector2 is used here since a lambda expression cannot capture a ref, out, or in parameter.
-                bool nearbyOtherWorkshop = workshopPoints.Any(point => Vector2.Distance(point.ToVector2(), new Vector2(placementPositionX, placementPositionY)) < 180f);
+                bool nearbyOtherWorkshop = workshopPoints.Any(point => Vector2.Distance(point.ToVector2(), new Vector2(placementPositionX, placementPositionY)) < (plague ? 200f : 180f));
                 float totalTiles = (schematicSize.X + xCheckArea * 2) * schematicSize.Y;
                 for (int x = placementPoint.X - xCheckArea; x < placementPoint.X + schematicSize.X + xCheckArea; x++)
                 {
                     for (int y = placementPoint.Y; y < placementPoint.Y + schematicSize.Y; y++)
                     {
                         Tile tile = CalamityUtils.ParanoidTileRetrieval(x, y);
+                        // The plague scan checked avoidance before counting, the ice scan after.
+                        if (plague && ShouldAvoidLocation(new Point(x, y)))
+                            canGenerateInLocation = false;
                         if (tile.HasTile)
                         {
-                            if (tile.TileType == TileID.SnowBlock || tile.TileType == TileID.IceBlock)
+                            if (plague)
+                            {
+                                if (tile.TileType == TileID.Mud || tile.TileType == TileID.JungleGrass)
+                                    iceTilesInArea++;
+                                if (tile.TileType == TileID.MushroomGrass || tile.TileType == TileID.MushroomPlants || tile.TileType == TileID.MushroomVines)
+                                    iceTilesInArea -= 10;
+                            }
+                            else if (tile.TileType == TileID.SnowBlock || tile.TileType == TileID.IceBlock)
                                 iceTilesInArea++;
                             activeTilesInArea++;
                         }
-                        if (ShouldAvoidLocation(new Point(x, y)))
+                        if (!plague && ShouldAvoidLocation(new Point(x, y)))
                             canGenerateInLocation = false;
                     }
                 }
-                // Snow overlaps a lot with jungle on drunk/gfb worlds so it needs a bit of extra help
+                // Both biomes can overlap heavily on drunk/gfb worlds.
                 if (Main.drunkWorld)
                 {
                     iceTilesInArea *= 3;
                 }
-                if (!canGenerateInLocation || nearbyOtherWorkshop || iceTilesInArea < totalTiles * 0.35f || !structures.CanPlace(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y)))
+                if (!canGenerateInLocation || nearbyOtherWorkshop || iceTilesInArea < totalTiles * (plague ? 0.4f : 0.35f) || !structures.CanPlace(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y)))
                     tries++;
                 else
                 {
                     bool hasPlacedLogAndSchematic = false;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref hasPlacedLogAndSchematic, new Action<Chest, int, bool>(FillIceLaboratoryChest));
+                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref hasPlacedLogAndSchematic, plague ? new Action<Chest, int, bool>(FillPlagueLaboratoryChest) : new Action<Chest, int, bool>(FillIceLaboratoryChest));
                     CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 20);
-                    CalamityWorld.IceLabCenter = placementPoint.ToWorldCoordinates() + new Vector2(TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1)) * 8f;
+                    if (plague)
+                        CalamityWorld.JungleLabCenter = placementPoint.ToWorldCoordinates() + new Vector2(TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1)) * 8f;
+                    else
+                        CalamityWorld.IceLabCenter = placementPoint.ToWorldCoordinates() + new Vector2(TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1)) * 8f;
                     break;
                 }
             }
@@ -465,66 +446,7 @@ namespace CalamityMod.World
         }
 
         public static void PlacePlagueLab(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
-        {
-            int tries = 0;
-            string mapKey = PlagueLabKey;
-            PilePlacementMaps.TryGetValue(mapKey, out PilePlacementFunction pilePlacementFunction);
-            SchematicMetaTile[,] schematic = TileMaps[mapKey];
-
-            do
-            {
-                int underworldTop = Main.UnderworldLayer;
-                int placementPositionX = WorldGen.genRand.Next(120, Main.maxTilesX - 120);
-                int placementPositionY = WorldGen.genRand.Next((int)Main.worldSurface + 160, underworldTop - HellVerticalAvoidance);
-
-                placementPoint = new Point(placementPositionX, placementPositionY);
-                Vector2 schematicSize = new Vector2(schematic.GetLength(0), schematic.GetLength(1));
-                int activeTilesInArea = 0;
-                int jungleTilesInArea = 0;
-                int xCheckArea = 30;
-                bool canGenerateInLocation = true;
-
-                // new Vector2 is used here since a lambda expression cannot capture a ref, out, or in parameter.
-                bool nearbyOtherWorkshop = workshopPoints.Any(point => Vector2.Distance(point.ToVector2(), new Vector2(placementPositionX, placementPositionY)) < 200f);
-                float totalTiles = (schematicSize.X + xCheckArea * 2) * schematicSize.Y;
-                for (int x = placementPoint.X - xCheckArea; x < placementPoint.X + schematicSize.X + xCheckArea; x++)
-                {
-                    for (int y = placementPoint.Y; y < placementPoint.Y + schematicSize.Y; y++)
-                    {
-                        Tile tile = CalamityUtils.ParanoidTileRetrieval(x, y);
-                        if (ShouldAvoidLocation(new Point(x, y)))
-                            canGenerateInLocation = false;
-                        if (tile.HasTile)
-                        {
-                            if (tile.TileType == TileID.Mud || tile.TileType == TileID.JungleGrass)
-                                jungleTilesInArea++;
-                            if (tile.TileType == TileID.MushroomGrass || tile.TileType == TileID.MushroomPlants || tile.TileType == TileID.MushroomVines)
-                                jungleTilesInArea -= 10;
-
-                            activeTilesInArea++;
-                        }
-                    }
-                }
-                // Jungle overlaps a lot with snow on drunk/gfb worlds so it needs a bit of extra help
-                if (Main.drunkWorld)
-                {
-                    jungleTilesInArea *= 3;
-                }
-                if (!canGenerateInLocation || nearbyOtherWorkshop || jungleTilesInArea < totalTiles * 0.4f || !structures.CanPlace(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y)))
-                {
-                    tries++;
-                }
-                else
-                {
-                    bool hasPlacedLogAndSchematic = false;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref hasPlacedLogAndSchematic, new Action<Chest, int, bool>(FillPlagueLaboratoryChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 20);
-                    CalamityWorld.JungleLabCenter = placementPoint.ToWorldCoordinates() + new Vector2(TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1)) * 8f;
-                    break;
-                }
-            }
-            while (tries <= 20000);
-        }
+            => PlaceBiomeLab(out placementPoint, workshopPoints, structures, true);
         #endregion
 
         #region Planetoid Lab

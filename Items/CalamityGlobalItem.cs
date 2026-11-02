@@ -1338,60 +1338,37 @@ namespace CalamityMod.Items
 
         public static bool HasEnoughAmmo(Player player, Item item, int ammoConsumed)
         {
-            bool hasEnoughAmmo = false;
-            bool canShoot = false;
+            return FindAdditionalAmmo(player, item, ammoConsumed) >= 0;
+        }
 
+        private static int FindAdditionalAmmo(Player player, Item item, int ammoConsumed)
+        {
             for (int i = 54; i < Main.InventorySlotsTotal; i++)
             {
                 if (player.inventory[i].ammo == item.useAmmo && (player.inventory[i].stack >= ammoConsumed || !player.inventory[i].consumable))
                 {
-                    canShoot = true;
-                    hasEnoughAmmo = true;
-                    break;
+                    return i;
                 }
             }
 
-            if (!hasEnoughAmmo)
+            for (int j = 0; j < 54; j++)
             {
-                for (int j = 0; j < 54; j++)
+                if (player.inventory[j].ammo == item.useAmmo && (player.inventory[j].stack >= ammoConsumed || !player.inventory[j].consumable))
                 {
-                    if (player.inventory[j].ammo == item.useAmmo && (player.inventory[j].stack >= ammoConsumed || !player.inventory[j].consumable))
-                    {
-                        canShoot = true;
-                        break;
-                    }
+                    return j;
                 }
             }
-            return canShoot;
+            return -1;
         }
 
         public static void ConsumeAdditionalAmmo(Player player, Item item, int ammoConsumed)
         {
             Item itemAmmo = new Item();
-            bool hasEnoughAmmo = false;
             bool dontConsumeAmmo = false;
 
-            for (int i = 54; i < Main.InventorySlotsTotal; i++)
-            {
-                if (player.inventory[i].ammo == item.useAmmo && (player.inventory[i].stack >= ammoConsumed || !player.inventory[i].consumable))
-                {
-                    itemAmmo = player.inventory[i];
-                    hasEnoughAmmo = true;
-                    break;
-                }
-            }
-
-            if (!hasEnoughAmmo)
-            {
-                for (int j = 0; j < 54; j++)
-                {
-                    if (player.inventory[j].ammo == item.useAmmo && (player.inventory[j].stack >= ammoConsumed || !player.inventory[j].consumable))
-                    {
-                        itemAmmo = player.inventory[j];
-                        break;
-                    }
-                }
-            }
+            int ammoIndex = FindAdditionalAmmo(player, item, ammoConsumed);
+            if (ammoIndex >= 0)
+                itemAmmo = player.inventory[ammoIndex];
 
             if (player.magicQuiver && (item.useAmmo == AmmoID.Arrow || item.useAmmo == AmmoID.Stake) && Main.rand.NextBool(5))
                 dontConsumeAmmo = true;

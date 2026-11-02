@@ -1878,56 +1878,63 @@ namespace CalamityMod.CalPlayer
             cooldowns = new Dictionary<string, CooldownInstance>(16);
         }
 
+        private delegate ref bool SavedBoostFlag(CalamityPlayer player);
+
+        private static readonly (string Key, SavedBoostFlag Flag)[] SavedBoostFlags =
+        {
+            ("extraAccessoryML", static (CalamityPlayer player) => ref player.extraAccessoryML),
+            ("etherealCore", static (CalamityPlayer player) => ref player.eCore),
+            ("miracleFruit", static (CalamityPlayer player) => ref player.mFruit),
+            ("bloodOrange", static (CalamityPlayer player) => ref player.sTangerine),
+            ("elderBerry", static (CalamityPlayer player) => ref player.tCloudberry),
+            ("dragonFruit", static (CalamityPlayer player) => ref player.sStrawberry),
+            ("phantomHeart", static (CalamityPlayer player) => ref player.pHeart),
+            ("cometShard", static (CalamityPlayer player) => ref player.cShard),
+            ("revJam", static (CalamityPlayer player) => ref player.revJamDrop),
+            ("rageOne", static (CalamityPlayer player) => ref player.rageBoostOne),
+            ("rageTwo", static (CalamityPlayer player) => ref player.rageBoostTwo),
+            ("rageThree", static (CalamityPlayer player) => ref player.rageBoostThree),
+            ("adrenalineOne", static (CalamityPlayer player) => ref player.adrenalineBoostOne),
+            ("adrenalineTwo", static (CalamityPlayer player) => ref player.adrenalineBoostTwo),
+            ("adrenalineThree", static (CalamityPlayer player) => ref player.adrenalineBoostThree),
+            ("bossHPBar", static (CalamityPlayer player) => ref player.drawBossHPBar),
+            ("drawSmallText", static (CalamityPlayer player) => ref player.shouldDrawSmallText),
+            ("newMerchantInventory", static (CalamityPlayer player) => ref player.newMerchantInventory),
+            ("newPainterInventory", static (CalamityPlayer player) => ref player.newPainterInventory),
+            ("newGolferInventory", static (CalamityPlayer player) => ref player.newGolferInventory),
+            ("newZoologistInventory", static (CalamityPlayer player) => ref player.newZoologistInventory),
+            ("newDyeTraderInventory", static (CalamityPlayer player) => ref player.newDyeTraderInventory),
+            ("newPartyGirlInventory", static (CalamityPlayer player) => ref player.newPartyGirlInventory),
+            ("newStylistInventory", static (CalamityPlayer player) => ref player.newStylistInventory),
+            ("newDemolitionistInventory", static (CalamityPlayer player) => ref player.newDemolitionistInventory),
+            ("newDryadInventory", static (CalamityPlayer player) => ref player.newDryadInventory),
+            ("newTavernkeepInventory", static (CalamityPlayer player) => ref player.newTavernkeepInventory),
+            ("newArmsDealerInventory", static (CalamityPlayer player) => ref player.newArmsDealerInventory),
+            ("newGoblinTinkererInventory", static (CalamityPlayer player) => ref player.newGoblinTinkererInventory),
+            ("newWitchDoctorInventory", static (CalamityPlayer player) => ref player.newWitchDoctorInventory),
+            ("newClothierInventory", static (CalamityPlayer player) => ref player.newClothierInventory),
+            ("newMechanicInventory", static (CalamityPlayer player) => ref player.newMechanicInventory),
+            ("newPirateInventory", static (CalamityPlayer player) => ref player.newPirateInventory),
+            ("newTruffleInventory", static (CalamityPlayer player) => ref player.newTruffleInventory),
+            ("newWizardInventory", static (CalamityPlayer player) => ref player.newWizardInventory),
+            ("newSteampunkerInventory", static (CalamityPlayer player) => ref player.newSteampunkerInventory),
+            ("newCyborgInventory", static (CalamityPlayer player) => ref player.newCyborgInventory),
+            ("newPrincessInventory", static (CalamityPlayer player) => ref player.newPrincessInventory),
+            ("newSkeletonMerchantInventory", static (CalamityPlayer player) => ref player.newSkeletonMerchantInventory),
+            ("newPermafrostInventory", static (CalamityPlayer player) => ref player.newPermafrostInventory),
+            ("newAmidiasInventory", static (CalamityPlayer player) => ref player.newAmidiasInventory),
+            ("newBanditInventory", static (CalamityPlayer player) => ref player.newBanditInventory),
+            ("newCalamitasInventory", static (CalamityPlayer player) => ref player.newCalamitasInventory),
+            ("GivenBrimstoneLocus", static (CalamityPlayer player) => ref player.GivenBrimstoneLocus),
+            ("HasTalkedAtCodebreaker", static (CalamityPlayer player) => ref player.HasTalkedAtCodebreaker),
+            ("HasCraftedDraedonsForge", static (CalamityPlayer player) => ref player.HasCraftedDraedonsForge)
+        };
+
         public override void SaveData(TagCompound tag)
         {
             var boost = new List<string>();
-            boost.AddWithCondition("extraAccessoryML", extraAccessoryML);
-            boost.AddWithCondition("etherealCore", eCore);
-            boost.AddWithCondition("miracleFruit", mFruit);
-            boost.AddWithCondition("bloodOrange", sTangerine);
-            boost.AddWithCondition("elderBerry", tCloudberry);
-            boost.AddWithCondition("dragonFruit", sStrawberry);
-            boost.AddWithCondition("phantomHeart", pHeart);
-            boost.AddWithCondition("cometShard", cShard);
-            boost.AddWithCondition("revJam", revJamDrop);
-            boost.AddWithCondition("rageOne", rageBoostOne);
-            boost.AddWithCondition("rageTwo", rageBoostTwo);
-            boost.AddWithCondition("rageThree", rageBoostThree);
-            boost.AddWithCondition("adrenalineOne", adrenalineBoostOne);
-            boost.AddWithCondition("adrenalineTwo", adrenalineBoostTwo);
-            boost.AddWithCondition("adrenalineThree", adrenalineBoostThree);
-            boost.AddWithCondition("bossHPBar", drawBossHPBar);
-            boost.AddWithCondition("drawSmallText", shouldDrawSmallText);
-
-            boost.AddWithCondition("newMerchantInventory", newMerchantInventory);
-            boost.AddWithCondition("newPainterInventory", newPainterInventory);
-            boost.AddWithCondition("newGolferInventory", newGolferInventory);
-            boost.AddWithCondition("newZoologistInventory", newZoologistInventory);
-            boost.AddWithCondition("newDyeTraderInventory", newDyeTraderInventory);
-            boost.AddWithCondition("newPartyGirlInventory", newPartyGirlInventory);
-            boost.AddWithCondition("newStylistInventory", newStylistInventory);
-            boost.AddWithCondition("newDemolitionistInventory", newDemolitionistInventory);
-            boost.AddWithCondition("newDryadInventory", newDryadInventory);
-            boost.AddWithCondition("newTavernkeepInventory", newTavernkeepInventory);
-            boost.AddWithCondition("newArmsDealerInventory", newArmsDealerInventory);
-            boost.AddWithCondition("newGoblinTinkererInventory", newGoblinTinkererInventory);
-            boost.AddWithCondition("newWitchDoctorInventory", newWitchDoctorInventory);
-            boost.AddWithCondition("newClothierInventory", newClothierInventory);
-            boost.AddWithCondition("newMechanicInventory", newMechanicInventory);
-            boost.AddWithCondition("newPirateInventory", newPirateInventory);
-            boost.AddWithCondition("newTruffleInventory", newTruffleInventory);
-            boost.AddWithCondition("newWizardInventory", newWizardInventory);
-            boost.AddWithCondition("newSteampunkerInventory", newSteampunkerInventory);
-            boost.AddWithCondition("newCyborgInventory", newCyborgInventory);
-            boost.AddWithCondition("newPrincessInventory", newPrincessInventory);
-            boost.AddWithCondition("newSkeletonMerchantInventory", newSkeletonMerchantInventory);
-            boost.AddWithCondition("newPermafrostInventory", newPermafrostInventory);
-            boost.AddWithCondition("newAmidiasInventory", newAmidiasInventory);
-            boost.AddWithCondition("newBanditInventory", newBanditInventory);
-            boost.AddWithCondition("newCalamitasInventory", newCalamitasInventory);
-            boost.AddWithCondition("GivenBrimstoneLocus", GivenBrimstoneLocus);
-            boost.AddWithCondition("HasTalkedAtCodebreaker", HasTalkedAtCodebreaker);
-            boost.AddWithCondition("HasCraftedDraedonsForge", HasCraftedDraedonsForge);
+            foreach (var flag in SavedBoostFlags)
+                boost.AddWithCondition(flag.Key, flag.Flag(this));
 
             // Calculate the new total time of all sessions at the instant of this player save.
             TimeSpan newSessionTotal = previousSessionTotal.Add(SpeedrunTimerSystem.Elapsed);
@@ -1970,53 +1977,8 @@ namespace CalamityMod.CalPlayer
         public override void LoadData(TagCompound tag)
         {
             var boost = tag.GetList<string>("boost");
-            extraAccessoryML = boost.Contains("extraAccessoryML");
-            eCore = boost.Contains("etherealCore");
-            mFruit = boost.Contains("miracleFruit");
-            sTangerine = boost.Contains("bloodOrange");
-            tCloudberry = boost.Contains("elderBerry");
-            sStrawberry = boost.Contains("dragonFruit");
-            pHeart = boost.Contains("phantomHeart");
-            cShard = boost.Contains("cometShard");
-            revJamDrop = boost.Contains("revJam");
-            rageBoostOne = boost.Contains("rageOne");
-            rageBoostTwo = boost.Contains("rageTwo");
-            rageBoostThree = boost.Contains("rageThree");
-            adrenalineBoostOne = boost.Contains("adrenalineOne");
-            adrenalineBoostTwo = boost.Contains("adrenalineTwo");
-            adrenalineBoostThree = boost.Contains("adrenalineThree");
-            drawBossHPBar = boost.Contains("bossHPBar");
-            shouldDrawSmallText = boost.Contains("drawSmallText");
-
-            newMerchantInventory = boost.Contains("newMerchantInventory");
-            newPainterInventory = boost.Contains("newPainterInventory");
-            newGolferInventory = boost.Contains("newGolferInventory");
-            newZoologistInventory = boost.Contains("newZoologistInventory");
-            newDyeTraderInventory = boost.Contains("newDyeTraderInventory");
-            newPartyGirlInventory = boost.Contains("newPartyGirlInventory");
-            newStylistInventory = boost.Contains("newStylistInventory");
-            newDemolitionistInventory = boost.Contains("newDemolitionistInventory");
-            newDryadInventory = boost.Contains("newDryadInventory");
-            newTavernkeepInventory = boost.Contains("newTavernkeepInventory");
-            newArmsDealerInventory = boost.Contains("newArmsDealerInventory");
-            newGoblinTinkererInventory = boost.Contains("newGoblinTinkererInventory");
-            newWitchDoctorInventory = boost.Contains("newWitchDoctorInventory");
-            newClothierInventory = boost.Contains("newClothierInventory");
-            newMechanicInventory = boost.Contains("newMechanicInventory");
-            newPirateInventory = boost.Contains("newPirateInventory");
-            newTruffleInventory = boost.Contains("newTruffleInventory");
-            newWizardInventory = boost.Contains("newWizardInventory");
-            newSteampunkerInventory = boost.Contains("newSteampunkerInventory");
-            newCyborgInventory = boost.Contains("newCyborgInventory");
-            newPrincessInventory = boost.Contains("newPrincessInventory");
-            newSkeletonMerchantInventory = boost.Contains("newSkeletonMerchantInventory");
-            newPermafrostInventory = boost.Contains("newPermafrostInventory");
-            newAmidiasInventory = boost.Contains("newAmidiasInventory");
-            newBanditInventory = boost.Contains("newBanditInventory");
-            newCalamitasInventory = boost.Contains("newCalamitasInventory");
-            GivenBrimstoneLocus = boost.Contains("GivenBrimstoneLocus");
-            HasTalkedAtCodebreaker = boost.Contains("HasTalkedAtCodebreaker");
-            HasCraftedDraedonsForge = boost.Contains("HasCraftedDraedonsForge");
+            foreach (var flag in SavedBoostFlags)
+                flag.Flag(this) = boost.Contains(flag.Key);
 
             // Load rage if it's there, which it will be for any players saved with 1.5.
             // Older players have "stress" instead, which will be ignored. This is intentional.
@@ -2094,8 +2056,7 @@ namespace CalamityMod.CalPlayer
 
             if (Player.HeldItem.type == ModContent.ItemType<ViridVanguard>())
             {
-                if (ViridVanguardActiveCooldown > 0)
-                    ViridVanguardActiveCooldown--;
+                DecrementIfPositive(ref ViridVanguardActiveCooldown);
             }
             else if (ViridVanguardActiveCooldown >= 0 && ViridVanguardActiveCooldown < ViridVanguard.ActiveAttackCooldown)
                 ViridVanguardActiveCooldown++;
@@ -2539,8 +2500,7 @@ namespace CalamityMod.CalPlayer
             spiritOrigin = false;
             spiritOriginVanity = false;
             critDamage = 0;
-            if (abaddonCooldown > 0)
-                abaddonCooldown--;
+            DecrementIfPositive(ref abaddonCooldown);
 
 
             astralStarRain = false;
@@ -2626,8 +2586,7 @@ namespace CalamityMod.CalPlayer
             blunderBoosterVisibility = true;
             veneratedLocket = false;
 
-            if (DemonAltarDialogueCooldown > 0)
-                DemonAltarDialogueCooldown--;
+            DecrementIfPositive(ref DemonAltarDialogueCooldown);
 
             ResetDebuffFlags();
             enraged = false;
@@ -2638,8 +2597,7 @@ namespace CalamityMod.CalPlayer
             ResetCommonBuffFlags();
             trippy = false;
             amidiasBlessing = false;
-            if (purpleHazeStealthTimer > 0)
-                purpleHazeStealthTimer--;
+            DecrementIfPositive(ref purpleHazeStealthTimer);
             bloodfinBoost = false;
             divineBless = false;
 
@@ -4636,96 +4594,12 @@ namespace CalamityMod.CalPlayer
                             Player.position -= Player.velocity;
                         }
                         if (intersectX || intersect)
-                        {
-                            //This checks if the player is to the left of the pillar
-                            if (Player.Center.X < npc.Center.X)
-                            {
-                                float playerEdge = Player.Hitbox.X + Player.Hitbox.Width;
-                                float pillarEdge = npc.Hitbox.X;
-                                float goalEdge = playerEdge + Player.velocity.X;
-                                if (goalEdge > pillarEdge)
-                                {
-                                    Player.velocity.X += pillarEdge - goalEdge;
-                                    if (Player.velocity.X < 0)
-                                        if (!Collision.SolidCollision(Player.position + new Vector2(Player.velocity.X, 0), Player.Hitbox.Width, Player.Hitbox.Height))
-                                        {
-                                            Player.position.X += Player.velocity.X;
-                                            Player.velocity.X = 0;
-                                        }
-                                        else
-                                        {
-                                            Player.velocity.X = origX;
-                                        }
-                                }
-                            }
-                            //This is for if the player is to the right of the pillar
-                            else
-                            {
-                                float playerEdge = Player.Hitbox.X;
-                                float pillarEdge = npc.Hitbox.X + npc.Hitbox.Width;
-                                float goalEdge = playerEdge + Player.velocity.X;
-                                if (goalEdge < pillarEdge)
-                                {
-                                    Player.velocity.X += pillarEdge - goalEdge;
-                                    if (Player.velocity.X > 0)
-                                        if (!Collision.SolidCollision(Player.position + new Vector2(Player.velocity.X, 0), Player.Hitbox.Width, Player.Hitbox.Height))
-                                        {
-                                            Player.position.X += Player.velocity.X;
-                                            Player.velocity.X = 0;
-                                        }
-                                        else
-                                        {
-                                            Player.velocity.X = origX;
-                                        }
-                                }
-                            }
-                        }
+                            ResolvePillarCollisionAxis(npc, true, origX);
                         //For the vertical axis, we don't distinguish between top and bottom, and always move players to the top
                         //This is so being placed inside a pillar teleports a player to the top, which applies primarily to teleporting or pillar spawning
                         //Additionally, this is set to only work when the pillar is stationary vertically to prevent janky interations when pillars are moving.
                         if ((intersectY || intersect))
-                        {
-                            if (Player.Center.Y < npc.Center.Y)
-                            {
-                                float playerEdge = Player.Hitbox.Y + Player.Hitbox.Height;
-                                float pillarEdge = npc.Hitbox.Y;
-                                float goalEdge = playerEdge + Player.velocity.Y;
-                                if (goalEdge > pillarEdge)
-                                {
-                                    Player.velocity.Y += pillarEdge - goalEdge;
-                                    if (Player.velocity.Y < 0)
-                                        if (!Collision.SolidCollision(Player.position + new Vector2(0, Player.velocity.Y), Player.Hitbox.Width, Player.Hitbox.Height))
-                                        {
-                                            Player.position.Y += Player.velocity.Y;
-                                            Player.velocity.Y = 0;
-                                        }
-                                        else
-                                        {
-                                            Player.velocity.Y = origY;
-                                        }
-                                }
-                            }
-                            else
-                            {
-                                float playerEdge = Player.Hitbox.Y;
-                                float pillarEdge = npc.Hitbox.Y + npc.Hitbox.Height;
-                                float goalEdge = playerEdge + Player.velocity.Y;
-                                if (goalEdge < pillarEdge)
-                                {
-                                    Player.velocity.Y += pillarEdge - goalEdge;
-                                    if (Player.velocity.Y > 0)
-                                        if (!Collision.SolidCollision(Player.position + new Vector2(0, Player.velocity.Y), Player.Hitbox.Width, Player.Hitbox.Height))
-                                        {
-                                            Player.position.Y += Player.velocity.Y;
-                                            Player.velocity.Y = 0;
-                                        }
-                                        else
-                                        {
-                                            Player.velocity.Y = origY;
-                                        }
-                                }
-                            }
-                        }
+                            ResolvePillarCollisionAxis(npc, false, origY);
                         //This is to guarantee we can stand on top of rock pillars instead of looking like we're "floating" on top of them.
                         if (intersectY && Player.velocity.Y < 0.25f && Player.velocity.Y > -0.25f)
                         {
@@ -4847,6 +4721,35 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region PostUpdateEquips
+        private void ResolvePillarCollisionAxis(NPC npc, bool horizontal, float originalVelocity)
+        {
+            bool lowerSide = horizontal ? Player.Center.X < npc.Center.X : Player.Center.Y < npc.Center.Y;
+            float playerEdge = horizontal
+                ? (lowerSide ? Player.Hitbox.X + Player.Hitbox.Width : Player.Hitbox.X)
+                : (lowerSide ? Player.Hitbox.Y + Player.Hitbox.Height : Player.Hitbox.Y);
+            float pillarEdge = horizontal
+                ? (lowerSide ? npc.Hitbox.X : npc.Hitbox.X + npc.Hitbox.Width)
+                : (lowerSide ? npc.Hitbox.Y : npc.Hitbox.Y + npc.Hitbox.Height);
+            ref float velocity = ref (horizontal ? ref Player.velocity.X : ref Player.velocity.Y);
+            float goalEdge = playerEdge + velocity;
+            if (lowerSide ? goalEdge > pillarEdge : goalEdge < pillarEdge)
+            {
+                velocity += pillarEdge - goalEdge;
+                if (lowerSide ? velocity < 0 : velocity > 0)
+                {
+                    Vector2 offset = horizontal ? new Vector2(velocity, 0) : new Vector2(0, velocity);
+                    if (!Collision.SolidCollision(Player.position + offset, Player.Hitbox.Width, Player.Hitbox.Height))
+                    {
+                        ref float position = ref (horizontal ? ref Player.position.X : ref Player.position.Y);
+                        position += velocity;
+                        velocity = 0;
+                    }
+                    else
+                        velocity = originalVelocity;
+                }
+            }
+        }
+
         private void UpdateWhiskeyClassEffects(Item item, IVDripPlayer dripPlayer, DamageClass damageClass, ref int timeHolding)
         {
             if (item.DamageType.CountsAsClass(damageClass))
@@ -4926,8 +4829,7 @@ namespace CalamityMod.CalPlayer
                         Player.breath += 1;
                 }
                 else
-                    if (oceanCrestTimer > 0)
-                    oceanCrestTimer--;
+                    DecrementIfPositive(ref oceanCrestTimer);
 
                 if (oceanCrestTimer > 0 || GetEffects)
                     Player.pickSpeed -= 0.15f; // 15% mining speed

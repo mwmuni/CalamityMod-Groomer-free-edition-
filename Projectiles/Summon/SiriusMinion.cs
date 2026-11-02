@@ -68,21 +68,7 @@ namespace CalamityMod.Projectiles.Summon
             #region Add Minion Slots
             if (MinionSlotsToAdd > 0)
             {
-                float minionSlotsAvaliable = Owner.maxMinions;
-                foreach (var item in Main.ActiveProjectiles)
-                {
-                    if (item.owner == Projectile.owner)
-                        minionSlotsAvaliable -= item.minionSlots;
-                }
-                while (minionSlotsAvaliable >= 1 && MinionSlotsToAdd > 0)
-                {
-
-                    Projectile.minionSlots++;
-                    minionSlotsAvaliable--;
-                    MinionSlotsToAdd--;
-                    Projectile.netUpdate = true;
-                }
-                MinionSlotsToAdd = 0;
+                Projectile.AllocateMinionSlots(Owner, 1, true);
             }
             #endregion
             CheckMinionExistince(); // Checks if the minion can still exist.

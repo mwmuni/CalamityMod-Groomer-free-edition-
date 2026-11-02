@@ -206,13 +206,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
             bool phase5 = lifeRatio < 0.2f;
             bool phase6 = lifeRatio < 0.05f;
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFar(NPC, false);
 
             // Target variable
             Player player = Main.player[NPC.target];
@@ -574,20 +568,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                         calamityGlobalNPC.newAI[2] += 1f;
 
                         Lighting.AddLight(NPC.Center, 0.4f, 0.85f, 0.9f);
-
-                        float rotation = MathHelper.Clamp((float)Main.rand.NextDouble() * 1f - 0.5f, -0.5f, 0.5f);
-                        Vector2 dustPosition = new Vector2(-NPC.width * 0.2f * NPC.scale, 0f).RotatedBy(rotation * ((float)Math.PI * 2f)).RotatedBy(NPC.velocity.ToRotation());
-                        int dust = Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.Electric, (0f - NPC.velocity.X) / 3f, (0f - NPC.velocity.Y) / 3f, 150, Color.Transparent, 0.7f);
-                        Main.dust[dust].position = NPC.Center + dustPosition;
-                        Main.dust[dust].velocity = Vector2.Normalize(Main.dust[dust].position - NPC.Center) * 2f;
-                        Main.dust[dust].noGravity = true;
-
-                        rotation = MathHelper.Clamp((float)Main.rand.NextDouble() * 1f - 0.5f, -0.5f, 0.5f);
-                        dustPosition = new Vector2(-NPC.width * 0.6f * NPC.scale, 0f).RotatedBy(rotation * ((float)Math.PI * 2f)).RotatedBy(NPC.velocity.ToRotation());
-                        dust = Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.Electric, (0f - NPC.velocity.X) / 3f, (0f - NPC.velocity.Y) / 3f, 150, Color.Transparent, 0.7f);
-                        Main.dust[dust].velocity = Vector2.Zero;
-                        Main.dust[dust].position = NPC.Center + dustPosition;
-                        Main.dust[dust].noGravity = true;
+                        SpawnChargePhaseDust(true);
 
                         if (calamityGlobalNPC.newAI[2] >= lightningRainDuration)
                         {
@@ -690,20 +671,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                         calamityGlobalNPC.newAI[2] += 1f;
 
                         Lighting.AddLight(NPC.Center, 0.3f, 0.75f, 0.9f);
-
-                        float rotation = MathHelper.Clamp((float)Main.rand.NextDouble() * 1f - 0.5f, -0.5f, 0.5f);
-                        Vector2 dustPosition = new Vector2(-NPC.width * 0.2f * NPC.scale, 0f).RotatedBy(rotation * ((float)Math.PI * 2f)).RotatedBy(NPC.velocity.ToRotation());
-                        int dust = Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.NorthPole, 0f, 0f, 100, Color.Transparent);
-                        Main.dust[dust].position = NPC.Center + dustPosition;
-                        Main.dust[dust].velocity = Vector2.Normalize(Main.dust[dust].position - NPC.Center) * 2f;
-                        Main.dust[dust].noGravity = true;
-
-                        rotation = MathHelper.Clamp((float)Main.rand.NextDouble() * 1f - 0.5f, -0.5f, 0.5f);
-                        dustPosition = new Vector2(-NPC.width * 0.6f * NPC.scale, 0f).RotatedBy(rotation * ((float)Math.PI * 2f)).RotatedBy(NPC.velocity.ToRotation());
-                        dust = Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.NorthPole, 0f, 0f, 100, Color.Transparent);
-                        Main.dust[dust].velocity = Vector2.Zero;
-                        Main.dust[dust].position = NPC.Center + dustPosition;
-                        Main.dust[dust].noGravity = true;
+                        SpawnChargePhaseDust(false);
 
                         if (calamityGlobalNPC.newAI[2] >= iceMistDuration)
                         {
@@ -1196,6 +1164,27 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                 NPC.NewNPC(NPC.GetSource_FromAI(), (int)(player.Center.X + (float)(Math.Sin(i * ancientDoomDegrees) * ancientDoomDistance)), (int)(player.Center.Y + (float)(Math.Cos(i * ancientDoomDegrees) * ancientDoomDistance)),
                     NPCID.AncientDoom, 0, NPC.whoAmI, 0f, ai2, 0f, Main.maxPlayers);
             }
+        }
+
+        private void SpawnChargePhaseDust(bool lightning)
+        {
+            float rotation = MathHelper.Clamp((float)Main.rand.NextDouble() * 1f - 0.5f, -0.5f, 0.5f);
+            Vector2 dustPosition = new Vector2(-NPC.width * 0.2f * NPC.scale, 0f).RotatedBy(rotation * ((float)Math.PI * 2f)).RotatedBy(NPC.velocity.ToRotation());
+            int dust = lightning
+                ? Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.Electric, (0f - NPC.velocity.X) / 3f, (0f - NPC.velocity.Y) / 3f, 150, Color.Transparent, 0.7f)
+                : Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.NorthPole, 0f, 0f, 100, Color.Transparent);
+            Main.dust[dust].position = NPC.Center + dustPosition;
+            Main.dust[dust].velocity = Vector2.Normalize(Main.dust[dust].position - NPC.Center) * 2f;
+            Main.dust[dust].noGravity = true;
+
+            rotation = MathHelper.Clamp((float)Main.rand.NextDouble() * 1f - 0.5f, -0.5f, 0.5f);
+            dustPosition = new Vector2(-NPC.width * 0.6f * NPC.scale, 0f).RotatedBy(rotation * ((float)Math.PI * 2f)).RotatedBy(NPC.velocity.ToRotation());
+            dust = lightning
+                ? Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.Electric, (0f - NPC.velocity.X) / 3f, (0f - NPC.velocity.Y) / 3f, 150, Color.Transparent, 0.7f)
+                : Dust.NewDust(NPC.Center - Vector2.One * 5f, 10, 10, DustID.NorthPole, 0f, 0f, 100, Color.Transparent);
+            Main.dust[dust].velocity = Vector2.Zero;
+            Main.dust[dust].position = NPC.Center + dustPosition;
+            Main.dust[dust].noGravity = true;
         }
 
         private void ChargeDust()

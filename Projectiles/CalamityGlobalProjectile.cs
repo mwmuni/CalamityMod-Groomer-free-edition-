@@ -511,6 +511,33 @@ namespace CalamityMod.Projectiles
         #endregion
 
         #region Pre AI
+        private static void UpdateSharknadoBolt(Projectile projectile, float strength)
+        {
+            float num552 = (float)Math.PI / 15f;
+            float num553 = strength;
+            float num554 = (float)(Math.Cos(num552 * projectile.ai[0]) - 0.5) * num553;
+            projectile.velocity.Y -= num554;
+            projectile.ai[0]++;
+            num554 = (float)(Math.Cos(num552 * projectile.ai[0]) - 0.5) * num553;
+            projectile.velocity.Y += num554;
+            projectile.localAI[0]++;
+            if (projectile.localAI[0] > 10f)
+            {
+                projectile.alpha -= 5;
+                if (projectile.alpha < 100)
+                    projectile.alpha = 100;
+
+                projectile.rotation += projectile.velocity.X * 0.1f;
+                projectile.frame = (int)(projectile.localAI[0] / 3f) % 3;
+            }
+
+            if (projectile.wet)
+            {
+                projectile.position.Y -= 16f;
+                projectile.Kill();
+            }
+        }
+
         public override bool PreAI(Projectile projectile)
         {
             //Light Pets will add light to the abyss darkness.
@@ -1138,65 +1165,14 @@ namespace CalamityMod.Projectiles
             {
                 if (projectile.ai[1] == 0f)
                 {
-                    float num552 = (float)Math.PI / 15f;
-                    float num553 = 4f;
-                    float num554 = (float)(Math.Cos(num552 * projectile.ai[0]) - 0.5) * num553;
-                    projectile.velocity.Y -= num554;
-                    projectile.ai[0]++;
-                    num554 = (float)(Math.Cos(num552 * projectile.ai[0]) - 0.5) * num553;
-                    projectile.velocity.Y += num554;
-                    projectile.localAI[0]++;
-                    if (projectile.localAI[0] > 10f)
-                    {
-                        projectile.alpha -= 5;
-                        if (projectile.alpha < 100)
-                            projectile.alpha = 100;
-
-                        projectile.rotation += projectile.velocity.X * 0.1f;
-                        projectile.frame = (int)(projectile.localAI[0] / 3f) % 3;
-                    }
-
-                    if (projectile.wet)
-                    {
-                        projectile.position.Y -= 16f;
-                        projectile.Kill();
-                    }
-
+                    UpdateSharknadoBolt(projectile, 4f);
                     return false;
                 }
                 else if (projectile.ai[1] < 0f)
                 {
                     projectile.timeLeft -= 2;
 
-                    float num623 = (float)Math.PI / 15f;
-                    float num624 = -2f;
-                    float num625 = (float)(Math.Cos(num623 * projectile.ai[0]) - 0.5) * num624;
-
-                    projectile.velocity.Y -= num625;
-
-                    projectile.ai[0] += 1f;
-
-                    num625 = (float)(Math.Cos(num623 * projectile.ai[0]) - 0.5) * num624;
-
-                    projectile.velocity.Y += num625;
-
-                    projectile.localAI[0] += 1f;
-                    if (projectile.localAI[0] > 10f)
-                    {
-                        projectile.alpha -= 5;
-                        if (projectile.alpha < 100)
-                            projectile.alpha = 100;
-
-                        projectile.rotation += projectile.velocity.X * 0.1f;
-                        projectile.frame = (int)(projectile.localAI[0] / 3f) % 3;
-                    }
-
-                    if (projectile.wet)
-                    {
-                        projectile.position.Y -= 16f;
-                        projectile.Kill();
-                    }
-
+                    UpdateSharknadoBolt(projectile, -2f);
                     return false;
                 }
             }

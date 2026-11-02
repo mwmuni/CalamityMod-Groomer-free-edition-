@@ -109,34 +109,7 @@ namespace CalamityMod.NPCs.SlimeGod
             NPC.noTileCollide = false;
             NPC.noGravity = false;
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
-
-            Player player = Main.player[NPC.target];
-
-            if (NPC.ai[0] != 4f)
-            {
-                if (player.dead || !player.active)
-                {
-                    NPC.TargetClosest();
-                    player = Main.player[NPC.target];
-                    if (player.dead || !player.active)
-                    {
-                        NPC.ai[0] = 4f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.ai[3] = 0f;
-                        NPC.netUpdate = true;
-                    }
-                }
-                else if (NPC.timeLeft < 1800)
-                    NPC.timeLeft = 1800;
-            }
+            Player player = SlimeGodPaladinBehavior.TargetAndHandleDespawn(NPC, 4f, false);
 
             bool enraged = true;
             bool hyperMode = NPC.localAI[1] == 1f;
@@ -472,7 +445,7 @@ namespace CalamityMod.NPCs.SlimeGod
 
                         NPC.ai[1] = 0f;
 
-                        SlimeGodPaladinBehavior.StartEbonianHop(NPC, player, death, revenge, expertMode, distanceSpeedBoost);
+                        SlimeGodPaladinBehavior.StartHop(NPC, player, death, revenge, expertMode, distanceSpeedBoost, true);
                     }
                     else
                         NPC.aiAction = 1;

@@ -160,51 +160,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
             // Percent life remaining
             float lifeRatio = Main.npc[CalamityGlobalNPC.draedonExoMechPrime].life / (float)Main.npc[CalamityGlobalNPC.draedonExoMechPrime].lifeMax;
 
-            // Check if the other exo mechs are alive
-            int otherExoMechsAlive = 0;
-            bool exoWormAlive = false;
-            bool exoTwinsAlive = false;
-            if (CalamityGlobalNPC.draedonExoMechWorm != -1)
-            {
-                if (Main.npc[CalamityGlobalNPC.draedonExoMechWorm].active)
-                {
-                    otherExoMechsAlive++;
-                    exoWormAlive = true;
-                }
-            }
-            if (CalamityGlobalNPC.draedonExoMechTwinGreen != -1)
-            {
-                if (Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].active)
-                {
-                    otherExoMechsAlive++;
-                    exoTwinsAlive = true;
-                }
-            }
-
-            // Used to nerf Ares if fighting alongside Artemis and Apollo, because otherwise it's too difficult
-            bool nerfedAttacks = false;
-            if (exoTwinsAlive)
-                nerfedAttacks = Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].Calamity().newAI[1] != (float)Apollo.Apollo.SecondaryPhase.PassiveAndImmune;
-            // Used to make the beam only sweep horizontally during mecha mayhem phase
-            bool mechaMayhem = nerfedAttacks && exoWormAlive && Main.npc[CalamityGlobalNPC.draedonExoMechWorm].Calamity().newAI[1] != (float)ThanatosHead.SecondaryPhase.PassiveAndImmune;
-
-            // Phases
-            bool berserk = lifeRatio < 0.4f || (otherExoMechsAlive == 0 && lifeRatio < 0.7f);
-            bool lastMechAlive = berserk && otherExoMechsAlive == 0;
-
-            // These are 5 by default to avoid triggering passive phases after the other mechs are dead
-            float exoWormLifeRatio = defaultLifeRatio;
-            float exoTwinsLifeRatio = defaultLifeRatio;
-            if (exoWormAlive)
-                exoWormLifeRatio = Main.npc[CalamityGlobalNPC.draedonExoMechWorm].life / (float)Main.npc[CalamityGlobalNPC.draedonExoMechWorm].lifeMax;
-            if (exoTwinsAlive)
-                exoTwinsLifeRatio = Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].life / (float)Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].lifeMax;
-
-            // If Ares doesn't go berserk
-            bool otherMechIsBerserk = exoWormLifeRatio < 0.4f || exoTwinsLifeRatio < 0.4f;
-
-            // Whether Ares should be buffed while in berserk phase
-            bool shouldGetBuffedByBerserkPhase = berserk && !otherMechIsBerserk;
+            var (nerfedAttacks, mechaMayhem, lastMechAlive, shouldGetBuffedByBerserkPhase) = GetCannonPhaseState(lifeRatio, defaultLifeRatio, true);
 
             // Target variables
             int targetIndex = Main.npc[CalamityGlobalNPC.draedonExoMechPrime].target;
@@ -225,20 +181,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
             bool enraged = Main.npc[(int)NPC.ai[2]].localAI[1] == (float)AresBody.Enraged.Yes;
 
             // Adjust opacity
-            bool invisiblePhase = calamityGlobalNPC_Body.newAI[1] == (float)AresBody.SecondaryPhase.PassiveAndImmune;
-            NPC.dontTakeDamage = invisiblePhase || Main.npc[(int)NPC.ai[2]].dontTakeDamage;
-            if (!invisiblePhase)
-            {
-                NPC.Opacity += 0.2f;
-                if (NPC.Opacity > 1f)
-                    NPC.Opacity = 1f;
-            }
-            else
-            {
-                NPC.Opacity -= 0.05f;
-                if (NPC.Opacity < 0f)
-                    NPC.Opacity = 0f;
-            }
+            bool invisiblePhase = UpdateCannonOpacity(calamityGlobalNPC_Body);
 
             // Global timer used for passive movement
             NPC.localAI[0]++;

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using CalamityMod.BiomeManagers;
 using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Buffs.StatDebuffs;
@@ -19,10 +20,10 @@ using CalamityMod.Items.Weapons.Summon;
 using CalamityMod.NPCs.AcidRain;
 using CalamityMod.Projectiles.Boss;
 using CalamityMod.Projectiles.Enemy;
+using CalamityMod.Systems.Collections;
 using CalamityMod.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -30,7 +31,6 @@ using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.ModLoader;
-using CalamityMod.Systems.Collections;
 
 namespace CalamityMod.NPCs.AquaticScourge
 {
@@ -484,77 +484,7 @@ namespace CalamityMod.NPCs.AquaticScourge
                 scourgeTargetX *= scourgeTimeToReachTarget;
                 scourgeTargetY *= scourgeTimeToReachTarget;
 
-                if ((NPC.velocity.X > 0f && scourgeTargetX > 0f) || (NPC.velocity.X < 0f && scourgeTargetX < 0f) || (NPC.velocity.Y > 0f && scourgeTargetY > 0f) || (NPC.velocity.Y < 0f && scourgeTargetY < 0f))
-                {
-                    if (NPC.velocity.X < scourgeTargetX)
-                    {
-                        NPC.velocity.X += scourgeAcceleration;
-                    }
-                    else
-                    {
-                        if (NPC.velocity.X > scourgeTargetX)
-                            NPC.velocity.X -= scourgeAcceleration;
-                    }
-
-                    if (NPC.velocity.Y < scourgeTargetY)
-                    {
-                        NPC.velocity.Y += scourgeAcceleration;
-                    }
-                    else
-                    {
-                        if (NPC.velocity.Y > scourgeTargetY)
-                            NPC.velocity.Y -= scourgeAcceleration;
-                    }
-
-                    if (Math.Abs(scourgeTargetY) < scourgeMaxSpeed * 0.2 && ((NPC.velocity.X > 0f && scourgeTargetX < 0f) || (NPC.velocity.X < 0f && scourgeTargetX > 0f)))
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y += scourgeAcceleration * 2f;
-                        else
-                            NPC.velocity.Y -= scourgeAcceleration * 2f;
-                    }
-
-                    if (Math.Abs(scourgeTargetX) < scourgeMaxSpeed * 0.2 && ((NPC.velocity.Y > 0f && scourgeTargetY < 0f) || (NPC.velocity.Y < 0f && scourgeTargetY > 0f)))
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X += scourgeAcceleration * 2f;
-                        else
-                            NPC.velocity.X -= scourgeAcceleration * 2f;
-                    }
-                }
-                else
-                {
-                    if (scourgeAbsoluteTargetX > scourgeAbsoluteTargetY)
-                    {
-                        if (NPC.velocity.X < scourgeTargetX)
-                            NPC.velocity.X += scourgeAcceleration * 1.1f;
-                        else if (NPC.velocity.X > scourgeTargetX)
-                            NPC.velocity.X -= scourgeAcceleration * 1.1f;
-
-                        if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < scourgeMaxSpeed * 0.5)
-                        {
-                            if (NPC.velocity.Y > 0f)
-                                NPC.velocity.Y += scourgeAcceleration;
-                            else
-                                NPC.velocity.Y -= scourgeAcceleration;
-                        }
-                    }
-                    else
-                    {
-                        if (NPC.velocity.Y < scourgeTargetY)
-                            NPC.velocity.Y += scourgeAcceleration * 1.1f;
-                        else if (NPC.velocity.Y > scourgeTargetY)
-                            NPC.velocity.Y -= scourgeAcceleration * 1.1f;
-
-                        if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < scourgeMaxSpeed * 0.5)
-                        {
-                            if (NPC.velocity.X > 0f)
-                                NPC.velocity.X += scourgeAcceleration;
-                            else
-                                NPC.velocity.X -= scourgeAcceleration;
-                        }
-                    }
-                }
+                BaseWormNPC.SteerWormVelocity(NPC, scourgeTargetX, scourgeTargetY, scourgeAbsoluteTargetX, scourgeAbsoluteTargetY, scourgeMaxSpeed, scourgeAcceleration);
 
                 NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
             }

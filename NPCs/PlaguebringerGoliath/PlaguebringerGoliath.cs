@@ -203,13 +203,7 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
             // Count nearby players
             int activePlayers = Main.CurrentFrameFlags.ActivePlayersCount;
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFar(NPC, false);
 
             Player player = Main.player[NPC.target];
 
@@ -623,19 +617,7 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                             NPC.NewNPC(NPC.GetSource_FromAI(), (int)missileSpawnPos.X, (int)missileSpawnPos.Y, ModContent.NPCType<PlagueMine>(), 0, 0f, 0f, 0f, challengeAmt);
 
                         float npcSpeed = (revenge ? 9f : 7f) + enrageScale * 2f;
-
-                        float projXDist = player.Center.X - missileSpawnPos.X;
-                        float projYDist = player.Center.Y - missileSpawnPos.Y;
-                        float projDistance = (float)Math.Sqrt(projXDist * projXDist + projYDist * projYDist);
-
-                        projDistance = npcSpeed / projDistance;
-                        projXDist *= projDistance;
-                        projYDist *= projDistance;
-
-                        int plagueMissile = NPC.NewNPC(NPC.GetSource_FromAI(), (int)missileSpawnPos.X, (int)missileSpawnPos.Y, ModContent.NPCType<PlagueHomingMissile>(), 0, 0f, 0f, 0f, challengeAmt);
-                        Main.npc[plagueMissile].velocity.X = projXDist;
-                        Main.npc[plagueMissile].velocity.Y = projYDist;
-                        Main.npc[plagueMissile].netUpdate = true;
+                        SpawnHomingMissile(player, missileSpawnPos, npcSpeed, challengeAmt, false);
                     }
                 }
 
@@ -688,21 +670,7 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                             NPC.NewNPC(NPC.GetSource_FromAI(), (int)missileSpawnPos.X, (int)missileSpawnPos.Y, ModContent.NPCType<PlagueMine>(), 0, 0f, 0f, 0f, challengeAmt);
 
                         float npcSpeed = (revenge ? 10f : 8f) + enrageScale * 2f;
-
-                        float projXDist = player.Center.X - missileSpawnPos.X;
-                        float projYDist = player.Center.Y - missileSpawnPos.Y;
-                        float projDistance = (float)Math.Sqrt(projXDist * projXDist + projYDist * projYDist);
-
-                        projDistance = npcSpeed / projDistance;
-                        projXDist *= projDistance;
-                        projYDist *= projDistance;
-                        projXDist += Main.rand.Next(-20, 21) * 0.05f;
-                        projYDist += Main.rand.Next(-20, 21) * 0.05f;
-
-                        int plagueMissile = NPC.NewNPC(NPC.GetSource_FromAI(), (int)missileSpawnPos.X, (int)missileSpawnPos.Y, ModContent.NPCType<PlagueHomingMissile>(), 0, 0f, 0f, 0f, challengeAmt);
-                        Main.npc[plagueMissile].velocity.X = projXDist;
-                        Main.npc[plagueMissile].velocity.Y = projYDist;
-                        Main.npc[plagueMissile].netUpdate = true;
+                        SpawnHomingMissile(player, missileSpawnPos, npcSpeed, challengeAmt, true);
                     }
                 }
 
@@ -997,6 +965,27 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                     }
                 }
             }
+        }
+
+        private void SpawnHomingMissile(Player player, Vector2 missileSpawnPos, float npcSpeed, float challengeAmt, bool addSpread)
+        {
+            float projXDist = player.Center.X - missileSpawnPos.X;
+            float projYDist = player.Center.Y - missileSpawnPos.Y;
+            float projDistance = (float)Math.Sqrt(projXDist * projXDist + projYDist * projYDist);
+
+            projDistance = npcSpeed / projDistance;
+            projXDist *= projDistance;
+            projYDist *= projDistance;
+            if (addSpread)
+            {
+                projXDist += Main.rand.Next(-20, 21) * 0.05f;
+                projYDist += Main.rand.Next(-20, 21) * 0.05f;
+            }
+
+            int plagueMissile = NPC.NewNPC(NPC.GetSource_FromAI(), (int)missileSpawnPos.X, (int)missileSpawnPos.Y, ModContent.NPCType<PlagueHomingMissile>(), 0, 0f, 0f, 0f, challengeAmt);
+            Main.npc[plagueMissile].velocity.X = projXDist;
+            Main.npc[plagueMissile].velocity.Y = projYDist;
+            Main.npc[plagueMissile].netUpdate = true;
         }
 
         private void AdjustChargeLineup(Player player, float chargeHeight, float chargeDistanceY, float lineUpAccel, float maxLineUpSpeed, float distanceFromTargetX, int chargeDistanceX)

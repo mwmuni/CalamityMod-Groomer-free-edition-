@@ -476,51 +476,12 @@ namespace CalamityMod.CalPlayer
         }
         public override void ModifyHitNPCWithItem(Item item, NPC target, ref NPC.HitModifiers modifiers)
         {
-            modifiers.CritDamage += critDamage;
-            // All Calamity multipliers are added together to prevent insane exponential stacking
-            float totalDamageMult = 1f;
-
-            // Rippers are always checked for application, because there are ways to get rippers outside of Rev now
-            CalamityUtils.ApplyRippersToDamage(this, item.IsTrueMelee(), ref totalDamageMult);
-
-            // Demonshade enrage
-            if (enraged)
-                totalDamageMult += DemonshadeHelm.MultDamageBoost;
-            // Withering enchantment when it's draining your HP
-            if (witheredDebuff && witheringWeaponEnchant)
-                totalDamageMult += 0.6f;
-
-            // Apply all Calamity multipliers as a sum total to TML New Damage in a single step
-            modifiers.SourceDamage *= totalDamageMult;
-
-            // 01JUN2024: Ozzatron: apply Yellow Candle "chip damage" as a dirty modifier
-            // The registration of the dirty modifier is conditional to ensure it doesn't apply to "near invincible" targets
-            //
-            // FinalDamage cannot be used for the intended effect because there is no way to access the actual damage of the hit
-            CalamityGlobalNPC cgn = target.Calamity();
-            if (yellowCandle && cgn.DR < 0.9f && target.takenDamageMultiplier > 0.05f)
-                modifiers.ModifyHitInfo += YellowCandleBuff.ModifyHitInfo_Spite;
+            ApplyCommonOutgoingHitModifiers(item, static attack => attack.IsTrueMelee(), target, ref modifiers, 0.9f);
 
             if (Player.Calamity().scionsCurio && item.CountsAsClass<RangedDamageClass>())
                 target.Calamity().scionsCurioEffected = true;
 
-            // Frost Armor's rework gives +X% melee damage and +Y% ranged damage based on distance, where X+Y = 15.
-            if (frostSet)
-            {
-                // 0f = point blank, 1f = max range or further
-                float DistanceInterpolant = Utils.GetLerpValue(FrostArmorSetChange.MinDistance, FrostArmorSetChange.MaxDistance, target.Distance(Main.LocalPlayer.Center), true);
-
-                if (item.CountsAsClass<MeleeDamageClass>())
-                {
-                    float meleeBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, 1 - DistanceInterpolant);
-                    ApplyFrostArmorDamageBoost(target, ref modifiers, meleeBoost);
-                }
-                else if (item.CountsAsClass<RangedDamageClass>())
-                {
-                    float rangedBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, DistanceInterpolant);
-                    ApplyFrostArmorDamageBoost(target, ref modifiers, rangedBoost);
-                }
-            }
+            ApplyFrostArmorSetBonus(item, static attack => attack.CountsAsClass<MeleeDamageClass>(), static attack => attack.CountsAsClass<RangedDamageClass>(), target, ref modifiers);
         }
 
         public override void ModifyHitNPCWithProj(Projectile proj, NPC target, ref NPC.HitModifiers modifiers)
@@ -540,31 +501,7 @@ namespace CalamityMod.CalPlayer
             }
 
 
-            modifiers.CritDamage += critDamage;
-
-            // All Calamity multipliers are added together to prevent insane exponential stacking
-            float totalDamageMult = 1f;
-
-            // Rippers are always checked for application, because there are ways to get rippers outside of Rev now
-            CalamityUtils.ApplyRippersToDamage(this, proj.IsTrueMelee(), ref totalDamageMult);
-
-            // Demonshade enrage
-            if (enraged)
-                totalDamageMult += DemonshadeHelm.MultDamageBoost;
-            // Withering enchantment when it's draining your HP
-            if (witheredDebuff && witheringWeaponEnchant)
-                totalDamageMult += 0.6f;
-
-            // Apply all Calamity multipliers as a sum total to TML New Damage in a single step
-            modifiers.SourceDamage *= totalDamageMult;
-
-            // 01JUN2024: Ozzatron: apply Yellow Candle "chip damage" as a dirty modifier
-            // The registration of the dirty modifier is conditional to ensure it doesn't apply to "near invincible" targets
-            //
-            // FinalDamage cannot be used for the intended effect because there is no way to access the actual damage of the hit
-            CalamityGlobalNPC cgn = target.Calamity();
-            if (yellowCandle && cgn.DR < 0.99f && target.takenDamageMultiplier > 0.05f)
-                modifiers.ModifyHitInfo += YellowCandleBuff.ModifyHitInfo_Spite;
+            ApplyCommonOutgoingHitModifiers(proj, static attack => attack.IsTrueMelee(), target, ref modifiers, 0.99f);
 
             // Stealth strike damage multipliers are applied here.
             // TODO -- stealth should be its own damage class and this should be applied as player StealthDamage *= XYZ
@@ -574,23 +511,7 @@ namespace CalamityMod.CalPlayer
             if (Player.Calamity().scionsCurio && proj.CountsAsClass<RangedDamageClass>())
                 target.Calamity().scionsCurioEffected = true;
 
-            // Frost Armor's rework gives +X% melee damage and +Y% ranged damage based on distance, where X+Y = 15.
-            if (frostSet)
-            {
-                // 0f = point blank, 1f = max range or further
-                float DistanceInterpolant = Utils.GetLerpValue(FrostArmorSetChange.MinDistance, FrostArmorSetChange.MaxDistance, target.Distance(Main.LocalPlayer.Center), true);
-
-                if (proj.CountsAsClass<MeleeDamageClass>())
-                {
-                    float meleeBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, 1 - DistanceInterpolant);
-                    ApplyFrostArmorDamageBoost(target, ref modifiers, meleeBoost);
-                }
-                else if (proj.CountsAsClass<RangedDamageClass>())
-                {
-                    float rangedBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, DistanceInterpolant);
-                    ApplyFrostArmorDamageBoost(target, ref modifiers, rangedBoost);
-                }
-            }
+            ApplyFrostArmorSetBonus(proj, static attack => attack.CountsAsClass<MeleeDamageClass>(), static attack => attack.CountsAsClass<RangedDamageClass>(), target, ref modifiers);
 
             // SUMMONER CROSS CLASS NERF IS APPLIED HERE
             //
@@ -607,6 +528,42 @@ namespace CalamityMod.CalPlayer
 
                 if (CalamityUtils.ShouldTriggerSummonPenalty(Player, heldItem) && !CalamityProjectileSets.MinionWhichIgnoresSummonerNerf[proj.type])
                     modifiers.FinalDamage *= BalancingConstants.SummonerCrossClassNerf;
+            }
+        }
+
+        private void ApplyCommonOutgoingHitModifiers<TAttack>(TAttack attack, Func<TAttack, bool> isTrueMelee, NPC target, ref NPC.HitModifiers modifiers, float yellowCandleDRLimit)
+        {
+            modifiers.CritDamage += critDamage;
+            // Add multipliers before applying them to avoid exponential stacking.
+            float totalDamageMult = 1f;
+            CalamityUtils.ApplyRippersToDamage(this, isTrueMelee(attack), ref totalDamageMult);
+            if (enraged)
+                totalDamageMult += DemonshadeHelm.MultDamageBoost;
+            if (witheredDebuff && witheringWeaponEnchant)
+                totalDamageMult += 0.6f;
+            modifiers.SourceDamage *= totalDamageMult;
+
+            // FinalDamage cannot implement the candle's chip damage or its near-invulnerability gate.
+            CalamityGlobalNPC cgn = target.Calamity();
+            if (yellowCandle && cgn.DR < yellowCandleDRLimit && target.takenDamageMultiplier > 0.05f)
+                modifiers.ModifyHitInfo += YellowCandleBuff.ModifyHitInfo_Spite;
+        }
+
+        private void ApplyFrostArmorSetBonus<TAttack>(TAttack attack, Func<TAttack, bool> isMelee, Func<TAttack, bool> isRanged, NPC target, ref NPC.HitModifiers modifiers)
+        {
+            if (frostSet)
+            {
+                float DistanceInterpolant = Utils.GetLerpValue(FrostArmorSetChange.MinDistance, FrostArmorSetChange.MaxDistance, target.Distance(Main.LocalPlayer.Center), true);
+                if (isMelee(attack))
+                {
+                    float meleeBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, 1 - DistanceInterpolant);
+                    ApplyFrostArmorDamageBoost(target, ref modifiers, meleeBoost);
+                }
+                else if (isRanged(attack))
+                {
+                    float rangedBoost = MathHelper.Lerp(0f, FrostArmorSetChange.ProximityBoost, DistanceInterpolant);
+                    ApplyFrostArmorDamageBoost(target, ref modifiers, rangedBoost);
+                }
             }
         }
 

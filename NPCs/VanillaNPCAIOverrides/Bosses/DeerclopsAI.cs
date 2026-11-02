@@ -256,7 +256,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                     NPC.ai[1] += 1f;
                     haltMovement = true;
-                    MakeSpikesForward(NPC, 1, targetData, iceSpike, IceSpikeDamage, lifeRatio, death);
+                    MakeIceSpikes(NPC, 1, iceSpike, IceSpikeDamage, lifeRatio, death, 36, 20, 4, bothSides: false);
 
                     float iceSpikePhaseGateValue = 80f;
                     if (NPC.ai[1] >= iceSpikePhaseGateValue)
@@ -336,13 +336,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             float randomRadialOffset = MathHelper.ToRadians(MathHelper.Lerp(0f, death ? 270f : 180f, 1f - lifeRatio));
                             float radians = MathHelper.TwoPi / totalProjectiles + randomRadialOffset;
                             float velocity = (death ? 9f : 7f) + MathHelper.Lerp(0f, 3.5f, 1f - lifeRatio);
-                            Vector2 spinningPoint = new Vector2(0f, -velocity);
-                            for (int k = 0; k < totalProjectiles; k++)
-                            {
-                                Vector2 actualVelocity = spinningPoint.RotatedBy(radians * k);
-                                float velocityMultiplier = 1f - k * velocityMultIncrement;
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), Main.player[NPC.target].Center + Vector2.Normalize(actualVelocity) * 550f, actualVelocity * velocityMultiplier * -1f, shadowHand, HandDamage, 0f, Main.myPlayer);
-                            }
+                            SpawnShadowHandRing(NPC, shadowHand, HandDamage, totalProjectiles, velocityMultIncrement, radians, velocity, halveVelocityMultiplier: false);
                         }
                     }
 
@@ -361,7 +355,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     NPC.ai[1] += 1f;
                     haltMovement = true;
                     NPC.TargetClosest();
-                    MakeSpikesBothSides(NPC, 1, targetData, iceSpike, IceSpikeDamage, lifeRatio, death);
+                    MakeIceSpikes(NPC, 1, iceSpike, IceSpikeDamage, lifeRatio, death, 56, 15, 2, bothSides: true);
 
                     float doubleIceSpikePhaseGateValue = 90f;
                     if (NPC.ai[1] >= doubleIceSpikePhaseGateValue)
@@ -397,13 +391,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             float randomRadialOffset = Main.rand.NextFloat(MathHelper.ToRadians(MathHelper.Lerp(0f, death ? 360f : 270f, 1f - lifeRatio)));
                             float radians = MathHelper.TwoPi / totalProjectiles + randomRadialOffset;
                             float velocity = 12f + MathHelper.Lerp(0f, 4f, 1f - lifeRatio);
-                            Vector2 spinningPoint = new Vector2(0f, -velocity);
-                            for (int k = 0; k < totalProjectiles; k++)
-                            {
-                                Vector2 actualVelocity = spinningPoint.RotatedBy(radians * k);
-                                float velocityMultiplier = 1f - (k * velocityMultIncrement * 0.5f);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), Main.player[NPC.target].Center + Vector2.Normalize(actualVelocity) * 550f, actualVelocity * velocityMultiplier * -1f, shadowHand, HandDamage, 0f, Main.myPlayer);
-                            }
+                            SpawnShadowHandRing(NPC, shadowHand, HandDamage, totalProjectiles, velocityMultIncrement, radians, velocity, halveVelocityMultiplier: true);
                         }
                     }
 
@@ -592,6 +580,17 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             }
         }
 
+        private static void SpawnShadowHandRing(NPC npc, int shadowHand, int handDamage, int totalProjectiles, float velocityMultIncrement, float radians, float velocity, bool halveVelocityMultiplier)
+        {
+            Vector2 spinningPoint = new Vector2(0f, -velocity);
+            for (int k = 0; k < totalProjectiles; k++)
+            {
+                Vector2 actualVelocity = spinningPoint.RotatedBy(radians * k);
+                float velocityMultiplier = halveVelocityMultiplier ? 1f - (k * velocityMultIncrement * 0.5f) : 1f - k * velocityMultIncrement;
+                Projectile.NewProjectile(npc.GetSource_FromAI(), Main.player[npc.target].Center + Vector2.Normalize(actualVelocity) * 550f, actualVelocity * velocityMultiplier * -1f, shadowHand, handDamage, 0f, Main.myPlayer);
+            }
+        }
+
         private static void ShootRubbleUp(NPC npc, ref Point sourceTileCoords, int howMany, int distancedByThisManyTiles, int whichOne, int rubble, int DebrisDamage, float lifeRatio, bool death)
         {
             // Loop to spawn rubble
@@ -621,70 +620,48 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             Projectile.NewProjectile(npc.GetSource_FromAI(), new Vector2(posX * 16 + 8, posY * 16 - 8), rubbleVelocity * velocityMultiplier, rubble, DebrisDamage, 0f, Main.myPlayer, 0f, ai1_FrameToUse, ai2_DelayBeforeGoingUp);
         }
 
-        private static void MakeSpikesForward(NPC npc, int AISLOT_PhaseCounter, NPCAimedTarget targetData, int iceSpike, int IceSpikeDamage, float lifeRatio, bool death)
+        private static void MakeIceSpikes(NPC npc, int phaseCounterSlot, int iceSpike, int iceSpikeDamage, float lifeRatio, bool death, int iceSpikeGateValue, int numIceSpikes, int spikeInterval, bool bothSides)
         {
             if (Main.netMode == NetmodeID.MultiplayerClient)
                 return;
 
-            int iceSpikeGateValue = 36;
-            if (!(npc.ai[AISLOT_PhaseCounter] < (float)iceSpikeGateValue))
+            if (!(npc.ai[phaseCounterSlot] < (float)iceSpikeGateValue))
             {
                 Point sourceTileCoords = npc.Bottom.ToTileCoordinates();
-                int numIceSpikes = 20;
                 int xOffsetMult = 1;
-                sourceTileCoords.X += npc.direction * 3;
-                int screenShakeGateValue = (int)npc.ai[AISLOT_PhaseCounter] - iceSpikeGateValue;
+                if (!bothSides)
+                    sourceTileCoords.X += npc.direction * 3;
+
+                int screenShakeGateValue = (int)npc.ai[phaseCounterSlot] - iceSpikeGateValue;
                 if (screenShakeGateValue == 0)
                 {
                     PunchCameraModifier modifier = new PunchCameraModifier(npc.Center, new Vector2(0f, 1f), 20f, 6f, 30, 1000f, "Deerclops");
                     Main.instance.CameraModifiers.Add(modifier);
                 }
 
-                int iceSpikeStart = screenShakeGateValue / 4 * 4;
-                int iceSpikeLimit = iceSpikeStart + 4;
-                if (screenShakeGateValue % 4 != 0)
+                int iceSpikeStart = screenShakeGateValue / spikeInterval * spikeInterval;
+                int iceSpikeLimit = iceSpikeStart + spikeInterval;
+                if (screenShakeGateValue % spikeInterval != 0)
                     iceSpikeLimit = iceSpikeStart;
 
                 // Ice spikes get fucking gigantic later on in the fight
                 float iceSpikeScaleIncrease = MathHelper.Lerp(1f, 2f, 1f - lifeRatio);
-                for (int i = iceSpikeStart; i < iceSpikeLimit && i < numIceSpikes; i++)
+                if (bothSides)
                 {
-                    int xOffset = (int)Math.Round(i * xOffsetMult * iceSpikeScaleIncrease);
-                    TryMakingSpike(npc, ref sourceTileCoords, npc.direction, numIceSpikes, i, xOffset, iceSpike, IceSpikeDamage, lifeRatio, death);
+                    for (int iceSpikeIndex = iceSpikeStart; iceSpikeIndex >= 0 && iceSpikeIndex < iceSpikeLimit && iceSpikeIndex < numIceSpikes; iceSpikeIndex++)
+                    {
+                        int xOffset = (int)Math.Round(iceSpikeIndex * xOffsetMult * iceSpikeScaleIncrease);
+                        TryMakingSpike(npc, ref sourceTileCoords, npc.direction, numIceSpikes, -iceSpikeIndex, xOffset, iceSpike, iceSpikeDamage, lifeRatio, death);
+                        TryMakingSpike(npc, ref sourceTileCoords, -npc.direction, numIceSpikes, -iceSpikeIndex, xOffset, iceSpike, iceSpikeDamage, lifeRatio, death);
+                    }
                 }
-            }
-        }
-
-        private static void MakeSpikesBothSides(NPC npc, int AISLOT_PhaseCounter, NPCAimedTarget targetData, int iceSpike, int IceSpikeDamage, float lifeRatio, bool death)
-        {
-            if (Main.netMode == NetmodeID.MultiplayerClient)
-                return;
-
-            int iceSpikeGateValue = 56;
-            if (!(npc.ai[AISLOT_PhaseCounter] < (float)iceSpikeGateValue))
-            {
-                Point sourceTileCoords = npc.Bottom.ToTileCoordinates();
-                int numIceSpikes = 15;
-                int xOffsetMult = 1;
-                int screenShakeGateValue = (int)npc.ai[AISLOT_PhaseCounter] - iceSpikeGateValue;
-                if (screenShakeGateValue == 0)
+                else
                 {
-                    PunchCameraModifier modifier = new PunchCameraModifier(npc.Center, new Vector2(0f, 1f), 20f, 6f, 30, 1000f, "Deerclops");
-                    Main.instance.CameraModifiers.Add(modifier);
-                }
-
-                int iceSpikeStart = screenShakeGateValue / 2 * 2;
-                int iceSpikeLimit = iceSpikeStart + 2;
-                if (screenShakeGateValue % 2 != 0)
-                    iceSpikeLimit = iceSpikeStart;
-
-                // Ice spikes get fucking gigantic later on in the fight
-                float iceSpikeScaleIncrease = MathHelper.Lerp(1f, 2f, 1f - lifeRatio);
-                for (int iceSpikeIndex = iceSpikeStart; iceSpikeIndex >= 0 && iceSpikeIndex < iceSpikeLimit && iceSpikeIndex < numIceSpikes; iceSpikeIndex++)
-                {
-                    int xOffset = (int)Math.Round(iceSpikeIndex * xOffsetMult * iceSpikeScaleIncrease);
-                    TryMakingSpike(npc, ref sourceTileCoords, npc.direction, numIceSpikes, -iceSpikeIndex, xOffset, iceSpike, IceSpikeDamage, lifeRatio, death);
-                    TryMakingSpike(npc, ref sourceTileCoords, -npc.direction, numIceSpikes, -iceSpikeIndex, xOffset, iceSpike, IceSpikeDamage, lifeRatio, death);
+                    for (int i = iceSpikeStart; i < iceSpikeLimit && i < numIceSpikes; i++)
+                    {
+                        int xOffset = (int)Math.Round(i * xOffsetMult * iceSpikeScaleIncrease);
+                        TryMakingSpike(npc, ref sourceTileCoords, npc.direction, numIceSpikes, i, xOffset, iceSpike, iceSpikeDamage, lifeRatio, death);
+                    }
                 }
             }
         }

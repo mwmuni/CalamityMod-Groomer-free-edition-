@@ -704,8 +704,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.extraUpdates += delta;
-                if (proj.extraUpdates < 0)
-                    proj.extraUpdates = 0;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.extraUpdates, 0);
             }
         }
         internal static IProjectileTweak ExtraUpdatesDelta(int d) => new ExtraUpdatesDeltaRule(d);
@@ -719,8 +718,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.extraUpdates = newExtraUpdates;
-                if (proj.extraUpdates < 0)
-                    proj.extraUpdates = 0;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.extraUpdates, 0);
             }
         }
         internal static IProjectileTweak ExtraUpdatesExact(int eu) => new ExtraUpdatesExactRule(eu);
@@ -736,8 +734,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.MaxUpdates = newMaxUpdates;
-                if (proj.extraUpdates < 0)
-                    proj.extraUpdates = 0;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.extraUpdates, 0);
             }
         }
         internal static IProjectileTweak MaxUpdatesExact(int mu) => new MaxUpdatesExactRule(mu);
@@ -804,8 +801,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.penetrate += delta;
-                if (proj.penetrate < 1)
-                    proj.penetrate = 1;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.penetrate, 1);
                 proj.maxPenetrate = proj.penetrate;
             }
         }
@@ -840,8 +836,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.scale += delta;
-                if (proj.scale < 0f)
-                    proj.scale = 0f;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.scale, 0f);
             }
         }
         internal static IProjectileTweak ScaleDelta(float d) => new ScaleDeltaRule(d);
@@ -855,8 +850,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.scale = newScale;
-                if (proj.scale < 0f)
-                    proj.scale = 0f;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.scale, 0f);
             }
         }
         internal static IProjectileTweak ScaleExact(float s) => new ScaleExactRule(s);
@@ -870,8 +864,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.scale *= ratio;
-                if (proj.scale < 0f)
-                    proj.scale = 0f;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.scale, 0f);
             }
         }
         internal static IProjectileTweak ScaleRatio(float f) => new ScaleRatioRule(f);
@@ -912,8 +905,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.timeLeft += delta;
-                if (proj.timeLeft < 1)
-                    proj.timeLeft = 1;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.timeLeft, 1);
             }
         }
         internal static IProjectileTweak TimeLeftDelta(int d) => new TimeLeftDeltaRule(d);
@@ -927,8 +919,7 @@ namespace CalamityMod.Projectiles
             public void ApplyTweak(Projectile proj)
             {
                 proj.timeLeft = newTimeLeft;
-                if (proj.timeLeft < 1)
-                    proj.timeLeft = 1;
+                Items.CalamityGlobalItem.ClampTweakMinimum(ref proj.timeLeft, 1);
             }
         }
         internal static IProjectileTweak TimeLeftExact(int t) => new TimeLeftExactRule(t);

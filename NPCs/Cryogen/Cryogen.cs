@@ -341,20 +341,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                 NPC.rotation = NPC.velocity.X * 0.1f;
 
-                NPC.localAI[0] += 1f;
-                if (NPC.localAI[0] >= 120f)
-                {
-                    NPC.localAI[0] = 0f;
-                    if (Collision.CanHit(NPC.position, NPC.width, NPC.height, player.position, player.width, player.height))
-                    {
-                        SoundEngine.PlaySound(Main.zenithWorld ? SoundID.NPCHit41 : HitSound, NPC.Center);
-
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
-                        {
-                            FireIceBlastRing(16, iceBlast, death ? 9.5f : 9f);
-                        }
-                    }
-                }
+                UpdateIceBlastAttack(player, iceBlast, death ? 9.5f : 9f, 16, 120f);
 
                 Vector2 cryogenCenter = new Vector2(NPC.Center.X, NPC.Center.Y);
                 float playerXDist = player.Center.X - cryogenCenter.X;
@@ -386,65 +373,12 @@ namespace CalamityMod.NPCs.Cryogen
 
                     NPC.rotation = NPC.velocity.X * 0.1f;
 
-                    NPC.localAI[0] += 1f;
-                    if (NPC.localAI[0] >= 120f)
-                    {
-                        NPC.localAI[0] = 0f;
-                        if (Collision.CanHit(NPC.position, NPC.width, NPC.height, player.position, player.width, player.height))
-                        {
-                            SoundEngine.PlaySound(Main.zenithWorld ? SoundID.NPCHit41 : HitSound, NPC.Center);
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                FireIceBlastRing(12, iceBlast, death ? 9.5f : 9f);
-                            }
-                        }
-                    }
+                    UpdateIceBlastAttack(player, iceBlast, death ? 9.5f : 9f, 12, 120f);
 
                     float velocity = death ? 3.1f : revenge ? 3.5f : 4f;
                     float acceleration = death ? 0.185f : 0.15f;
 
-                    if (NPC.position.Y > player.position.Y - 375f)
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y *= 0.98f;
-
-                        NPC.velocity.Y -= acceleration;
-
-                        if (NPC.velocity.Y > velocity)
-                            NPC.velocity.Y = velocity;
-                    }
-                    else if (NPC.position.Y < player.position.Y - 425f)
-                    {
-                        if (NPC.velocity.Y < 0f)
-                            NPC.velocity.Y *= 0.98f;
-
-                        NPC.velocity.Y += acceleration;
-
-                        if (NPC.velocity.Y < -velocity)
-                            NPC.velocity.Y = -velocity;
-                    }
-
-                    if (NPC.position.X + (NPC.width / 2) > player.position.X + (player.width / 2) + 300f)
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X *= 0.98f;
-
-                        NPC.velocity.X -= acceleration;
-
-                        if (NPC.velocity.X > velocity)
-                            NPC.velocity.X = velocity;
-                    }
-                    if (NPC.position.X + (NPC.width / 2) < player.position.X + (player.width / 2) - 300f)
-                    {
-                        if (NPC.velocity.X < 0f)
-                            NPC.velocity.X *= 0.98f;
-
-                        NPC.velocity.X += acceleration;
-
-                        if (NPC.velocity.X < -velocity)
-                            NPC.velocity.X = -velocity;
-                    }
+                    HoverAbovePlayer(player, velocity, acceleration, 425f, 300f);
                 }
                 else if (NPC.ai[1] < chargeGateValue)
                 {
@@ -530,20 +464,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                     NPC.rotation = NPC.velocity.X * 0.1f;
 
-                    NPC.localAI[0] += 1f;
-                    if (NPC.localAI[0] >= 120f)
-                    {
-                        NPC.localAI[0] = 0f;
-                        if (Collision.CanHit(NPC.position, NPC.width, NPC.height, player.position, player.width, player.height))
-                        {
-                            SoundEngine.PlaySound(Main.zenithWorld ? SoundID.NPCHit41 : HitSound, NPC.Center);
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                FireIceBlastRing(12, iceBlast, death ? 9.5f : 9f);
-                            }
-                        }
-                    }
+                    UpdateIceBlastAttack(player, iceBlast, death ? 9.5f : 9f, 12, 120f);
 
                     Vector2 cryogenCenter = new Vector2(NPC.Center.X, NPC.Center.Y);
                     float playerXDist = player.Center.X - cryogenCenter.X;
@@ -638,20 +559,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                 NPC.rotation = NPC.velocity.X * 0.1f;
 
-                NPC.localAI[0] += 1f;
-                if (NPC.localAI[0] >= 90f && NPC.Opacity == 1f)
-                {
-                    NPC.localAI[0] = 0f;
-                    if (Collision.CanHit(NPC.position, NPC.width, NPC.height, player.position, player.width, player.height))
-                    {
-                        SoundEngine.PlaySound(Main.zenithWorld ? SoundID.NPCHit41 : HitSound, NPC.Center);
-
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
-                        {
-                            FireIceBlastRing(12, iceBlast, death ? 10.5f : 10f);
-                        }
-                    }
-                }
+                UpdateIceBlastAttack(player, iceBlast, death ? 10.5f : 10f, 12, 90f, true);
 
                 Vector2 cryogenCenter = new Vector2(NPC.Center.X, NPC.Center.Y);
                 float playerXDist = player.Center.X - cryogenCenter.X;
@@ -985,47 +893,70 @@ namespace CalamityMod.NPCs.Cryogen
                 float velocity = death ? 4.5f : revenge ? 5f : 6f;
                 float acceleration = death ? 0.535f : 0.2f;
 
-                if (NPC.position.Y > player.position.Y - 375f)
+                HoverAbovePlayer(player, velocity, acceleration, 400f, 350f);
+            }
+        }
+
+        private void UpdateIceBlastAttack(Player player, int iceBlast, float velocity, int totalProjectiles, float attackDelay, bool requireFullOpacity = false)
+        {
+            NPC.localAI[0] += 1f;
+            if (NPC.localAI[0] >= attackDelay && (!requireFullOpacity || NPC.Opacity == 1f))
+            {
+                NPC.localAI[0] = 0f;
+                if (Collision.CanHit(NPC.position, NPC.width, NPC.height, player.position, player.width, player.height))
                 {
-                    if (NPC.velocity.Y > 0f)
-                        NPC.velocity.Y *= 0.98f;
+                    SoundEngine.PlaySound(Main.zenithWorld ? SoundID.NPCHit41 : HitSound, NPC.Center);
 
-                    NPC.velocity.Y -= acceleration;
-
-                    if (NPC.velocity.Y > velocity)
-                        NPC.velocity.Y = velocity;
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        FireIceBlastRing(totalProjectiles, iceBlast, velocity);
+                    }
                 }
-                else if (NPC.position.Y < player.position.Y - 400f)
-                {
-                    if (NPC.velocity.Y < 0f)
-                        NPC.velocity.Y *= 0.98f;
+            }
+        }
 
-                    NPC.velocity.Y += acceleration;
+        private void HoverAbovePlayer(Player player, float velocity, float acceleration, float upperDistance, float horizontalDistance)
+        {
+            if (NPC.position.Y > player.position.Y - 375f)
+            {
+                if (NPC.velocity.Y > 0f)
+                    NPC.velocity.Y *= 0.98f;
 
-                    if (NPC.velocity.Y < -velocity)
-                        NPC.velocity.Y = -velocity;
-                }
+                NPC.velocity.Y -= acceleration;
 
-                if (NPC.position.X + (NPC.width / 2) > player.position.X + (player.width / 2) + 350f)
-                {
-                    if (NPC.velocity.X > 0f)
-                        NPC.velocity.X *= 0.98f;
+                if (NPC.velocity.Y > velocity)
+                    NPC.velocity.Y = velocity;
+            }
+            else if (NPC.position.Y < player.position.Y - upperDistance)
+            {
+                if (NPC.velocity.Y < 0f)
+                    NPC.velocity.Y *= 0.98f;
 
-                    NPC.velocity.X -= acceleration;
+                NPC.velocity.Y += acceleration;
 
-                    if (NPC.velocity.X > velocity)
-                        NPC.velocity.X = velocity;
-                }
-                if (NPC.position.X + (NPC.width / 2) < player.position.X + (player.width / 2) - 350f)
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X *= 0.98f;
+                if (NPC.velocity.Y < -velocity)
+                    NPC.velocity.Y = -velocity;
+            }
 
-                    NPC.velocity.X += acceleration;
+            if (NPC.position.X + (NPC.width / 2) > player.position.X + (player.width / 2) + horizontalDistance)
+            {
+                if (NPC.velocity.X > 0f)
+                    NPC.velocity.X *= 0.98f;
 
-                    if (NPC.velocity.X < -velocity)
-                        NPC.velocity.X = -velocity;
-                }
+                NPC.velocity.X -= acceleration;
+
+                if (NPC.velocity.X > velocity)
+                    NPC.velocity.X = velocity;
+            }
+            if (NPC.position.X + (NPC.width / 2) < player.position.X + (player.width / 2) - horizontalDistance)
+            {
+                if (NPC.velocity.X < 0f)
+                    NPC.velocity.X *= 0.98f;
+
+                NPC.velocity.X += acceleration;
+
+                if (NPC.velocity.X < -velocity)
+                    NPC.velocity.X = -velocity;
             }
         }
 

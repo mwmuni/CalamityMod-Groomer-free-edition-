@@ -386,13 +386,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 // Avoid cheap bullshit
                 NPC.damage = 0;
 
-                // Face the target
-                if (Math.Abs(NPC.Center.X - player.Center.X) > 10f)
-                {
-                    float playerLocation = NPC.Center.X - player.Center.X;
-                    NPC.direction = playerLocation < 0f ? 1 : -1;
-                    NPC.spriteDirection = NPC.direction;
-                }
+                ProfanedGuardianCommander.FaceTargetIfFar(NPC, player);
 
                 // Slow down and tell the Profaned Rocks to spin and fling themselves at the target by setting NPC.ai[0] = 1f
                 if (!phase1)
@@ -456,13 +450,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 // Avoid cheap bullshit
                 NPC.damage = 0;
 
-                // Face the target
-                if (Math.Abs(NPC.Center.X - player.Center.X) > 10f)
-                {
-                    float playerLocation = NPC.Center.X - player.Center.X;
-                    NPC.direction = playerLocation < 0f ? 1 : -1;
-                    NPC.spriteDirection = NPC.direction;
-                }
+                ProfanedGuardianCommander.FaceTargetIfFar(NPC, player);
 
                 // Do not increment the phase timer while swapping sides along with the commander in phase 2
                 if (!commanderGoingLowOrHighInPhase2)
@@ -688,12 +676,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
 
             if (Main.zenithWorld)
             {
-                if (Math.Abs(NPC.Center.X - player.Center.X) > 10f)
-                {
-                    float playerLocation = NPC.Center.X - player.Center.X;
-                    NPC.direction = playerLocation < 0f ? 1 : -1;
-                    NPC.spriteDirection = NPC.direction;
-                }
+                ProfanedGuardianCommander.FaceTargetIfFar(NPC, player);
                 // Block the main guardian
                 Vector2 guardPos = Main.npc[CalamityGlobalNPC.doughnutBoss].Center;
                 Vector2 playerPos = player.Center;

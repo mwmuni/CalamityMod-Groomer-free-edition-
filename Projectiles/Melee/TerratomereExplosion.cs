@@ -28,28 +28,30 @@ namespace CalamityMod.Projectiles.Melee
             Projectile.hide = true;
         }
 
-        public override void AI()
+        public override void AI() => UpdateExplosion(Projectile, true);
+
+        internal static void UpdateExplosion(Projectile projectile, bool terra)
         {
             // Play an explosion sound on the first frame of this projectile's existence.
-            if (Projectile.localAI[0] == 0f)
+            if (projectile.localAI[0] == 0f)
             {
-                SoundEngine.PlaySound(SubsumingVortex.ExplosionSound with { Volume = 0.6f }, Projectile.Center);
-                Projectile.localAI[0] = 1f;
+                SoundEngine.PlaySound(SubsumingVortex.ExplosionSound with { Volume = 0.6f }, projectile.Center);
+                projectile.localAI[0] = 1f;
             }
 
             // Emit a strong white light.
-            Lighting.AddLight(Projectile.Center, Color.White.ToVector3() * 1.5f);
+            Lighting.AddLight(projectile.Center, Color.White.ToVector3() * 1.5f);
 
             // Determine frames. Once the maximum frame is reached the projectile dies.
-            Projectile.frameCounter++;
-            if (Projectile.frameCounter % 5 == 4)
-                Projectile.frame++;
-            if (Projectile.frame >= 17)
-                Projectile.Kill();
+            projectile.frameCounter++;
+            if (projectile.frameCounter % 5 == 4)
+                projectile.frame++;
+            if (projectile.frame >= 17)
+                projectile.Kill();
 
             // Exponentially accelerate.
-            Projectile.scale *= Terratomere.ExplosionExpandFactor;
-            Projectile.Opacity = Utils.GetLerpValue(5f, 36f, Projectile.timeLeft, true);
+            projectile.scale *= terra ? Terratomere.ExplosionExpandFactor : 1.013f;
+            projectile.Opacity = Utils.GetLerpValue(5f, 36f, projectile.timeLeft, true);
         }
 
         public void AdditiveDraw(SpriteBatch spriteBatch)

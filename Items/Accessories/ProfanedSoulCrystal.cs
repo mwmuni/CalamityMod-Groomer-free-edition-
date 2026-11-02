@@ -68,30 +68,7 @@ namespace CalamityMod.Items.Accessories
         public float RenderDepth => IDyeableShaderRenderer.ProfanedSoulShieldDepth;
         public bool ShaderIsDyeable => false;
 
-        public bool ShouldDrawDyeableShader
-        {
-            get
-            {
-                if (CalamityClientConfig.Instance.EnergyShieldOpacity <= 0.0f)
-                    return false;
-
-                if (OwnerPlayer < 0 || OwnerPlayer >= Main.maxPlayers)
-                    return false;
-
-                var player = Main.player[OwnerPlayer];
-                if (player is null)
-                    return false;
-
-                if (player.outOfRange || player.dead)
-                    return false;
-
-                CalamityPlayer modPlayer = player.Calamity();
-                if (modPlayer.drawingParameters.ProfanedShieldCharge <= 0.0f)
-                    return false;
-
-                return true;
-            }
-        }
+        public bool ShouldDrawDyeableShader => ProfanedSoulArtifact.ShouldDrawSoulShield(OwnerPlayer);
 
         public enum ProfanedSoulCrystalState
         {
@@ -318,6 +295,15 @@ namespace CalamityMod.Items.Accessories
         }
 
         // Moved from CalamityGlobalItem since it's just a function called in one place.
+        private static void ConfigureSummonProjectile(int index, int originalDamage)
+        {
+            if (index.WithinBounds(Main.maxProjectiles))
+            {
+                Main.projectile[index].DamageType = DamageClass.Summon;
+                Main.projectile[index].originalDamage = originalDamage;
+            }
+        }
+
         internal static bool TransformItemUsage(Item item, Player player)
         {
             if (player.whoAmI != Main.myPlayer)
@@ -360,11 +346,7 @@ namespace CalamityMod.Items.Accessories
                                 int spearDamage = (int)player.GetTotalDamage<SummonDamageClass>().ApplyTo(spearBaseDamage);
 
                                 int proj = Projectile.NewProjectile(source, player.Center.X, player.Center.Y - separation, perturbedspeed.X, perturbedspeed.Y, ModContent.ProjectileType<ProfanedCrystalMeleeSpear>(), spearDamage, 1f, player.whoAmI, Main.rand.NextBool(player.Calamity().profanedSoulWeaponUsage == 4 ? 5 : 7) ? 1f : 0f);
-                                if (proj.WithinBounds(Main.maxProjectiles))
-                                {
-                                    Main.projectile[proj].DamageType = DamageClass.Summon;
-                                    Main.projectile[proj].originalDamage = spearBaseDamage;
-                                }
+                                ConfigureSummonProjectile(proj, spearBaseDamage);
                                 spread += 3;
                                 SoundEngine.PlaySound(SoundID.Item20, player.Center);
                             }
@@ -376,11 +358,7 @@ namespace CalamityMod.Items.Accessories
                             int spearDamage = (int)player.GetTotalDamage<SummonDamageClass>().ApplyTo(spearBaseDamage);
 
                             int proj = Projectile.NewProjectile(source, player.Center, correctedVelocity * 14f, ModContent.ProjectileType<ProfanedCrystalMeleeSpear>(), spearDamage, 1f, player.whoAmI, Main.rand.NextBool(player.Calamity().profanedSoulWeaponUsage == 4 ? 5 : 7) ? 1f : 0f, 1f);
-                            if (proj.WithinBounds(Main.maxProjectiles))
-                            {
-                                Main.projectile[proj].DamageType = DamageClass.Summon;
-                                Main.projectile[proj].originalDamage = spearBaseDamage;
-                            }
+                            ConfigureSummonProjectile(proj, spearBaseDamage);
                             SoundEngine.PlaySound(SoundID.Item20, player.Center);
                         }
 
@@ -405,19 +383,11 @@ namespace CalamityMod.Items.Accessories
                             case 1: //big boomer
                             case 2: //boomer
                                 int proj = Projectile.NewProjectile(source, player.Center, perturbedspeed, ModContent.ProjectileType<ProfanedCrystalRangedHuges>(), boomDamage, 0f, player.whoAmI, projType == 1 ? 1f : 0f);
-                                if (proj.WithinBounds(Main.maxProjectiles))
-                                {
-                                    Main.projectile[proj].DamageType = DamageClass.Summon;
-                                    Main.projectile[proj].originalDamage = boomBaseDamage;
-                                }
+                                ConfigureSummonProjectile(proj, boomBaseDamage);
                                 break;
                             case 3: //bab boomer
                                 int proj2 = Projectile.NewProjectile(source, player.Center, perturbedspeed, ModContent.ProjectileType<ProfanedCrystalRangedSmalls>(), boomDamage, 0f, player.whoAmI, 0f);
-                                if (proj2.WithinBounds(Main.maxProjectiles))
-                                {
-                                    Main.projectile[proj2].DamageType = DamageClass.Summon;
-                                    Main.projectile[proj2].originalDamage = boomBaseDamage;
-                                }
+                                ConfigureSummonProjectile(proj2, boomBaseDamage);
                                 break;
                         }
                         if (projType > 1)
@@ -447,11 +417,7 @@ namespace CalamityMod.Items.Accessories
                         }
 
                         int proj = Projectile.NewProjectile(source, player.position, correctedVelocity, ModContent.ProjectileType<ProfanedCrystalMageFireball>(), mageFireDamage, 1f, player.whoAmI, empowered ? 1f : 0f);
-                        if (proj.WithinBounds(Main.maxProjectiles))
-                        {
-                            Main.projectile[proj].DamageType = DamageClass.Summon;
-                            Main.projectile[proj].originalDamage = magefireBaseDamage;
-                        }
+                        ConfigureSummonProjectile(proj, magefireBaseDamage);
                         player.Calamity().profanedSoulWeaponUsage = enraged ? 20 : 25;
                     }
                     if (player.Calamity().profanedSoulWeaponUsage > 0)
@@ -474,11 +440,7 @@ namespace CalamityMod.Items.Accessories
                             int shardDamage = (int)player.GetTotalDamage<SummonDamageClass>().ApplyTo(shardBaseDamage);
 
                             int proj = Projectile.NewProjectile(source, player.Center, angle.ToRotationVector2() * 12f, ModContent.ProjectileType<ProfanedCrystalRogueShard>(), shardDamage, 1f, player.whoAmI, 0f, 0f);
-                            if (proj.WithinBounds(Main.maxProjectiles))
-                            {
-                                Main.projectile[proj].DamageType = DamageClass.Summon;
-                                Main.projectile[proj].originalDamage = shardBaseDamage;
-                            }
+                            ConfigureSummonProjectile(proj, shardBaseDamage);
                             SoundEngine.PlaySound(SoundID.Item20, player.Center);
                         }
                         player.Calamity().profanedSoulWeaponUsage = 0;
@@ -504,11 +466,7 @@ namespace CalamityMod.Items.Accessories
                                 Vector2 vector2 = spinningPoint.RotatedBy(radians * i + MathHelper.ToRadians(player.Calamity().profanedSoulWeaponUsage));
                                 vector2.Normalize();
                                 int proj = Projectile.NewProjectile(source, player.Center, vector2 * 12f, ModContent.ProjectileType<ProfanedCrystalRogueShard>(), shardDamage, 1f, player.whoAmI, 1f, 0f);
-                                if (proj.WithinBounds(Main.maxProjectiles))
-                                {
-                                    Main.projectile[proj].DamageType = DamageClass.Summon;
-                                    Main.projectile[proj].originalDamage = shardBaseDamage;
-                                }
+                                ConfigureSummonProjectile(proj, shardBaseDamage);
                             }
 
                             SoundEngine.PlaySound(SoundID.Item20, player.Center);

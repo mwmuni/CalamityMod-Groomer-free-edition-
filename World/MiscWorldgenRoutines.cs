@@ -150,40 +150,12 @@ namespace CalamityMod.World
 
         #region Tunnel Tools
         public static void CreateTunnel(int startX, int startY, int endX, int endY, int width = 6, int tileType = TileID.Dirt)
-        {
-            int dx = endX - startX;
-            int dy = endY - startY;
-            int steps = Math.Max(Math.Abs(dx), Math.Abs(dy));
+            => GenerateTunnel(startX, startY, endX, endY, width, false, tileType, 0, 0, false, false);
 
-            for (int i = 0; i <= steps; i++)
-            {
-                float t = (float)i / steps;
-                int x = (int)(startX + dx * t);
-                int y = (int)(startY + dy * t);
-
-                // Draw a small circular path
-                for (int xi = -width; xi <= width; xi++)
-                {
-                    for (int yi = -width; yi <= width; yi++)
-                    {
-                        if (xi * xi + yi * yi <= width * width)
-                        {
-                            int tileX = x + xi;
-                            int tileY = y + yi;
-
-                            if (WorldGen.InWorld(tileX, tileY))
-                            {
-                                Tile tTile = Main.tile[tileX, tileY];
-                                tTile.HasTile = true;
-                                tTile.TileType = (ushort)tileType;
-                                WorldGen.SquareTileFrame(tileX, tileY);
-                            }
-                        }
-                    }
-                }
-            }
-        }
         public static void ClearTunnel(int startX, int startY, int endX, int endY, int width = 3, int wallType = WallID.Dirt, int liquidType = LiquidID.Water, bool liquidOn = true, bool wallOn = true)
+            => GenerateTunnel(startX, startY, endX, endY, width, true, 0, wallType, liquidType, liquidOn, wallOn);
+
+        private static void GenerateTunnel(int startX, int startY, int endX, int endY, int width, bool clear, int tileType, int wallType, int liquidType, bool liquidOn, bool wallOn)
         {
             int dx = endX - startX;
             int dy = endY - startY;
@@ -207,6 +179,14 @@ namespace CalamityMod.World
                             if (WorldGen.InWorld(tileX, tileY))
                             {
                                 Tile tTile = Main.tile[tileX, tileY];
+                                if (!clear)
+                                {
+                                    tTile.HasTile = true;
+                                    tTile.TileType = (ushort)tileType;
+                                    WorldGen.SquareTileFrame(tileX, tileY);
+                                    continue;
+                                }
+
                                 tTile.HasTile = false;
                                 if (wallOn)
                                 {

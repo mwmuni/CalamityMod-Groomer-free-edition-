@@ -153,10 +153,7 @@ namespace CalamityMod.Projectiles.Typeless
                 color1,
                 color2
             };
-            int colorIndex = (int)(rate / 2 % eColors.Count);
-            Color currentColor = eColors[colorIndex];
-            Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
-            usedColor = Color.Lerp(Color.Lerp(currentColor, nextColor, rate % 2f > 1f ? 1f : rate % 1f), Color.White, 0.7f);
+            usedColor = Color.Lerp(CommonProjectileAI.CycleEnergyColor(rate, eColors), Color.White, 0.7f);
         }
         public void ManageSquash()
         {

@@ -1,14 +1,14 @@
-﻿using CalamityMod.Buffs.DamageOverTime;
+﻿using System;
+using CalamityMod.Buffs.DamageOverTime;
 using CalamityMod.Events;
 using CalamityMod.Projectiles.Boss;
+using CalamityMod.Systems.Collections;
 using CalamityMod.World;
 using Microsoft.Xna.Framework;
-using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using CalamityMod.Systems.Collections;
 
 namespace CalamityMod.NPCs.AquaticScourge
 {
@@ -24,6 +24,11 @@ namespace CalamityMod.NPCs.AquaticScourge
         }
 
         public override void AI()
+        {
+            UpdateSegmentAI(NPC, true);
+        }
+
+        internal static void UpdateSegmentAI(NPC NPC, bool fireTeeth)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
             bool expertMode = Main.expertMode || BossRushEvent.BossRushActive;
@@ -92,7 +97,7 @@ namespace CalamityMod.NPCs.AquaticScourge
             }
 
             // Fire teeth
-            if (calamityGlobalNPC.newAI[0] == 1f && (!phase3 || phase4))
+            if (fireTeeth && calamityGlobalNPC.newAI[0] == 1f && (!phase3 || phase4))
             {
                 NPC.localAI[0] += 1f;
                 float shootProjectile = 300;

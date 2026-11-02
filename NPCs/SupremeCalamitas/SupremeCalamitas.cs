@@ -513,13 +513,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
             Vector2 vectorCenter = NPC.Center;
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFar(NPC, false);
 
             Player player = Main.player[NPC.target];
 
@@ -952,23 +946,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                             float velocity = (distance == -1000f ? 4f : -4f) * uDieLul;
                             Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + distance, player.position.Y, velocity, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
                         }
-                        if (bulletHellCounter2 < 300 && !Main.zenithWorld) // Blasts from above
-                        {
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, 4f * uDieLul, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                        }
-                        else if (bulletHellCounter2 < 600) // Blasts from left and right
-                        {
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -3.5f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), 3.5f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                        }
-                        else // Blasts from above, left, and right
-                        {
-                            if (!Main.zenithWorld)
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, 3f * uDieLul, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -3f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), 3f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                        }
+                        SpawnBulletHellDirectionalPattern(player, bulletHellCounter2, 300, 600, bulletHellblast, HellblastDamage, uDieLul);
                     }
                 }
                 FrameType = FrameAnimationType.Casting;
@@ -1397,23 +1375,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                             Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + distance, player.position.Y, velocity, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
                         }
 
-                        if (bulletHellCounter2 < 3900 && !Main.zenithWorld) // Blasts from above
-                        {
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, 4f * uDieLul, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                        }
-                        else if (bulletHellCounter2 < 4200) // Blasts from left and right
-                        {
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -3.5f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), 3.5f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                        }
-                        else // Blasts from above, left, and right
-                        {
-                            if (!Main.zenithWorld)
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, 3f * uDieLul, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -3f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), 3f * uDieLul, 0f, bulletHellblast, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                        }
+                        SpawnBulletHellDirectionalPattern(player, bulletHellCounter2, 3900, 4200, bulletHellblast, HellblastDamage, uDieLul);
                     }
                 }
 
@@ -2621,6 +2583,27 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             NPC.damage = 0;
             NPC.chaseable = false;
             NPC.dontTakeDamage = true;
+        }
+
+        private void SpawnBulletHellDirectionalPattern(Player player, int counter, int verticalGate, int sideGate, int projectileType, int projectileDamage, float velocityScale)
+        {
+            if (counter < verticalGate && !Main.zenithWorld)
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, 4f * velocityScale, projectileType, projectileDamage, 0f, Main.myPlayer, 0f, 2f);
+            }
+            else if (counter < sideGate)
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -3.5f * velocityScale, 0f, projectileType, projectileDamage, 0f, Main.myPlayer, 0f, 2f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), 3.5f * velocityScale, 0f, projectileType, projectileDamage, 0f, Main.myPlayer, 0f, 2f);
+            }
+            else
+            {
+                if (!Main.zenithWorld)
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, 3f * velocityScale, projectileType, projectileDamage, 0f, Main.myPlayer, 0f, 2f);
+
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -3f * velocityScale, 0f, projectileType, projectileDamage, 0f, Main.myPlayer, 0f, 2f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), 3f * velocityScale, 0f, projectileType, projectileDamage, 0f, Main.myPlayer, 0f, 2f);
+            }
         }
 
         private void UpdateBulletHellEndTelegraph(Player player, int endValue, bool playEndEffects = true)

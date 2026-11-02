@@ -155,13 +155,7 @@ namespace CalamityMod.NPCs.Signus
             bool phase3 = lifeRatio < 0.5f;
             bool phase4 = lifeRatio < 0.33f;
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, vectorCenter) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFarFrom(NPC, vectorCenter, false);
 
             Player player = Main.player[NPC.target];
 

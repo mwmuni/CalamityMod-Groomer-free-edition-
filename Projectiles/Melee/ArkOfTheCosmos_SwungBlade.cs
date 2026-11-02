@@ -15,52 +15,29 @@ using static Terraria.ModLoader.ModContent;
 
 namespace CalamityMod.Projectiles.Melee
 {
-    public class ArkoftheCosmosSwungBlade : ModProjectile, ILocalizedModType
+    public class ArkoftheCosmosSwungBlade : BaseArkScissorBlade, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Melee";
         public override string Texture => "CalamityMod/Projectiles/Melee/SunderingScissorsRight";
 
         private bool initialized = false;
-        Vector2 direction = Vector2.Zero;
-        public ref float Combo => ref Projectile.ai[0];
-        public ref float Charge => ref Projectile.ai[1];
-        public Player Owner => Main.player[Projectile.owner];
+        protected override float BladeLength => 172f;
 
         Particle smear;
 
         #region Regular swing variables
 
         public float MaxSwingTime => SwirlSwing ? 55 : 35;
-        public int SwingDirection
-        {
-            get
-            {
-                switch (Combo)
-                {
-                    case 0:
-                        return 1 * Math.Sign(direction.X);
-                    case 1:
-                        return -1 * Math.Sign(direction.X);
-                    default:
-                        return 0;
-
-                }
-            }
-        }
-
         public bool SwirlSwing => Combo == 1;
 
         private float SwingWidth = MathHelper.PiOver2 * 1.5f;
-        public Vector2 DistanceFromPlayer => direction * 30;
         public float SwingTimer => MaxSwingTime - Projectile.timeLeft;
         public float SwingCompletion => SwingTimer / MaxSwingTime;
-        public ref float HasFired => ref Projectile.localAI[0];
         #endregion
 
         #region Throw variables
         //Only used for the long range throw
         private bool OwnerCanShoot => !Owner.CantUseHoldout() && Owner.HeldItem.type == ItemType<ArkoftheCosmos>();
-        public bool Thrown => Combo == 2 || Combo == 3;
         public const float MaxThrowTime = 140;
         public float ThrowReach;
         public float ThrowTimer => MaxThrowTime - Projectile.timeLeft;
@@ -69,16 +46,9 @@ namespace CalamityMod.Projectiles.Melee
         public const float SnapWindowStart = 0.35f;
         public const float SnapWindowEnd = 0.75f;
         public float SnapEndTime => (MaxThrowTime - (MaxThrowTime * SnapWindowEnd));
-        public float SnapEndCompletion => (SnapEndTime - Projectile.timeLeft) / SnapEndTime;
-        public ref float ChanceMissed => ref Projectile.localAI[1];
+        public override float SnapEndCompletion => (SnapEndTime - Projectile.timeLeft) / SnapEndTime;
 
         #endregion
-
-        public override void SetStaticDefaults()
-        {
-            ProjectileID.Sets.TrailCacheLength[Type] = 10;
-            ProjectileID.Sets.TrailingMode[Type] = 2;
-        }
 
         public override void SetDefaults()
         {
@@ -91,30 +61,6 @@ namespace CalamityMod.Projectiles.Melee
             Projectile.extraUpdates = 1;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = Thrown ? 10 : (int)(MaxSwingTime);
-        }
-
-        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
-        {
-            float bladeLength = 172f * Projectile.scale;
-
-            if (Thrown)
-            {
-                bool mainCollision = Collision.CheckAABBvAABBCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center - Vector2.One * bladeLength / 2f, Vector2.One * bladeLength);
-                if (Combo == 2f)
-                    return mainCollision;
-
-                else
-                {
-                    Vector2 thrownBladeStart = Vector2.SmoothStep(Owner.Center, Projectile.Center, MathHelper.Clamp(SnapEndCompletion + 0.25f, 0f, 1f));
-                    bool thrownScissorCollision = Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), thrownBladeStart, thrownBladeStart + direction * bladeLength);
-                    return mainCollision || thrownScissorCollision;
-                }
-            }
-
-            float collisionPoint = 0f;
-            Vector2 holdPoint = DistanceFromPlayer.Length() * Projectile.rotation.ToRotationVector2();
-
-            return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Owner.Center + holdPoint, Owner.Center + holdPoint + Projectile.rotation.ToRotationVector2() * bladeLength, 24, ref collisionPoint);
         }
 
         //Swing animation keys

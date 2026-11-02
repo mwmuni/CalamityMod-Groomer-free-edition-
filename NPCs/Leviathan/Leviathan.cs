@@ -318,31 +318,8 @@ namespace CalamityMod.NPCs.Leviathan
                     xDestination *= destinationDist;
                     yDestination *= destinationDist;
 
-                    if (NPC.velocity.X < xDestination)
-                    {
-                        NPC.velocity.X += hoverAcceleration;
-                        if (NPC.velocity.X < 0f && xDestination > 0f)
-                            NPC.velocity.X += hoverAcceleration;
-                    }
-                    else if (NPC.velocity.X > xDestination)
-                    {
-                        NPC.velocity.X -= hoverAcceleration;
-                        if (NPC.velocity.X > 0f && xDestination < 0f)
-                            NPC.velocity.X -= hoverAcceleration;
-                    }
-
-                    if (NPC.velocity.Y < yDestination)
-                    {
-                        NPC.velocity.Y += hoverAcceleration;
-                        if (NPC.velocity.Y < 0f && yDestination > 0f)
-                            NPC.velocity.Y += hoverAcceleration;
-                    }
-                    else if (NPC.velocity.Y > yDestination)
-                    {
-                        NPC.velocity.Y -= hoverAcceleration;
-                        if (NPC.velocity.Y > 0f && yDestination < 0f)
-                            NPC.velocity.Y -= hoverAcceleration;
-                    }
+                    AccelerateAxis(ref NPC.velocity.X, xDestination, hoverAcceleration);
+                    AccelerateAxis(ref NPC.velocity.Y, yDestination, hoverAcceleration);
 
                     float playerLocation = npcCenter.X - player.Center.X;
                     NPC.direction = playerLocation < 0 ? 1 : -1;
@@ -457,30 +434,8 @@ namespace CalamityMod.NPCs.Leviathan
                         playerXDist = player.Center.X - leviCenterAberration.X;
                         playerYDist = player.Center.Y - leviCenterAberration.Y;
 
-                        if (NPC.velocity.X < playerXDist)
-                        {
-                            NPC.velocity.X += aberrationAccel;
-                            if (NPC.velocity.X < 0f && playerXDist > 0f)
-                                NPC.velocity.X += aberrationAccel;
-                        }
-                        else if (NPC.velocity.X > playerXDist)
-                        {
-                            NPC.velocity.X -= aberrationAccel;
-                            if (NPC.velocity.X > 0f && playerXDist < 0f)
-                                NPC.velocity.X -= aberrationAccel;
-                        }
-                        if (NPC.velocity.Y < playerYDist)
-                        {
-                            NPC.velocity.Y += aberrationAccel;
-                            if (NPC.velocity.Y < 0f && playerYDist > 0f)
-                                NPC.velocity.Y += aberrationAccel;
-                        }
-                        else if (NPC.velocity.Y > playerYDist)
-                        {
-                            NPC.velocity.Y -= aberrationAccel;
-                            if (NPC.velocity.Y > 0f && playerYDist < 0f)
-                                NPC.velocity.Y -= aberrationAccel;
-                        }
+                        AccelerateAxis(ref NPC.velocity.X, playerXDist, aberrationAccel);
+                        AccelerateAxis(ref NPC.velocity.Y, playerYDist, aberrationAccel);
                     }
                     else
                         NPC.velocity *= 0.9f;
@@ -711,6 +666,22 @@ namespace CalamityMod.NPCs.Leviathan
             bool insideTailHitbox = minTailDist <= 115f * NPC.scale;
 
             return insideMouthHitbox || insideBodyHitbox || insideTailHitbox;
+        }
+
+        private static void AccelerateAxis(ref float velocity, float destination, float acceleration)
+        {
+            if (velocity < destination)
+            {
+                velocity += acceleration;
+                if (velocity < 0f && destination > 0f)
+                    velocity += acceleration;
+            }
+            else if (velocity > destination)
+            {
+                velocity -= acceleration;
+                if (velocity > 0f && destination < 0f)
+                    velocity -= acceleration;
+            }
         }
 
         private static float MinimumCornerDistance(Vector2 hitboxCenter, Rectangle targetHitbox)

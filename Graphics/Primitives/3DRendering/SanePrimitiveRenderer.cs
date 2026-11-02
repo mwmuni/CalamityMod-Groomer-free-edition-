@@ -279,12 +279,8 @@ public static class SanePrimitiveRenderer
         DepthStencilState? depthState = null,
         BlendState? blendState = null)
     {
-        if (vertices == null)
-            throw new ArgumentNullException(nameof(vertices));
-        if (vertices.Length < 3)
+        if (!ValidateSequentialVertices(vertices, false))
             return;
-        if (vertices.Length > short.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(vertices), "Vertex count exceeds index buffer range.");
 
         DrawMesh(
             world,
@@ -314,12 +310,8 @@ public static class SanePrimitiveRenderer
         DepthStencilState? depthState = null,
         BlendState? blendState = null)
     {
-        if (vertices == null)
-            throw new ArgumentNullException(nameof(vertices));
-        if (vertices.Length < 3)
+        if (!ValidateSequentialVertices(vertices, false))
             return;
-        if (vertices.Length > short.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(vertices), "Vertex count exceeds index buffer range.");
 
         DrawMesh(
             world,
@@ -349,12 +341,8 @@ public static class SanePrimitiveRenderer
         DepthStencilState? depthState = null,
         BlendState? blendState = null)
     {
-        if (vertices == null)
-            throw new ArgumentNullException(nameof(vertices));
-        if (vertices.Length < 3 || vertices.Length % 3 != 0)
+        if (!ValidateSequentialVertices(vertices, true))
             return;
-        if (vertices.Length > short.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(vertices), "Vertex count exceeds index buffer range.");
 
         DrawMesh(
             world,
@@ -384,12 +372,8 @@ public static class SanePrimitiveRenderer
         DepthStencilState? depthState = null,
         BlendState? blendState = null)
     {
-        if (vertices == null)
-            throw new ArgumentNullException(nameof(vertices));
-        if (vertices.Length < 3 || vertices.Length % 3 != 0)
+        if (!ValidateSequentialVertices(vertices, true))
             return;
-        if (vertices.Length > short.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(vertices), "Vertex count exceeds index buffer range.");
 
         DrawMesh(
             world,
@@ -399,6 +383,17 @@ public static class SanePrimitiveRenderer
             rasterizerState,
             depthState,
             blendState);
+    }
+
+    private static bool ValidateSequentialVertices<TVertex>(TVertex[] vertices, bool triangleList)
+    {
+        if (vertices == null)
+            throw new ArgumentNullException(nameof(vertices));
+        if (vertices.Length < 3 || (triangleList && vertices.Length % 3 != 0))
+            return false;
+        if (vertices.Length > short.MaxValue)
+            throw new ArgumentOutOfRangeException(nameof(vertices), "Vertex count exceeds index buffer range.");
+        return true;
     }
 
     public static void DrawMesh(

@@ -431,26 +431,7 @@ namespace CalamityMod.Projectiles.Rogue
 
         public override void AI()
         {
-            // Play an explosion sound on the first frame of this projectile's existence.
-            if (Projectile.localAI[0] == 0f)
-            {
-                SoundEngine.PlaySound(SubsumingVortex.ExplosionSound with { Volume = 0.6f }, Projectile.Center);
-                Projectile.localAI[0] = 1f;
-            }
-
-            // Emit a strong white light.
-            Lighting.AddLight(Projectile.Center, Color.White.ToVector3() * 1.5f);
-
-            // Determine frames. Once the maximum frame is reached the projectile dies.
-            Projectile.frameCounter++;
-            if (Projectile.frameCounter % 5 == 4)
-                Projectile.frame++;
-            if (Projectile.frame >= 17)
-                Projectile.Kill();
-
-            // Exponentially accelerate.
-            Projectile.scale *= 1.013f;
-            Projectile.Opacity = Utils.GetLerpValue(5f, 36f, Projectile.timeLeft, true);
+            Projectiles.Melee.TerratomereExplosion.UpdateExplosion(Projectile, false);
         }
 
         public override bool PreDraw(ref Color lightColor)

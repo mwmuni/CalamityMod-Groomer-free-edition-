@@ -458,17 +458,11 @@ namespace CalamityMod.Projectiles.Rogue
                     Projectile projectile = Main.projectile[x];
                     if (projectile.active && projectile.type == ModContent.ProjectileType<ElephantKillerElephant>())
                     {
-                        float _ = float.NaN;
-                        bool elephantCollide = Collision.CheckAABBvLineCollision(projectile.Hitbox.TopLeft(), projectile.Hitbox.Size(), Projectile.Center, Projectile.Center + velocity * 2500, 10 * Projectile.scale, ref _);
-                        if (Projectile.Hitbox.Intersects(projectile.Hitbox))
-                        {
-                            elephantCollide = true;
-                            _ = Projectile.width;
-                        }
+                        bool elephantCollide = CheckShotCollision(projectile, Projectile.Center, Projectile.Center + velocity * 2500, out float collisionDistance);
                         if (elephantCollide)
                         {
-                            elephantDistance = _;
-                            Vector2 hitPoint = Projectile.Center + velocity * _;
+                            elephantDistance = collisionDistance;
+                            Vector2 hitPoint = Projectile.Center + velocity * collisionDistance;
                             elephantBoosted = true;
                             Vector2 adjustedHitPoint = hitPoint + velocity * 15;
                             projectile.ai[1] = adjustedHitPoint.X;
@@ -498,15 +492,9 @@ namespace CalamityMod.Projectiles.Rogue
                         NPC target = Main.npc[index];
                         if (!target.dontTakeDamage && target.active && target.life > 0 && !target.townNPC)
                         {
-                            float _ = float.NaN;
-                            bool collides = Collision.CheckAABBvLineCollision(target.Hitbox.TopLeft(), target.Hitbox.Size(), startPoint, endPoint, 10 * Projectile.scale, ref _);
-                            if (Projectile.Hitbox.Intersects(target.Hitbox))
-                            {
-                                collides = true;
-                                _ = Projectile.width;
-                            }
+                            bool collides = CheckShotCollision(target, startPoint, endPoint, out float collisionDistance);
                             if (collides)
-                                hitNPCs.Add((target, ((!redirected ? 0 : elephantDistance) + _), redirected));
+                                hitNPCs.Add((target, ((!redirected ? 0 : elephantDistance) + collisionDistance), redirected));
                         }
                     }
                 }
@@ -542,6 +530,17 @@ namespace CalamityMod.Projectiles.Rogue
                 hitNPCs.Clear();
             }
         }
+        private bool CheckShotCollision(Entity target, Vector2 startPoint, Vector2 endPoint, out float distance)
+        {
+            distance = float.NaN;
+            bool collides = Collision.CheckAABBvLineCollision(target.Hitbox.TopLeft(), target.Hitbox.Size(), startPoint, endPoint, 10 * Projectile.scale, ref distance);
+            if (!Projectile.Hitbox.Intersects(target.Hitbox))
+                return collides;
+
+            distance = Projectile.width;
+            return true;
+        }
+
         public void makeHitEffects(Vector2 velocity, float damageMult, Vector2 hitPoint, int shotElephantID = -50, bool elephantBoosted = false, float effectMult = 1, float exitAngle = -1000)
         {
             bool shotElephant = shotElephantID != -50;

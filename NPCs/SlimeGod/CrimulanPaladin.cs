@@ -94,35 +94,7 @@ namespace CalamityMod.NPCs.SlimeGod
             NPC.noTileCollide = false;
             NPC.noGravity = false;
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
-
-            Player player = Main.player[NPC.target];
-
-            if (NPC.ai[0] != 3f)
-            {
-                if (player.dead || !player.active)
-                {
-                    NPC.TargetClosest();
-                    player = Main.player[NPC.target];
-                    if (player.dead || !player.active)
-                    {
-                        NPC.ai[0] = 3f;
-                        NPC.ai[1] = 0f;
-                        NPC.ai[2] = 0f;
-                        NPC.ai[3] = 0f;
-                        calamityGlobalNPC.newAI[0] = 0f;
-                        NPC.netUpdate = true;
-                    }
-                }
-                else if (NPC.timeLeft < 1800)
-                    NPC.timeLeft = 1800;
-            }
+            Player player = SlimeGodPaladinBehavior.TargetAndHandleDespawn(NPC, 3f, true);
 
             if (lifeRatio <= 0.5f && Main.netMode != NetmodeID.MultiplayerClient && expertMode)
             {
@@ -396,11 +368,7 @@ namespace CalamityMod.NPCs.SlimeGod
                             destination *= projectileVelocity;
                             int numProj = 5;
                             float rotation = MathHelper.ToRadians(45);
-                            for (int i = 0; i < numProj; i++)
-                            {
-                                Vector2 perturbedSpeed = destination.RotatedBy(MathHelper.Lerp(-rotation, rotation, i / (float)(numProj - 1)));
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(perturbedSpeed) * 30f * NPC.scale, perturbedSpeed * 1.5f, type, damage, 0f, Main.myPlayer, 1f, 0f);
-                            }
+                            SlimeGodPaladinBehavior.FireGlobEruption(NPC, destination, numProj, rotation, type, damage, 1.5f, false, false, true, 1f, 0f);
 
                             // Fire slime balls directly at players with a max of 2
                             if (enraged && expertMode)
@@ -445,7 +413,7 @@ namespace CalamityMod.NPCs.SlimeGod
 
                         NPC.ai[1] = 0f;
 
-                        SlimeGodPaladinBehavior.StartCrimulanHop(NPC, player, death, revenge, expertMode, distanceSpeedBoost);
+                        SlimeGodPaladinBehavior.StartHop(NPC, player, death, revenge, expertMode, distanceSpeedBoost, false);
                     }
                     else
                         NPC.aiAction = 1;
@@ -560,6 +528,41 @@ namespace CalamityMod.NPCs.SlimeGod
     // Shared by the four concrete paladins; their attack selection and mod identities stay separate.
     internal static class SlimeGodPaladinBehavior
     {
+        internal static Player TargetAndHandleDespawn(NPC npc, float despawnState, bool clearNewAi)
+        {
+            if (npc.target < 0 || npc.target == Main.maxPlayers || Main.player[npc.target].dead || !Main.player[npc.target].active)
+                npc.TargetClosest();
+
+            if (Vector2.Distance(Main.player[npc.target].Center, npc.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
+                npc.TargetClosest();
+
+            Player player = Main.player[npc.target];
+            if (npc.ai[0] != despawnState)
+            {
+                if (player.dead || !player.active)
+                {
+                    npc.TargetClosest();
+                    player = Main.player[npc.target];
+                    if (player.dead || !player.active)
+                    {
+                        npc.ai[0] = despawnState;
+                        npc.ai[1] = 0f;
+                        npc.ai[2] = 0f;
+                        npc.ai[3] = 0f;
+                        if (clearNewAi)
+                        {
+                            npc.Calamity().newAI[0] = 0f;
+                        }
+                        npc.netUpdate = true;
+                    }
+                }
+                else if (npc.timeLeft < 1800)
+                    npc.timeLeft = 1800;
+            }
+
+            return player;
+        }
+
         internal static void CatchUpToTarget(NPC npc, Player player, int setDamage, bool resetJumpCounter)
         {
             npc.damage = setDamage;
@@ -664,47 +667,44 @@ namespace CalamityMod.NPCs.SlimeGod
             }
         }
 
-        internal static void StartCrimulanHop(NPC npc, Player player, bool death, bool revenge, bool expertMode, float distanceSpeedBoost)
+        internal static void FireGlobEruption(NPC npc, Vector2 destination, int numProj, float rotation, int type, int damage, float velocityMultiplier, bool spawnAboveCenter, bool omitCenterShots, bool includeProjectileAI, float ai0, float ai1)
         {
-            npc.velocity.Y -= 3f;
-            if (player.position.Y + player.height < npc.Center.Y)
-                npc.velocity.Y -= 1.25f;
-            if (player.position.Y + player.height < npc.Center.Y - 40f)
-                npc.velocity.Y -= 1.5f;
-            if (player.position.Y + player.height < npc.Center.Y - 80f)
-                npc.velocity.Y -= 1.75f;
-            if (player.position.Y + player.height < npc.Center.Y - 120f)
-                npc.velocity.Y -= 2f;
-            if (player.position.Y + player.height < npc.Center.Y - 160f)
-                npc.velocity.Y -= 2.25f;
-            if (player.position.Y + player.height < npc.Center.Y - 200f)
-                npc.velocity.Y -= 2.5f;
-            if (!Collision.CanHit(npc.Center, 1, 1, player.Center, 1, 1))
-                npc.velocity.Y -= 2f;
-
-            npc.velocity.X = ((death ? 14f : revenge ? 13f : expertMode ? 12f : 11f) + distanceSpeedBoost) * npc.direction;
-            npc.ai[2] += 1f;
+            for (int i = 0; i < numProj; i++)
+            {
+                if (!omitCenterShots || i < 4 || i > 6)
+                {
+                    Vector2 perturbedSpeed = destination.RotatedBy(MathHelper.Lerp(-rotation, rotation, i / (float)(numProj - 1)));
+                    if (includeProjectileAI)
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromAI(), spawnAboveCenter ? npc.Center + Vector2.UnitY * 30f * npc.scale + Vector2.Normalize(perturbedSpeed) * 30f * npc.scale : npc.Center + Vector2.Normalize(perturbedSpeed) * 30f * npc.scale, perturbedSpeed * velocityMultiplier, type, damage, 0f, Main.myPlayer, ai0, ai1);
+                    }
+                    else
+                    {
+                        Projectile.NewProjectile(npc.GetSource_FromAI(), spawnAboveCenter ? npc.Center + Vector2.UnitY * 30f * npc.scale + Vector2.Normalize(perturbedSpeed) * 30f * npc.scale : npc.Center + Vector2.Normalize(perturbedSpeed) * 30f * npc.scale, perturbedSpeed, type, damage, 0f, Main.myPlayer);
+                    }
+                }
+            }
         }
 
-        internal static void StartEbonianHop(NPC npc, Player player, bool death, bool revenge, bool expertMode, float distanceSpeedBoost)
+        internal static void StartHop(NPC npc, Player player, bool death, bool revenge, bool expertMode, float distanceSpeedBoost, bool ebonian)
         {
-            npc.velocity.Y -= 6f;
+            npc.velocity.Y -= ebonian ? 6f : 3f;
             if (player.position.Y + player.height < npc.Center.Y)
-                npc.velocity.Y -= 1.2f;
+                npc.velocity.Y -= ebonian ? 1.2f : 1.25f;
             if (player.position.Y + player.height < npc.Center.Y - 40f)
-                npc.velocity.Y -= 1.4f;
+                npc.velocity.Y -= ebonian ? 1.4f : 1.5f;
             if (player.position.Y + player.height < npc.Center.Y - 80f)
-                npc.velocity.Y -= 1.7f;
+                npc.velocity.Y -= ebonian ? 1.7f : 1.75f;
             if (player.position.Y + player.height < npc.Center.Y - 120f)
                 npc.velocity.Y -= 2f;
             if (player.position.Y + player.height < npc.Center.Y - 160f)
-                npc.velocity.Y -= 2.2f;
+                npc.velocity.Y -= ebonian ? 2.2f : 2.25f;
             if (player.position.Y + player.height < npc.Center.Y - 200f)
-                npc.velocity.Y -= 2.4f;
+                npc.velocity.Y -= ebonian ? 2.4f : 2.5f;
             if (!Collision.CanHit(npc.Center, 1, 1, player.Center, 1, 1))
                 npc.velocity.Y -= 2f;
 
-            npc.velocity.X = ((death ? 11f : revenge ? 10f : expertMode ? 9f : 8f) + distanceSpeedBoost) * npc.direction;
+            npc.velocity.X = ((death ? (ebonian ? 11f : 14f) : revenge ? (ebonian ? 10f : 13f) : expertMode ? (ebonian ? 9f : 12f) : (ebonian ? 8f : 11f)) + distanceSpeedBoost) * npc.direction;
             npc.ai[2] += 1f;
         }
 

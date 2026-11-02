@@ -596,42 +596,7 @@ namespace CalamityMod.NPCs.AstrumDeus
             if (!shouldFly)
             {
                 NPC.velocity.Y += 0.15f;
-                if (NPC.velocity.Y > segmentVelocity)
-                    NPC.velocity.Y = segmentVelocity;
-
-                // This bool exists to stop the strange wiggle behavior when worms are falling down
-                bool slowXVelocity = Math.Abs(NPC.velocity.X) > speed;
-                if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * 0.4)
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X -= speed * 1.1f;
-                    else
-                        NPC.velocity.X += speed * 1.1f;
-                }
-                else if (NPC.velocity.Y == segmentVelocity)
-                {
-                    if (slowXVelocity)
-                    {
-                        if (NPC.velocity.X < deusTargetX)
-                            NPC.velocity.X += speed;
-                        else if (NPC.velocity.X > deusTargetX)
-                            NPC.velocity.X -= speed;
-                    }
-                    else
-                        NPC.velocity.X = 0f;
-                }
-                else if (NPC.velocity.Y > 4f)
-                {
-                    if (slowXVelocity)
-                    {
-                        if (NPC.velocity.X < 0f)
-                            NPC.velocity.X += speed * 0.9f;
-                        else
-                            NPC.velocity.X -= speed * 0.9f;
-                    }
-                    else
-                        NPC.velocity.X = 0f;
-                }
+                BaseWormNPC.UpdateFallingVelocity(NPC, segmentVelocity, speed, deusTargetX);
             }
             else
             {
@@ -687,64 +652,7 @@ namespace CalamityMod.NPCs.AstrumDeus
                         }
                     }
 
-                    if ((NPC.velocity.X > 0f && deusTargetX > 0f) || (NPC.velocity.X < 0f && deusTargetX < 0f) || (NPC.velocity.Y > 0f && deusTargetY > 0f) || (NPC.velocity.Y < 0f && deusTargetY < 0f))
-                    {
-                        if (NPC.velocity.X < deusTargetX)
-                            NPC.velocity.X += speed;
-                        else if (NPC.velocity.X > deusTargetX)
-                            NPC.velocity.X -= speed;
-
-                        if (NPC.velocity.Y < deusTargetY)
-                            NPC.velocity.Y += speed;
-                        else if (NPC.velocity.Y > deusTargetY)
-                            NPC.velocity.Y -= speed;
-
-                        if (Math.Abs(deusTargetY) < segmentVelocity * 0.2 && ((NPC.velocity.X > 0f && deusTargetX < 0f) || (NPC.velocity.X < 0f && deusTargetX > 0f)))
-                        {
-                            if (NPC.velocity.Y > 0f)
-                                NPC.velocity.Y += speed * 2f;
-                            else
-                                NPC.velocity.Y -= speed * 2f;
-                        }
-
-                        if (Math.Abs(deusTargetX) < segmentVelocity * 0.2 && ((NPC.velocity.Y > 0f && deusTargetY < 0f) || (NPC.velocity.Y < 0f && deusTargetY > 0f)))
-                        {
-                            if (NPC.velocity.X > 0f)
-                                NPC.velocity.X += speed * 2f;
-                            else
-                                NPC.velocity.X -= speed * 2f;
-                        }
-                    }
-                    else if (deusAbsoluteTargetX > deusAbsoluteTargetY)
-                    {
-                        if (NPC.velocity.X < deusTargetX)
-                            NPC.velocity.X += speed * 1.1f;
-                        else if (NPC.velocity.X > deusTargetX)
-                            NPC.velocity.X -= speed * 1.1f;
-
-                        if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * 0.5)
-                        {
-                            if (NPC.velocity.Y > 0f)
-                                NPC.velocity.Y += speed;
-                            else
-                                NPC.velocity.Y -= speed;
-                        }
-                    }
-                    else
-                    {
-                        if (NPC.velocity.Y < deusTargetY)
-                            NPC.velocity.Y += speed * 1.1f;
-                        else if (NPC.velocity.Y > deusTargetY)
-                            NPC.velocity.Y -= speed * 1.1f;
-
-                        if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * 0.5)
-                        {
-                            if (NPC.velocity.X > 0f)
-                                NPC.velocity.X += speed;
-                            else
-                                NPC.velocity.X -= speed;
-                        }
-                    }
+                    BaseWormNPC.SteerWormVelocity(NPC, deusTargetX, deusTargetY, deusAbsoluteTargetX, deusAbsoluteTargetY, segmentVelocity, speed);
                 }
             }
 

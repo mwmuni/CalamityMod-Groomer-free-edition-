@@ -107,12 +107,21 @@ namespace CalamityMod.NPCs.DesertScourge
 
         public override void AI()
         {
+            UpdateNuisanceAI<DesertNuisanceHead, DesertNuisanceBody, DesertNuisanceTail, DesertNuisanceHeadYoung>(NPC, ref biomeEnrageTimer, ref tailSpawned, false);
+        }
+
+        internal static void UpdateNuisanceAI<THead, TBody, TTail, TOtherHead>(NPC NPC, ref int biomeEnrageTimer, ref bool tailSpawned, bool young)
+            where THead : ModNPC
+            where TBody : ModNPC
+            where TTail : ModNPC
+            where TOtherHead : ModNPC
+        {
             bool expertMode = Main.expertMode || BossRushEvent.BossRushActive;
             bool revenge = CalamityWorld.revenge || BossRushEvent.BossRushActive;
             bool death = CalamityWorld.death || BossRushEvent.BossRushActive;
 
             // Become angry when the other Nuisance dies.
-            bool getMad = (!NPC.AnyNPCs(ModContent.NPCType<DesertNuisanceHeadYoung>()) && revenge) || death;
+            bool getMad = (!NPC.AnyNPCs(ModContent.NPCType<TOtherHead>()) && revenge) || death;
 
             // Enrage
             if (!Main.player[NPC.target].ZoneDesert && !BossRushEvent.BossRushActive)
@@ -135,12 +144,12 @@ namespace CalamityMod.NPCs.DesertScourge
             // Percent life remaining.
             float lifeRatio = NPC.life / (float)NPC.lifeMax;
 
-            float speed = death ? 0.105f : 0.085f;
-            float turnSpeed = death ? 0.21f : 0.17f;
+            float speed = young ? (death ? 0.09f : 0.07f) : (death ? 0.105f : 0.085f);
+            float turnSpeed = young ? (death ? 0.18f : 0.14f) : (death ? 0.21f : 0.17f);
             speed += speed * 0.4f * (1f - lifeRatio);
             turnSpeed += turnSpeed * 0.4f * (1f - lifeRatio);
-            speed += 0.085f * enrageScale;
-            turnSpeed += 0.17f * enrageScale;
+            speed += (young ? 0.07f : 0.085f) * enrageScale;
+            turnSpeed += (young ? 0.14f : 0.17f) * enrageScale;
 
             if (Main.getGoodWorld)
             {
@@ -158,44 +167,18 @@ namespace CalamityMod.NPCs.DesertScourge
             if (NPC.alpha < 0)
                 NPC.alpha = 0;
 
+            if (young)
+                DesertNuisanceHeadYoung.UpdateSpitAttack(NPC, revenge, death, getMad);
+
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 if (!tailSpawned && NPC.ai[0] == 0f)
                 {
-                    int previous = NPC.whoAmI;
                     int minLength = 8;
                     if (Main.getGoodWorld)
                         minLength *= 2;
 
-                    int bodyTypeAIVariable = 0;
-                    for (int i = 0; i < minLength + 1; i++)
-                    {
-                        int lol;
-                        if (i >= 0 && i < minLength)
-                        {
-                            if (i == 0)
-                                bodyTypeAIVariable = 0;
-                            else if (i == minLength - 1)
-                                bodyTypeAIVariable = 30;
-                            else if (i % 2 == 0)
-                                bodyTypeAIVariable = 20;
-                            else
-                                bodyTypeAIVariable = 10;
-
-                            lol = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<DesertNuisanceBody>(), NPC.whoAmI);
-                            Main.npc[lol].ai[3] = bodyTypeAIVariable;
-                        }
-                        else
-                            lol = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<DesertNuisanceTail>(), NPC.whoAmI);
-
-                        Main.npc[lol].ai[2] = NPC.whoAmI;
-                        Main.npc[lol].realLife = NPC.whoAmI;
-                        Main.npc[lol].ai[1] = previous;
-                        Main.npc[previous].ai[0] = lol;
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, lol, 0f, 0f, 0f, 0);
-                        previous = lol;
-                    }
-
+                    DesertScourgeHead.SpawnSegments<TBody, TTail>(NPC, minLength);
                     tailSpawned = true;
                 }
             }
@@ -246,13 +229,32 @@ namespace CalamityMod.NPCs.DesertScourge
                 bool shouldDirectlyChase = true;
                 if (NPC.position.Y > Main.player[NPC.target].position.Y)
                 {
-                    foreach (Player plr in Main.ActivePlayers)
+                    // Retain each head's player traversal rather than changing enumerators.
+                    if (young)
                     {
-                        Rectangle rectangle2 = new Rectangle((int)plr.position.X - directChaseDistance, (int)plr.position.Y - directChaseDistance, directChaseDistance * 2, directChaseDistance * 2);
-                        if (rectangle.Intersects(rectangle2))
+                        for (int m = 0; m < Main.maxPlayers; m++)
                         {
-                            shouldDirectlyChase = false;
-                            break;
+                            if (Main.player[m].active)
+                            {
+                                Rectangle rectangle2 = new Rectangle((int)Main.player[m].position.X - directChaseDistance, (int)Main.player[m].position.Y - directChaseDistance, directChaseDistance * 2, directChaseDistance * 2);
+                                if (rectangle.Intersects(rectangle2))
+                                {
+                                    shouldDirectlyChase = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (Player plr in Main.ActivePlayers)
+                        {
+                            Rectangle rectangle2 = new Rectangle((int)plr.position.X - directChaseDistance, (int)plr.position.Y - directChaseDistance, directChaseDistance * 2, directChaseDistance * 2);
+                            if (rectangle.Intersects(rectangle2))
+                            {
+                                shouldDirectlyChase = false;
+                                break;
+                            }
                         }
                     }
                     if (shouldDirectlyChase)
@@ -267,10 +269,15 @@ namespace CalamityMod.NPCs.DesertScourge
             else if (NPC.velocity.X > 0f)
                 NPC.spriteDirection = -1;
 
-            float maxChaseSpeed = Main.zenithWorld ? SegmentVelocity_ZenithSeed :
-                Main.getGoodWorld ? SegmentVelocity_GoodWorld :
-                death ? SegmentVelocity_Death :
-                SegmentVelocity_Expert;
+            float maxChaseSpeed = young
+                ? (Main.zenithWorld ? DesertNuisanceHeadYoung.SegmentVelocity_ZenithSeed :
+                    Main.getGoodWorld ? DesertNuisanceHeadYoung.SegmentVelocity_GoodWorld :
+                    death ? DesertNuisanceHeadYoung.SegmentVelocity_Death :
+                    DesertNuisanceHeadYoung.SegmentVelocity_Expert)
+                : (Main.zenithWorld ? SegmentVelocity_ZenithSeed :
+                    Main.getGoodWorld ? SegmentVelocity_GoodWorld :
+                    death ? SegmentVelocity_Death :
+                    SegmentVelocity_Expert);
             maxChaseSpeed += maxChaseSpeed * 0.2f * (1f - lifeRatio);
             if (death)
                 maxChaseSpeed += maxChaseSpeed * 0.2f * (1f - lifeRatio);
@@ -289,7 +296,7 @@ namespace CalamityMod.NPCs.DesertScourge
                 {
                     for (int a = 0; a < Main.maxNPCs; a++)
                     {
-                        if (Main.npc[a].type == ModContent.NPCType<DesertNuisanceHead>() || Main.npc[a].type == ModContent.NPCType<DesertNuisanceBody>() || Main.npc[a].type == ModContent.NPCType<DesertNuisanceTail>())
+                        if (Main.npc[a].type == ModContent.NPCType<THead>() || Main.npc[a].type == ModContent.NPCType<TBody>() || Main.npc[a].type == ModContent.NPCType<TTail>())
                             Main.npc[a].active = false;
                     }
                 }
@@ -308,11 +315,16 @@ namespace CalamityMod.NPCs.DesertScourge
 
             if (!shouldFly)
             {
-                NPC.velocity.Y += (death ? 0.125f : 0.1f);
-                if (NPC.velocity.Y > 0f && Math.Abs(NPC.Center.Y - Main.player[NPC.target].Center.Y) > 180f)
-                    NPC.velocity.Y += 0.05f;
+                if (young)
+                    NPC.velocity.Y += 0.1f;
+                else
+                {
+                    NPC.velocity.Y += (death ? 0.125f : 0.1f);
+                    if (NPC.velocity.Y > 0f && Math.Abs(NPC.Center.Y - Main.player[NPC.target].Center.Y) > 180f)
+                        NPC.velocity.Y += 0.05f;
+                }
 
-                DesertScourgeHead.UpdateFallingVelocity(NPC, maxChaseSpeed, speed, playerX);
+                BaseWormNPC.UpdateFallingVelocity(NPC, maxChaseSpeed, speed, playerX);
             }
             else
             {

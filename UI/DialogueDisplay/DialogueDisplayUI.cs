@@ -1063,6 +1063,9 @@ namespace CalamityMod.UI.DialogueDisplay
         }
 
         public static int StartDialogueOnClient(string name, Vector2 startPosition, int startIndex = 0, int Uptime = -1, bool progressDialogue = true, DisplayEffect effects = null, float wrapWidth = -1)
+            => StartClientDialogue(name, startPosition, null, false, startIndex, Uptime, progressDialogue, effects, wrapWidth);
+
+        private static int StartClientDialogue(string name, Vector2 startPosition, Entity entity, bool attached, int startIndex, int Uptime, bool progressDialogue, DisplayEffect effects, float wrapWidth)
         {
             if (Main.dedServ)
                 return -1;
@@ -1080,13 +1083,13 @@ namespace CalamityMod.UI.DialogueDisplay
             if (startIndex >= textData.PageCount)
                 startIndex = textData.PageCount - 1;
 
-            DialogueDisplay display = new(textData.Pages[startIndex], effects, wrapWidth: wrapWidth)
+            DialogueDisplay display = new(attached ? textData[startIndex] : textData.Pages[startIndex], effects, wrapWidth: wrapWidth)
             {
-                Position = startPosition,
+                Position = attached ? entity.Center : startPosition,
                 ProgressDialogue = progressDialogue,
             };
 
-            return RegisterDialogue(name, display, textData, null, Uptime);
+            return RegisterDialogue(name, display, textData, entity, Uptime);
         }
 
         /// <summary>
@@ -1111,31 +1114,7 @@ namespace CalamityMod.UI.DialogueDisplay
         }
 
         public static int StartDialogueOnClient(string name, Entity entity, int startIndex = 0, int Uptime = -1, bool progressDialogue = true, DisplayEffect effects = null, float wrapWidth = -1)
-        {
-            if (Main.dedServ)
-                return -1;
-
-            UI ??= new();
-            State ??= new();
-            effects ??= new DisplayEffect();
-
-            if (!DialogueLoader.TryGetDialogue(name, out var textData))
-            {
-                CalamityMod.Log.Error($"Unable to find Dialogue Data for given name: '{name}'");
-                return -1;
-            }
-
-            if (startIndex >= textData.PageCount)
-                startIndex = textData.PageCount - 1;
-
-            DialogueDisplay display = new(textData[startIndex], effects, wrapWidth: wrapWidth)
-            {
-                Position = entity.Center,
-                ProgressDialogue = progressDialogue,
-            };
-
-            return RegisterDialogue(name, display, textData, entity, Uptime);
-        }
+            => StartClientDialogue(name, default, entity, true, startIndex, Uptime, progressDialogue, effects, wrapWidth);
 
         private static int RegisterDialogue(string name, DialogueDisplay display, DialogueTextData textData, Entity entity, int Uptime)
         {

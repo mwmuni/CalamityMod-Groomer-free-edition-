@@ -124,10 +124,18 @@ namespace CalamityMod
                     // Standard afterimages. No customizable features other than total afterimage count.
                     // Type 0 afterimages linearly scale down from 100% to 0% opacity. Their color and lighting is equal to the main projectile's.
                     case 0:
-
-
+                    case 2:
                         for (int i = 0; i < proj.oldPos.Length; ++i)
                         {
+                            // History rotation affects drawing, but not the armor shader's DrawData.
+                            float afterimageRot = rotation;
+                            SpriteEffects sfxForThisAfterimage = spriteEffects;
+                            if (mode == 2)
+                            {
+                                afterimageRot = proj.oldRot[i];
+                                sfxForThisAfterimage = proj.oldSpriteDirection[i] == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+                            }
+
                             Vector2 drawPos = proj.oldPos[i] + centerOffset - Main.screenPosition + new Vector2(0f, proj.gfxOffY);
                             // DO NOT REMOVE THESE "UNNECESSARY" FLOAT CASTS. THIS WILL BREAK THE AFTERIMAGES.
                             float interpolant = ((float)(proj.oldPos.Length - i) / (float)proj.oldPos.Length);
@@ -141,7 +149,7 @@ namespace CalamityMod
                             };
 
                             GameShaders.Armor.Apply(armorShaderToUse, proj, drawData);
-                            Main.spriteBatch.Draw(texture, drawPos, new Rectangle?(rectangle), color, rotation, origin, shrink ? scale * interpolant : scale, spriteEffects, 0f);
+                            Main.spriteBatch.Draw(texture, drawPos, new Rectangle?(rectangle), color, afterimageRot, origin, shrink ? scale * interpolant : scale, sfxForThisAfterimage, 0f);
                         }
                         break;
 
@@ -175,31 +183,6 @@ namespace CalamityMod
                             GameShaders.Armor.Apply(armorShaderToUse, proj, drawData);
                             Main.spriteBatch.Draw(texture, drawPos, new Rectangle?(rectangle), drawColor, rotation, origin, shrink ? scale * interpolant : scale, spriteEffects, 0f);
                             k += increment;
-                        }
-                        break;
-
-                    // Standard afterimages with rotation. No customizable features other than total afterimage count.
-                    // Type 2 afterimages linearly scale down from 100% to 0% opacity. Their color and lighting is equal to the main projectile's.
-                    case 2:
-                        for (int i = 0; i < proj.oldPos.Length; ++i)
-                        {
-                            float afterimageRot = proj.oldRot[i];
-                            SpriteEffects sfxForThisAfterimage = proj.oldSpriteDirection[i] == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
-                            Vector2 drawPos = proj.oldPos[i] + centerOffset - Main.screenPosition + new Vector2(0f, proj.gfxOffY);
-                            // DO NOT REMOVE THESE "UNNECESSARY" FLOAT CASTS. THIS WILL BREAK THE AFTERIMAGES.
-                            float interpolant = ((float)(proj.oldPos.Length - i) / (float)proj.oldPos.Length);
-                            Color color = alphaColor * interpolant;
-
-                            var drawData = new DrawData(texture, drawPos, rectangle, color)
-                            {
-                                rotation = rotation,
-                                origin = origin,
-                                effect = spriteEffects
-                            };
-
-                            GameShaders.Armor.Apply(armorShaderToUse, proj, drawData);
-                            Main.spriteBatch.Draw(texture, drawPos, new Rectangle?(rectangle), color, afterimageRot, origin, shrink ? scale * interpolant : scale, sfxForThisAfterimage, 0f);
                         }
                         break;
 
@@ -248,22 +231,16 @@ namespace CalamityMod
                 // Standard afterimages. No customizable features other than total afterimage count.
                 // Type 0 afterimages linearly scale down from 100% to 0% opacity. Their color and lighting is equal to the main projectile's.
                 case 0:
-                    for (int i = 0; i < proj.oldPos.Length; ++i)
-                    {
-                        Vector2 drawPos = proj.oldPos[i] + drawOrigin - Main.screenPosition + new Vector2(0f, proj.gfxOffY);
-                        // DO NOT REMOVE THESE "UNNECESSARY" FLOAT CASTS. THIS WILL BREAK THE AFTERIMAGES.
-                        Color color = proj.GetAlpha(lightColor) * ((float)(proj.oldPos.Length - i) / (float)proj.oldPos.Length);
-                        Main.spriteBatch.Draw(texture, drawPos, new Rectangle?(rectangle), color, rotation, drawOrigin, scale, spriteEffects, 0f);
-                    }
-                    return;
-
-                // Standard afterimages with rotation. No customizable features other than total afterimage count.
-                // Type 2 afterimages linearly scale down from 100% to 0% opacity. Their color and lighting is equal to the main projectile's.
                 case 2:
                     for (int i = 0; i < proj.oldPos.Length; ++i)
                     {
-                        float afterimageRot = proj.oldRot[i];
-                        SpriteEffects sfxForThisAfterimage = proj.oldSpriteDirection[i] == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+                        float afterimageRot = rotation;
+                        SpriteEffects sfxForThisAfterimage = spriteEffects;
+                        if (mode == 2)
+                        {
+                            afterimageRot = proj.oldRot[i];
+                            sfxForThisAfterimage = proj.oldSpriteDirection[i] == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+                        }
 
                         Vector2 drawPos = proj.oldPos[i] + drawOrigin - Main.screenPosition + new Vector2(0f, proj.gfxOffY);
                         // DO NOT REMOVE THESE "UNNECESSARY" FLOAT CASTS. THIS WILL BREAK THE AFTERIMAGES.
@@ -271,6 +248,7 @@ namespace CalamityMod
                         Main.spriteBatch.Draw(texture, drawPos, new Rectangle?(rectangle), color, afterimageRot, drawOrigin, scale, sfxForThisAfterimage, 0f);
                     }
                     return;
+
             }
         }
         #endregion

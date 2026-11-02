@@ -154,6 +154,20 @@ namespace CalamityMod.Projectiles.DraedonsArsenal
             if (SoundEngine.TryGetActiveSound(AudSlot5, out var s5))
                 s5?.Stop();
         }
+        private void UpdateFingerSound(ref SlotId slot, ref float extension, float pitch, string soundPath, float sine, float minPitch, float maxVol)
+        {
+            if (SoundEngine.TryGetActiveSound(slot, out var sound) && sound.IsPlaying)
+            {
+                sound.Position = Projectile.Center;
+                sound.Pitch = Utils.Remap(extension, 0.7f, 1, pitch + minPitch, pitch) + sine;
+                sound.Volume = Utils.Remap(extension, 0, 1, 0f, maxVol) * 100;
+            }
+            else if (extension > 1)
+            {
+                SoundStyle beam = new(soundPath);
+                slot = SoundEngine.PlaySound(beam with { Volume = 0.01f, Pitch = 0, IsLooped = true }, Projectile.Center);
+            }
+        }
         public override void HoldoutAI()
         {
             if (hitTimer > 0)
@@ -220,61 +234,11 @@ namespace CalamityMod.Projectiles.DraedonsArsenal
             float sine = (float)Math.Sin(time * 0.2f / MathHelper.Pi) * 0.1f;
             float maxVol = 0.4f;
             float minPitch = -0.8f;
-            if (SoundEngine.TryGetActiveSound(AudSlot1, out var f1s) && f1s.IsPlaying)
-            {
-                f1s.Position = Projectile.Center;
-                f1s.Pitch = Utils.Remap(f1x, 0.7f, 1, 0f + minPitch, 0f) + sine;
-                f1s.Volume = Utils.Remap(f1x, 0, 1, 0f, maxVol) * 100;
-            }
-            else if (f1x > 1)
-            {
-                SoundStyle beam = new("CalamityMod/Sounds/Item/MittWelding/Weld1");
-                AudSlot1 = SoundEngine.PlaySound(beam with { Volume = 0.01f, Pitch = 0, IsLooped = true }, Projectile.Center);
-            }
-            if (SoundEngine.TryGetActiveSound(AudSlot2, out var f2s) && f2s.IsPlaying)
-            {
-                f2s.Position = Projectile.Center;
-                f2s.Pitch = Utils.Remap(f2x, 0.7f, 1, 0.2f + minPitch, 0.2f) + sine;
-                f2s.Volume = Utils.Remap(f2x, 0, 1, 0f, maxVol) * 100;
-            }
-            else if (f2x > 1)
-            {
-                SoundStyle beam = new("CalamityMod/Sounds/Item/MittWelding/Weld2");
-                AudSlot2 = SoundEngine.PlaySound(beam with { Volume = 0.01f, Pitch = 0, IsLooped = true }, Projectile.Center);
-            }
-            if (SoundEngine.TryGetActiveSound(AudSlot3, out var f3s) && f3s.IsPlaying)
-            {
-                f3s.Position = Projectile.Center;
-                f3s.Pitch = Utils.Remap(f3x, 0.7f, 1, 0.4f + minPitch, 0.4f) + sine;
-                f3s.Volume = Utils.Remap(f3x, 0, 1, 0f, maxVol) * 100;
-            }
-            else if (f3x > 1)
-            {
-                SoundStyle beam = new("CalamityMod/Sounds/Item/MittWelding/Weld3");
-                AudSlot3 = SoundEngine.PlaySound(beam with { Volume = 0.01f, Pitch = 0, IsLooped = true }, Projectile.Center);
-            }
-            if (SoundEngine.TryGetActiveSound(AudSlot4, out var f4s) && f4s.IsPlaying)
-            {
-                f4s.Position = Projectile.Center;
-                f4s.Pitch = Utils.Remap(f4x, 0.7f, 1, 0.6f + minPitch, 0.6f) + sine;
-                f4s.Volume = Utils.Remap(f4x, 0, 1, 0f, maxVol) * 100;
-            }
-            else if (f4x > 1)
-            {
-                SoundStyle beam = new("CalamityMod/Sounds/Item/MittWelding/Weld4");
-                AudSlot4 = SoundEngine.PlaySound(beam with { Volume = 0.01f, Pitch = 0, IsLooped = true }, Projectile.Center);
-            }
-            if (SoundEngine.TryGetActiveSound(AudSlot5, out var f5s) && f5s.IsPlaying)
-            {
-                f5s.Position = Projectile.Center;
-                f5s.Pitch = Utils.Remap(f5x, 0.7f, 1, 0.8f + minPitch, 0.8f) + sine;
-                f5s.Volume = Utils.Remap(f5x, 0, 1, 0f, maxVol) * 100;
-            }
-            else if (f5x > 1)
-            {
-                SoundStyle beam = new("CalamityMod/Sounds/Item/MittWelding/Weld5");
-                AudSlot5 = SoundEngine.PlaySound(beam with { Volume = 0.01f, Pitch = 0, IsLooped = true }, Projectile.Center);
-            }
+            UpdateFingerSound(ref AudSlot1, ref f1x, 0f, "CalamityMod/Sounds/Item/MittWelding/Weld1", sine, minPitch, maxVol);
+            UpdateFingerSound(ref AudSlot2, ref f2x, 0.2f, "CalamityMod/Sounds/Item/MittWelding/Weld2", sine, minPitch, maxVol);
+            UpdateFingerSound(ref AudSlot3, ref f3x, 0.4f, "CalamityMod/Sounds/Item/MittWelding/Weld3", sine, minPitch, maxVol);
+            UpdateFingerSound(ref AudSlot4, ref f4x, 0.6f, "CalamityMod/Sounds/Item/MittWelding/Weld4", sine, minPitch, maxVol);
+            UpdateFingerSound(ref AudSlot5, ref f5x, 0.8f, "CalamityMod/Sounds/Item/MittWelding/Weld5", sine, minPitch, maxVol);
             #endregion
 
             Lighting.AddLight(Projectile.Center, Color.Lerp(Effects.ArsenalEffects.ArsenalLaserColor, Color.White, 0.3f).ToVector3() * MathHelper.Clamp((f1x + f2x + f3x + f4x + f5x - 4f) * 2f, 0f, 0.7f));

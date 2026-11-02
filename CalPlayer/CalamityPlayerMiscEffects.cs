@@ -104,8 +104,7 @@ namespace CalamityMod.CalPlayer
                 Player.jumpSpeedBoost += 1f;
 
             // Decrease the counter on Fearmonger set turbo regeneration
-            if (fearmongerRegenFrames > 0)
-                fearmongerRegenFrames--;
+            DecrementIfPositive(ref fearmongerRegenFrames);
 
             // Tile effects for touching tiles
             HandleTileEffects();
@@ -209,26 +208,10 @@ namespace CalamityMod.CalPlayer
             // Spawning for items that have holdouts active when held
             if (Player.whoAmI == Main.myPlayer && !Player.dead && !Main.mapFullscreen && !Player.mouseInterface)
             {
-                if (Player.HeldItem.type == ModContent.ItemType<Starfleet>() && (Player.ownedProjectileCounts[ModContent.ProjectileType<StarfleetHoldout>()] == 0))
-                {
-                    int damage = (int)Player.GetTotalDamage<RangedDamageClass>().ApplyTo(Player.HeldItem.damage);
-                    Projectile.NewProjectile(Player.GetProjectileSource_Item_WithPotentialAmmo(Player.HeldItem, 0), Player.Center, Player.Center.DirectionTo(Player.Calamity().mouseWorld), ModContent.ProjectileType<StarfleetHoldout>(), damage, Player.HeldItem.knockBack, Player.whoAmI);
-                }
-                if (Player.HeldItem.type == ModContent.ItemType<Starmada>() && (Player.ownedProjectileCounts[ModContent.ProjectileType<StarmadaHoldout>()] == 0))
-                {
-                    int damage = (int)Player.GetTotalDamage<RangedDamageClass>().ApplyTo(Player.HeldItem.damage);
-                    Projectile.NewProjectile(Player.GetProjectileSource_Item_WithPotentialAmmo(Player.HeldItem, 0), Player.Center, Player.Center.DirectionTo(Player.Calamity().mouseWorld), ModContent.ProjectileType<StarmadaHoldout>(), damage, Player.HeldItem.knockBack, Player.whoAmI);
-                }
-                if (Player.HeldItem.type == ModContent.ItemType<Basher>() && (Player.ownedProjectileCounts[ModContent.ProjectileType<BasherHoldout>()] == 0))
-                {
-                    int damage = (int)Player.GetTotalDamage<TrueMeleeDamageClass>().ApplyTo(Player.HeldItem.damage);
-                    Projectile.NewProjectile(Player.GetProjectileSource_Item_WithPotentialAmmo(Player.HeldItem, 0), Player.Center, Player.Center.DirectionTo(Player.Calamity().mouseWorld), ModContent.ProjectileType<BasherHoldout>(), damage, Player.HeldItem.knockBack, Player.whoAmI);
-                }
-                if (Player.HeldItem.type == ModContent.ItemType<GrandDad>() && (Player.ownedProjectileCounts[ModContent.ProjectileType<GrandDadHoldout>()] == 0))
-                {
-                    int damage = (int)Player.GetTotalDamage<TrueMeleeDamageClass>().ApplyTo(Player.HeldItem.damage);
-                    Projectile.NewProjectile(Player.GetProjectileSource_Item_WithPotentialAmmo(Player.HeldItem, 0), Player.Center, Player.Center.DirectionTo(Player.Calamity().mouseWorld), ModContent.ProjectileType<GrandDadHoldout>(), damage, Player.HeldItem.knockBack, Player.whoAmI);
-                }
+                SpawnHeldItemHoldout<Starfleet, StarfleetHoldout, RangedDamageClass>();
+                SpawnHeldItemHoldout<Starmada, StarmadaHoldout, RangedDamageClass>();
+                SpawnHeldItemHoldout<Basher, BasherHoldout, TrueMeleeDamageClass>();
+                SpawnHeldItemHoldout<GrandDad, GrandDadHoldout, TrueMeleeDamageClass>();
             }
 
             // De-equipping Gael's Greatsword deletes all rage.
@@ -620,6 +603,24 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region Revengeance Effects
+        private static void DecrementIfPositive<T>(ref T timer) where T : System.Numerics.INumber<T>
+        {
+            if (timer > T.Zero)
+                timer--;
+        }
+
+        private void SpawnHeldItemHoldout<TItem, TProjectile, TDamageClass>()
+            where TItem : ModItem
+            where TProjectile : ModProjectile
+            where TDamageClass : DamageClass
+        {
+            if (Player.HeldItem.type == ModContent.ItemType<TItem>() && Player.ownedProjectileCounts[ModContent.ProjectileType<TProjectile>()] == 0)
+            {
+                int damage = (int)Player.GetTotalDamage<TDamageClass>().ApplyTo(Player.HeldItem.damage);
+                Projectile.NewProjectile(Player.GetProjectileSource_Item_WithPotentialAmmo(Player.HeldItem, 0), Player.Center, Player.Center.DirectionTo(Player.Calamity().mouseWorld), ModContent.ProjectileType<TProjectile>(), damage, Player.HeldItem.knockBack, Player.whoAmI);
+            }
+        }
+
         private void RevengeanceModeMiscEffects()
         {
             if (CalamityWorld.revenge)
@@ -895,8 +896,7 @@ namespace CalamityMod.CalPlayer
                     playFullAdrenalineSound = true;
             }
 
-            if (adrenalinePauseTimer > 0)
-                adrenalinePauseTimer--;
+            DecrementIfPositive(ref adrenalinePauseTimer);
             #endregion
         }
         #endregion
@@ -1651,8 +1651,7 @@ namespace CalamityMod.CalPlayer
                 // Offense bonus
                 Player.maxMinions++;
                 // Healer bonus
-                if (healCounter > 0)
-                    healCounter--;
+                DecrementIfPositive(ref healCounter);
 
                 if (healCounter <= 0)
                 {
@@ -1902,8 +1901,7 @@ namespace CalamityMod.CalPlayer
                     }
                 }
             }
-            if (transformerDelay > 0)
-                transformerDelay--;
+            DecrementIfPositive(ref transformerDelay);
 
             if (sSpiritAmulet)
             {
@@ -2280,68 +2278,41 @@ namespace CalamityMod.CalPlayer
                 Player.buffImmune[BuffID.Webbed] = true;
             }
 
-            if (arsenalCooldown > 0)
-                arsenalCooldown--;
-            if (killModeCooldown > 0)
-                killModeCooldown--;
-            if (oblivionCooldown > 0)
-                oblivionCooldown--;
+            DecrementIfPositive(ref arsenalCooldown);
+            DecrementIfPositive(ref killModeCooldown);
+            DecrementIfPositive(ref oblivionCooldown);
             if (ascendantInsigniaCooldown > 0 && ascendantInsigniaBuffTime <= 0)
                 ascendantInsigniaCooldown--;
-            if (transformerCooldown > 0)
-                transformerCooldown--;
-            if (DragonsBreathAudioCooldown > 0)
-                DragonsBreathAudioCooldown--;
-            if (DragonsBreathAudioCooldown2 > 0)
-                DragonsBreathAudioCooldown2--;
-            if (PhotoAudioCooldown > 0)
-                PhotoAudioCooldown--;
-            if (arpeggioCooldown > 0)
-                arpeggioCooldown--;
+            DecrementIfPositive(ref transformerCooldown);
+            DecrementIfPositive(ref DragonsBreathAudioCooldown);
+            DecrementIfPositive(ref DragonsBreathAudioCooldown2);
+            DecrementIfPositive(ref PhotoAudioCooldown);
+            DecrementIfPositive(ref arpeggioCooldown);
             if (fullRageSoundCountdownTimer > 0)
                 --fullRageSoundCountdownTimer;
-            if (plagueTaintedSMGDroneCooldown > 0)
-                plagueTaintedSMGDroneCooldown--;
-            if (flareGunOverheat > 0)
-                flareGunOverheat--;
+            DecrementIfPositive(ref plagueTaintedSMGDroneCooldown);
+            DecrementIfPositive(ref flareGunOverheat);
             if (momentumCapacitorTime > 0)
                 --momentumCapacitorTime;
             if (phantomicHeartRegen > 0 && phantomicHeartRegen < 1000)
                 phantomicHeartRegen--;
-            if (phantomicBulwarkCooldown > 0)
-                phantomicBulwarkCooldown--;
-            if (gladiatorTimer > 0)
-                gladiatorTimer--;
-            if (dragonRageCooldown > 0)
-                dragonRageCooldown--;
-            if (soundCooldown > 0)
-                soundCooldown--;
-            if (raiderCritLifespan > 0f)
-                raiderCritLifespan--;
-            if (raiderSoundCooldown > 0)
-                raiderSoundCooldown--;
-            if (astralStarRainCooldown > 0)
-                astralStarRainCooldown--;
-            if (ursaSergeantCooldown > 0)
-                ursaSergeantCooldown--;
-            if (generalBandCooldown > 0)
-                generalBandCooldown--;
-            if (AlchFlaskCooldown > 0)
-                AlchFlaskCooldown--;
-            if (tarraRangedCooldown > 0)
-                tarraRangedCooldown--;
-            if (bloodflareMageCooldown > 0)
-                bloodflareMageCooldown--;
-            if (silvaMageCooldown > 0)
-                silvaMageCooldown--;
-            if (nanotechHitCooldown > 0)
-                nanotechHitCooldown--;
-            if (spectralVeilImmunity > 0)
-                spectralVeilImmunity--;
-            if (jetPackDash > 0)
-                jetPackDash--;
-            if (theBeeCooldown > 0)
-                theBeeCooldown--;
+            DecrementIfPositive(ref phantomicBulwarkCooldown);
+            DecrementIfPositive(ref gladiatorTimer);
+            DecrementIfPositive(ref dragonRageCooldown);
+            DecrementIfPositive(ref soundCooldown);
+            DecrementIfPositive(ref raiderCritLifespan);
+            DecrementIfPositive(ref raiderSoundCooldown);
+            DecrementIfPositive(ref astralStarRainCooldown);
+            DecrementIfPositive(ref ursaSergeantCooldown);
+            DecrementIfPositive(ref generalBandCooldown);
+            DecrementIfPositive(ref AlchFlaskCooldown);
+            DecrementIfPositive(ref tarraRangedCooldown);
+            DecrementIfPositive(ref bloodflareMageCooldown);
+            DecrementIfPositive(ref silvaMageCooldown);
+            DecrementIfPositive(ref nanotechHitCooldown);
+            DecrementIfPositive(ref spectralVeilImmunity);
+            DecrementIfPositive(ref jetPackDash);
+            DecrementIfPositive(ref theBeeCooldown);
 
             if (bloomStoneTotalHeal > 0)
             {
@@ -2382,8 +2353,7 @@ namespace CalamityMod.CalPlayer
                 }
                 bloomStoneHealTimer += bloomStoneHealRate;
             }
-            if (bloomStoneBuffedHealRateTimer > 0)
-                bloomStoneBuffedHealRateTimer--;
+            DecrementIfPositive(ref bloomStoneBuffedHealRateTimer);
 
             if (summonProjCooldown > 0f)
                 summonProjCooldown -= 1f;
@@ -2397,32 +2367,19 @@ namespace CalamityMod.CalPlayer
                 xerocDmg -= 2f;
             if (xerocDmg < 0f)
                 xerocDmg = 0f;
-            if (hideOfDeusMeleeBoostTimer > 0)
-                hideOfDeusMeleeBoostTimer--;
-            if (hurtSoundTimer > 0)
-                hurtSoundTimer--;
-            if (wingProjectileCooldown > 0)
-                wingProjectileCooldown--;
-            if (hallowedRuneCooldown > 0)
-                hallowedRuneCooldown--;
-            if (sulphurBubbleCooldown > 0)
-                sulphurBubbleCooldown--;
-            if (forbiddenCooldown > 0)
-                forbiddenCooldown--;
-            if (tornadoCooldown > 0)
-                tornadoCooldown--;
-            if (ladHearts > 0)
-                ladHearts--;
-            if (prismaticLasers > 0)
-                prismaticLasers--;
-            if (dogTextCooldown > 0)
-                dogTextCooldown--;
-            if (titanCooldown > 0)
-                titanCooldown--;
-            if (hideOfDeusTimer > 0)
-                hideOfDeusTimer--;
-            if (murasamaHitCooldown > 0)
-                murasamaHitCooldown--;
+            DecrementIfPositive(ref hideOfDeusMeleeBoostTimer);
+            DecrementIfPositive(ref hurtSoundTimer);
+            DecrementIfPositive(ref wingProjectileCooldown);
+            DecrementIfPositive(ref hallowedRuneCooldown);
+            DecrementIfPositive(ref sulphurBubbleCooldown);
+            DecrementIfPositive(ref forbiddenCooldown);
+            DecrementIfPositive(ref tornadoCooldown);
+            DecrementIfPositive(ref ladHearts);
+            DecrementIfPositive(ref prismaticLasers);
+            DecrementIfPositive(ref dogTextCooldown);
+            DecrementIfPositive(ref titanCooldown);
+            DecrementIfPositive(ref hideOfDeusTimer);
+            DecrementIfPositive(ref murasamaHitCooldown);
             if (burningSeaBurnOut > 0)
             {
                 burningSeaBurnOut--;
@@ -2468,8 +2425,7 @@ namespace CalamityMod.CalPlayer
                 auralisAuroraCounter = 0;
                 auralisAuroraCooldown = CalamityUtils.SecondsToFrames(30f);
             }
-            if (auralisAuroraCooldown > 0)
-                auralisAuroraCooldown--;
+            DecrementIfPositive(ref auralisAuroraCooldown);
 
             if (divineProvidence)
             {
@@ -2503,8 +2459,7 @@ namespace CalamityMod.CalPlayer
                 }
             }
 
-            if (MythrilFlareSpawnCountdown > 0)
-                MythrilFlareSpawnCountdown--;
+            DecrementIfPositive(ref MythrilFlareSpawnCountdown);
             if (AdamantiteSetDecayDelay > 0)
                 AdamantiteSetDecayDelay--;
             else if (AdamantiteSet)
@@ -2514,33 +2469,20 @@ namespace CalamityMod.CalPlayer
             }
             else
                 adamantiteSetDefenseBoostInterpolant = 0f;
-            if (monolithAccursedShader > 0)
-                monolithAccursedShader--;
-            if (monolithBossRushShader > 0)
-                monolithBossRushShader--;
-            if (monolithExoShader > 0)
-                monolithExoShader--;
-            if (monolithLeviathanShader > 0)
-                monolithLeviathanShader--;
-            if (monolithCryogenShader > 0)
-                monolithCryogenShader--;
-            if (monolithDevourerBShader > 0)
-                monolithDevourerBShader--;
-            if (monolithDevourerPShader > 0)
-                monolithDevourerPShader--;
-            if (monolithYharonShader > 0)
-                monolithYharonShader--;
-            if (monolithPlagueShader > 0)
-                monolithPlagueShader--;
-            if (monolithAstralShader > 0)
-                monolithAstralShader--;
-            if (BrimstoneLavaFountainCounter > 0)
-                BrimstoneLavaFountainCounter--;
+            DecrementIfPositive(ref monolithAccursedShader);
+            DecrementIfPositive(ref monolithBossRushShader);
+            DecrementIfPositive(ref monolithExoShader);
+            DecrementIfPositive(ref monolithLeviathanShader);
+            DecrementIfPositive(ref monolithCryogenShader);
+            DecrementIfPositive(ref monolithDevourerBShader);
+            DecrementIfPositive(ref monolithDevourerPShader);
+            DecrementIfPositive(ref monolithYharonShader);
+            DecrementIfPositive(ref monolithPlagueShader);
+            DecrementIfPositive(ref monolithAstralShader);
+            DecrementIfPositive(ref BrimstoneLavaFountainCounter);
 
-            if (miningSetCooldown > 0)
-                miningSetCooldown--;
-            if (MiniSwarmerCooldown > 0)
-                MiniSwarmerCooldown--;
+            DecrementIfPositive(ref miningSetCooldown);
+            DecrementIfPositive(ref MiniSwarmerCooldown);
 
             // God Slayer Armor dash debuff immunity
             if (LastUsedDashID == GodslayerArmorDash.ID && Player.dashDelay < 0)
@@ -2707,8 +2649,7 @@ namespace CalamityMod.CalPlayer
             // Bloodflare pickup spawn cooldowns
             if (bloodflareSet)
             {
-                if (bloodflareHeartTimer > 0)
-                    bloodflareHeartTimer--;
+                DecrementIfPositive(ref bloodflareHeartTimer);
             }
 
             // Bloodflare frenzy effects
@@ -3947,8 +3888,7 @@ namespace CalamityMod.CalPlayer
                 if (Player.statLife <= (int)(Player.statLifeMax2 * BloodflareHeadSummon.DefenseBoostHealthThreshold))
                     Player.statDefense += BloodflareHeadSummon.DefenseBoostBelowHealthThreshold;
 
-                if (bloodflareSummonTimer > 0)
-                    bloodflareSummonTimer--;
+                DecrementIfPositive(ref bloodflareSummonTimer);
 
                 if (Player.whoAmI == Main.myPlayer && bloodflareSummonTimer <= 0)
                 {

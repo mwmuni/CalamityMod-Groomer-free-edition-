@@ -88,20 +88,10 @@ namespace CalamityMod.Systems
             AddEquipmentRecipeGroups();
 
             // Mythril Anvil and Orichalcum Anvil
-            RecipeGroup group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.HardmodeAnvil"), new int[]
-            {
-                ItemID.MythrilAnvil,
-                ItemID.OrichalcumAnvil
-            });
-            HardmodeAnvil = RecipeGroup.RegisterGroup("HardmodeAnvil", group);
+            HardmodeAnvil = RegisterLocalizedGroup("HardmodeAnvil", ItemID.MythrilAnvil, ItemID.OrichalcumAnvil);
 
             // Adamantite Forge and Titanium Forge
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.HardmodeForge"), new int[]
-            {
-                ItemID.AdamantiteForge,
-                ItemID.TitaniumForge
-            });
-            HardmodeForge = RecipeGroup.RegisterGroup("HardmodeForge", group);
+            HardmodeForge = RegisterLocalizedGroup("HardmodeForge", ItemID.AdamantiteForge, ItemID.TitaniumForge);
 
             // Food
             AnyFood = RecipeGroup.RegisterGroup("AnyFood", GetFoodItems());
@@ -110,182 +100,86 @@ namespace CalamityMod.Systems
         private static void AddOreAndBarRecipeGroups()
         {
             // Copper and Tin
-            RecipeGroup group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.CopperOre)}", new int[]
-            {
-                ItemID.CopperOre,
-                ItemID.TinOre
-            });
-            AnyCopperOre = RecipeGroup.RegisterGroup("AnyCopperOre", group);
-
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.CopperBar)}", new int[]
-            {
-                ItemID.CopperBar,
-                ItemID.TinBar
-            });
-            AnyCopperBar = RecipeGroup.RegisterGroup("AnyCopperBar", group);
+            AnyCopperOre = RegisterItemGroup("AnyCopperOre", ItemID.CopperOre, ItemID.TinOre);
+            AnyCopperBar = RegisterItemGroup("AnyCopperBar", ItemID.CopperBar, ItemID.TinBar);
 
             // Silver and Tungsten
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.SilverOre)}", new int[]
-            {
-                ItemID.SilverOre,
-                ItemID.TungstenOre
-            });
-            AnySilverOre = RecipeGroup.RegisterGroup("AnySilverOre", group);
-
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.SilverBar)}", new int[]
-            {
-                ItemID.SilverBar,
-                ItemID.TungstenBar,
-            });
-            AnySilverBar = RecipeGroup.RegisterGroup("AnySilverBar", group);
+            AnySilverOre = RegisterItemGroup("AnySilverOre", ItemID.SilverOre, ItemID.TungstenOre);
+            AnySilverBar = RegisterItemGroup("AnySilverBar", ItemID.SilverBar, ItemID.TungstenBar);
 
             // Gold and Platinum
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.GoldOre)}", new int[]
-            {
-                ItemID.GoldOre,
-                ItemID.PlatinumOre
-            });
-            AnyGoldOre = RecipeGroup.RegisterGroup("AnyGoldOre", group);
-
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.GoldBar)}", new int[]
-            {
-                ItemID.GoldBar,
-                ItemID.PlatinumBar
-            });
-            AnyGoldBar = RecipeGroup.RegisterGroup("AnyGoldBar", group);
+            AnyGoldOre = RegisterItemGroup("AnyGoldOre", ItemID.GoldOre, ItemID.PlatinumOre);
+            AnyGoldBar = RegisterItemGroup("AnyGoldBar", ItemID.GoldBar, ItemID.PlatinumBar);
 
             // Demonite and Crimtane
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.DemoniteOre)}", new int[]
-            {
-                ItemID.DemoniteOre,
-                ItemID.CrimtaneOre
-            });
-            AnyEvilOre = RecipeGroup.RegisterGroup("AnyEvilOre", group);
-
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.AnyEvilBar"), new int[]
-            {
-                ItemID.DemoniteBar,
-                ItemID.CrimtaneBar
-            });
-            AnyEvilBar = RecipeGroup.RegisterGroup("AnyEvilBar", group);
+            AnyEvilOre = RegisterItemGroup("AnyEvilOre", ItemID.DemoniteOre, ItemID.CrimtaneOre);
+            AnyEvilBar = RegisterLocalizedGroup("AnyEvilBar", ItemID.DemoniteBar, ItemID.CrimtaneBar);
 
             // Cobalt and Palladium
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.CobaltOre)}", new int[]
-            {
-                ItemID.CobaltOre,
-                ItemID.PalladiumOre
-            });
-            AnyCobaltOre = RecipeGroup.RegisterGroup("AnyCobaltOre", group);
-
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.CobaltBar)}", new int[]
-            {
-                ItemID.CobaltBar,
-                ItemID.PalladiumBar
-            });
-            AnyCobaltBar = RecipeGroup.RegisterGroup("AnyCobaltBar", group);
+            AnyCobaltOre = RegisterItemGroup("AnyCobaltOre", ItemID.CobaltOre, ItemID.PalladiumOre);
+            AnyCobaltBar = RegisterItemGroup("AnyCobaltBar", ItemID.CobaltBar, ItemID.PalladiumBar);
 
             // Mythril and Orichalcum
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.MythrilOre)}", new int[]
-            {
-                ItemID.MythrilOre,
-                ItemID.OrichalcumOre
-            });
-            AnyMythrilOre = RecipeGroup.RegisterGroup("AnyMythrilOre", group);
-
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.MythrilBar)}", new int[]
-            {
-                ItemID.MythrilBar,
-                ItemID.OrichalcumBar
-            });
-            AnyMythrilBar = RecipeGroup.RegisterGroup("AnyMythrilBar", group);
+            AnyMythrilOre = RegisterItemGroup("AnyMythrilOre", ItemID.MythrilOre, ItemID.OrichalcumOre);
+            AnyMythrilBar = RegisterItemGroup("AnyMythrilBar", ItemID.MythrilBar, ItemID.OrichalcumBar);
 
             // Adamantite and Titanium
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.AdamantiteOre)}", new int[]
-            {
-                ItemID.AdamantiteOre,
-                ItemID.TitaniumOre
-            });
-            AnyAdamantiteOre = RecipeGroup.RegisterGroup("AnyAdamantiteOre", group);
-
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.AdamantiteBar)}", new int[]
-            {
-                ItemID.AdamantiteBar,
-                ItemID.TitaniumBar
-            });
-            AnyAdamantiteBar = RecipeGroup.RegisterGroup("AnyAdamantiteBar", group);
+            AnyAdamantiteOre = RegisterItemGroup("AnyAdamantiteOre", ItemID.AdamantiteOre, ItemID.TitaniumOre);
+            AnyAdamantiteBar = RegisterItemGroup("AnyAdamantiteBar", ItemID.AdamantiteBar, ItemID.TitaniumBar);
         }
 
         private static void AddEvilBiomeItemRecipeGroups()
         {
             // Shadow Scale and Tissue Sample
-            RecipeGroup group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.Boss2Material"), new int[]
-            {
-                ItemID.ShadowScale,
-                ItemID.TissueSample
-            });
-            Boss2Material = RecipeGroup.RegisterGroup("Boss2Material", group);
+            Boss2Material = RegisterLocalizedGroup("Boss2Material", ItemID.ShadowScale, ItemID.TissueSample);
 
             // Cursed Flame and Ichor
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.CursedFlameIchor"), new int[]
-            {
-                ItemID.CursedFlame,
-                ItemID.Ichor
-            });
-            CursedFlameIchor = RecipeGroup.RegisterGroup("CursedFlameIchor", group);
+            CursedFlameIchor = RegisterLocalizedGroup("CursedFlameIchor", ItemID.CursedFlame, ItemID.Ichor);
 
             // Unholy Water and Blood Water
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.AnyEvilWater"), new int[]
-            {
-                ItemID.UnholyWater,
-                ItemID.BloodWater
-            });
-            AnyEvilWater = RecipeGroup.RegisterGroup("AnyEvilWater", group);
+            AnyEvilWater = RegisterLocalizedGroup("AnyEvilWater", ItemID.UnholyWater, ItemID.BloodWater);
+        }
+
+        private static int RegisterItemGroup(string key, params int[] items)
+        {
+            // Capture the display item, not the mutable recipe group's membership.
+            int displayItem = items[0];
+            RecipeGroup group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(displayItem)}", items);
+            return RecipeGroup.RegisterGroup(key, group);
+        }
+
+        private static int RegisterLocalizedGroup(string key, params int[] items)
+        {
+            RecipeGroup group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup." + key), items);
+            return RecipeGroup.RegisterGroup(key, group);
         }
 
         private static void AddBiomeBlockRecipeGroups()
         {
             // Vanilla Stone and Astral Stone
-            RecipeGroup group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.StoneBlock)}", new int[]
-            {
+            AnyStoneBlock = RegisterItemGroup("AnyStoneBlock",
                 ItemID.StoneBlock,
                 ItemID.EbonstoneBlock,
                 ItemID.CrimstoneBlock,
                 ItemID.PearlstoneBlock,
-                ItemType<AstralStone>()
-            });
-            AnyStoneBlock = RecipeGroup.RegisterGroup("AnyStoneBlock", group);
+                ItemType<AstralStone>());
 
             // Vanilla Snow and Astral Snow
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.SnowBlock)}", new int[]
-            {
-                ItemID.SnowBlock,
-                ItemType<AstralSnow>()
-            });
-            AnySnowBlock = RecipeGroup.RegisterGroup("AnySnowBlock", group);
+            AnySnowBlock = RegisterItemGroup("AnySnowBlock", ItemID.SnowBlock, ItemType<AstralSnow>());
 
             // Vanilla Ice and Astral Ice
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.IceBlock)}", new int[]
-            {
+            AnyIceBlock = RegisterItemGroup("AnyIceBlock",
                 ItemID.IceBlock,
                 ItemID.PurpleIceBlock,
                 ItemID.RedIceBlock,
                 ItemID.PinkIceBlock,
-                ItemType<AstralIce>()
-            });
-            AnyIceBlock = RecipeGroup.RegisterGroup("AnyIceBlock", group);
+                ItemType<AstralIce>());
 
             // Silt, Slush, and Astral Silt, for Ancient Fossil
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.SiltBlock)}", new int[]
-            {
-                ItemID.SiltBlock,
-                ItemID.SlushBlock,
-                ItemType<NovaeSlag>()
-            });
-            AnySiltBlock = RecipeGroup.RegisterGroup("AnySiltBlock", group);
+            AnySiltBlock = RegisterItemGroup("AnySiltBlock", ItemID.SiltBlock, ItemID.SlushBlock, ItemType<NovaeSlag>());
 
             // Set of all generic Corruption/Crimson blocks, for Overloaded Sludge
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.AnyEvilBlock"), new int[]
-            {
+            AnyEvilBlock = RegisterLocalizedGroup("AnyEvilBlock",
                 ItemID.EbonstoneBlock,
                 ItemID.CrimstoneBlock,
                 ItemID.PurpleIceBlock,
@@ -295,27 +189,21 @@ namespace CalamityMod.Systems
                 ItemID.CorruptHardenedSand,
                 ItemID.CrimsonHardenedSand,
                 ItemID.CorruptSandstone,
-                ItemID.CrimsonSandstone
-            });
-            AnyEvilBlock = RecipeGroup.RegisterGroup("AnyEvilBlock", group);
+                ItemID.CrimsonSandstone);
 
             // Set of all generic Hallow blocks, this recipe group is unused
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.AnyGoodBlock"), new int[]
-            {
+            AnyGoodBlock = RegisterLocalizedGroup("AnyGoodBlock",
                 ItemID.PearlstoneBlock,
                 ItemID.PinkIceBlock,
                 ItemID.PearlsandBlock,
                 ItemID.HallowHardenedSand,
-                ItemID.HallowSandstone
-            });
-            AnyGoodBlock = RecipeGroup.RegisterGroup("AnyGoodBlock", group);
+                ItemID.HallowSandstone);
         }
 
         private static void AddEquipmentRecipeGroups()
         {
             // Wooden Swords for Broken Biome Blade
-            RecipeGroup group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.WoodenSword)}", new int[]
-            {
+            AnyWoodenSword = RegisterItemGroup("AnyWoodenSword",
                 ItemID.WoodenSword,
                 ItemID.BorealWoodSword,
                 ItemID.RichMahoganySword,
@@ -325,13 +213,10 @@ namespace CalamityMod.Systems
                 ItemID.PearlwoodSword,
                 ItemID.AshWoodSword,
                 ItemType<AcidwoodSword>(),
-                ItemType<DriftwoodSword>()
-            });
-            AnyWoodenSword = RecipeGroup.RegisterGroup("AnyWoodenSword", group);
+                ItemType<DriftwoodSword>());
 
             // Hallowed Helmets for Angelic Alliance
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.HallowedHelmet)}", new int[]
-            {
+            AnyHallowedHelmet = RegisterItemGroup("AnyHallowedHelmet",
                 ItemID.HallowedHelmet,
                 ItemID.HallowedHeadgear,
                 ItemID.HallowedMask,
@@ -339,77 +224,44 @@ namespace CalamityMod.Systems
                 ItemID.AncientHallowedHelmet,
                 ItemID.AncientHallowedHeadgear,
                 ItemID.AncientHallowedMask,
-                ItemID.AncientHallowedHood
-            });
-            AnyHallowedHelmet = RecipeGroup.RegisterGroup("AnyHallowedHelmet", group);
+                ItemID.AncientHallowedHood);
 
             // Hallowed Plate Mails
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.HallowedPlateMail)}", new int[]
-            {
-                ItemID.HallowedPlateMail,
-                ItemID.AncientHallowedPlateMail
-            });
-            AnyHallowedPlatemail = RecipeGroup.RegisterGroup("AnyHallowedPlatemail", group);
+            AnyHallowedPlatemail = RegisterItemGroup("AnyHallowedPlatemail", ItemID.HallowedPlateMail, ItemID.AncientHallowedPlateMail);
 
             // Hallowed Greaves
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.HallowedGreaves)}", new int[]
-            {
-                ItemID.HallowedGreaves,
-                ItemID.AncientHallowedGreaves
-            });
-            AnyHallowedGreaves = RecipeGroup.RegisterGroup("AnyHallowedGreaves", group);
+            AnyHallowedGreaves = RegisterItemGroup("AnyHallowedGreaves", ItemID.HallowedGreaves, ItemID.AncientHallowedGreaves);
 
             // Gold and Platinum Crowns for Feather Crown
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.GoldCrown)}", new int[]
-            {
-                ItemID.GoldCrown,
-                ItemID.PlatinumCrown
-            });
-            AnyGoldCrown = RecipeGroup.RegisterGroup("AnyGoldCrown", group);
+            AnyGoldCrown = RegisterItemGroup("AnyGoldCrown", ItemID.GoldCrown, ItemID.PlatinumCrown);
 
             // Vanilla Luminite Pickaxes and Genesis Pickaxe for Crystyl Crusher
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.LunarPickaxe"), new int[]
-            {
+            LunarPickaxe = RegisterLocalizedGroup("LunarPickaxe",
                 ItemID.SolarFlarePickaxe,
                 ItemID.VortexPickaxe,
                 ItemID.NebulaPickaxe,
                 ItemID.StardustPickaxe,
-                ItemType<GenesisPickaxe>()
-            });
-            LunarPickaxe = RecipeGroup.RegisterGroup("LunarPickaxe", group);
+                ItemType<GenesisPickaxe>());
 
             // Luminite Hamaxes for Grax
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.LunarHamaxe"), new int[]
-            {
+            LunarHamaxe = RegisterLocalizedGroup("LunarHamaxe",
                 ItemID.LunarHamaxeSolar,
                 ItemID.LunarHamaxeVortex,
                 ItemID.LunarHamaxeNebula,
-                ItemID.LunarHamaxeStardust
-            });
-            LunarHamaxe = RecipeGroup.RegisterGroup("LunarHamaxe", group);
+                ItemID.LunarHamaxeStardust);
 
             // Mana Flower+ for Ethereal Talisman
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.ManaFlower)}", new int[]
-            {
+            AnyManaFlower = RegisterItemGroup("AnyManaFlower",
                 ItemID.ManaFlower,
                 ItemID.ArcaneFlower,
                 ItemID.MagnetFlower,
-                ItemID.ManaCloak
-            });
-            AnyManaFlower = RecipeGroup.RegisterGroup("AnyManaFlower", group);
+                ItemID.ManaCloak);
 
             // Magic Quiver+ for Elemental Quiver
-            group = new RecipeGroup(() => CalamityUtils.GetTextValue("Misc.RecipeGroup.AnyQuiver"), new int[]
-            {
-                ItemID.MagicQuiver,
-                ItemID.MoltenQuiver,
-                ItemID.StalkersQuiver
-            });
-            AnyQuiver = RecipeGroup.RegisterGroup("AnyQuiver", group);
+            AnyQuiver = RegisterLocalizedGroup("AnyQuiver", ItemID.MagicQuiver, ItemID.MoltenQuiver, ItemID.StalkersQuiver);
 
             // Tombstones for Grave Grimreaver
-            group = new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Tombstone)}", new int[]
-            {
+            AnyTombstone = RegisterItemGroup("AnyTombstone",
                 ItemID.Tombstone,
                 ItemID.GraveMarker,
                 ItemID.CrossGraveMarker,
@@ -420,9 +272,7 @@ namespace CalamityMod.Systems
                 ItemID.RichGravestone2,
                 ItemID.RichGravestone3,
                 ItemID.RichGravestone4,
-                ItemID.RichGravestone5
-            });
-            AnyTombstone = RecipeGroup.RegisterGroup("AnyTombstone", group);
+                ItemID.RichGravestone5);
         }
         #endregion
 
@@ -825,139 +675,85 @@ namespace CalamityMod.Systems
             #region Astral Clay
             // Intentionally excluding Red Brick and Red Stucco recipes
             // Argon Moss Brick
-            Recipe r = Recipe.Create(ItemID.ArgonMossBlock, 10);
-            r.AddIngredient(ItemID.ArgonMoss);
-            r.AddIngredient<AstralClay>(10);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.ArgonMossBlock);
+            AddAstralRecipeVariant<AstralClay>(ItemID.ArgonMossBlock, 10, 10, TileID.Furnaces, ItemID.ArgonMoss);
 
             // Bowl
-            r = Recipe.Create(ItemID.Bowl);
-            r.AddIngredient<AstralClay>(2);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.Bowl);
+            AddAstralRecipeVariant<AstralClay>(ItemID.Bowl, 1, 2, TileID.Furnaces);
 
             // Clay Pot
-            r = Recipe.Create(ItemID.ClayPot);
-            r.AddIngredient<AstralClay>(5);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.ClayPot);
+            AddAstralRecipeVariant<AstralClay>(ItemID.ClayPot, 1, 5, TileID.Furnaces);
 
             // Helium Moss Brick
-            r = Recipe.Create(ItemID.RainbowMossBlock, 10);
-            r.AddIngredient(ItemID.RainbowMoss);
-            r.AddIngredient<AstralClay>(10);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.RainbowMossBlock);
+            AddAstralRecipeVariant<AstralClay>(ItemID.RainbowMossBlock, 10, 10, TileID.Furnaces, ItemID.RainbowMoss);
 
             // Krypton Moss Brick
-            r = Recipe.Create(ItemID.KryptonMossBlock, 10);
-            r.AddIngredient(ItemID.KryptonMoss);
-            r.AddIngredient<AstralClay>(10);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.KryptonMossBlock);
+            AddAstralRecipeVariant<AstralClay>(ItemID.KryptonMossBlock, 10, 10, TileID.Furnaces, ItemID.KryptonMoss);
 
             // Lava Moss Brick
-            r = Recipe.Create(ItemID.LavaMossBlock, 10);
-            r.AddIngredient(ItemID.LavaMoss);
-            r.AddIngredient<AstralClay>(10);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.LavaMossBlock);
+            AddAstralRecipeVariant<AstralClay>(ItemID.LavaMossBlock, 10, 10, TileID.Furnaces, ItemID.LavaMoss);
 
             // Neon Moss Brick
-            r = Recipe.Create(ItemID.VioletMossBlock, 10);
-            r.AddIngredient(ItemID.VioletMoss);
-            r.AddIngredient<AstralClay>(10);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.VioletMossBlock);
+            AddAstralRecipeVariant<AstralClay>(ItemID.VioletMossBlock, 10, 10, TileID.Furnaces, ItemID.VioletMoss);
 
             // Pink Vase
-            r = Recipe.Create(ItemID.PinkVase);
-            r.AddIngredient<AstralClay>(4);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.PinkVase);
+            AddAstralRecipeVariant<AstralClay>(ItemID.PinkVase, 1, 4, TileID.Furnaces);
 
             // Plate
-            r = Recipe.Create(ItemID.FoodPlatter);
-            r.AddIngredient<AstralClay>(2);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.FoodPlatter);
+            AddAstralRecipeVariant<AstralClay>(ItemID.FoodPlatter, 1, 2, TileID.Furnaces);
 
             // Teapot
-            r = Recipe.Create(ItemID.TeaKettle);
-            r.AddIngredient<AstralClay>(12);
-            r.AddIngredient(ItemID.Bone, 12);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.TeaKettle);
+            AddAstralRecipeVariant<AstralClay>(ItemID.TeaKettle, 1, 12, TileID.Furnaces, after: ItemID.Bone, afterStack: 12);
 
             // Wandering Jingasa
-            r = Recipe.Create(ItemID.RoninHat);
-            r.AddIngredient<AstralClay>(10);
-            r.AddIngredient(ItemID.Firefly, 3); // Does not use the recipe group in Vanilla
-            r.AddTile(TileID.Loom);
-            RegisterRecipeVariant(r, ItemID.RoninHat);
+            // Does not use the recipe group in Vanilla.
+            AddAstralRecipeVariant<AstralClay>(ItemID.RoninHat, 1, 10, TileID.Loom, after: ItemID.Firefly, afterStack: 3);
 
             // Xenon Moss Brick
-            r = Recipe.Create(ItemID.XenonMossBlock, 10);
-            r.AddIngredient(ItemID.XenonMoss);
-            r.AddIngredient<AstralClay>(10);
-            r.AddTile(TileID.Furnaces);
-            RegisterRecipeVariant(r, ItemID.XenonMossBlock);
+            AddAstralRecipeVariant<AstralClay>(ItemID.XenonMossBlock, 10, 10, TileID.Furnaces, ItemID.XenonMoss);
             #endregion
 
             #region Astral Dirt
             // Intentionally excluding a ton of pure dirt recipes ie. Dirt Bombs, Walls
             // Floret Protector set
-            r = Recipe.Create(ItemID.FloretProtectorHelmet);
-            r.AddIngredient(ItemID.Glass, 20);
-            r.AddIngredient<AstralDirt>(10);
-            r.AddIngredient(ItemID.Daybloom);
-            r.AddTile(TileID.Loom);
-            RegisterRecipeVariant(r, ItemID.FloretProtectorHelmet);
+            AddAstralRecipeVariant<AstralDirt>(ItemID.FloretProtectorHelmet, 1, 10, TileID.Loom, ItemID.Glass, 20, ItemID.Daybloom);
 
-            r = Recipe.Create(ItemID.FloretProtectorChestplate);
-            r.AddIngredient(ItemID.Silk, 20);
-            r.AddIngredient<AstralDirt>(15);
-            r.AddTile(TileID.Loom);
-            RegisterRecipeVariant(r, ItemID.FloretProtectorChestplate);
+            AddAstralRecipeVariant<AstralDirt>(ItemID.FloretProtectorChestplate, 1, 15, TileID.Loom, ItemID.Silk, 20);
 
-            r = Recipe.Create(ItemID.FloretProtectorLegs);
-            r.AddIngredient(ItemID.Silk, 20);
-            r.AddIngredient<AstralDirt>(15);
-            r.AddTile(TileID.Loom);
-            RegisterRecipeVariant(r, ItemID.FloretProtectorLegs);
+            AddAstralRecipeVariant<AstralDirt>(ItemID.FloretProtectorLegs, 1, 15, TileID.Loom, ItemID.Silk, 20);
             #endregion
 
             #region Astral Ice
             // Ice Torch
-            r = Recipe.Create(ItemID.IceTorch, 3);
-            r.AddIngredient(ItemID.Torch, 3);
-            r.AddIngredient<AstralIce>();
-            RegisterRecipeVariant(r, ItemID.IceTorch);
+            AddAstralRecipeVariant<AstralIce>(ItemID.IceTorch, 3, 1, -1, ItemID.Torch, 3);
             #endregion
 
             #region Astral Snow
             // Frozen Banana Daiquiri
-            r = Recipe.Create(ItemID.BananaDaiquiri);
-            r.AddIngredient(ItemID.Banana);
-            r.AddIngredient(ItemID.Bottle);
-            r.AddIngredient<AstralSnow>();
-            r.AddTile(TileID.CookingPots);
-            RegisterRecipeVariant(r, ItemID.BananaDaiquiri);
+            AddAstralRecipeVariant<AstralSnow>(ItemID.BananaDaiquiri, 1, 1, TileID.CookingPots, ItemID.Banana, secondBefore: ItemID.Bottle);
 
             // Snowball
-            r = Recipe.Create(ItemID.Snowball, 15);
-            r.AddIngredient<AstralSnow>();
-            RegisterRecipeVariant(r, ItemID.Snowball);
+            AddAstralRecipeVariant<AstralSnow>(ItemID.Snowball, 15, 1, -1);
             #endregion
 
             #region Hardened Astral Sand
             // Desert Torch
-            r = Recipe.Create(ItemID.DesertTorch, 3);
-            r.AddIngredient(ItemID.Torch, 3);
-            r.AddIngredient<HardenedAstralSand>();
-            RegisterRecipeVariant(r, ItemID.DesertTorch);
+            AddAstralRecipeVariant<HardenedAstralSand>(ItemID.DesertTorch, 3, 1, -1, ItemID.Torch, 3);
             #endregion
+        }
+
+        private static void AddAstralRecipeVariant<T>(int result, int stack, int astralStack, int tile, int before = -1, int beforeStack = 1, int after = -1, int afterStack = 1, int secondBefore = -1) where T : ModItem
+        {
+            Recipe r = Recipe.Create(result, stack);
+            if (before != -1)
+                r.AddIngredient(before, beforeStack);
+            if (secondBefore != -1)
+                r.AddIngredient(secondBefore);
+            r.AddIngredient<T>(astralStack);
+            if (after != -1)
+                r.AddIngredient(after, afterStack);
+            if (tile != -1)
+                r.AddTile(tile);
+            RegisterRecipeVariant(r, result);
         }
         #endregion
 

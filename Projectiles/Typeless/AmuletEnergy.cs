@@ -61,10 +61,7 @@ namespace CalamityMod.Projectiles.Typeless
                 Color.Lerp(Color.MediumTurquoise, Color.Coral, colorShift)
             };
 
-            int colorIndex = (int)(rate / 2 % eColors.Count);
-            Color currentColor = eColors[colorIndex];
-            Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
-            bColor = Color.Lerp(currentColor, nextColor, rate % 2f > 1f ? 1f : rate % 1f);
+            bColor = CommonProjectileAI.CycleEnergyColor(rate, eColors);
 
             if (idle || time < startTime) // If not attacking/healing keep it alive
                 Projectile.timeLeft++;
@@ -104,20 +101,7 @@ namespace CalamityMod.Projectiles.Typeless
                 }
                 if (time > 80) // Track the player in a natural motion simular to swimming
                 {
-                    float homingSpeed = Utils.Remap(Utils.Distance(Projectile.Center, Owner.Center), 200, 600, 0.07f, 0.16f) + 0.005f * energyNumber;
-                    float offsetPower = Utils.GetLerpValue(1, 5, Owner.velocity.Length(), true);
-                    float sine = (float)Math.Sin((time * 0.1f) / MathHelper.Pi);
-                    float sine2 = (float)Math.Sin((time * 0.04f) / MathHelper.Pi);
-                    Vector2 bonusMobility = (offsetPower > 0 ? ((Utils.DirectionTo(Projectile.Center, Owner.Center) * 90) * sine2).RotatedBy(0.8f * sine) * offsetPower : Vector2.Zero);
-                    Vector2 goalPosition = Owner.MountedCenter + bonusMobility + ((MathHelper.TwoPi * energyNumber) / Math.Max(Owner.ownedProjectileCounts[ModContent.ProjectileType<AmuletEnergy>()], 1)).ToRotationVector2().RotatedBy(Main.GlobalTimeWrappedHourly * 0.4f) * 20;
-
-                    bool outOfRange = Utils.Distance(Projectile.Center, goalPosition) > 60;
-                    if (Projectile.velocity.Length() < 6 && outOfRange)
-                        Projectile.velocity = Projectile.velocity * 0.995f + Utils.DirectionTo(Projectile.Center, goalPosition) * homingSpeed;
-                    else if (outOfRange)
-                        Projectile.velocity *= 0.985f;
-                    if (!outOfRange)
-                        Projectile.velocity = Projectile.velocity.RotatedBy(0.0065f * (energyNumber % 2 == 0 ? -1 : 1)) * 1.004f;
+                    Projectile.FollowEnergyOwner(Owner, ref time, ref energyNumber, 0.005f, 60);
                 }
                 else
                     Projectile.velocity *= 0.99f;

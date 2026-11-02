@@ -768,8 +768,14 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         float rayDist = CalamityUtils.PreciseDistanceToTileCollisionHit(Target.Center, dir.ToRotation(), 360, 1);
         Vector2 offset = dir * (rayDist - NPC.width);
         Vector2 goalPos = Target.Center + offset;
+        MoveTowardsHoverPosition(goalPos, 0.15f, 6f, idle: true, swinging: false);
+        #endregion
+    }
+
+    private void MoveTowardsHoverPosition(Vector2 goalPos, float acceleration, float speed, bool idle, bool swinging)
+    {
         float distSQ = NPC.DistanceSQ(goalPos);
-        if (distSQ > 129600)
+        if (idle && distSQ > 129600)
         {
             NPC.velocity = NPC.DirectionTo(goalPos) * (4 + (NPC.Distance(goalPos) - 360) / 64f);
         }
@@ -777,15 +783,14 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         {
             NPC.velocity *= 0.9f;
         }
-        else if (NPC.velocity.LengthSquared() < 16f)
+        else if (swinging ? NPC.velocity.LengthSquared() <= 56.25f : NPC.velocity.LengthSquared() < 16f)
         {
-            NPC.velocity += NPC.DirectionTo(goalPos).SafeNormalize(Vector2.Zero) * 0.15f;
+            NPC.velocity += NPC.DirectionTo(goalPos).SafeNormalize(swinging ? Vector2.UnitX * -Target.direction : Vector2.Zero) * acceleration;
         }
         else
         {
-            NPC.velocity = NPC.DirectionTo(goalPos).SafeNormalize(Vector2.Zero) * 6f;
+            NPC.velocity = NPC.DirectionTo(goalPos).SafeNormalize(swinging ? Vector2.UnitX * -Target.direction : Vector2.Zero) * speed;
         }
-        #endregion
     }
 
     private void TelekineticOnslaught()
@@ -973,21 +978,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         #region Tile Collision
         if (Time < StunDuration)
         {
-            if (Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-            {
-                NPC.velocity = NPC.DirectionTo(Target.Center) * 4f;
-            }
-            else if (Collision.SolidCollision(NPC.position + NPC.velocity, NPC.width, NPC.height))
-            {
-                if (NPC.velocity.X != NPC.oldVelocity.X)
-                    NPC.velocity.X = -NPC.oldVelocity.X;
-                if (NPC.velocity.Y != NPC.oldVelocity.Y)
-                    NPC.velocity.Y = -NPC.oldVelocity.Y;
-                //NPC.velocity *= 2f;
-                NPC.velocity = NPC.velocity.ClampMagnitude(0f, 8f);
-                AttackTime = 30;
-                AttackRotation = NPC.rotation;
-            }
+            HandleTileCollision(stunned: true);
 
             if (AttackTime > 0)
             {
@@ -1264,12 +1255,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             goalDir = Vector2.UnitY * Math.Sign(fromTarget.Y);
 
         Vector2 goalPos = Target.Center + (goalDir * 360) - (Vector2.UnitY * 32);
-        if (NPC.DistanceSQ(goalPos) <= 2048)
-            NPC.velocity *= 0.9f;
-        else if (NPC.velocity.LengthSquared() <= 56.25f) //7.5^2
-            NPC.velocity += NPC.DirectionTo(goalPos).SafeNormalize(Vector2.UnitX * -Target.direction) * 0.5f;
-        else
-            NPC.velocity = NPC.DirectionTo(goalPos).SafeNormalize(Vector2.UnitX * -Target.direction) * 8f;
+        MoveTowardsHoverPosition(goalPos, 0.5f, 8f, idle: false, swinging: true);
         #endregion
 
         int delay = OnSecondCreeperPhase ? StrongSwipeDelay : LightSwipeDelay;
@@ -1588,24 +1574,35 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             NPC.velocity *= 0.8f;
 
             #region Tile Collision
-            if (Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-            {
-                NPC.velocity = NPC.DirectionTo(Target.Center) * 4f;
-            }
-            else if (Collision.SolidCollision(NPC.position + NPC.velocity, NPC.width, NPC.height))
-            {
-                if (NPC.velocity.X != NPC.oldVelocity.X)
-                    NPC.velocity.X = -NPC.oldVelocity.X;
-                if (NPC.velocity.Y != NPC.oldVelocity.Y)
-                    NPC.velocity.Y = -NPC.oldVelocity.Y;
-                NPC.velocity *= 2f;
-                NPC.velocity = NPC.velocity.ClampMagnitude(0f, 8f);
-            }
+            HandleTileCollision(stunned: false);
             #endregion
         }
     }
 
     #region Phase 2
+
+    private void HandleTileCollision(bool stunned)
+    {
+        if (Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
+        {
+            NPC.velocity = NPC.DirectionTo(Target.Center) * 4f;
+        }
+        else if (Collision.SolidCollision(NPC.position + NPC.velocity, NPC.width, NPC.height))
+        {
+            if (NPC.velocity.X != NPC.oldVelocity.X)
+                NPC.velocity.X = -NPC.oldVelocity.X;
+            if (NPC.velocity.Y != NPC.oldVelocity.Y)
+                NPC.velocity.Y = -NPC.oldVelocity.Y;
+            if (!stunned)
+                NPC.velocity *= 2f;
+            NPC.velocity = NPC.velocity.ClampMagnitude(0f, 8f);
+            if (stunned)
+            {
+                AttackTime = 30;
+                AttackRotation = NPC.rotation;
+            }
+        }
+    }
 
     private void Phase2Idle()
     {
@@ -1646,76 +1643,48 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             TeleportDuration = IdleTeleportDuration;
             NPC.damage = 0;
 
-            Vector2 endPoint = AttackPosition;
-
-            NPC.velocity = Vector2.Zero;
-
-            if (Time < ChaseTime + (TeleportDuration / 2f))
+            if (UpdateTeleport(chasing: true))
             {
-                if (Time % 4 == 0)
+                #region Attack Selection
+                if (AttackCounter >= ChaseAmount) //Pick attack
                 {
-                    SpawnTeleportAfterImage(NPC.Center, endPoint, (int)(ChaseTime + (TeleportDuration * 0.75f) - Time));
-                }
-                TeleportTime++;
-            }
-            else if (Time == ChaseTime + (TeleportDuration / 2f) && !AttackFlag)
-            {
-                NPC.Center = endPoint;
-                NPC.damage = NPC.defDamage;
-                DisableMultiplayerSmoothing = true;
-                AttackFlag = true;
-                NPC.netUpdate = true;
-            }
-            else
-            {
-                TeleportTime--;
-                if (TeleportTime < 0)
-                {
-                    TeleportTime = 0;
-                    Time = -1;
-                    AttackFlag = false;
+                    NPC.rotation = 0;
+                    ResetAttackValues();
 
-                    #region Attack Selection
-                    if (AttackCounter >= ChaseAmount) //Pick attack
+                    if (!ForcedIllusionAttack && (NPC.life / (float)NPC.lifeMax) <= ForcedIllusionHealthGate)
                     {
-                        NPC.rotation = 0;
-                        ResetAttackValues();
-
-                        if (!ForcedIllusionAttack && (NPC.life / (float)NPC.lifeMax) <= ForcedIllusionHealthGate)
-                        {
-                            ForcedIllusionAttack = true;
-                            AIState = BrainAIState.IllusionTrick;
-                            PreviousAttack = AIState;
-                        }
-                        else
-                        {
-                            if (availableAttacks.Count == 0)
-                            {
-                                bool quickChoice = Main.rand.NextBool();
-                                availableAttacks = [
-                                    BrainAIState.Bloodletting,
-                                        quickChoice ? BrainAIState.SanguineScythes : BrainAIState.IllusionDash,
-                                        Main.rand.NextBool() ? BrainAIState.Phase2Idle : BrainAIState.Bloodletting,
-                                        quickChoice ? BrainAIState.IllusionDash : BrainAIState.SanguineScythes,
-                                        BrainAIState.IllusionTrick
-                                ];
-                            }
-
-                            AIState = availableAttacks[0];
-                            availableAttacks.RemoveAt(0);
-                            PreviousAttack = AIState;
-
-                            if (AIState == BrainAIState.SanguineScythes)
-                            {
-                                Time = -31;
-                                BoCAfterImages = [];
-                            }
-                        }
-
-                        NPC.netUpdate = true;
+                        ForcedIllusionAttack = true;
+                        AIState = BrainAIState.IllusionTrick;
+                        PreviousAttack = AIState;
                     }
-                    #endregion
+                    else
+                    {
+                        if (availableAttacks.Count == 0)
+                        {
+                            bool quickChoice = Main.rand.NextBool();
+                            availableAttacks = [
+                                BrainAIState.Bloodletting,
+                                    quickChoice ? BrainAIState.SanguineScythes : BrainAIState.IllusionDash,
+                                    Main.rand.NextBool() ? BrainAIState.Phase2Idle : BrainAIState.Bloodletting,
+                                    quickChoice ? BrainAIState.IllusionDash : BrainAIState.SanguineScythes,
+                                    BrainAIState.IllusionTrick
+                            ];
+                        }
+
+                        AIState = availableAttacks[0];
+                        availableAttacks.RemoveAt(0);
+                        PreviousAttack = AIState;
+
+                        if (AIState == BrainAIState.SanguineScythes)
+                        {
+                            Time = -31;
+                            BoCAfterImages = [];
+                        }
+                    }
+
+                    NPC.netUpdate = true;
                 }
+                #endregion
             }
 
             NPC.Opacity = 1 - (TeleportTime / (TeleportDuration / 2f));
@@ -1996,71 +1965,89 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         {
             TeleportDuration = SanguineTeleportDuration;
 
-            Vector2 endPoint = AttackPosition;
+            if (UpdateTeleport(chasing: false))
+            {
+                AttackCounter++;
 
-            if (Time < (TeleportDuration / 2f))
-            {
-                if (Time % 4 == 0)
+                if (AttackCounter <= SanguineTeleportCount)
                 {
-                    SpawnTeleportAfterImage(NPC.Center, endPoint, (int)((TeleportDuration * 0.75f) - Time));
+                    SoundEngine.PlaySound(BloodExplosion, NPC.Center);
+
+                    for (int i = 0; i < SanguineScytheCount; i++)
+                    {
+                        float initalSpeed = 16f;
+                        if (CalamityWorld.death && i % 2 == 0)
+                            initalSpeed /= 2f;
+
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.UnitX.RotatedBy(MathHelper.TwoPi / SanguineScytheCount * i) * initalSpeed, ModContent.ProjectileType<BloodScythe>(), BloodScytheDamage, 0.5f);
+                    }
                 }
-                TeleportTime++;
-            }
-            else if (Time == (TeleportDuration / 2f) && !AttackFlag)
-            {
-                Vector2 start = NPC.Center;
-                NPC.Center = endPoint;
-                DisableMultiplayerSmoothing = true;
-                AttackFlag = true;
+
+                Vector2 direction;
+                if (AttackCounter < SanguineTeleportCount)
+                {
+                    direction = Main.rand.NextFloat(0f, MathHelper.TwoPi).ToRotationVector2();
+                    AttackPosition = Target.Center + (direction * SanguineTeleportDistance);
+                }
+                else
+                {
+                    direction = Vector2.UnitX * (Main.rand.NextBool() ? -1 : 1);
+                    AttackPosition = Target.Center + (direction * SanguineFinalTeleportOffset.X) + (Vector2.UnitY * -SanguineFinalTeleportOffset.Y);
+                }
+
                 NPC.netUpdate = true;
-            }
-            else
-            {
-                TeleportTime--;
-                if (TeleportTime < 0)
-                {
-                    TeleportTime = 0;
-                    Time = -1;
-                    AttackFlag = false;
-                    AttackCounter++;
 
-                    if (AttackCounter <= SanguineTeleportCount)
-                    {
-                        SoundEngine.PlaySound(BloodExplosion, NPC.Center);
-
-                        for (int i = 0; i < SanguineScytheCount; i++)
-                        {
-                            float initalSpeed = 16f;
-                            if (CalamityWorld.death && i % 2 == 0)
-                                initalSpeed /= 2f;
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                                Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.UnitX.RotatedBy(MathHelper.TwoPi / SanguineScytheCount * i) * initalSpeed, ModContent.ProjectileType<BloodScythe>(), BloodScytheDamage, 0.5f);
-                        }
-                    }
-
-                    Vector2 direction;
-                    if (AttackCounter < SanguineTeleportCount)
-                    {
-                        direction = Main.rand.NextFloat(0f, MathHelper.TwoPi).ToRotationVector2();
-                        AttackPosition = Target.Center + (direction * SanguineTeleportDistance);
-                    }
-                    else
-                    {
-                        direction = Vector2.UnitX * (Main.rand.NextBool() ? -1 : 1);
-                        AttackPosition = Target.Center + (direction * SanguineFinalTeleportOffset.X) + (Vector2.UnitY * -SanguineFinalTeleportOffset.Y);
-                    }
-
-                    NPC.netUpdate = true;
-
-                    BoCAfterImages = [];
-                    NPC.Opacity = 1f;
-                }
+                BoCAfterImages = [];
+                NPC.Opacity = 1f;
             }
 
             NPC.Opacity = 1 - (TeleportTime / (TeleportDuration / 2f));
         }
         #endregion
+    }
+
+    // Keep absolute chase timings and zero-based scythe timings separate: adding
+    // an offset to a shared expression would change the original float operations.
+    private bool UpdateTeleport(bool chasing)
+    {
+        Vector2 endPoint = AttackPosition;
+        if (chasing)
+            NPC.velocity = Vector2.Zero;
+
+        if (chasing ? Time < ChaseTime + (TeleportDuration / 2f) : Time < (TeleportDuration / 2f))
+        {
+            if (Time % 4 == 0)
+            {
+                SpawnTeleportAfterImage(NPC.Center, endPoint, chasing ? (int)(ChaseTime + (TeleportDuration * 0.75f) - Time) : (int)((TeleportDuration * 0.75f) - Time));
+            }
+            TeleportTime++;
+        }
+        else if ((chasing ? Time == ChaseTime + (TeleportDuration / 2f) : Time == (TeleportDuration / 2f)) && !AttackFlag)
+        {
+            if (!chasing)
+            {
+                Vector2 start = NPC.Center;
+            }
+            NPC.Center = endPoint;
+            if (chasing)
+                NPC.damage = NPC.defDamage;
+            DisableMultiplayerSmoothing = true;
+            AttackFlag = true;
+            NPC.netUpdate = true;
+        }
+        else
+        {
+            TeleportTime--;
+            if (TeleportTime < 0)
+            {
+                TeleportTime = 0;
+                Time = -1;
+                AttackFlag = false;
+                return true;
+            }
+        }
+        return false;
     }
 
     //Unused
@@ -2136,12 +2123,7 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
                 Vector2 fromTarget = (NPC.Center - Target.Center).SafeNormalize(Vector2.UnitX);
                 Vector2 goalPos = Target.Center + (fromTarget * dist) - (Vector2.UnitY * 32);
-                if (NPC.DistanceSQ(goalPos) <= 2048)
-                    NPC.velocity *= 0.9f;
-                else if (NPC.velocity.LengthSquared() < 16f) //7.5^2
-                    NPC.velocity += NPC.DirectionTo(goalPos).SafeNormalize(Vector2.Zero) * 0.1f;
-                else
-                    NPC.velocity = NPC.DirectionTo(goalPos).SafeNormalize(Vector2.Zero) * 4f;
+                MoveTowardsHoverPosition(goalPos, 0.1f, 4f, idle: false, swinging: false);
             }
             #endregion
 

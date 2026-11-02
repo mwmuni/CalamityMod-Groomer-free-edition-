@@ -421,48 +421,8 @@ namespace CalamityMod.NPCs.Bumblebirb
                                     if (Main.netMode != NetmodeID.MultiplayerClient)
                                     {
                                         int totalProjectiles = 40;
-                                        float radians = MathHelper.TwoPi / totalProjectiles;
                                         int distance = 800;
-                                        bool spawnRight = player.velocity.X > 0f;
-                                        for (int i = 0; i < totalProjectiles; i++)
-                                        {
-                                            if (Main.getGoodWorld)
-                                            {
-                                                if (i >= (int)(totalProjectiles * 0.125) && i <= (int)(totalProjectiles * 0.375))
-                                                {
-                                                    Vector2 spawnVector = player.Center + Vector2.Normalize(new Vector2(0f, -featherVelocity).RotatedBy(radians * i)) * distance;
-                                                    Vector2 velocity = Vector2.Normalize(player.Center - spawnVector) * featherVelocity;
-                                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, FeatherDamage, 0f, Main.myPlayer);
-                                                }
-                                                if (i >= (int)(totalProjectiles * 0.625) && i <= (int)(totalProjectiles * 0.875))
-                                                {
-                                                    Vector2 spawnVector = player.Center + Vector2.Normalize(new Vector2(0f, -featherVelocity).RotatedBy(radians * i)) * distance;
-                                                    Vector2 velocity = Vector2.Normalize(player.Center - spawnVector) * featherVelocity;
-                                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, FeatherDamage, 0f, Main.myPlayer);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (spawnRight)
-                                                {
-                                                    if (i >= (int)(totalProjectiles * 0.125) && i <= (int)(totalProjectiles * 0.375))
-                                                    {
-                                                        Vector2 spawnVector = player.Center + Vector2.Normalize(new Vector2(0f, -featherVelocity).RotatedBy(radians * i)) * distance;
-                                                        Vector2 velocity = Vector2.Normalize(player.Center - spawnVector) * featherVelocity;
-                                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, FeatherDamage, 0f, Main.myPlayer);
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (i >= (int)(totalProjectiles * 0.625) && i <= (int)(totalProjectiles * 0.875))
-                                                    {
-                                                        Vector2 spawnVector = player.Center + Vector2.Normalize(new Vector2(0f, -featherVelocity).RotatedBy(radians * i)) * distance;
-                                                        Vector2 velocity = Vector2.Normalize(player.Center - spawnVector) * featherVelocity;
-                                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, FeatherDamage, 0f, Main.myPlayer);
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        SummonFeathers(player, featherVelocity, type, totalProjectiles, distance, true);
                                     }
                                 }
                                 else
@@ -496,34 +456,12 @@ namespace CalamityMod.NPCs.Bumblebirb
                                         if (Main.getGoodWorld)
                                             totalProjectiles *= 2;
 
-                                        float radians = MathHelper.TwoPi / totalProjectiles;
                                         int distance = phase2 ? 1200 : 1320;
 
                                         if (Main.getGoodWorld)
                                             distance *= 2;
 
-                                        bool spawnRight = player.velocity.X > 0f;
-                                        for (int i = 0; i < totalProjectiles; i++)
-                                        {
-                                            if (spawnRight)
-                                            {
-                                                if (i >= totalProjectiles / 2)
-                                                    break;
-
-                                                Vector2 spawnVector = player.Center + Vector2.Normalize(new Vector2(0f, -featherVelocity).RotatedBy(radians * i)) * distance;
-                                                Vector2 velocity = Vector2.Normalize(player.Center - spawnVector) * featherVelocity;
-                                                Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, FeatherDamage, 0f, Main.myPlayer);
-                                            }
-                                            else
-                                            {
-                                                if (i >= totalProjectiles / 2)
-                                                {
-                                                    Vector2 spawnVector = player.Center + Vector2.Normalize(new Vector2(0f, -featherVelocity).RotatedBy(radians * i)) * distance;
-                                                    Vector2 velocity = Vector2.Normalize(player.Center - spawnVector) * featherVelocity;
-                                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, FeatherDamage, 0f, Main.myPlayer);
-                                                }
-                                            }
-                                        }
+                                        SummonFeathers(player, featherVelocity, type, totalProjectiles, distance, false);
                                     }
                                 }
                                 else
@@ -862,6 +800,37 @@ namespace CalamityMod.NPCs.Bumblebirb
                     NPC.ai[0] = 0f;
                     NPC.ai[1] = 0f;
                     NPC.ForceNetUpdate(false);
+                }
+            }
+        }
+
+        private void SummonFeathers(Player player, float featherVelocity, int type, int totalProjectiles, int distance, bool narrowArcs)
+        {
+            float radians = MathHelper.TwoPi / totalProjectiles;
+            bool spawnRight = player.velocity.X > 0f;
+            for (int i = 0; i < totalProjectiles; i++)
+            {
+                bool spawnFeather;
+                if (narrowArcs)
+                {
+                    // The two arcs are disjoint for the fixed 40-projectile narrow ring.
+                    bool rightArc = i >= (int)(totalProjectiles * 0.125) && i <= (int)(totalProjectiles * 0.375);
+                    bool leftArc = i >= (int)(totalProjectiles * 0.625) && i <= (int)(totalProjectiles * 0.875);
+                    spawnFeather = Main.getGoodWorld ? rightArc || leftArc : spawnRight ? rightArc : leftArc;
+                }
+                else
+                {
+                    if (spawnRight && i >= totalProjectiles / 2)
+                        break;
+
+                    spawnFeather = spawnRight || i >= totalProjectiles / 2;
+                }
+
+                if (spawnFeather)
+                {
+                    Vector2 spawnVector = player.Center + Vector2.Normalize(new Vector2(0f, -featherVelocity).RotatedBy(radians * i)) * distance;
+                    Vector2 velocity = Vector2.Normalize(player.Center - spawnVector) * featherVelocity;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, FeatherDamage, 0f, Main.myPlayer);
                 }
             }
         }

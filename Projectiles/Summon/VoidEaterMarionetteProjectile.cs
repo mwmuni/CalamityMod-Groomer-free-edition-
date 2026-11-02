@@ -132,20 +132,7 @@ namespace CalamityMod.Projectiles.Summon
             #region Update Segment Count
             if (MinionSlotsToAdd > 0)
             {
-                float minionSlotsAvaliable = Owner.maxMinions;
-                foreach (var item in Main.ActiveProjectiles)
-                {
-                    if (item.owner == Projectile.owner)
-                        minionSlotsAvaliable -= item.minionSlots;
-                }
-                while (minionSlotsAvaliable >= 1 && MinionSlotsToAdd > 0)
-                {
-
-                    Projectile.minionSlots++;
-                    minionSlotsAvaliable--;
-                    MinionSlotsToAdd--;
-                }
-                MinionSlotsToAdd = 0;
+                Projectile.AllocateMinionSlots(Owner, 0, false);
             }
 
             bool UpdatedSegmentCount = false;

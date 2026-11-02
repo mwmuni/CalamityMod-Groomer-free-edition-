@@ -12,6 +12,68 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
         protected abstract string CannonGorePrefix { get; }
         protected virtual bool HasThirdCannonGore => false;
 
+        protected static (bool nerfedAttacks, bool mechaMayhem, bool lastMechAlive, bool shouldGetBuffedByBerserkPhase) GetCannonPhaseState(float lifeRatio, float defaultLifeRatio, bool checkMechaMayhem = false)
+        {
+            int otherExoMechsAlive = 0;
+            bool exoWormAlive = false;
+            bool exoTwinsAlive = false;
+            if (CalamityGlobalNPC.draedonExoMechWorm != -1)
+            {
+                if (Main.npc[CalamityGlobalNPC.draedonExoMechWorm].active)
+                {
+                    otherExoMechsAlive++;
+                    exoWormAlive = true;
+                }
+            }
+            if (CalamityGlobalNPC.draedonExoMechTwinGreen != -1)
+            {
+                if (Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].active)
+                {
+                    otherExoMechsAlive++;
+                    exoTwinsAlive = true;
+                }
+            }
+
+            bool nerfedAttacks = false;
+            if (exoTwinsAlive)
+                nerfedAttacks = Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].Calamity().newAI[1] != (float)Apollo.Apollo.SecondaryPhase.PassiveAndImmune;
+            // Only the laser cannon reads the worm's passive state, at this point in its AI.
+            bool mechaMayhem = checkMechaMayhem && nerfedAttacks && exoWormAlive && Main.npc[CalamityGlobalNPC.draedonExoMechWorm].Calamity().newAI[1] != (float)Thanatos.ThanatosHead.SecondaryPhase.PassiveAndImmune;
+
+            bool berserk = lifeRatio < 0.4f || (otherExoMechsAlive == 0 && lifeRatio < 0.7f);
+            bool lastMechAlive = berserk && otherExoMechsAlive == 0;
+
+            float exoWormLifeRatio = defaultLifeRatio;
+            float exoTwinsLifeRatio = defaultLifeRatio;
+            if (exoWormAlive)
+                exoWormLifeRatio = Main.npc[CalamityGlobalNPC.draedonExoMechWorm].life / (float)Main.npc[CalamityGlobalNPC.draedonExoMechWorm].lifeMax;
+            if (exoTwinsAlive)
+                exoTwinsLifeRatio = Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].life / (float)Main.npc[CalamityGlobalNPC.draedonExoMechTwinGreen].lifeMax;
+
+            bool otherMechIsBerserk = exoWormLifeRatio < 0.4f || exoTwinsLifeRatio < 0.4f;
+            bool shouldGetBuffedByBerserkPhase = berserk && !otherMechIsBerserk;
+            return (nerfedAttacks, mechaMayhem, lastMechAlive, shouldGetBuffedByBerserkPhase);
+        }
+
+        protected bool UpdateCannonOpacity(CalamityGlobalNPC calamityGlobalNPC_Body)
+        {
+            bool invisiblePhase = calamityGlobalNPC_Body.newAI[1] == (float)AresBody.SecondaryPhase.PassiveAndImmune;
+            NPC.dontTakeDamage = invisiblePhase || Main.npc[(int)NPC.ai[2]].dontTakeDamage;
+            if (!invisiblePhase)
+            {
+                NPC.Opacity += 0.2f;
+                if (NPC.Opacity > 1f)
+                    NPC.Opacity = 1f;
+            }
+            else
+            {
+                NPC.Opacity -= 0.05f;
+                if (NPC.Opacity < 0f)
+                    NPC.Opacity = 0f;
+            }
+            return invisiblePhase;
+        }
+
         public override void HitEffect(NPC.HitInfo hit)
         {
             for (int k = 0; k < 3; k++)

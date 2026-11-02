@@ -143,40 +143,7 @@ namespace CalamityMod.CalPlayer
             if (ursaSergeant && target.life <= 0 && target.realLife == -1)
                 ursaSergeantCooldown = (int)MathHelper.Clamp(ursaSergeantCooldown - 180, 0, 300);
 
-            if (generalBandCooldown == 0)
-            {
-                int cooldown = 0;
-                if (bGlassBand)
-                {
-                    int damage = (int)Player.GetBestClassDamage().ApplyTo(BlackGlassBand.damage);
-                    Vector2 launchVel = Utils.DirectionTo(Player.Center, target.Center) * 6;
-                    Projectile.NewProjectile(source, target.Center, Vector2.Zero, ProjectileType<BlackGlassBandProjectile>(), damage, -1, Player.whoAmI, target.whoAmI, launchVel.X, launchVel.Y);
-                    if (cooldown < BlackGlassBand.cooldown)
-                        cooldown = BlackGlassBand.cooldown;
-                }
-                if (protolithBangle && item.DamageType.CountsAsClass(DamageClass.Ranged))
-                {
-                    int damage = (int)Player.GetBestClassDamage().ApplyTo(ProtolithBangle.damage);
-                    Projectile band = Projectile.NewProjectileDirect(source, target.Center, Vector2.Zero, ProjectileType<ProtolithBangleProjectile>(), damage, -1, Player.whoAmI, target.whoAmI);
-                    band.DamageType = DamageClass.Ranged;
-                    if (cooldown < ProtolithBangle.cooldown)
-                        cooldown = ProtolithBangle.cooldown;
-                }
-                if (batholithBangle && item.DamageType.CountsAsClass(DamageClass.Magic))
-                {
-                    int damage = (int)Player.GetBestClassDamage().ApplyTo(BatholithBangle.damage);
-                    Projectile band = Projectile.NewProjectileDirect(source, target.Center, Vector2.Zero, ProjectileType<BatholithBangleProjectile>(), damage, -1, Player.whoAmI, target.whoAmI);
-                    band.DamageType = DamageClass.Magic;
-                    if (cooldown < BatholithBangle.cooldown)
-                        cooldown = BatholithBangle.cooldown;
-                }
-
-                if (cooldown > 0) // Check if a band effect went off, and apply the highest cooldown
-                {
-                    generalBandCooldown = cooldown;
-                    Player.AddCooldown(GenericBandCooldown.ID, cooldown);
-                }
-            }
+            ApplyOnHitBands(item, static attack => attack.DamageType, target, source);
 
             if (luxorsGift)
                 luxorHit = true;
@@ -356,40 +323,7 @@ namespace CalamityMod.CalPlayer
             if (ursaSergeant && target.life <= 0 && target.realLife == -1)
                 ursaSergeantCooldown = (int)MathHelper.Clamp(ursaSergeantCooldown - UrsaSergeant.CooldownReducedPerKill, 0, UrsaSergeant.MaxCooldown);
 
-            if (generalBandCooldown == 0)
-            {
-                int cooldown = 0;
-                if (bGlassBand) 
-                {
-                    int damage = (int)Player.GetBestClassDamage().ApplyTo(BlackGlassBand.damage);
-                    Vector2 launchVel = Utils.DirectionTo(Player.Center, target.Center) * 6;
-                    Projectile.NewProjectile(source, target.Center, Vector2.Zero, ProjectileType<BlackGlassBandProjectile>(), damage, -1, Player.whoAmI, target.whoAmI, launchVel.X, launchVel.Y);
-                    if (cooldown < BlackGlassBand.cooldown)
-                        cooldown = BlackGlassBand.cooldown;
-                }
-                if (protolithBangle && proj.DamageType.CountsAsClass(DamageClass.Ranged))
-                {
-                    int damage = (int)Player.GetBestClassDamage().ApplyTo(ProtolithBangle.damage);
-                    Projectile band = Projectile.NewProjectileDirect(source, target.Center, Vector2.Zero, ProjectileType<ProtolithBangleProjectile>(), damage, -1, Player.whoAmI, target.whoAmI);
-                    band.DamageType = DamageClass.Ranged;
-                    if (cooldown < ProtolithBangle.cooldown)
-                        cooldown = ProtolithBangle.cooldown;
-                }
-                if (batholithBangle && proj.DamageType.CountsAsClass(DamageClass.Magic))
-                {
-                    int damage = (int)Player.GetBestClassDamage().ApplyTo(BatholithBangle.damage);
-                    Projectile band = Projectile.NewProjectileDirect(source, target.Center, Vector2.Zero, ProjectileType<BatholithBangleProjectile>(), damage, -1, Player.whoAmI, target.whoAmI);
-                    band.DamageType = DamageClass.Magic;
-                    if (cooldown < BatholithBangle.cooldown)
-                        cooldown = BatholithBangle.cooldown;
-                }
-
-                if (cooldown > 0) // Check if a band effect went off, and apply the highest cooldown
-                {
-                    generalBandCooldown = cooldown;
-                    Player.AddCooldown(GenericBandCooldown.ID, cooldown);
-                }
-            }
+            ApplyOnHitBands(proj, static attack => attack.DamageType, target, source);
 
             if (luxorsGift && proj.type != ProjectileType<LuxorsGiftMelee>() && proj.type != ProjectileType<LuxorsGiftRanged>() && proj.type != ProjectileType<LuxorsGiftMagic>() && proj.type != ProjectileType<LuxorsGiftSummon>() && proj.type != ProjectileType<LuxorsGiftRogue>() && proj.type != ProjectileType<LuxorsGiftClassless>())
                 luxorHit = true;
@@ -1244,6 +1178,44 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region Lifesteal
+        private void ApplyOnHitBands<TAttack>(TAttack attack, Func<TAttack, DamageClass> getDamageType, NPC target, IEntitySource source)
+        {
+            if (generalBandCooldown == 0)
+            {
+                int cooldown = 0;
+                if (bGlassBand)
+                {
+                    int damage = (int)Player.GetBestClassDamage().ApplyTo(BlackGlassBand.damage);
+                    Vector2 launchVel = Utils.DirectionTo(Player.Center, target.Center) * 6;
+                    Projectile.NewProjectile(source, target.Center, Vector2.Zero, ProjectileType<BlackGlassBandProjectile>(), damage, -1, Player.whoAmI, target.whoAmI, launchVel.X, launchVel.Y);
+                    if (cooldown < BlackGlassBand.cooldown)
+                        cooldown = BlackGlassBand.cooldown;
+                }
+                if (protolithBangle && getDamageType(attack).CountsAsClass(DamageClass.Ranged))
+                {
+                    int damage = (int)Player.GetBestClassDamage().ApplyTo(ProtolithBangle.damage);
+                    Projectile band = Projectile.NewProjectileDirect(source, target.Center, Vector2.Zero, ProjectileType<ProtolithBangleProjectile>(), damage, -1, Player.whoAmI, target.whoAmI);
+                    band.DamageType = DamageClass.Ranged;
+                    if (cooldown < ProtolithBangle.cooldown)
+                        cooldown = ProtolithBangle.cooldown;
+                }
+                if (batholithBangle && getDamageType(attack).CountsAsClass(DamageClass.Magic))
+                {
+                    int damage = (int)Player.GetBestClassDamage().ApplyTo(BatholithBangle.damage);
+                    Projectile band = Projectile.NewProjectileDirect(source, target.Center, Vector2.Zero, ProjectileType<BatholithBangleProjectile>(), damage, -1, Player.whoAmI, target.whoAmI);
+                    band.DamageType = DamageClass.Magic;
+                    if (cooldown < BatholithBangle.cooldown)
+                        cooldown = BatholithBangle.cooldown;
+                }
+
+                if (cooldown > 0)
+                {
+                    generalBandCooldown = cooldown;
+                    Player.AddCooldown(GenericBandCooldown.ID, cooldown);
+                }
+            }
+        }
+
         private void ApplySharedLifesteal(NPC target, bool checkMoonLeech)
         {
             if (bloodflareSet && (!checkMoonLeech || !Player.moonLeech))

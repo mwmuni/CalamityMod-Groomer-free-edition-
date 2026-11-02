@@ -169,109 +169,42 @@ namespace CalamityMod.Systems
         #endregion
 
         #region Tile Variation Helpers
-        public static int GetVariation4x4_012_Low0(int i, int j)
+        // Rows are X, columns are Y, matching the original nested switches.
+        private static readonly byte[,] Variation4x4_012 =
         {
-            int xRel = i & 0b0011;
-            int yRel = j & 0b0011;
-            var output = xRel switch
-            {
-                0 => (yRel switch
-                {
-                    0 => 0,
-                    1 => 2,
-                    2 => 1,
-                    _ => 2
-                }),
-                1 => (yRel switch
-                {
-                    0 => 2,
-                    1 => 0,
-                    2 => 2,
-                    _ => 2
-                }),
-                2 => (yRel switch
-                {
-                    0 => 2,
-                    1 => 0,
-                    2 => 1,
-                    _ => 2
-                }),
-                _ => (yRel switch
-                {
-                    0 => 1,
-                    1 => 2,
-                    2 => 0,
-                    _ => 2
-                }),
-            };
-            return output;
-        }
+            { 0, 2, 1, 2 },
+            { 2, 0, 2, 2 },
+            { 2, 0, 1, 2 },
+            { 1, 2, 0, 2 }
+        };
+
+        private static readonly byte[,] Variation4x4_01 =
+        {
+            { 0, 0, 1, 1 },
+            { 1, 0, 1, 1 },
+            { 1, 0, 0, 1 },
+            { 0, 1, 0, 1 }
+        };
+
+        private static readonly byte[,] Variation3x3_01234 =
+        {
+            { 0, 1, 2 },
+            { 2, 3, 4 },
+            { 4, 0, 1 }
+        };
+
+        public static int GetVariation4x4_012_Low0(int i, int j)
+            => Variation4x4_012[i & 0b0011, j & 0b0011];
 
         public static int GetVariation4x4_01_Low0(int i, int j)
-        {
-            int xRel = i & 0b0011;
-            int yRel = j & 0b0011;
-            var output = xRel switch
-            {
-                0 => (yRel switch
-                {
-                    0 => 0,
-                    1 => 0,
-                    2 => 1,
-                    _ => 1
-                }),
-                1 => (yRel switch
-                {
-                    0 => 1,
-                    1 => 0,
-                    2 => 1,
-                    _ => 1
-                }),
-                2 => (yRel switch
-                {
-                    0 => 1,
-                    1 => 0,
-                    2 => 0,
-                    _ => 1
-                }),
-                _ => (yRel switch
-                {
-                    0 => 0,
-                    1 => 1,
-                    2 => 0,
-                    _ => 1
-                }),
-            };
-            return output;
-        }
+            => Variation4x4_01[i & 0b0011, j & 0b0011];
 
         public static int GetVariation3x3_01234_Low3(int i, int j)
-        {
-            int xRel = i % 3;
-            int yRel = j % 3;
-            var output = xRel switch
-            {
-                0 => (yRel switch
-                {
-                    0 => 0,
-                    1 => 1,
-                    _ => 2
-                }),
-                1 => (yRel switch
-                {
-                    0 => 2,
-                    1 => 3,
-                    _ => 4
-                }),
-                _ => (yRel switch
-                {
-                    0 => 4,
-                    1 => 0,
-                    _ => 1
-                }),
-            };
-            return output;
-        }
+            // Negative remainders originally selected the default (last) switch arm.
+            => Variation3x3_01234[VariationIndex3(i), VariationIndex3(j)];
+
+        private static int VariationIndex3(int coordinate)
+            => coordinate % 3 is 0 or 1 ? coordinate % 3 : 2;
         #endregion
 
         #region Framing Helpers
@@ -535,217 +468,45 @@ namespace CalamityMod.Systems
                 4 - 5
                 6 3 7
             */
-            #region L States
-            if (!up && down && !left && right && !downRight)
+            // Same adjacency order as CompactFraming; only the atlas coordinates differ.
+            (int X, int Y)? frame = (up, down, left, right, upLeft, upRight, downLeft, downRight) switch
             {
-                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrameX54) : (13 * 18));
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (!up && down && left && !right && !downLeft)
-            {
-                tile.TileFrameX = (short)(brimstone ? (18 * 18 + randomFrameX54) : (15 * 18));
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (up && !down && !left && right && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrameX54) : (13 * 18));
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (up && !down && left && !right && !upLeft)
-            {
-                tile.TileFrameX = (short)(brimstone ? (18 * 18 + randomFrameX54) : (15 * 18));
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            #endregion
+                (false, true, false, true, _, _, _, false) => (brimstone ? 16 * 18 + randomFrameX54 : 13 * 18, 0),
+                (false, true, true, false, _, _, false, _) => (brimstone ? 18 * 18 + randomFrameX54 : 15 * 18, 0),
+                (true, false, false, true, _, false, _, _) => (brimstone ? 16 * 18 + randomFrameX54 : 13 * 18, 2 * 18),
+                (true, false, true, false, false, _, _, _) => (brimstone ? 18 * 18 + randomFrameX54 : 15 * 18, 2 * 18),
+                (false, true, true, true, _, _, false, false) => (brimstone ? 17 * 18 + randomFrameX54 : 14 * 18, 0),
+                (true, false, true, true, false, false, _, _) => (brimstone ? 17 * 18 + randomFrameX54 : 14 * 18, 2 * 18),
+                (true, true, false, true, _, false, _, false) => (brimstone ? 16 * 18 + randomFrameX54 : 13 * 18, 18),
+                (true, true, true, false, false, _, false, _) => (brimstone ? 18 * 18 + randomFrameX54 : 15 * 18, 18),
+                (true, true, true, true, false, false, false, false) => (brimstone ? 17 * 18 + randomFrameX54 : 14 * 18, 18),
 
-            #region T States
-            if (!up && down && left && right && !downLeft && !downRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrameX54) : (14 * 18));
-                tile.TileFrameY = 0;
-                return false;
-            }
-            if (up && !down && left && right && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrameX54) : (14 * 18));
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (up && down && !left && right && !downRight && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrameX54) : (13 * 18));
-                tile.TileFrameY = 18;
-                return false;
-            }
-            if (up && down && left && !right && !downLeft && !upLeft)
-            {
-                tile.TileFrameX = (short)(brimstone ? (18 * 18 + randomFrameX54) : (15 * 18));
-                tile.TileFrameY = 18;
-                return false;
-            }
-            #endregion
+                (true, true, true, true, true, true, false, true) => (brimstone ? 14 * 18 : 15 * 18, brimstone ? 5 * 18 + randomFrame * 36 : 3 * 18),
+                (true, true, true, true, true, true, true, false) => (brimstone ? 13 * 18 : 14 * 18, brimstone ? 5 * 18 + randomFrame * 36 : 3 * 18),
+                (true, true, true, true, false, true, true, true) => (brimstone ? 14 * 18 : 15 * 18, brimstone ? 6 * 18 + randomFrame * 36 : 4 * 18),
+                (true, true, true, true, true, false, true, true) => (brimstone ? 13 * 18 : 14 * 18, brimstone ? 6 * 18 + randomFrame * 36 : 4 * 18),
+                (true, true, true, true, true, true, false, false) => (6 * 18 + randomFrame * 18, 2 * 18),
+                (true, true, true, true, false, false, true, true) => (6 * 18 + randomFrame * 18, 1 * 18),
+                (true, true, true, true, false, true, false, true) => (10 * 18, randomFrame * 18),
+                (true, true, true, true, true, false, true, false) => (11 * 18, randomFrame * 18),
+                (true, true, true, true, true, false, false, true) => (brimstone ? 10 * 18 + randomFrame * 18 : 16 * 18, 4 * 18),
+                (true, true, true, true, false, true, true, false) => (brimstone ? 13 * 18 + randomFrame * 18 : 17 * 18, 4 * 18),
+                (true, true, true, true, false, true, false, false) => (brimstone ? 15 * 18 : 12 * 18, brimstone ? 6 * 18 + randomFrame * 36 : 4 * 18),
+                (true, true, true, true, false, false, false, true) => (brimstone ? 15 * 18 : 12 * 18, brimstone ? 5 * 18 + randomFrame * 36 : 3 * 18),
+                (true, true, true, true, true, false, false, false) => (brimstone ? 16 * 18 : 13 * 18, brimstone ? 6 * 18 + randomFrame * 36 : 4 * 18),
+                (true, true, true, true, false, false, true, false) => (brimstone ? 16 * 18 : 13 * 18, brimstone ? 5 * 18 + randomFrame * 36 : 3 * 18),
 
-            #region X State
-            if (up && down && left && right && !downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrameX54) : (14 * 18));
-                tile.TileFrameY = 18;
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x1
-            if (up && down && left && right && !downLeft && downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (14 * 18) : (15 * 18));
-                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (13 * 18) : (14 * 18));
-                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
-                return false;
-            }
-            if (up && down && left && right && downLeft && downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (14 * 18) : (15 * 18));
-                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
-                return false;
-            }
-            if (up && down && left && right && downLeft && downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (13 * 18) : (14 * 18));
-                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x2 (same side)
-            if (up && down && left && right && !downLeft && !downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(6 * 18 + randomFrame * 18);
-                tile.TileFrameY = 2 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(6 * 18 + randomFrame * 18);
-                tile.TileFrameY = 1 * 18;
-                return false;
-            }
-            if (up && down && left && right && !downLeft && downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 10 * 18;
-                tile.TileFrameY = (short)(randomFrame * 18);
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 11 * 18;
-                tile.TileFrameY = (short)(randomFrame * 18);
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x2 (opposite corners)
-            if (up && down && left && right && !downLeft && downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (10 * 18 + randomFrame * 18) : (16 * 18));
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (13 * 18 + randomFrame * 18) : (17 * 18));
-                tile.TileFrameY = 4 * 18;
-                return false;
-            }
-            #endregion
-
-            #region Inner Corner x3
-            if (up && down && left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (15 * 18) : (12 * 18));
-                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
-                return false;
-            }
-            if (up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (15 * 18) : (12 * 18));
-                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
-                return false;
-            }
-            if (up && down && left && right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (16 * 18) : (13 * 18));
-                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (4 * 18));
-                return false;
-            }
-            if (up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (16 * 18) : (13 * 18));
-                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (3 * 18));
-                return false;
-            }
-            #endregion
-
-            #region Corner and Side
-            if (!up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrame * 36) : (17 * 18));
-                tile.TileFrameY = (short)(brimstone ? (3 * 18) : (2 * 18));
-                return false;
-            }
-            if (!up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrame * 36) : (16 * 18));
-                tile.TileFrameY = (short)(brimstone ? (3 * 18) : (2 * 18));
-                return false;
-            }
-            if (up && !down && left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (17 * 18 + randomFrame * 36) : (17 * 18));
-                tile.TileFrameY = (short)(brimstone ? (4 * 18) : (3 * 18));
-                return false;
-            }
-            if (up && !down && left && right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (16 * 18 + randomFrame * 36) : (16 * 18));
-                tile.TileFrameY = (short)(brimstone ? (4 * 18) : (3 * 18));
-                return false;
-            }
-            if (up && down && !left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (17 * 18) : (16 * 18));
-                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (0));
-                return false;
-            }
-            if (up && down && !left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (17 * 18) : (16 * 18));
-                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (18));
-                return false;
-            }
-            if (up && down && left && !right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (18 * 18) : (17 * 18));
-                tile.TileFrameY = (short)(brimstone ? (5 * 18 + randomFrame * 36) : (0));
-                return false;
-            }
-            if (up && down && left && !right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = (short)(brimstone ? (18 * 18) : (17 * 18));
-                tile.TileFrameY = (short)(brimstone ? (6 * 18 + randomFrame * 36) : (18));
-                return false;
-            }
-            #endregion
-
-            return true;
+                (false, true, true, true, false, false, false, true) => (brimstone ? 17 * 18 + randomFrame * 36 : 17 * 18, brimstone ? 3 * 18 : 2 * 18),
+                (false, true, true, true, false, false, true, false) => (brimstone ? 16 * 18 + randomFrame * 36 : 16 * 18, brimstone ? 3 * 18 : 2 * 18),
+                (true, false, true, true, false, true, false, false) => (brimstone ? 17 * 18 + randomFrame * 36 : 17 * 18, brimstone ? 4 * 18 : 3 * 18),
+                (true, false, true, true, true, false, false, false) => (brimstone ? 16 * 18 + randomFrame * 36 : 16 * 18, brimstone ? 4 * 18 : 3 * 18),
+                (true, true, false, true, false, true, false, false) => (brimstone ? 17 * 18 : 16 * 18, brimstone ? 5 * 18 + randomFrame * 36 : 0),
+                (true, true, false, true, false, false, false, true) => (brimstone ? 17 * 18 : 16 * 18, brimstone ? 6 * 18 + randomFrame * 36 : 18),
+                (true, true, true, false, true, false, false, false) => (brimstone ? 18 * 18 : 17 * 18, brimstone ? 5 * 18 + randomFrame * 36 : 0),
+                (true, true, true, false, false, false, true, false) => (brimstone ? 18 * 18 : 17 * 18, brimstone ? 6 * 18 + randomFrame * 36 : 18),
+                _ => null
+            };
+            return !ApplyFrame(tile, frame);
         }
 
         internal static void CompactFraming(int x, int y, bool resetFrame = true)
@@ -771,329 +532,72 @@ namespace CalamityMod.Systems
 
             GetAdjacentTiles(x, y, out var up, out var down, out var left, out var right, out var upLeft, out var upRight, out var downLeft, out var downRight);
 
-            #region Middle State
-            if (up && down && left && right && upLeft && upRight && downLeft && downRight)
+            // Ordered adjacency table: up, down, left, right, then the four diagonals.
+            // A missing match leaves both existing frame coordinates untouched.
+            (int X, int Y)? frame = (up, down, left, right, upLeft, upRight, downLeft, downRight) switch
             {
-                tile.TileFrameX = 18;
-                tile.TileFrameY = 18;
-                return;
-            }
-            #endregion
+                (true, true, true, true, true, true, true, true) => (18, 18),
+                (false, false, false, false, _, _, _, _) => (54, 54),
+                (false, true, true, true, _, _, true, true) => (18, 0),
+                (true, true, false, true, _, true, _, true) => (0, 18),
+                (true, false, true, true, true, true, _, _) => (18, 36),
+                (true, true, true, false, true, _, true, _) => (36, 18),
+                (false, true, false, true, _, _, _, true) => (0, 0),
+                (false, true, true, false, _, _, true, _) => (36, 0),
+                (true, false, false, true, _, true, _, _) => (0, 36),
+                (true, false, true, false, true, _, _, _) => (36, 36),
+                (true, true, false, false, _, _, _, _) => (54, 18),
+                (false, false, true, true, _, _, _, _) => (18, 54),
+                (false, true, false, false, _, _, _, _) => (54, 0),
+                (true, false, false, false, _, _, _, _) => (54, 36),
+                (false, false, false, true, _, _, _, _) => (0, 54),
+                (false, false, true, false, _, _, _, _) => (36, 54),
+                (false, true, false, true, _, _, _, false) => (72, 0),
+                (false, true, true, false, _, _, false, _) => (108, 0),
+                (true, false, false, true, _, false, _, _) => (72, 36),
+                (true, false, true, false, false, _, _, _) => (108, 36),
+                (false, true, true, true, _, _, false, false) => (90, 0),
+                (true, false, true, true, false, false, _, _) => (90, 36),
+                (true, true, false, true, _, false, _, false) => (72, 18),
+                (true, true, true, false, false, _, false, _) => (108, 18),
+                (true, true, true, true, false, false, false, false) => (90, 18),
+                (true, true, true, true, true, true, false, true) => (144, 36),
+                (true, true, true, true, true, true, true, false) => (126, 36),
+                (true, true, true, true, false, true, true, true) => (144, 54),
+                (true, true, true, true, true, false, true, true) => (126, 54),
+                (true, true, true, true, true, true, false, false) => (198, 0),
+                (true, true, true, true, false, false, true, true) => (198, 18),
+                (true, true, true, true, false, true, false, true) => (198, 36),
+                (true, true, true, true, true, false, true, false) => (198, 54),
+                (true, true, true, true, true, false, false, true) => (108, 54),
+                (true, true, true, true, false, true, true, false) => (90, 54),
+                (true, true, true, true, false, true, false, false) => (126, 18),
+                (true, true, true, true, false, false, false, true) => (126, 0),
+                (true, true, true, true, true, false, false, false) => (144, 18),
+                (true, true, true, true, false, false, true, false) => (144, 0),
+                (false, true, true, true, false, false, false, true) => (180, 0),
+                (false, true, true, true, false, false, true, false) => (162, 0),
+                (true, false, true, true, false, true, false, false) => (180, 18),
+                (true, false, true, true, true, false, false, false) => (162, 18),
+                (true, true, false, true, false, true, false, false) => (162, 36),
+                (true, true, false, true, false, false, false, true) => (162, 54),
+                (true, true, true, false, true, false, false, false) => (180, 36),
+                (true, true, true, false, false, false, true, false) => (180, 54),
+                _ => null
+            };
 
-            #region Single State
-            if (!up && !down && !left && !right)
-            {
-                tile.TileFrameX = 54;
-                tile.TileFrameY = 54;
-                return;
-            }
-            #endregion
+            ApplyFrame(tile, frame);
+        }
 
-            #region Edges
-            if (!up && down && left && right && downLeft && downRight)
+        private static bool ApplyFrame(Tile tile, (int X, int Y)? frame)
+        {
+            if (frame is { } selected)
             {
-                tile.TileFrameX = 18;
-                tile.TileFrameY = 0;
-                return;
+                tile.TileFrameX = (short)selected.X;
+                tile.TileFrameY = (short)selected.Y;
+                return true;
             }
-            if (up && down && !left && right && upRight && downRight)
-            {
-                tile.TileFrameX = 0;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (up && !down && left && right && upLeft && upRight)
-            {
-                tile.TileFrameX = 18;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && down && left && !right && upLeft && downLeft)
-            {
-                tile.TileFrameX = 36;
-                tile.TileFrameY = 18;
-                return;
-            }
-            #endregion
-
-            #region Edge Corners
-            if (!up && down && !left && right && downRight)
-            {
-                tile.TileFrameX = 0;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (!up && down && left && !right && downLeft)
-            {
-                tile.TileFrameX = 36;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (up && !down && !left && right && upRight)
-            {
-                tile.TileFrameX = 0;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && !down && left && !right && upLeft)
-            {
-                tile.TileFrameX = 36;
-                tile.TileFrameY = 36;
-                return;
-            }
-            #endregion
-
-            #region I States
-            if (up && down && !left && !right)
-            {
-                tile.TileFrameX = 54;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (!up && !down && left && right)
-            {
-                tile.TileFrameX = 18;
-                tile.TileFrameY = 54;
-                return;
-            }
-            #endregion
-
-            #region I End States
-            if (!up && down && !left && !right)
-            {
-                tile.TileFrameX = 54;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (up && !down && !left && !right)
-            {
-                tile.TileFrameX = 54;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (!up && !down && !left && right)
-            {
-                tile.TileFrameX = 0;
-                tile.TileFrameY = 54;
-                return;
-            }
-            if (!up && !down && left && !right)
-            {
-                tile.TileFrameX = 36;
-                tile.TileFrameY = 54;
-                return;
-            }
-            #endregion
-
-            #region L States
-            if (!up && down && !left && right && !downRight)
-            {
-                tile.TileFrameX = 72;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (!up && down && left && !right && !downLeft)
-            {
-                tile.TileFrameX = 108;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (up && !down && !left && right && !upRight)
-            {
-                tile.TileFrameX = 72;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && !down && left && !right && !upLeft)
-            {
-                tile.TileFrameX = 108;
-                tile.TileFrameY = 36;
-                return;
-            }
-            #endregion
-
-            #region T States
-            if (!up && down && left && right && !downLeft && !downRight)
-            {
-                tile.TileFrameX = 90;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (up && !down && left && right && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 90;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && down && !left && right && !downRight && !upRight)
-            {
-                tile.TileFrameX = 72;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (up && down && left && !right && !downLeft && !upLeft)
-            {
-                tile.TileFrameX = 108;
-                tile.TileFrameY = 18;
-                return;
-            }
-            #endregion
-
-            #region X State
-            if (up && down && left && right && !downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 90;
-                tile.TileFrameY = 18;
-                return;
-            }
-            #endregion
-
-            #region Inner Corner x1
-            if (up && down && left && right && !downLeft && downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = 144;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && down && left && right && downLeft && !downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = 126;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && down && left && right && downLeft && downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 144;
-                tile.TileFrameY = 54;
-                return;
-            }
-            if (up && down && left && right && downLeft && downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 126;
-                tile.TileFrameY = 54;
-                return;
-            }
-            #endregion
-
-            #region Inner Corner x2 (same side)
-            if (up && down && left && right && !downLeft && !downRight && upLeft && upRight)
-            {
-                tile.TileFrameX = 198;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (up && down && left && right && downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 198;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (up && down && left && right && !downLeft && downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 198;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && down && left && right && downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 198;
-                tile.TileFrameY = 54;
-                return;
-            }
-            #endregion
-
-            #region Inner Corner x2 (opposite corners)
-            if (up && down && left && right && !downLeft && downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 108;
-                tile.TileFrameY = 54;
-                return;
-            }
-            if (up && down && left && right && downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 90;
-                tile.TileFrameY = 54;
-                return;
-            }
-            #endregion
-
-            #region Inner Corner x3
-            if (up && down && left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 126;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 126;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (up && down && left && right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 144;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 144;
-                tile.TileFrameY = 0;
-                return;
-            }
-            #endregion
-
-            #region Corner and Side
-            if (!up && down && left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 180;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (!up && down && left && right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 162;
-                tile.TileFrameY = 0;
-                return;
-            }
-            if (up && !down && left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 180;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (up && !down && left && right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 162;
-                tile.TileFrameY = 18;
-                return;
-            }
-            if (up && down && !left && right && !downLeft && !downRight && !upLeft && upRight)
-            {
-                tile.TileFrameX = 162;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && down && !left && right && !downLeft && downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 162;
-                tile.TileFrameY = 54;
-                return;
-            }
-            if (up && down && left && !right && !downLeft && !downRight && upLeft && !upRight)
-            {
-                tile.TileFrameX = 180;
-                tile.TileFrameY = 36;
-                return;
-            }
-            if (up && down && left && !right && downLeft && !downRight && !upLeft && !upRight)
-            {
-                tile.TileFrameX = 180;
-                tile.TileFrameY = 54;
-                return;
-            }
-            #endregion
+            return false;
         }
 
         internal static void SlopedGlowmask(ref readonly Tile tile, int i, int j, Texture2D texture, Rectangle? sourceRectangle, Color drawColor, Vector2 positionOffset)
@@ -1245,502 +749,128 @@ namespace CalamityMod.Systems
             // Initialize all merged variables to false.
             mergedDown = mergedLeft = mergedRight = mergedUp = false;
 
-            #region Custom Merge Conditional Tree
-            if (leftSim == Similarity.None)
+            const Similarity S = Similarity.Same;
+            const Similarity M = Similarity.MergeLink;
+            const Similarity N = Similarity.None;
+            const int Up = 1;
+            const int Left = 2;
+            const int Right = 4;
+            const int Down = 8;
+
+            if (leftSim == S && upSim == S && downSim == S && rightSim == S)
             {
-                if (upSim == Similarity.Same)
+                // Diagonal merge links take priority, in bottom-right to top-left order.
+                (int X, int Y) fullFrame = (topLeftSim, topRightSim, bottomLeftSim, bottomRightSim) switch
                 {
-                    if (downSim == Similarity.Same)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            SetFrameAt(x, y, 0, 18 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            mergedRight = true;
-                            SetFrameAt(x, y, 234 + 18 * randomFrame, 36);
-                            return;
-                        }
-                        SetFrameAt(x, y, 90, 18 * randomFrame);
-                        return;
-                    }
-                    else if (downSim == Similarity.MergeLink)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            mergedDown = true;
-                            SetFrameAt(x, y, 72, 90 + 18 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            SetFrameAt(x, y, 108 + 18 * randomFrame, 54);
-                            return;
-                        }
-                        mergedDown = true;
-                        SetFrameAt(x, y, 126, 90 + 18 * randomFrame);
-                        return;
-                    }
-                    if (rightSim == Similarity.Same)
-                    {
-                        SetFrameAt(x, y, 36 * randomFrame, 72);
-                        return;
-                    }
-                    SetFrameAt(x, y, 108 + 18 * randomFrame, 54);
-                    return;
-                }
-                else if (upSim == Similarity.MergeLink)
-                {
-                    if (downSim == Similarity.Same)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            mergedUp = true;
-                            SetFrameAt(x, y, 72, 144 + 18 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            SetFrameAt(x, y, 108 + 18 * randomFrame, 0);
-                            return;
-                        }
-                        mergedUp = true;
-                        SetFrameAt(x, y, 126, 144 + 18 * randomFrame);
-                        return;
-                    }
-                    else if (downSim == Similarity.MergeLink)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            SetFrameAt(x, y, 162, 18 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
-                            return;
-                        }
-                        mergedUp = true;
-                        mergedDown = true;
-                        SetFrameAt(x, y, 108, 216 + 18 * randomFrame);
-                        return;
-                    }
-                    if (rightSim == Similarity.Same)
-                    {
-                        SetFrameAt(x, y, 162, 18 * randomFrame);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
-                        return;
-                    }
-                    mergedUp = true;
-                    SetFrameAt(x, y, 108, 144 + 18 * randomFrame);
-                    return;
-                }
-                if (downSim == Similarity.Same)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        SetFrameAt(x, y, 36 * randomFrame, 54);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        SetFrameAt(x, y, 108 + 18 * randomFrame, 0);
-                        return;
-                    }
-                    SetFrameAt(x, y, 108 + 18 * randomFrame, 0);
-                    return;
-                }
-                else if (downSim == Similarity.MergeLink)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        SetFrameAt(x, y, 162, 18 * randomFrame);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
-                        return;
-                    }
-                    mergedDown = true;
-                    SetFrameAt(x, y, 108, 90 + 18 * randomFrame);
-                    return;
-                }
-                if (rightSim == Similarity.Same)
-                {
-                    SetFrameAt(x, y, 162, 18 * randomFrame);
-                    return;
-                }
-                else if (rightSim == Similarity.MergeLink)
-                {
-                    mergedRight = true;
-                    SetFrameAt(x, y, 54 + 18 * randomFrame, 234);
-                    return;
-                }
-                SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
+                    (_, _, _, M) => (0, 90 + 36 * randomFrame),
+                    (_, _, M, _) => (18, 90 + 36 * randomFrame),
+                    (_, M, _, _) => (0, 108 + 36 * randomFrame),
+                    (M, _, _, _) => (18, 108 + 36 * randomFrame),
+                    (S, S, N, N) => (108 + 18 * randomFrame, 36),
+                    (S, N, S, N) => (198, 18 * randomFrame),
+                    _ => (18 + 18 * randomFrame, 18)
+                };
+                SetFrameAt(x, y, fullFrame.X, fullFrame.Y);
                 return;
             }
-            else if (leftSim == Similarity.MergeLink)
+
+            // Cardinal atlas table: left, up, down, right. Link flags are intentionally
+            // separate from frame selection: several merge-shaped frames report no link.
+            (int X, int Y, int Links) frame = (leftSim, upSim, downSim, rightSim) switch
             {
-                if (upSim == Similarity.Same)
-                {
-                    if (downSim == Similarity.Same)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            mergedLeft = true;
-                            SetFrameAt(x, y, 162, 126 + 18 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            mergedLeft = true;
-                            mergedRight = true;
-                            SetFrameAt(x, y, 180, 126 + 18 * randomFrame);
-                            return;
-                        }
-                        mergedLeft = true;
-                        SetFrameAt(x, y, 234 + 18 * randomFrame, 54);
-                        return;
-                    }
-                    else if (downSim == Similarity.MergeLink)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            mergedLeft = mergedDown = true;
-                            SetFrameAt(x, y, 36, 108 + 36 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            mergedLeft = mergedRight = mergedDown = true;
-                            SetFrameAt(x, y, 198, 144 + 18 * randomFrame);
-                            return;
-                        }
-                        SetFrameAt(x, y, 108 + 18 * randomFrame, 54);
-                        return;
-                    }
-                    if (rightSim == Similarity.Same)
-                    {
-                        mergedLeft = true;
-                        SetFrameAt(x, y, 18 * randomFrame, 216);
-                        return;
-                    }
-                    SetFrameAt(x, y, 108 + 18 * randomFrame, 54);
-                    return;
-                }
-                else if (upSim == Similarity.MergeLink)
-                {
-                    if (downSim == Similarity.Same)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            mergedUp = mergedLeft = true;
-                            SetFrameAt(x, y, 36, 90 + 36 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            mergedLeft = mergedRight = mergedUp = true;
-                            SetFrameAt(x, y, 198, 90 + 18 * randomFrame);
-                            return;
-                        }
-                        SetFrameAt(x, y, 108 + 18 * randomFrame, 0);
-                        return;
-                    }
-                    else if (downSim == Similarity.MergeLink)
-                    {
-                        if (rightSim == Similarity.Same)
-                        {
-                            mergedUp = mergedLeft = mergedDown = true;
-                            SetFrameAt(x, y, 216, 90 + 18 * randomFrame);
-                            return;
-                        }
-                        else if (rightSim == Similarity.MergeLink)
-                        {
-                            mergedDown = mergedLeft = mergedRight = mergedUp = true;
-                            SetFrameAt(x, y, 108 + 18 * randomFrame, 198);
-                            return;
-                        }
-                        SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
-                        return;
-                    }
-                    if (rightSim == Similarity.Same)
-                    {
-                        SetFrameAt(x, y, 162, 18 * randomFrame);
-                        return;
-                    }
-                    SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
-                    return;
-                }
-                if (downSim == Similarity.Same)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        mergedLeft = true;
-                        SetFrameAt(x, y, 18 * randomFrame, 198);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        SetFrameAt(x, y, 108 + 18 * randomFrame, 0);
-                        return;
-                    }
-                    SetFrameAt(x, y, 108 + 18 * randomFrame, 0);
-                    return;
-                }
-                else if (downSim == Similarity.MergeLink)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        SetFrameAt(x, y, 162, 18 * randomFrame);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
-                        return;
-                    }
-                    SetFrameAt(x, y, 162 + 18 * randomFrame, 54);
-                    return;
-                }
-                if (rightSim == Similarity.Same)
-                {
-                    mergedLeft = true;
-                    SetFrameAt(x, y, 18 * randomFrame, 252);
-                    return;
-                }
-                else if (rightSim == Similarity.MergeLink)
-                {
-                    mergedRight = mergedLeft = true;
-                    SetFrameAt(x, y, 162 + 18 * randomFrame, 198);
-                    return;
-                }
+                (S, S, S, M) => (144, 126 + 18 * randomFrame, Right),
+                (S, S, S, N) => (72, 18 * randomFrame, 0),
+                (S, S, M, S) => (144 + 18 * randomFrame, 90, Down),
+                (S, S, M, M) => (54, 108 + 36 * randomFrame, Right | Down),
+                (S, S, M, N) => (90, 90 + 18 * randomFrame, Down),
+                (S, S, N, S) => (18 + 18 * randomFrame, 36, 0),
+                (S, S, N, M) => (54 + 18 * randomFrame, 216, Right),
+                (S, S, N, N) => (18 + 36 * randomFrame, 72, 0),
+                (S, M, S, S) => (144 + 18 * randomFrame, 108, Up),
+                (S, M, S, M) => (54, 90 + 36 * randomFrame, Up | Right),
+                (S, M, S, N) => (90, 144 + 18 * randomFrame, Up),
+                (S, M, M, S) => (144 + 18 * randomFrame, 180, Up | Down),
+                (S, M, M, M) => (216, 144 + 18 * randomFrame, Up | Right | Down),
+                (S, M, M, N) => (216, 18 * randomFrame, 0),
+                (S, M, N, S) => (234 + 18 * randomFrame, 18, Up),
+                (S, M, N, M) => (216, 18 * randomFrame, 0),
+                (S, M, N, N) => (216, 18 * randomFrame, 0),
+                (S, N, S, S) => (18 + 18 * randomFrame, 0, 0),
+                (S, N, S, M) => (54 + 18 * randomFrame, 198, Right),
+                (S, N, S, N) => (18 + 36 * randomFrame, 54, 0),
+                (S, N, M, S) => (234 + 18 * randomFrame, 0, Down),
+                (S, N, M, M) => (216, 18 * randomFrame, 0),
+                (S, N, M, N) => (216, 18 * randomFrame, 0),
+                (S, N, N, S) => (108 + 18 * randomFrame, 72, 0),
+                (S, N, N, M) => (54 + 18 * randomFrame, 252, Right),
+                (S, N, N, N) => (216, 18 * randomFrame, 0),
+                (M, S, S, S) => (162, 126 + 18 * randomFrame, Left),
+                (M, S, S, M) => (180, 126 + 18 * randomFrame, Left | Right),
+                (M, S, S, N) => (234 + 18 * randomFrame, 54, Left),
+                (M, S, M, S) => (36, 108 + 36 * randomFrame, Left | Down),
+                (M, S, M, M) => (198, 144 + 18 * randomFrame, Left | Right | Down),
+                (M, S, M, N) => (108 + 18 * randomFrame, 54, 0),
+                (M, S, N, S) => (18 * randomFrame, 216, Left),
+                (M, S, N, M) => (108 + 18 * randomFrame, 54, 0),
+                (M, S, N, N) => (108 + 18 * randomFrame, 54, 0),
+                (M, M, S, S) => (36, 90 + 36 * randomFrame, Up | Left),
+                (M, M, S, M) => (198, 90 + 18 * randomFrame, Up | Left | Right),
+                (M, M, S, N) => (108 + 18 * randomFrame, 0, 0),
+                (M, M, M, S) => (216, 90 + 18 * randomFrame, Up | Left | Down),
+                (M, M, M, M) => (108 + 18 * randomFrame, 198, Up | Left | Right | Down),
+                (M, M, M, N) => (162 + 18 * randomFrame, 54, 0),
+                (M, M, N, S) => (162, 18 * randomFrame, 0),
+                (M, M, N, M) => (162 + 18 * randomFrame, 54, 0),
+                (M, M, N, N) => (162 + 18 * randomFrame, 54, 0),
+                (M, N, S, S) => (18 * randomFrame, 198, Left),
+                (M, N, S, M) => (108 + 18 * randomFrame, 0, 0),
+                (M, N, S, N) => (108 + 18 * randomFrame, 0, 0),
+                (M, N, M, S) => (162, 18 * randomFrame, 0),
+                (M, N, M, M) => (162 + 18 * randomFrame, 54, 0),
+                (M, N, M, N) => (162 + 18 * randomFrame, 54, 0),
+                (M, N, N, S) => (18 * randomFrame, 252, Left),
+                (M, N, N, M) => (162 + 18 * randomFrame, 198, Left | Right),
+                (M, N, N, N) => (18 * randomFrame, 234, Left),
+                (N, S, S, S) => (0, 18 * randomFrame, 0),
+                (N, S, S, M) => (234 + 18 * randomFrame, 36, Right),
+                (N, S, S, N) => (90, 18 * randomFrame, 0),
+                (N, S, M, S) => (72, 90 + 18 * randomFrame, Down),
+                (N, S, M, M) => (108 + 18 * randomFrame, 54, 0),
+                (N, S, M, N) => (126, 90 + 18 * randomFrame, Down),
+                (N, S, N, S) => (36 * randomFrame, 72, 0),
+                (N, S, N, M) => (108 + 18 * randomFrame, 54, 0),
+                (N, S, N, N) => (108 + 18 * randomFrame, 54, 0),
+                (N, M, S, S) => (72, 144 + 18 * randomFrame, Up),
+                (N, M, S, M) => (108 + 18 * randomFrame, 0, 0),
+                (N, M, S, N) => (126, 144 + 18 * randomFrame, Up),
+                (N, M, M, S) => (162, 18 * randomFrame, 0),
+                (N, M, M, M) => (162 + 18 * randomFrame, 54, 0),
+                (N, M, M, N) => (108, 216 + 18 * randomFrame, Up | Down),
+                (N, M, N, S) => (162, 18 * randomFrame, 0),
+                (N, M, N, M) => (162 + 18 * randomFrame, 54, 0),
+                (N, M, N, N) => (108, 144 + 18 * randomFrame, Up),
+                (N, N, S, S) => (36 * randomFrame, 54, 0),
+                (N, N, S, M) => (108 + 18 * randomFrame, 0, 0),
+                (N, N, S, N) => (108 + 18 * randomFrame, 0, 0),
+                (N, N, M, S) => (162, 18 * randomFrame, 0),
+                (N, N, M, M) => (162 + 18 * randomFrame, 54, 0),
+                (N, N, M, N) => (108, 90 + 18 * randomFrame, Down),
+                (N, N, N, S) => (162, 18 * randomFrame, 0),
+                (N, N, N, M) => (54 + 18 * randomFrame, 234, Right),
+                _ => (162 + 18 * randomFrame, 54, 0)
+            };
+
+            // Only write true flags after the original false initialization. In particular,
+            // callers may alias out arguments, so assigning a whole tuple would be incorrect.
+            if ((frame.Links & Up) != 0)
+                mergedUp = true;
+            if ((frame.Links & Left) != 0)
                 mergedLeft = true;
-                SetFrameAt(x, y, 18 * randomFrame, 234);
-                return;
-            }
-            if (upSim == Similarity.Same)
-            {
-                if (downSim == Similarity.Same)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        #region FULL TILE STUFF
-                        if (topLeftSim == Similarity.MergeLink || topRightSim == Similarity.MergeLink || bottomLeftSim == Similarity.MergeLink || bottomRightSim == Similarity.MergeLink)
-                        {
-                            if (bottomRightSim == Similarity.MergeLink)
-                            {
-                                SetFrameAt(x, y, 0, 90 + 36 * randomFrame);
-                                return;
-                            }
-                            else if (bottomLeftSim == Similarity.MergeLink)
-                            {
-                                SetFrameAt(x, y, 18, 90 + 36 * randomFrame);
-                                return;
-                            }
-                            else if (topRightSim == Similarity.MergeLink)
-                            {
-                                SetFrameAt(x, y, 0, 108 + 36 * randomFrame);
-                                return;
-                            }
-                            SetFrameAt(x, y, 18, 108 + 36 * randomFrame);
-                            return;
-                        }
-                        if (topLeftSim == Similarity.Same)
-                        {
-                            if (topRightSim == Similarity.Same)
-                            {
-                                if (bottomLeftSim == Similarity.Same)
-                                {
-                                    SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                                    return;
-                                }
-                                if (bottomRightSim == Similarity.Same)
-                                {
-                                    SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                                    return;
-                                }
-                                SetFrameAt(x, y, 108 + 18 * randomFrame, 36);
-                                return;
-                            }
-                            if (bottomLeftSim == Similarity.Same)
-                            {
-                                if (bottomRightSim == Similarity.Same)
-                                {
-                                    if (topRightSim == Similarity.MergeLink)
-                                    {
-                                        SetFrameAt(x, y, 0, 108 + 36 * randomFrame);
-                                        return;
-                                    }
-                                    SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                                    return;
-                                }
-                                SetFrameAt(x, y, 198, 18 * randomFrame);
-                                return;
-                            }
-                        }
-                        else if (topLeftSim == Similarity.None)
-                        {
-                            if (topRightSim == Similarity.Same)
-                            {
-                                if (bottomRightSim == Similarity.Same)
-                                {
-                                    if (bottomLeftSim == Similarity.Same)
-                                    {
-                                        SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                                        return;
-                                    }
-                                    SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                                    return;
-                                }
-                                if (bottomLeftSim == Similarity.Same)
-                                {
-                                    SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                                    return;
-                                }
-                            }
-                            SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                            return;
-                        }
-                        SetFrameAt(x, y, 18 + 18 * randomFrame, 18);
-                        return;
-                        #endregion
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        mergedRight = true;
-                        SetFrameAt(x, y, 144, 126 + 18 * randomFrame);
-                        return;
-                    }
-                    SetFrameAt(x, y, 72, 18 * randomFrame);
-                    return;
-                }
-                else if (downSim == Similarity.MergeLink)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        mergedDown = true;
-                        SetFrameAt(x, y, 144 + 18 * randomFrame, 90);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        mergedDown = mergedRight = true;
-                        SetFrameAt(x, y, 54, 108 + 36 * randomFrame);
-                        return;
-                    }
-                    mergedDown = true;
-                    SetFrameAt(x, y, 90, 90 + 18 * randomFrame);
-                    return;
-                }
-                if (rightSim == Similarity.Same)
-                {
-                    SetFrameAt(x, y, 18 + 18 * randomFrame, 36);
-                    return;
-                }
-                else if (rightSim == Similarity.MergeLink)
-                {
-                    mergedRight = true;
-                    SetFrameAt(x, y, 54 + 18 * randomFrame, 216);
-                    return;
-                }
-                SetFrameAt(x, y, 18 + 36 * randomFrame, 72);
-                return;
-            }
-            else if (upSim == Similarity.MergeLink)
-            {
-                if (downSim == Similarity.Same)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        mergedUp = true;
-                        SetFrameAt(x, y, 144 + 18 * randomFrame, 108);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        mergedRight = mergedUp = true;
-                        SetFrameAt(x, y, 54, 90 + 36 * randomFrame);
-                        return;
-                    }
-                    mergedUp = true;
-                    SetFrameAt(x, y, 90, 144 + 18 * randomFrame);
-                    return;
-                }
-                else if (downSim == Similarity.MergeLink)
-                {
-                    if (rightSim == Similarity.Same)
-                    {
-                        mergedUp = mergedDown = true;
-                        SetFrameAt(x, y, 144 + 18 * randomFrame, 180);
-                        return;
-                    }
-                    else if (rightSim == Similarity.MergeLink)
-                    {
-                        mergedUp = mergedRight = mergedDown = true;
-                        SetFrameAt(x, y, 216, 144 + 18 * randomFrame);
-                        return;
-                    }
-                    SetFrameAt(x, y, 216, 18 * randomFrame);
-                    return;
-                }
-                if (rightSim == Similarity.Same)
-                {
-                    mergedUp = true;
-                    SetFrameAt(x, y, 234 + 18 * randomFrame, 18);
-                    return;
-                }
-                SetFrameAt(x, y, 216, 18 * randomFrame);
-                return;
-            }
-            if (downSim == Similarity.Same)
-            {
-                if (rightSim == Similarity.Same)
-                {
-                    SetFrameAt(x, y, 18 + 18 * randomFrame, 0);
-                    return;
-                }
-                else if (rightSim == Similarity.MergeLink)
-                {
-                    mergedRight = true;
-                    SetFrameAt(x, y, 54 + 18 * randomFrame, 198);
-                    return;
-                }
-                SetFrameAt(x, y, 18 + 36 * randomFrame, 54);
-                return;
-            }
-            else if (downSim == Similarity.MergeLink)
-            {
-                if (rightSim == Similarity.Same)
-                {
-                    mergedDown = true;
-                    SetFrameAt(x, y, 234 + 18 * randomFrame, 0);
-                    return;
-                }
-                SetFrameAt(x, y, 216, 18 * randomFrame);
-                return;
-            }
-            if (rightSim == Similarity.Same)
-            {
-                SetFrameAt(x, y, 108 + 18 * randomFrame, 72);
-                return;
-            }
-            else if (rightSim == Similarity.MergeLink)
-            {
+            if ((frame.Links & Right) != 0)
                 mergedRight = true;
-                SetFrameAt(x, y, 54 + 18 * randomFrame, 252);
-                return;
-            }
-            SetFrameAt(x, y, 216, 18 * randomFrame);
-            return;
-            #endregion
+            if ((frame.Links & Down) != 0)
+                mergedDown = true;
+            SetFrameAt(x, y, frame.X, frame.Y);
         }
 
         internal static void CustomMergeFrame(int x, int y, int myType, int mergeType, bool forceSameDown = false,

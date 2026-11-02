@@ -214,6 +214,84 @@ public static partial class RevengeanceAndDeathAI
             }
         }
 
+        private bool AdvanceVortexGrowth(bool larva)
+        {
+            if (NPC.CountNPCS(larva ? NPCID.VortexHornet : NPCID.VortexHornetQueen) < (larva ? 6 : 3))
+            {
+                NPC.localAI[0] += 1f;
+                if (!larva)
+                    NPC.localAI[0] += Math.Abs(NPC.velocity.X) / 2f;
+
+                // Larvae test solid tiles before the network gate; hornets test
+                // the network gate first. Keep those different evaluation orders.
+                if (NPC.localAI[0] >= (larva
+                    ? (CalamityWorld.death ? 90f : CalamityWorld.revenge ? 150f : 300f)
+                    : (CalamityWorld.death ? 300f : CalamityWorld.revenge ? 600f : 1200f)) &&
+                    (larva || Main.netMode != NetmodeID.MultiplayerClient))
+                {
+                    int centerTileX = (int)NPC.Center.X / 16 - (larva ? 1 : 2);
+                    int centerTileY = (int)NPC.Center.Y / 16 - (larva ? 1 : 3);
+                    if (!Collision.SolidTiles(centerTileX, centerTileX + (larva ? 2 : 4), centerTileY, centerTileY + (larva ? 1 : 4)) && (!larva || Main.netMode != NetmodeID.MultiplayerClient))
+                    {
+                        NPC.Transform(larva ? NPCID.VortexHornet : NPCID.VortexHornetQueen);
+                        NPC.life = NPC.lifeMax;
+                        NPC.localAI[0] = 0f;
+                        return true;
+                    }
+                }
+                int maxValue;
+                if (NPC.localAI[0] < (larva
+                    ? (CalamityWorld.revenge ? 30f : 60f)
+                    : (CalamityWorld.death ? 60f : CalamityWorld.revenge ? 120f : 240f)))
+                {
+                    maxValue = larva ? 16 : 32;
+                }
+                else if (NPC.localAI[0] < (larva
+                    ? (CalamityWorld.death ? 45f : CalamityWorld.revenge ? 60f : 120f)
+                    : (CalamityWorld.death ? 120f : CalamityWorld.revenge ? 240f : 480f)))
+                {
+                    maxValue = larva ? 8 : 16;
+                }
+                else if (NPC.localAI[0] < (larva
+                    ? (CalamityWorld.death ? 60f : CalamityWorld.revenge ? 90f : 180f)
+                    : (CalamityWorld.death ? 180f : CalamityWorld.revenge ? 360f : 720f)))
+                {
+                    maxValue = larva ? 4 : 6;
+                }
+                else if (NPC.localAI[0] < (larva
+                    ? (CalamityWorld.death ? 75f : CalamityWorld.revenge ? 120f : 240f)
+                    : (CalamityWorld.death ? 240f : CalamityWorld.revenge ? 480f : 960f)))
+                {
+                    maxValue = 2;
+                }
+                else if (NPC.localAI[0] < (larva
+                    ? (CalamityWorld.death ? 90f : CalamityWorld.revenge ? 150f : 300f)
+                    : (CalamityWorld.death ? 300f : CalamityWorld.revenge ? 600f : 1200f)))
+                {
+                    maxValue = 1;
+                }
+                else
+                {
+                    maxValue = 1;
+                }
+                if (Main.rand.NextBool(maxValue))
+                {
+                    Dust dust = Main.dust[Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Vortex, 0f, 0f, 0, default, 1f)];
+                    dust.noGravity = true;
+                    dust.scale = 1f;
+                    dust.noLight = true;
+                    if (larva)
+                    {
+                        dust.velocity = NPC.DirectionFrom(dust.position) * dust.velocity.Length();
+                        dust.position -= dust.velocity * 5f;
+                        dust.position.X += (float)(NPC.direction * 6);
+                        dust.position.Y += 4f;
+                    }
+                }
+            }
+            return false;
+        }
+
         private void UpdateMedusaStareTimer(float afterHitTime, float afterWaitTime)
         {
             NPC.velocity.X *= 0.9f;
@@ -962,111 +1040,14 @@ public static partial class RevengeanceAndDeathAI
 
             if (npcType == NPCID.VortexLarva)
             {
-                if (NPC.CountNPCS(NPCID.VortexHornet) < 6)
-                {
-                    NPC.localAI[0] += 1f;
-                    if (NPC.localAI[0] >= (CalamityWorld.death ? 90f : CalamityWorld.revenge ? 150f : 300f))
-                    {
-                        int centerTileX = (int)NPC.Center.X / 16 - 1;
-                        int centerTileY = (int)NPC.Center.Y / 16 - 1;
-                        if (!Collision.SolidTiles(centerTileX, centerTileX + 2, centerTileY, centerTileY + 1) && Main.netMode != NetmodeID.MultiplayerClient)
-                        {
-                            NPC.Transform(NPCID.VortexHornet);
-                            NPC.life = NPC.lifeMax;
-                            NPC.localAI[0] = 0f;
-                            return false;
-                        }
-                    }
-                    int maxValue;
-                    if (NPC.localAI[0] < (CalamityWorld.revenge ? 30f : 60f))
-                    {
-                        maxValue = 16;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 45f : CalamityWorld.revenge ? 60f : 120f))
-                    {
-                        maxValue = 8;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 60f : CalamityWorld.revenge ? 90f : 180f))
-                    {
-                        maxValue = 4;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 75f : CalamityWorld.revenge ? 120f : 240f))
-                    {
-                        maxValue = 2;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 90f : CalamityWorld.revenge ? 150f : 300f))
-                    {
-                        maxValue = 1;
-                    }
-                    else
-                    {
-                        maxValue = 1;
-                    }
-                    if (Main.rand.NextBool(maxValue))
-                    {
-                        Dust dust = Main.dust[Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Vortex, 0f, 0f, 0, default, 1f)];
-                        dust.noGravity = true;
-                        dust.scale = 1f;
-                        dust.noLight = true;
-                        dust.velocity = NPC.DirectionFrom(dust.position) * dust.velocity.Length();
-                        dust.position -= dust.velocity * 5f;
-                        dust.position.X += (float)(NPC.direction * 6);
-                        dust.position.Y += 4f;
-                    }
-                }
+                if (AdvanceVortexGrowth(larva: true))
+                    return false;
             }
 
             if (npcType == NPCID.VortexHornet)
             {
-                if (NPC.CountNPCS(NPCID.VortexHornetQueen) < 3)
-                {
-                    NPC.localAI[0] += 1f;
-                    NPC.localAI[0] += Math.Abs(NPC.velocity.X) / 2f;
-                    if (NPC.localAI[0] >= (CalamityWorld.death ? 300f : CalamityWorld.revenge ? 600f : 1200f) && Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        int centerTileX = (int)NPC.Center.X / 16 - 2;
-                        int centerTileY = (int)NPC.Center.Y / 16 - 3;
-                        if (!Collision.SolidTiles(centerTileX, centerTileX + 4, centerTileY, centerTileY + 4))
-                        {
-                            NPC.Transform(NPCID.VortexHornetQueen);
-                            NPC.life = NPC.lifeMax;
-                            NPC.localAI[0] = 0f;
-                            return false;
-                        }
-                    }
-                    int maxValue2;
-                    if (NPC.localAI[0] < (CalamityWorld.death ? 60f : CalamityWorld.revenge ? 120f : 240f))
-                    {
-                        maxValue2 = 32;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 120f : CalamityWorld.revenge ? 240f : 480f))
-                    {
-                        maxValue2 = 16;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 180f : CalamityWorld.revenge ? 360f : 720f))
-                    {
-                        maxValue2 = 6;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 240f : CalamityWorld.revenge ? 480f : 960f))
-                    {
-                        maxValue2 = 2;
-                    }
-                    else if (NPC.localAI[0] < (CalamityWorld.death ? 300f : CalamityWorld.revenge ? 600f : 1200f))
-                    {
-                        maxValue2 = 1;
-                    }
-                    else
-                    {
-                        maxValue2 = 1;
-                    }
-                    if (Main.rand.NextBool(maxValue2))
-                    {
-                        Dust dust = Main.dust[Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Vortex, 0f, 0f, 0, default, 1f)];
-                        dust.noGravity = true;
-                        dust.scale = 1f;
-                        dust.noLight = true;
-                    }
-                }
+                if (AdvanceVortexGrowth(larva: false))
+                    return false;
             }
 
             bool jump = false;
@@ -1483,79 +1464,28 @@ PrepareToShoot:
             }
             else if (npcType == NPCID.Skeleton || npcType == NPCID.SporeSkeleton || npcType == NPCID.GoblinPeon || npcType == NPCID.AngryBones || npcType == NPCID.AngryBonesBig || npcType == NPCID.AngryBonesBigMuscle || npcType == NPCID.AngryBonesBigHelmet || npcType == NPCID.CorruptBunny || npcType == NPCID.GoblinScout || npcType == NPCID.PossessedArmor || npcType == NPCID.WallCreeper || npcType == NPCID.BloodCrawler || npcType == NPCID.UndeadViking || npcType == NPCID.CorruptPenguin || npcType == NPCID.SnowFlinx || npcType == NPCID.Lihzahrd || npcType == NPCID.HeadacheSkeleton || npcType == NPCID.MisassembledSkeleton || npcType == NPCID.PantlessSkeleton || npcType == NPCID.CochinealBeetle || npcType == NPCID.CyanBeetle || npcType == NPCID.LacBeetle || npcType == NPCID.FlyingSnake || npcType == NPCID.FaceMonster || npcType == NPCID.ZombieMushroom || npcType == NPCID.ZombieElf || npcType == NPCID.ZombieElfBeard || npcType == NPCID.ZombieElfGirl || npcType == NPCID.GingerbreadMan || npcType == NPCID.GrayGrunt || npcType == NPCID.GigaZapper || npcType == NPCID.Fritz || npcType == NPCID.Nailhead || npcType == NPCID.Psycho || npcType == NPCID.CrimsonBunny || npcType == NPCID.ThePossessed || npcType == NPCID.CrimsonPenguin || npcType == NPCID.Medusa || npcType == NPCID.GraniteGolem || npcType == NPCID.VortexRifleman || npcType == NPCID.VortexSoldier)
             {
-                float maxVelocity = 1.5f;
-                if (npcType == NPCID.AngryBonesBig)
+                float maxVelocity = npcType switch
                 {
-                    maxVelocity = 2f;
-                }
-                else if (npcType == NPCID.AngryBonesBigMuscle)
-                {
-                    maxVelocity = 1.75f;
-                }
-                else if (npcType == NPCID.AngryBonesBigHelmet)
-                {
-                    maxVelocity = 1.25f;
-                }
-                else if (npcType == NPCID.HeadacheSkeleton)
-                {
-                    maxVelocity = 1.1f;
-                }
-                else if (npcType == NPCID.MisassembledSkeleton)
-                {
-                    maxVelocity = 0.9f;
-                }
-                else if (npcType == NPCID.PantlessSkeleton)
-                {
-                    maxVelocity = 1.2f;
-                }
-                else if (npcType == NPCID.ZombieElf)
-                {
-                    maxVelocity = 1.75f;
-                }
-                else if (npcType == NPCID.ZombieElfBeard)
-                {
-                    maxVelocity = 1.25f;
-                }
-                else if (npcType == NPCID.ZombieElfGirl)
-                {
-                    maxVelocity = 2f;
-                }
-                else if (npcType == NPCID.GrayGrunt)
-                {
-                    maxVelocity = 1.8f;
-                }
-                else if (npcType == NPCID.GigaZapper)
-                {
-                    maxVelocity = 2.25f;
-                }
-                else if (npcType == NPCID.Fritz)
-                {
-                    maxVelocity = 4f;
-                }
-                else if (npcType == NPCID.Nailhead)
-                {
-                    maxVelocity = CalamityWorld.revenge ? 0.75f : 0.6f;
-                }
-                else if (npcType == NPCID.Psycho)
-                {
-                    maxVelocity = 3.75f;
-                }
-                else if (npcType == NPCID.ThePossessed)
-                {
-                    maxVelocity = 3.25f;
-                }
-                else if (npcType == NPCID.Medusa)
-                {
-                    maxVelocity = 1.5f + (1f - (float)NPC.life / (float)NPC.lifeMax) * 2f;
-                }
-                else if (npcType == NPCID.VortexRifleman)
-                {
-                    maxVelocity = CalamityWorld.revenge ? 6f : 4.8f;
-                }
-                else if (npcType == NPCID.VortexSoldier)
-                {
-                    maxVelocity = 4f;
-                }
+                    NPCID.AngryBonesBig => 2f,
+                    NPCID.AngryBonesBigMuscle => 1.75f,
+                    NPCID.AngryBonesBigHelmet => 1.25f,
+                    NPCID.HeadacheSkeleton => 1.1f,
+                    NPCID.MisassembledSkeleton => 0.9f,
+                    NPCID.PantlessSkeleton => 1.2f,
+                    NPCID.ZombieElf => 1.75f,
+                    NPCID.ZombieElfBeard => 1.25f,
+                    NPCID.ZombieElfGirl => 2f,
+                    NPCID.GrayGrunt => 1.8f,
+                    NPCID.GigaZapper => 2.25f,
+                    NPCID.Fritz => 4f,
+                    NPCID.Nailhead => CalamityWorld.revenge ? 0.75f : 0.6f,
+                    NPCID.Psycho => 3.75f,
+                    NPCID.ThePossessed => 3.25f,
+                    NPCID.Medusa => 1.5f + (1f - (float)NPC.life / (float)NPC.lifeMax) * 2f,
+                    NPCID.VortexRifleman => CalamityWorld.revenge ? 6f : 4.8f,
+                    NPCID.VortexSoldier => 4f,
+                    _ => 1.5f
+                };
                 if (npcType == NPCID.Skeleton || npcType == NPCID.HeadacheSkeleton || npcType == NPCID.MisassembledSkeleton || npcType == NPCID.PantlessSkeleton || npcType == NPCID.GingerbreadMan)
                 {
                     maxVelocity *= 1f + (1f - NPC.scale);
@@ -1569,55 +1499,22 @@ PrepareToShoot:
             }
             else if (npcType >= NPCID.RustyArmoredBonesAxe && npcType <= NPCID.HellArmoredBonesSword)
             {
-                float maxVelocity = 1.5f;
-                if (npcType == NPCID.RustyArmoredBonesAxe)
+                float maxVelocity = npcType switch
                 {
-                    maxVelocity = 2f;
-                }
-                if (npcType == NPCID.RustyArmoredBonesFlail)
-                {
-                    maxVelocity = 1f;
-                }
-                if (npcType == NPCID.RustyArmoredBonesSword)
-                {
-                    maxVelocity = 1.5f;
-                }
-                if (npcType == NPCID.RustyArmoredBonesSwordNoArmor)
-                {
-                    maxVelocity = 3f;
-                }
-                if (npcType == NPCID.BlueArmoredBones)
-                {
-                    maxVelocity = 1.25f;
-                }
-                if (npcType == NPCID.BlueArmoredBonesMace)
-                {
-                    maxVelocity = 3f;
-                }
-                if (npcType == NPCID.BlueArmoredBonesNoPants)
-                {
-                    maxVelocity = 3.25f;
-                }
-                if (npcType == NPCID.BlueArmoredBonesSword)
-                {
-                    maxVelocity = 2f;
-                }
-                if (npcType == NPCID.HellArmoredBones)
-                {
-                    maxVelocity = 2.75f;
-                }
-                if (npcType == NPCID.HellArmoredBonesSpikeShield)
-                {
-                    maxVelocity = 1.8f;
-                }
-                if (npcType == NPCID.HellArmoredBonesMace)
-                {
-                    maxVelocity = 1.3f;
-                }
-                if (npcType == NPCID.HellArmoredBonesSword)
-                {
-                    maxVelocity = 2.5f;
-                }
+                    NPCID.RustyArmoredBonesAxe => 2f,
+                    NPCID.RustyArmoredBonesFlail => 1f,
+                    NPCID.RustyArmoredBonesSword => 1.5f,
+                    NPCID.RustyArmoredBonesSwordNoArmor => 3f,
+                    NPCID.BlueArmoredBones => 1.25f,
+                    NPCID.BlueArmoredBonesMace => 3f,
+                    NPCID.BlueArmoredBonesNoPants => 3.25f,
+                    NPCID.BlueArmoredBonesSword => 2f,
+                    NPCID.HellArmoredBones => 2.75f,
+                    NPCID.HellArmoredBonesSpikeShield => 1.8f,
+                    NPCID.HellArmoredBonesMace => 1.3f,
+                    NPCID.HellArmoredBonesSword => 2.5f,
+                    _ => 1.5f
+                };
                 maxVelocity *= 1f + (1f - NPC.scale);
                 maxVelocity *= 1.25f;
                 if (CalamityWorld.death)
@@ -1627,27 +1524,15 @@ PrepareToShoot:
             }
             else if (npcType >= 305 && npcType <= 314)
             {
-                float maxVelocity = 1.5f;
-                if (npcType == NPCID.Scarecrow1 || npcType == NPCID.Scarecrow6)
+                float maxVelocity = npcType switch
                 {
-                    maxVelocity = 2f;
-                }
-                if (npcType == NPCID.Scarecrow2 || npcType == NPCID.Scarecrow7)
-                {
-                    maxVelocity = 1.25f;
-                }
-                if (npcType == NPCID.Scarecrow3 || npcType == NPCID.Scarecrow8)
-                {
-                    maxVelocity = 2.25f;
-                }
-                if (npcType == NPCID.Scarecrow4 || npcType == NPCID.Scarecrow9)
-                {
-                    maxVelocity = 1.5f;
-                }
-                if (npcType == NPCID.Scarecrow5 || npcType == NPCID.Scarecrow10)
-                {
-                    maxVelocity = 1f;
-                }
+                    NPCID.Scarecrow1 or NPCID.Scarecrow6 => 2f,
+                    NPCID.Scarecrow2 or NPCID.Scarecrow7 => 1.25f,
+                    NPCID.Scarecrow3 or NPCID.Scarecrow8 => 2.25f,
+                    NPCID.Scarecrow4 or NPCID.Scarecrow9 => 1.5f,
+                    NPCID.Scarecrow5 or NPCID.Scarecrow10 => 1f,
+                    _ => 1.5f
+                };
                 maxVelocity *= 1.25f;
                 if (CalamityWorld.death)
                     maxVelocity *= 1.25f;
@@ -1796,39 +1681,15 @@ PrepareToShoot:
             }
             else if (npcType == NPCID.Scutlix || npcType == NPCID.VortexHornet || npcType == NPCID.SolarDrakomire || npcType == NPCID.SolarSolenian || npcType == NPCID.SolarSpearman || npcType == NPCID.DesertBeast)
             {
-                float maxVelocity = 5f;
-                float acceleration = 0.25f;
-                float turnMultiplier = 0.7f;
-                if (npcType == NPCID.VortexHornet)
+                var (maxVelocity, acceleration, turnMultiplier) = npcType switch
                 {
-                    maxVelocity = 6f;
-                    acceleration = 0.2f;
-                    turnMultiplier = 0.8f;
-                }
-                else if (npcType == NPCID.SolarDrakomire)
-                {
-                    maxVelocity = 4f;
-                    acceleration = 0.1f;
-                    turnMultiplier = 0.95f;
-                }
-                else if (npcType == NPCID.SolarSolenian)
-                {
-                    maxVelocity = 6f;
-                    acceleration = 0.15f;
-                    turnMultiplier = 0.85f;
-                }
-                else if (npcType == NPCID.SolarSpearman)
-                {
-                    maxVelocity = 5f;
-                    acceleration = 0.1f;
-                    turnMultiplier = 0.95f;
-                }
-                else if (npcType == NPCID.DesertBeast)
-                {
-                    maxVelocity = 5f;
-                    acceleration = 0.15f;
-                    turnMultiplier = 0.98f;
-                }
+                    NPCID.VortexHornet => (6f, 0.2f, 0.8f),
+                    NPCID.SolarDrakomire => (4f, 0.1f, 0.95f),
+                    NPCID.SolarSolenian => (6f, 0.15f, 0.85f),
+                    NPCID.SolarSpearman => (5f, 0.1f, 0.95f),
+                    NPCID.DesertBeast => (5f, 0.15f, 0.98f),
+                    _ => (5f, 0.25f, 0.7f)
+                };
                 if (CalamityWorld.revenge)
                 {
                     maxVelocity *= 1.25f;

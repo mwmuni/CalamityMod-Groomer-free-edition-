@@ -315,13 +315,7 @@ namespace CalamityMod.NPCs.Yharon
 
             int spawnPhaseTimer = 75;
 
-            // Target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFar(NPC, false);
 
             Player player = Main.player[NPC.target];
 
@@ -727,33 +721,7 @@ namespace CalamityMod.NPCs.Yharon
                     NPC.ai[1] = Math.Sign((NPC.Center - player.Center).X);
 
                 Vector2 destination = player.Center + new Vector2(NPC.ai[1], 0);
-                Vector2 distanceFromDestination = destination - NPC.Center;
-                Vector2 desiredVelocity = Vector2.Normalize(distanceFromDestination - NPC.velocity) * velocity;
-
-                if (Vector2.Distance(NPC.Center, destination) > reduceSpeedChargeDistance && NPC.localAI[1] <= fastChargeTelegraphTime * 0.5f)
-                    NPC.SimpleFlyMovement(desiredVelocity, acceleration);
-                else
-                    NPC.velocity *= 0.98f;
-
-                int playerFaceDirectionFurtherPhases = Math.Sign(player.Center.X - NPC.Center.X);
-                if (playerFaceDirectionFurtherPhases != 0)
-                {
-                    if (NPC.ai[2] == 0f && playerFaceDirectionFurtherPhases != NPC.direction)
-                        NPC.rotation += MathHelper.Pi;
-
-                    NPC.direction = playerFaceDirectionFurtherPhases;
-
-                    if (NPC.spriteDirection != -NPC.direction)
-                        NPC.rotation += MathHelper.Pi;
-
-                    NPC.spriteDirection = -NPC.direction;
-                }
-
-                // Play a roar sound before charging out of bullet hell
-                if (NPC.ai[2] == -45f)
-                    RoarSoundSlot = SoundEngine.PlaySound(ShortRoarSound, NPC.Center);
-
-                NPC.ai[2] += 1f;
+                int playerFaceDirectionFurtherPhases = UpdatePhaseSwitchMovement(player, destination, velocity, acceleration, reduceSpeedChargeDistance, fastChargeTelegraphTime);
                 if (NPC.ai[2] >= phaseSwitchTimer || slowChargeAfterBulletHell)
                 {
                     int aiState = 0;
@@ -989,33 +957,7 @@ namespace CalamityMod.NPCs.Yharon
                     NPC.ai[1] = Math.Sign((NPC.Center - player.Center).X);
 
                 Vector2 destination = player.Center + new Vector2(NPC.ai[1], 0);
-                Vector2 distanceFromDestination = destination - NPC.Center;
-                Vector2 desiredVelocity = Vector2.Normalize(distanceFromDestination - NPC.velocity) * velocity;
-
-                if (Vector2.Distance(NPC.Center, destination) > reduceSpeedChargeDistance && NPC.localAI[1] <= fastChargeTelegraphTime * 0.5f)
-                    NPC.SimpleFlyMovement(desiredVelocity, acceleration);
-                else
-                    NPC.velocity *= 0.98f;
-
-                int playerFaceDirectionFurtherPhases = Math.Sign(player.Center.X - NPC.Center.X);
-                if (playerFaceDirectionFurtherPhases != 0)
-                {
-                    if (NPC.ai[2] == 0f && playerFaceDirectionFurtherPhases != NPC.direction)
-                        NPC.rotation += MathHelper.Pi;
-
-                    NPC.direction = playerFaceDirectionFurtherPhases;
-
-                    if (NPC.spriteDirection != -NPC.direction)
-                        NPC.rotation += MathHelper.Pi;
-
-                    NPC.spriteDirection = -NPC.direction;
-                }
-
-                // Play a roar sound before charging out of bullet hell
-                if (NPC.ai[2] == -45f)
-                    RoarSoundSlot = SoundEngine.PlaySound(ShortRoarSound, NPC.Center);
-
-                NPC.ai[2] += 1f;
+                int playerFaceDirectionFurtherPhases = UpdatePhaseSwitchMovement(player, destination, velocity, acceleration, reduceSpeedChargeDistance, fastChargeTelegraphTime);
                 if (NPC.ai[2] >= phaseSwitchTimer || slowChargeAfterBulletHell)
                 {
                     int aiState = 0;
@@ -1317,19 +1259,7 @@ namespace CalamityMod.NPCs.Yharon
                 invincibilityCounter++;
             }
 
-            // Acquire target and determine enrage state
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-            {
-                NPC.TargetClosest();
-                NPC.netUpdate = true;
-            }
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-            {
-                NPC.TargetClosest();
-                NPC.netUpdate = true;
-            }
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFar(NPC, true);
 
             Player targetData = Main.player[NPC.target];
 
@@ -2218,6 +2148,38 @@ namespace CalamityMod.NPCs.Yharon
                 NPC.rotation = NPC.rotation.AngleTowards(facingAngle, rotationSpeed);
         }
         #endregion
+
+        private int UpdatePhaseSwitchMovement(Player player, Vector2 destination, float velocity, float acceleration, float reduceSpeedChargeDistance, float fastChargeTelegraphTime)
+        {
+            Vector2 distanceFromDestination = destination - NPC.Center;
+            Vector2 desiredVelocity = Vector2.Normalize(distanceFromDestination - NPC.velocity) * velocity;
+
+            if (Vector2.Distance(NPC.Center, destination) > reduceSpeedChargeDistance && NPC.localAI[1] <= fastChargeTelegraphTime * 0.5f)
+                NPC.SimpleFlyMovement(desiredVelocity, acceleration);
+            else
+                NPC.velocity *= 0.98f;
+
+            int playerFaceDirectionFurtherPhases = Math.Sign(player.Center.X - NPC.Center.X);
+            if (playerFaceDirectionFurtherPhases != 0)
+            {
+                if (NPC.ai[2] == 0f && playerFaceDirectionFurtherPhases != NPC.direction)
+                    NPC.rotation += MathHelper.Pi;
+
+                NPC.direction = playerFaceDirectionFurtherPhases;
+
+                if (NPC.spriteDirection != -NPC.direction)
+                    NPC.rotation += MathHelper.Pi;
+
+                NPC.spriteDirection = -NPC.direction;
+            }
+
+            // Play a roar sound before charging out of bullet hell.
+            if (NPC.ai[2] == -45f)
+                RoarSoundSlot = SoundEngine.PlaySound(ShortRoarSound, NPC.Center);
+
+            NPC.ai[2] += 1f;
+            return playerFaceDirectionFurtherPhases;
+        }
 
         private void UpdateFlareBombBreath(Player player, Vector2 fromMouth, float flareBombPhaseVelocity, float reduceSpeedFlareBombDistance, float flareBombPhaseAcceleration, int flareBombSpawnDivisor)
         {

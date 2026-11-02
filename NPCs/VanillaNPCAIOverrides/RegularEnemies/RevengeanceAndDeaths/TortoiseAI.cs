@@ -65,12 +65,7 @@ public static partial class RevengeanceAndDeathAI
             }
 
             if (NPC.type == NPCID.IceTortoise && Main.rand.NextBool(10))
-            {
-                int iceTortoiseDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.IceRod, NPC.velocity.X * 0.5f, NPC.velocity.Y * 0.5f, 90, default(Color), 1.5f);
-                Main.dust[iceTortoiseDust].noGravity = true;
-                Dust dust = Main.dust[iceTortoiseDust];
-                dust.velocity *= 0.2f;
-            }
+                SpawnIceTortoiseDust(NPC);
 
             if (NPC.ai[0] == 0f)
             {
@@ -298,12 +293,7 @@ public static partial class RevengeanceAndDeathAI
                 if (NPC.ai[0] == 3f)
                 {
                     if (NPC.type == NPCID.IceTortoise && Main.rand.Next(3) < 2)
-                    {
-                        int iceTortoiseSpinDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.IceRod, NPC.velocity.X * 0.5f, NPC.velocity.Y * 0.5f, 90, default(Color), 1.5f);
-                        Main.dust[iceTortoiseSpinDust].noGravity = true;
-                        Dust dust = Main.dust[iceTortoiseSpinDust];
-                        dust.velocity *= 0.2f;
-                    }
+                        SpawnIceTortoiseDust(NPC);
 
                     if (NPC.type == NPCID.GiantShelly || NPC.type == NPCID.GiantShelly2)
                     {
@@ -586,6 +576,14 @@ public static partial class RevengeanceAndDeathAI
             }
 
             return false;
+        }
+
+        private static void SpawnIceTortoiseDust(NPC npc)
+        {
+            int dustIndex = Dust.NewDust(npc.position, npc.width, npc.height, DustID.IceRod, npc.velocity.X * 0.5f, npc.velocity.Y * 0.5f, 90, default(Color), 1.5f);
+            Main.dust[dustIndex].noGravity = true;
+            Dust dust = Main.dust[dustIndex];
+            dust.velocity *= 0.2f;
         }
     }
 }

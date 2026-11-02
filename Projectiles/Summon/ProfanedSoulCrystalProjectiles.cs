@@ -24,13 +24,18 @@ namespace CalamityMod.Projectiles.Summon
         internal static void ExplodeFireball(Projectile projectile, float nightLargeDustScale = 0.75f)
         {
             SoundEngine.PlaySound(SoundID.Item14, projectile.position);
+            FireballDust(projectile, nightLargeDustScale);
+        }
+
+        internal static void FireballDust(Projectile projectile, float nightLargeDustScale = 0.75f, int size = 200, int smallDustCount = 4, int largeDustCount = 12)
+        {
             projectile.position.X = projectile.position.X + (float)(projectile.width / 2);
             projectile.position.Y = projectile.position.Y + (float)(projectile.height / 2);
-            projectile.width = projectile.height = 200;
+            projectile.width = projectile.height = size;
             projectile.position.X = projectile.position.X - (float)(projectile.width / 2);
             projectile.position.Y = projectile.position.Y - (float)(projectile.height / 2);
             int dust = ProvUtils.GetDustID(!Main.dayTime);
-            for (int num621 = 0; num621 < 4; num621++)
+            for (int num621 = 0; num621 < smallDustCount; num621++)
             {
                 int num622 = Dust.NewDust(projectile.position, projectile.width, projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
                 Main.dust[num622].velocity *= 3f;
@@ -40,7 +45,7 @@ namespace CalamityMod.Projectiles.Summon
                     Main.dust[num622].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
                 }
             }
-            for (int num623 = 0; num623 < 12; num623++)
+            for (int num623 = 0; num623 < largeDustCount; num623++)
             {
                 int num624 = Dust.NewDust(projectile.position, projectile.width, projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 3f : nightLargeDustScale);
                 Main.dust[num624].noGravity = true;
@@ -48,6 +53,24 @@ namespace CalamityMod.Projectiles.Summon
                 num624 = Dust.NewDust(projectile.position, projectile.width, projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
                 Main.dust[num624].velocity *= 2f;
             }
+        }
+
+        internal static void Steer(Projectile projectile, Vector2 targetPosition, float speed)
+        {
+            float num550 = speed;
+            Vector2 vector43 = projectile.Center;
+            float num551 = targetPosition.X - vector43.X;
+            float num552 = targetPosition.Y - vector43.Y;
+            float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
+            if (num553 < 100f)
+            {
+                num550 = 28f;
+            }
+            num553 = num550 / num553;
+            num551 *= num553;
+            num552 *= num553;
+            projectile.velocity.X = (projectile.velocity.X * 14f + num551) / 15f;
+            projectile.velocity.Y = (projectile.velocity.Y * 14f + num552) / 15f;
         }
 
         internal static bool TryFindTarget(Projectile projectile, float maxDistance, int npcCount, out NPC target, out Vector2 targetCenter)
@@ -100,18 +123,13 @@ namespace CalamityMod.Projectiles.Summon
     #region Mage Projectiles
 
     #region Main Fireball
-    public class ProfanedCrystalMageFireball : ModProjectile, ILocalizedModType
+    public class ProfanedCrystalMageFireball : BaseProfanedCrystalFireball, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Summon";
         public override string Texture => "CalamityMod/Projectiles/Boss/HolyBlast";
 
-        public override void SetStaticDefaults()
-        {
-            Main.projFrames[Type] = 4;
-            ProjectileID.Sets.MinionTargettingFeature[Type] = true;
-            ProjectileID.Sets.TrailCacheLength[Type] = 5;
-            ProjectileID.Sets.TrailingMode[Type] = 0;
-        }
+        protected override float FireballScale => 0.6f;
+        protected override bool DiesInWater => true;
 
         private void Split(bool hit, bool chaseable)
         {
@@ -163,43 +181,6 @@ namespace CalamityMod.Projectiles.Summon
 
         }
 
-        public override void SetDefaults()
-        {
-            Projectile.width = 180;
-            Projectile.height = 180;
-            Projectile.friendly = true;
-            Projectile.penetrate = 1;
-            Projectile.tileCollide = false;
-            Projectile.timeLeft = 75;
-            Projectile.minion = true;
-            Projectile.scale = 0.6f;
-        }
-
-        public override bool PreAI()
-        {
-            Projectile.Calamity().overridesMinionDamagePrevention = true;
-            Projectile.frameCounter++;
-            if (Projectile.frameCounter > 6)
-            {
-                Projectile.frame++;
-                Projectile.frameCounter = 0;
-            }
-            if (Projectile.frame > 3)
-            {
-                Projectile.frame = 0;
-            }
-            if (Projectile.timeLeft == 50)
-            {
-                Projectile.tileCollide = true;
-            }
-            if (Projectile.wet && !Projectile.lavaWet && Projectile.timeLeft < 70) //timeleft check because projectile lavawet isn't set until after the first frame
-            {
-                Projectile.Kill();
-            }
-            Projectile.rotation = Projectile.velocity.ToRotation();
-            return false;
-        }
-
         public override void AI()
         {
             int pscState = (int)(Main.dayTime ? Providence.BossMode.Normal : Providence.BossMode.Enraged);
@@ -209,21 +190,6 @@ namespace CalamityMod.Projectiles.Summon
             Main.dust[num469].velocity *= 0f;
             var Owner = Main.player[Projectile.owner];
             Projectile.damage = (int)Owner.GetTotalDamage<SummonDamageClass>().ApplyTo(Projectile.originalDamage);
-        }
-
-        public override Color? GetAlpha(Color lightColor)
-        {
-            return ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha);
-        }
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            Texture2D texture = Main.dayTime ? Terraria.GameContent.TextureAssets.Projectile[Type].Value : ModContent.Request<Texture2D>("CalamityMod/Projectiles/Boss/HolyBlastNight").Value;
-            int num214 = texture.Height / Main.projFrames[Type];
-            int y6 = num214 * Projectile.frame;
-            Projectile.DrawBackglow(ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha, true), 4f, texture);
-            Main.spriteBatch.Draw(texture, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(new Rectangle(0, y6, texture.Width, num214)), Projectile.GetAlpha(lightColor), Projectile.rotation, new Vector2(texture.Width / 2f, num214 / 2f), Projectile.scale, SpriteEffects.None, 0);
-            return false;
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -273,7 +239,7 @@ namespace CalamityMod.Projectiles.Summon
     #endregion
 
     #region Fireball Split
-    public class ProfanedCrystalMageFireballSplit : ModProjectile, ILocalizedModType
+    public class ProfanedCrystalMageFireballSplit : BaseProfanedCrystalFireballSplit, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Summon";
         public override string Texture => "CalamityMod/Projectiles/Boss/HolyFire2";
@@ -281,36 +247,8 @@ namespace CalamityMod.Projectiles.Summon
         private int hits = 0;
         private NPC target = null;
 
-        public override void SetStaticDefaults()
-        {
-            Main.projFrames[Type] = 4;
-            ProjectileID.Sets.CultistIsResistantTo[Type] = true;
-            ProjectileID.Sets.MinionTargettingFeature[Type] = true;
-            ProjectileID.Sets.SummonTagDamageMultiplier[Type] = 0.3f;
-        }
-
-        public override void SetDefaults()
-        {
-            Projectile.width = 26;
-            Projectile.height = 26;
-            Projectile.friendly = true;
-            Projectile.ignoreWater = true;
-            Projectile.penetrate = -1;
-            Projectile.tileCollide = false;
-            Projectile.extraUpdates = 1;
-            Projectile.timeLeft = 600;
-            Projectile.minion = true;
-            Projectile.gfxOffY = -25f;
-            Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = -1;
-            Projectile.DamageType = DamageClass.Summon;
-        }
-
-        public override bool PreAI()
-        {
-            Projectile.Calamity().overridesMinionDamagePrevention = true;
-            return true;
-        }
+        protected override int Lifetime => 600;
+        protected override int HitCooldown => -1;
 
         public override void AI()
         {
@@ -341,38 +279,10 @@ namespace CalamityMod.Projectiles.Summon
                     target = foundTarget;
                     if (Projectile.ai[1] == 0f)
                     {
-                        float num550 = 24f; //12
-                        Vector2 vector43 = Projectile.Center;
-                        float num551 = targetPosition.X - vector43.X;
-                        float num552 = targetPosition.Y - vector43.Y;
-                        float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
-                        if (num553 < 100f)
-                        {
-                            num550 = 28f; //14
-                        }
-                        num553 = num550 / num553;
-                        num551 *= num553;
-                        num552 *= num553;
-                        Projectile.velocity.X = (Projectile.velocity.X * 14f + num551) / 15f;
-                        Projectile.velocity.Y = (Projectile.velocity.Y * 14f + num552) / 15f;
+                        ProfanedSoulCrystalProjectileUtils.Steer(Projectile, targetPosition, 24f);
                     }
                 }
             }
-        }
-
-        public override Color? GetAlpha(Color lightColor)
-        {
-            return ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha);
-        }
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            Texture2D texture = Main.dayTime ? Terraria.GameContent.TextureAssets.Projectile[Type].Value : ModContent.Request<Texture2D>("CalamityMod/Projectiles/Boss/HolyFire2Night").Value;
-            int num214 = texture.Height / Main.projFrames[Type];
-            int y6 = num214 * Projectile.frame;
-            Projectile.DrawBackglow(ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha, true), 4f, texture);
-            Main.spriteBatch.Draw(texture, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(new Rectangle(0, y6, texture.Width, num214)), Projectile.GetAlpha(lightColor), Projectile.rotation, new Vector2(texture.Width / 2f, num214 / 2f), Projectile.scale, SpriteEffects.None, 0);
-            return false;
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -518,31 +428,7 @@ namespace CalamityMod.Projectiles.Summon
             SoundEngine.PlaySound(SoundID.Item74, Projectile.position);
             if (Main.rand.NextBool() || Main.rand.NextBool(3)) //so it's not exactly 1 in 2, but it's not more or less consistently either.
             {
-                Projectile.position.X = Projectile.position.X + (float)(Projectile.width / 2);
-                Projectile.position.Y = Projectile.position.Y + (float)(Projectile.height / 2);
-                Projectile.width = Projectile.height = 200;
-                Projectile.position.X = Projectile.position.X - (float)(Projectile.width / 2);
-                Projectile.position.Y = Projectile.position.Y - (float)(Projectile.height / 2);
-                int dust = ProvUtils.GetDustID(!Main.dayTime);
-                for (int num621 = 0; num621 < 4; num621++)
-                {
-                    int num622 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                    Main.dust[num622].velocity *= 3f;
-                    if (Main.rand.NextBool())
-                    {
-                        Main.dust[num622].scale = 0.5f;
-                        Main.dust[num622].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
-                    }
-                }
-                for (int num623 = 0; num623 < 12; num623++)
-                {
-                    int num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 3f : 0.75f);
-                    Main.dust[num624].noGravity = true;
-                    Main.dust[num624].velocity *= 5f;
-                    num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                    Main.dust[num624].velocity *= 2f;
-
-                }
+                ProfanedSoulCrystalProjectileUtils.FireballDust(Projectile);
             }
         }
 
@@ -561,9 +447,10 @@ namespace CalamityMod.Projectiles.Summon
     #region Ranger Projectiles
 
     #region Meteors
-    public class ProfanedCrystalRangedHuges : ModProjectile, ILocalizedModType
+    public class ProfanedCrystalRangedHuges : BaseProfanedCrystalProjectile, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Summon";
+        protected override Texture2D DrawTexture => Main.dayTime ? Terraria.GameContent.TextureAssets.Projectile[Type].Value : ModContent.Request<Texture2D>("CalamityMod/Projectiles/Summon/ProfanedCrystalRangedHugesNight").Value;
         bool boomerSwarm = false;
         bool kill = false;
         NPC target = null;
@@ -678,16 +565,7 @@ namespace CalamityMod.Projectiles.Summon
             var Owner = Main.player[Projectile.owner];
             Projectile.damage = (int)Owner.GetTotalDamage<SummonDamageClass>().ApplyTo(Projectile.originalDamage);
 
-            Projectile.frameCounter++;
-            if (Projectile.frameCounter > 8)
-            {
-                Projectile.frame++;
-                Projectile.frameCounter = 0;
-            }
-            if (Projectile.frame > 2)
-            {
-                Projectile.frame = 0;
-            }
+            Projectile.LoopAnimation(8, 3, 0);
             if (Projectile.timeLeft == 145 && Projectile.ai[0] < 2f)
             {
                 Projectile.tileCollide = true;
@@ -701,21 +579,6 @@ namespace CalamityMod.Projectiles.Summon
             Main.dust[num469].velocity *= 0f;
             if (boomerSwarm)
                 swarmAI();
-        }
-
-        public override Color? GetAlpha(Color lightColor)
-        {
-            return ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha);
-        }
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            Texture2D texture = Main.dayTime ? Terraria.GameContent.TextureAssets.Projectile[Type].Value : ModContent.Request<Texture2D>("CalamityMod/Projectiles/Summon/ProfanedCrystalRangedHugesNight").Value;
-            int num214 = texture.Height / Main.projFrames[Type];
-            int y6 = num214 * Projectile.frame;
-            Projectile.DrawBackglow(ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha, true), 4f, texture);
-            Main.spriteBatch.Draw(texture, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(new Rectangle(0, y6, texture.Width, num214)), Projectile.GetAlpha(lightColor), Projectile.rotation, new Vector2(texture.Width / 2f, num214 / 2f), Projectile.scale, SpriteEffects.None, 0);
-            return false;
         }
 
         public override bool? CanHitNPC(NPC target)
@@ -782,7 +645,7 @@ namespace CalamityMod.Projectiles.Summon
 
     #region Fireballs
 
-    public class ProfanedCrystalRangedSmalls : ModProjectile, ILocalizedModType
+    public class ProfanedCrystalRangedSmalls : BaseProfanedCrystalProjectile, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Summon";
         public override void SetStaticDefaults()
@@ -804,27 +667,12 @@ namespace CalamityMod.Projectiles.Summon
             Projectile.DamageType = DamageClass.Summon;
         }
 
-        public override bool PreAI()
-        {
-            Projectile.Calamity().overridesMinionDamagePrevention = true;
-            return true;
-        }
-
         public override void AI()
         {
             var Owner = Main.player[Projectile.owner];
             Projectile.damage = (int)Owner.GetTotalDamage<SummonDamageClass>().ApplyTo(Projectile.originalDamage);
 
-            Projectile.frameCounter++;
-            if (Projectile.frameCounter > 4)
-            {
-                Projectile.frame++;
-                Projectile.frameCounter = 0;
-            }
-            if (Projectile.frame > 3)
-            {
-                Projectile.frame = 0;
-            }
+            Projectile.LoopAnimation(4, 4, 0);
             if (Projectile.ai[0] == 0f)
             {
             }
@@ -846,31 +694,7 @@ namespace CalamityMod.Projectiles.Summon
             SoundEngine.PlaySound(SoundID.Item14, Projectile.position);
             if (!Main.rand.NextBool(3)) //1 in 3 chance for dust
                 return;
-            Projectile.position.X = Projectile.position.X + (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y + (float)(Projectile.height / 2);
-            Projectile.width = 50;
-            Projectile.height = 50;
-            Projectile.position.X = Projectile.position.X - (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y - (float)(Projectile.height / 2);
-            int dust = ProvUtils.GetDustID(!Main.dayTime);
-            for (int num621 = 0; num621 < 10; num621++)
-            {
-                int num622 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num622].velocity *= 3f;
-                if (Main.rand.NextBool())
-                {
-                    Main.dust[num622].scale = 0.5f;
-                    Main.dust[num622].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
-                }
-            }
-            for (int num623 = 0; num623 < 15; num623++)
-            {
-                int num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 3f : 0.75f);
-                Main.dust[num624].noGravity = true;
-                Main.dust[num624].velocity *= 5f;
-                num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num624].velocity *= 2f;
-            }
+            ProfanedSoulCrystalProjectileUtils.FireballDust(Projectile, size: 50, smallDustCount: 10, largeDustCount: 15);
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -883,19 +707,6 @@ namespace CalamityMod.Projectiles.Summon
             Main.player[Projectile.owner].Calamity().rollBabSpears(50, true);
         }
 
-        public override Color? GetAlpha(Color lightColor)
-        {
-            return ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha);
-        }
-        public override bool PreDraw(ref Color lightColor)
-        {
-            Texture2D texture = Terraria.GameContent.TextureAssets.Projectile[Type].Value;
-            int num214 = texture.Height / Main.projFrames[Type];
-            int y6 = num214 * Projectile.frame;
-            Projectile.DrawBackglow(ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha, true), 4f, texture);
-            Main.spriteBatch.Draw(texture, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(new Rectangle(0, y6, texture.Width, num214)), Projectile.GetAlpha(lightColor), Projectile.rotation, new Vector2(texture.Width / 2f, num214 / 2f), Projectile.scale, SpriteEffects.None, 0);
-            return false;
-        }
     }
 
     #endregion
@@ -954,20 +765,7 @@ namespace CalamityMod.Projectiles.Summon
                     if (Main.rand.NextBool())
                         Projectile.timeLeft++;
                     Projectile.tileCollide = false;
-                    float num550 = 40f;
-                    Vector2 vector43 = Projectile.Center;
-                    float num551 = targetPosition.X - vector43.X;
-                    float num552 = targetPosition.Y - vector43.Y;
-                    float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
-                    if (num553 < 100f)
-                    {
-                        num550 = 28f; //14
-                    }
-                    num553 = num550 / num553;
-                    num551 *= num553;
-                    num552 *= num553;
-                    Projectile.velocity.X = (Projectile.velocity.X * 14f + num551) / 15f;
-                    Projectile.velocity.Y = (Projectile.velocity.Y * 14f + num552) / 15f;
+                    ProfanedSoulCrystalProjectileUtils.Steer(Projectile, targetPosition, 40f);
                     Projectile.velocity *= 1.05f;
                 }
                 else
@@ -1616,20 +1414,7 @@ namespace CalamityMod.Projectiles.Summon
                     {
                         if (Projectile.ai[1] == 0f)
                         {
-                            float num550 = 24f; //12
-                            Vector2 vector43 = Projectile.Center;
-                            float num551 = targetPosition.X - vector43.X;
-                            float num552 = targetPosition.Y - vector43.Y;
-                            float num553 = (float)Math.Sqrt((double)(num551 * num551 + num552 * num552));
-                            if (num553 < 100f)
-                            {
-                                num550 = 28f; //14
-                            }
-                            num553 = num550 / num553;
-                            num551 *= num553;
-                            num552 *= num553;
-                            Projectile.velocity.X = (Projectile.velocity.X * 14f + num551) / 15f;
-                            Projectile.velocity.Y = (Projectile.velocity.Y * 14f + num552) / 15f;
+                            ProfanedSoulCrystalProjectileUtils.Steer(Projectile, targetPosition, 24f);
                         }
                     }
                 }
@@ -1705,18 +1490,12 @@ namespace CalamityMod.Projectiles.Summon
 
     #region Bab Fireball
 
-    public class MiniGuardianFireball : ModProjectile, ILocalizedModType
+    public class MiniGuardianFireball : BaseProfanedCrystalFireball, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Summon";
         public override string Texture => "CalamityMod/Projectiles/Boss/HolyBlast";
 
-        public override void SetStaticDefaults()
-        {
-            Main.projFrames[Type] = 4;
-            ProjectileID.Sets.MinionTargettingFeature[Type] = true;
-            ProjectileID.Sets.TrailCacheLength[Type] = 5;
-            ProjectileID.Sets.TrailingMode[Type] = 0;
-        }
+        protected override float FireballScale => 0.4f;
 
         private void Split()
         {
@@ -1733,39 +1512,6 @@ namespace CalamityMod.Projectiles.Summon
             }
         }
 
-        public override void SetDefaults()
-        {
-            Projectile.width = 180;
-            Projectile.height = 180;
-            Projectile.friendly = true;
-            Projectile.penetrate = 1;
-            Projectile.tileCollide = false;
-            Projectile.timeLeft = 75;
-            Projectile.minion = true;
-            Projectile.scale = 0.4f;
-        }
-
-        public override bool PreAI()
-        {
-            Projectile.Calamity().overridesMinionDamagePrevention = true;
-            Projectile.frameCounter++;
-            if (Projectile.frameCounter > 6)
-            {
-                Projectile.frame++;
-                Projectile.frameCounter = 0;
-            }
-            if (Projectile.frame > 3)
-            {
-                Projectile.frame = 0;
-            }
-            if (Projectile.timeLeft == 50)
-            {
-                Projectile.tileCollide = true;
-            }
-            Projectile.rotation = Projectile.velocity.ToRotation();
-            return false;
-        }
-
         public override void AI()
         {
             var Owner = Main.player[Projectile.owner];
@@ -1774,21 +1520,6 @@ namespace CalamityMod.Projectiles.Summon
             int num469 = Dust.NewDust(Projectile.Center, Projectile.width, Projectile.height, ProvUtils.GetDustID(!Main.dayTime), 0f, 0f, 100, default, 1f);
             Main.dust[num469].noGravity = true;
             Main.dust[num469].velocity *= 0f;
-        }
-
-        public override Color? GetAlpha(Color lightColor)
-        {
-            return ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha);
-        }
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            Texture2D texture = Main.dayTime ? Terraria.GameContent.TextureAssets.Projectile[Type].Value : ModContent.Request<Texture2D>("CalamityMod/Projectiles/Boss/HolyBlastNight").Value;
-            int num214 = texture.Height / Main.projFrames[Type];
-            int y6 = num214 * Projectile.frame;
-            Projectile.DrawBackglow(ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha, true), 4f, texture);
-            Main.spriteBatch.Draw(texture, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(new Rectangle(0, y6, texture.Width, num214)), Projectile.GetAlpha(lightColor), Projectile.rotation, new Vector2(texture.Width / 2f, num214 / 2f), Projectile.scale, SpriteEffects.None, 0);
-            return false;
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -1843,41 +1574,13 @@ namespace CalamityMod.Projectiles.Summon
     #region Bab Fireball Split
 
 
-    public class MiniGuardianFireballSplit : ModProjectile, ILocalizedModType
+    public class MiniGuardianFireballSplit : BaseProfanedCrystalFireballSplit, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Summon";
         public override string Texture => "CalamityMod/Projectiles/Boss/HolyFire2";
 
-        public override void SetStaticDefaults()
-        {
-            Main.projFrames[Type] = 4;
-            ProjectileID.Sets.CultistIsResistantTo[Type] = true;
-            ProjectileID.Sets.MinionTargettingFeature[Type] = true;
-            ProjectileID.Sets.SummonTagDamageMultiplier[Type] = 0.3f;
-        }
-
-        public override void SetDefaults()
-        {
-            Projectile.width = 26;
-            Projectile.height = 26;
-            Projectile.friendly = true;
-            Projectile.ignoreWater = true;
-            Projectile.penetrate = -1;
-            Projectile.tileCollide = false;
-            Projectile.extraUpdates = 1;
-            Projectile.timeLeft = 300;
-            Projectile.minion = true;
-            Projectile.gfxOffY = -25f;
-            Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = 6;
-            Projectile.DamageType = DamageClass.Summon;
-        }
-
-        public override bool PreAI()
-        {
-            Projectile.Calamity().overridesMinionDamagePrevention = true;
-            return true;
-        }
+        protected override int Lifetime => 300;
+        protected override int HitCooldown => 6;
 
         public override void AI()
         {
@@ -1886,14 +1589,7 @@ namespace CalamityMod.Projectiles.Summon
             var Owner = Main.player[Projectile.owner];
             Projectile.damage = (int)Owner.GetTotalDamage<SummonDamageClass>().ApplyTo(Projectile.originalDamage);
 
-            Projectile.frameCounter++;
-            if (Projectile.frameCounter > 6)
-            {
-                Projectile.frame++;
-                Projectile.frameCounter = 0;
-            }
-            if (Projectile.frame > 3)
-                Projectile.frame = 0;
+            Projectile.LoopAnimation(6, 4, 0);
 
             if (Math.Abs(Projectile.velocity.X) < 8f)
                 Projectile.velocity.X *= 1.05f;
@@ -1913,21 +1609,6 @@ namespace CalamityMod.Projectiles.Summon
             }
 
             Projectile.rotation = Projectile.velocity.X * 0.025f;
-        }
-
-        public override Color? GetAlpha(Color lightColor)
-        {
-            return ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha);
-        }
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            Texture2D texture = Main.dayTime ? Terraria.GameContent.TextureAssets.Projectile[Type].Value : ModContent.Request<Texture2D>("CalamityMod/Projectiles/Boss/HolyFire2Night").Value;
-            int num214 = texture.Height / Main.projFrames[Type];
-            int y6 = num214 * Projectile.frame;
-            Projectile.DrawBackglow(ProvUtils.GetColorBasedOnEnrage(!Main.dayTime, Projectile.alpha, true), 4f, texture);
-            Main.spriteBatch.Draw(texture, Projectile.Center - Main.screenPosition + new Vector2(0f, Projectile.gfxOffY), new Microsoft.Xna.Framework.Rectangle?(new Rectangle(0, y6, texture.Width, num214)), Projectile.GetAlpha(lightColor), Projectile.rotation, new Vector2(texture.Width / 2f, num214 / 2f), Projectile.scale, SpriteEffects.None, 0);
-            return false;
         }
 
         public override void OnKill(int timeLeft) => ProfanedSoulCrystalProjectileUtils.ExplodeFireball(Projectile, nightLargeDustScale: 0.5f);

@@ -212,19 +212,22 @@ namespace CalamityMod.Projectiles.Magic
         #region Pink Mark
         public void PinkMarkExplosionDust()
         {
-            // Spawn the main balloon.
-            BalloonExplosionDust(Projectile.Center, Main.rand.NextFloat(8f, 15f), Color.Yellow);
+            TripleMarkExplosionDust((center, speed, angle, main) => BalloonExplosionDust(center, speed, main ? Color.Yellow : Color.DeepPink, angle), 15f, 40f, true);
+        }
 
-            // Spawn the two smaller balloons.
+        private void TripleMarkExplosionDust(Action<Vector2, float, float, bool> explode, float mainMaxSpeed, float horizontalOffset, bool rotateSideMarks)
+        {
+            // Invoke each complete effect before drawing randomness for the next mark.
+            explode(Projectile.Center, Main.rand.NextFloat(8f, mainMaxSpeed), 0f, true);
             float absoluteOffsetAngle = Main.rand.NextFloat(0.4f, 0.7f) * -1f;
             Vector2 offset = Vector2.UnitY.RotatedBy(absoluteOffsetAngle) * 120f;
-            offset += Vector2.UnitX * 40f;
-            BalloonExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f), Color.DeepPink, absoluteOffsetAngle);
+            offset += Vector2.UnitX * horizontalOffset;
+            explode(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f), rotateSideMarks ? absoluteOffsetAngle : 0f, false);
 
             absoluteOffsetAngle = Main.rand.NextFloat(0.4f, 0.7f);
             offset = Vector2.UnitY.RotatedBy(absoluteOffsetAngle) * 120f;
-            offset -= Vector2.UnitX * 40f;
-            BalloonExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f), Color.DeepPink, absoluteOffsetAngle);
+            offset -= Vector2.UnitX * horizontalOffset;
+            explode(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f), rotateSideMarks ? absoluteOffsetAngle : 0f, false);
         }
         public void BalloonExplosionDust(Vector2 center, float petalBurstSpeed, Color balloonColor, float absoluteOffsetAngle = 0)
         {
@@ -281,19 +284,7 @@ namespace CalamityMod.Projectiles.Magic
         #region Orange Mark
         public void OrangeMarkExplosionDust()
         {
-            // Spawn the main apple.
-            AppleExplosionDust(Projectile.Center, Main.rand.NextFloat(8f, 15f));
-
-            // Spawn two other apples to the side.
-            float absoluteOffsetAngle = Main.rand.NextFloat(0.4f, 0.7f) * -1f;
-            Vector2 offset = Vector2.UnitY.RotatedBy(absoluteOffsetAngle) * 120f;
-            offset += Vector2.UnitX * 70f;
-            AppleExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f), absoluteOffsetAngle);
-
-            absoluteOffsetAngle = Main.rand.NextFloat(0.4f, 0.7f);
-            offset = Vector2.UnitY.RotatedBy(absoluteOffsetAngle) * 120f;
-            offset -= Vector2.UnitX * 70f;
-            AppleExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f), absoluteOffsetAngle);
+            TripleMarkExplosionDust((center, speed, angle, main) => AppleExplosionDust(center, speed, angle), 15f, 70f, true);
         }
         public void AppleExplosionDust(Vector2 center, float appleBurstSpeed, float offsetAngle = 0f)
         {
@@ -360,16 +351,7 @@ namespace CalamityMod.Projectiles.Magic
         #region Yellow Mark
         public void YellowMarkExplosionDust()
         {
-            // Spawn three butterflies.
-            ButterflyExplosionDust(Projectile.Center, Main.rand.NextFloat(8f, 12f));
-
-            Vector2 offset = Vector2.UnitY.RotatedBy(Main.rand.NextFloat(0.4f, 0.7f) * -1f) * 120f;
-            offset += Vector2.UnitX * 84f;
-            ButterflyExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f));
-
-            offset = Vector2.UnitY.RotatedBy(Main.rand.NextFloat(0.4f, 0.7f)) * 120f;
-            offset -= Vector2.UnitX * 84f;
-            ButterflyExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f));
+            TripleMarkExplosionDust((center, speed, angle, main) => ButterflyExplosionDust(center, speed, angle), 12f, 84f, false);
         }
         public void ButterflyExplosionDust(Vector2 center, float butterflyBurstSpeed, float offsetAngle = 0f)
         {
@@ -427,18 +409,7 @@ namespace CalamityMod.Projectiles.Magic
         #region White Mark
         public void WhiteMarkExplosionDust()
         {
-            // Spawn three diamonds.
-            DiamondExplosionDust(Projectile.Center, Main.rand.NextFloat(8f, 12f));
-
-            float absoluteOffsetAngle = Main.rand.NextFloat(0.4f, 0.7f);
-            Vector2 offset = Vector2.UnitY.RotatedBy(absoluteOffsetAngle * -1f) * 120f;
-            offset += Vector2.UnitX * 84f;
-            DiamondExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f));
-
-            absoluteOffsetAngle = Main.rand.NextFloat(0.4f, 0.7f);
-            offset = Vector2.UnitY.RotatedBy(absoluteOffsetAngle) * 120f;
-            offset -= Vector2.UnitX * 84f;
-            DiamondExplosionDust(Projectile.Center + offset, Main.rand.NextFloat(6f, 11f));
+            TripleMarkExplosionDust((center, speed, angle, main) => DiamondExplosionDust(center, speed, angle), 12f, 84f, false);
         }
         public void DiamondExplosionDust(Vector2 center, float diamondBurstSpeed, float offsetAngle = 0f)
         {

@@ -325,8 +325,7 @@ namespace CalamityMod.CalPlayer
 
             if (bloodfinBoost)
             {
-                if (bloodfinTimer > 0)
-                    bloodfinTimer--;
+                DecrementIfPositive(ref bloodfinTimer);
 
                 if (Player.whoAmI == Main.myPlayer && bloodfinTimer <= 0)
                 {

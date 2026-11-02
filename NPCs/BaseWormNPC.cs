@@ -302,6 +302,110 @@ namespace CalamityMod.NPCs
     #endregion
     public abstract class BaseWormNPC : ModNPC
     {
+        internal static void UpdateFallingVelocity(NPC NPC, float maxChaseSpeed, float speed, float playerX)
+        {
+            if (NPC.velocity.Y > maxChaseSpeed)
+                NPC.velocity.Y = maxChaseSpeed;
+
+            // Avoid the horizontal wiggle while falling without changing the speed comparisons.
+            bool slowXVelocity = Math.Abs(NPC.velocity.X) > speed;
+            if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.4)
+            {
+                if (NPC.velocity.X < 0f)
+                    NPC.velocity.X -= speed * 1.1f;
+                else
+                    NPC.velocity.X += speed * 1.1f;
+            }
+            else if (NPC.velocity.Y == maxChaseSpeed)
+            {
+                if (slowXVelocity)
+                {
+                    if (NPC.velocity.X < playerX)
+                        NPC.velocity.X += speed;
+                    else if (NPC.velocity.X > playerX)
+                        NPC.velocity.X -= speed;
+                }
+                else
+                    NPC.velocity.X = 0f;
+            }
+            else if (NPC.velocity.Y > 4f)
+            {
+                if (slowXVelocity)
+                {
+                    if (NPC.velocity.X < 0f)
+                        NPC.velocity.X += speed * 0.9f;
+                    else
+                        NPC.velocity.X -= speed * 0.9f;
+                }
+                else
+                    NPC.velocity.X = 0f;
+            }
+        }
+
+        // Targets are already speed-scaled; absolute distances are from before that scaling.
+        // Callers retain their own gravity, flight boosts, digging sound and extra turning.
+        internal static void SteerWormVelocity(NPC NPC, float playerX, float targettingPosition, float absolutePlayerX, float absoluteTargetPos, float maxChaseSpeed, float speed)
+        {
+            if ((NPC.velocity.X > 0f && playerX > 0f) || (NPC.velocity.X < 0f && playerX < 0f) || (NPC.velocity.Y > 0f && targettingPosition > 0f) || (NPC.velocity.Y < 0f && targettingPosition < 0f))
+            {
+                if (NPC.velocity.X < playerX)
+                    NPC.velocity.X += speed;
+                else if (NPC.velocity.X > playerX)
+                    NPC.velocity.X -= speed;
+
+                if (NPC.velocity.Y < targettingPosition)
+                    NPC.velocity.Y += speed;
+                else if (NPC.velocity.Y > targettingPosition)
+                    NPC.velocity.Y -= speed;
+
+                if ((double)Math.Abs(targettingPosition) < maxChaseSpeed * 0.2 && ((NPC.velocity.X > 0f && playerX < 0f) || (NPC.velocity.X < 0f && playerX > 0f)))
+                {
+                    if (NPC.velocity.Y > 0f)
+                        NPC.velocity.Y += speed * 2f;
+                    else
+                        NPC.velocity.Y -= speed * 2f;
+                }
+
+                if ((double)Math.Abs(playerX) < maxChaseSpeed * 0.2 && ((NPC.velocity.Y > 0f && targettingPosition < 0f) || (NPC.velocity.Y < 0f && targettingPosition > 0f)))
+                {
+                    if (NPC.velocity.X > 0f)
+                        NPC.velocity.X += speed * 2f;
+                    else
+                        NPC.velocity.X -= speed * 2f;
+                }
+            }
+            else if (absolutePlayerX > absoluteTargetPos)
+            {
+                if (NPC.velocity.X < playerX)
+                    NPC.velocity.X += speed * 1.1f;
+                else if (NPC.velocity.X > playerX)
+                    NPC.velocity.X -= speed * 1.1f;
+
+                if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
+                {
+                    if (NPC.velocity.Y > 0f)
+                        NPC.velocity.Y += speed;
+                    else
+                        NPC.velocity.Y -= speed;
+                }
+            }
+            else
+            {
+                if (NPC.velocity.Y < targettingPosition)
+                    NPC.velocity.Y += speed * 1.1f;
+                else if (NPC.velocity.Y > targettingPosition)
+                    NPC.velocity.Y -= speed * 1.1f;
+
+                if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
+                {
+                    if (NPC.velocity.X > 0f)
+                        NPC.velocity.X += speed;
+                    else
+                        NPC.velocity.X -= speed;
+                }
+            }
+        }
+
         #region Abstracts & Commonly Overriden Fields
         /// <summary>
         /// The amount of segments of this worm. This does not include the head

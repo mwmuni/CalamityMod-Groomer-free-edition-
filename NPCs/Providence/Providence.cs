@@ -417,6 +417,16 @@ namespace CalamityMod.NPCs.Providence
                 NPC.ai[3] = -projectileShootGateValue;
         }
 
+        private void AdvancePhaseTimer(float phaseTime)
+        {
+            NPC.ai[1] += 1f;
+            if (NPC.ai[1] >= phaseTime)
+            {
+                AIState = (int)Phase.PhaseChange;
+                NPC.TargetClosest();
+            }
+        }
+
         public override void AI()
         {
             //ensure projectiles all despawn when she does
@@ -438,13 +448,7 @@ namespace CalamityMod.NPCs.Providence
             // Rotation
             NPC.rotation = MathHelper.Lerp(NPC.rotation, NPC.velocity.X * 0.006f, 0.1f);
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFar(NPC, false);
 
             // Target variable and boss center
             Player player = Main.player[NPC.target];
@@ -1121,12 +1125,7 @@ namespace CalamityMod.NPCs.Providence
                     else if (NPC.ai[3] < 0f)
                         NPC.ai[3] += 1f;
 
-                    NPC.ai[1] += 1f;
-                    if (NPC.ai[1] >= phaseTime)
-                    {
-                        AIState = (int)Phase.PhaseChange;
-                        NPC.TargetClosest();
-                    }
+                    AdvancePhaseTimer(phaseTime);
 
                     break;
 
@@ -1167,12 +1166,7 @@ namespace CalamityMod.NPCs.Providence
                         }
                     }
 
-                    NPC.ai[1] += 1f;
-                    if (NPC.ai[1] >= phaseTime)
-                    {
-                        AIState = (int)Phase.PhaseChange;
-                        NPC.TargetClosest();
-                    }
+                    AdvancePhaseTimer(phaseTime);
 
                     break;
 
@@ -1386,12 +1380,7 @@ namespace CalamityMod.NPCs.Providence
                     else if (NPC.ai[3] < 0f)
                         NPC.ai[3] += 1f;
 
-                    NPC.ai[1] += 1f;
-                    if (NPC.ai[1] >= phaseTime)
-                    {
-                        AIState = (int)Phase.PhaseChange;
-                        NPC.TargetClosest();
-                    }
+                    AdvancePhaseTimer(phaseTime);
 
                     break;
 
@@ -1429,12 +1418,7 @@ namespace CalamityMod.NPCs.Providence
                         }
                     }
 
-                    NPC.ai[1] += 1f;
-                    if (NPC.ai[1] >= phaseTime)
-                    {
-                        AIState = (int)Phase.PhaseChange;
-                        NPC.TargetClosest();
-                    }
+                    AdvancePhaseTimer(phaseTime);
 
                     break;
 

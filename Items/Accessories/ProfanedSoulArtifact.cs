@@ -35,29 +35,28 @@ namespace CalamityMod.Items.Accessories
         public int OwnerPlayer { get; set; }
         public float RenderDepth => IDyeableShaderRenderer.ProfanedSoulShieldDepth;
 
-        public bool ShouldDrawDyeableShader
+        public bool ShouldDrawDyeableShader => ShouldDrawSoulShield(OwnerPlayer);
+
+        internal static bool ShouldDrawSoulShield(int ownerPlayer)
         {
-            get
-            {
-                if (CalamityClientConfig.Instance.EnergyShieldOpacity <= 0.0f)
-                    return false;
+            if (CalamityClientConfig.Instance.EnergyShieldOpacity <= 0.0f)
+                return false;
 
-                if (OwnerPlayer < 0 || OwnerPlayer >= Main.maxPlayers)
-                    return false;
+            if (ownerPlayer < 0 || ownerPlayer >= Main.maxPlayers)
+                return false;
 
-                var player = Main.player[OwnerPlayer];
-                if (player is null)
-                    return false;
+            var player = Main.player[ownerPlayer];
+            if (player is null)
+                return false;
 
-                if (player.outOfRange || player.dead)
-                    return false;
+            if (player.outOfRange || player.dead)
+                return false;
 
-                CalamityPlayer modPlayer = player.Calamity();
-                if (modPlayer.drawingParameters.ProfanedShieldCharge <= 0.0f)
-                    return false;
+            CalamityPlayer modPlayer = player.Calamity();
+            if (modPlayer.drawingParameters.ProfanedShieldCharge <= 0.0f)
+                return false;
 
-                return true;
-            }
+            return true;
         }
 
         public override void SetStaticDefaults()

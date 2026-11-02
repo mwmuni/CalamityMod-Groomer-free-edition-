@@ -18,6 +18,19 @@ namespace CalamityMod.Items
     // ApplyTweaks(ref Item item) would be the one exposed function, which CalamityGlobalItem would call in SetDefaults.
     public partial class CalamityGlobalItem : GlobalItem
     {
+        internal static void ClampTweakMinimum(ref int value, int minimum)
+        {
+            if (value < minimum)
+                value = minimum;
+        }
+
+        internal static void ClampTweakMinimum(ref float value, float minimum)
+        {
+            // A comparison (not Math.Max/CompareTo) leaves NaN and signed zero alone.
+            if (value < minimum)
+                value = minimum;
+        }
+
         // 02AUG2023: Ozzatron: Having Overhaul enabled turns off all scaling changes, per direct request from Mirsario on 8/2/23.
         private static bool DisableScalingForOverhaul => ExternalMods.overhaul is not null;
 
@@ -538,8 +551,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.axe = newAxePower;
-                if (it.axe < 0)
-                    it.axe = 0;
+                ClampTweakMinimum(ref it.axe, 0);
             }
         }
         internal static IItemTweak AxePower(int a) => new AxePowerRule(a);
@@ -568,8 +580,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.crit += delta;
-                if (it.crit < 0)
-                    it.crit = 0;
+                ClampTweakMinimum(ref it.crit, 0);
             }
         }
         internal static IItemTweak CritDelta(int d) => new CritChanceDeltaRule(d);
@@ -583,8 +594,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.crit = newCrit;
-                if (it.crit < 0)
-                    it.crit = 0;
+                ClampTweakMinimum(ref it.crit, 0);
             }
         }
         internal static IItemTweak CritExact(int crit) => new CritChanceExactRule(crit);
@@ -600,8 +610,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.damage += delta;
-                if (it.damage < 0)
-                    it.damage = 0;
+                ClampTweakMinimum(ref it.damage, 0);
             }
         }
         internal static IItemTweak DamageDelta(int d) => new DamageDeltaRule(d);
@@ -615,8 +624,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.damage = newDamage;
-                if (it.damage < 0)
-                    it.damage = 0;
+                ClampTweakMinimum(ref it.damage, 0);
             }
         }
         internal static IItemTweak DamageExact(int d) => new DamageExactRule(d);
@@ -630,8 +638,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.damage = (int)(it.damage * ratio);
-                if (it.damage < 0)
-                    it.damage = 0;
+                ClampTweakMinimum(ref it.damage, 0);
             }
         }
         internal static IItemTweak DamageRatio(float f) => new DamageRatioRule(f);
@@ -647,8 +654,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.defense += delta;
-                if (it.defense < 0)
-                    it.defense = 0;
+                ClampTweakMinimum(ref it.defense, 0);
             }
         }
         internal static IItemTweak DefenseDelta(int d) => new DefenseDeltaRule(d);
@@ -662,8 +668,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.defense = newDefense;
-                if (it.defense < 0)
-                    it.defense = 0;
+                ClampTweakMinimum(ref it.defense, 0);
             }
         }
         internal static IItemTweak DefenseExact(int d) => new DefenseExactRule(d);
@@ -679,8 +684,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.hammer = newHammerPower;
-                if (it.hammer < 0)
-                    it.hammer = 0;
+                ClampTweakMinimum(ref it.hammer, 0);
             }
         }
         internal static IItemTweak HammerPower(int h) => new HammerPowerRule(h);
@@ -696,8 +700,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.knockBack += delta;
-                if (it.knockBack < 0f)
-                    it.knockBack = 0f;
+                ClampTweakMinimum(ref it.knockBack, 0f);
             }
         }
         internal static IItemTweak KnockbackDelta(float d) => new KnockbackDeltaRule(d);
@@ -711,8 +714,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.knockBack = newKnockback;
-                if (it.knockBack < 0f)
-                    it.knockBack = 0f;
+                ClampTweakMinimum(ref it.knockBack, 0f);
             }
         }
         internal static IItemTweak KnockbackExact(float kb) => new KnockbackExactRule(kb);
@@ -726,8 +728,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.knockBack *= ratio;
-                if (it.knockBack < 0f)
-                    it.knockBack = 0f;
+                ClampTweakMinimum(ref it.knockBack, 0f);
             }
         }
         internal static IItemTweak KnockbackRatio(float r) => new KnockbackRatioRule(r);
@@ -743,8 +744,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.mana += delta;
-                if (it.mana < 0)
-                    it.mana = 0;
+                ClampTweakMinimum(ref it.mana, 0);
             }
         }
         internal static IItemTweak ManaDelta(int d) => new ManaDeltaRule(d);
@@ -758,8 +758,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.mana = newMana;
-                if (it.mana < 0)
-                    it.mana = 0;
+                ClampTweakMinimum(ref it.mana, 0);
             }
         }
         internal static IItemTweak ManaExact(int m) => new ManaExactRule(m);
@@ -773,8 +772,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.mana = (int)(it.mana * ratio);
-                if (it.mana < 0)
-                    it.mana = 0;
+                ClampTweakMinimum(ref it.mana, 0);
             }
         }
         internal static IItemTweak ManaRatio(float f) => new ManaRatioRule(f);
@@ -790,8 +788,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.maxStack = newMaxStack;
-                if (it.maxStack < 1)
-                    it.maxStack = 1;
+                ClampTweakMinimum(ref it.maxStack, 1);
             }
         }
         internal static IItemTweak MaxStack(int stk) => new MaxStackRule(stk);
@@ -843,8 +840,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.pick = newPickPower;
-                if (it.pick < 0)
-                    it.pick = 0;
+                ClampTweakMinimum(ref it.pick, 0);
             }
         }
         internal static IItemTweak PickPower(int p) => new PickPowerRule(p);
@@ -862,8 +858,7 @@ namespace CalamityMod.Items
                 if (DisableScalingForOverhaul)
                     return;
                 it.scale += delta;
-                if (it.scale < 0f)
-                    it.scale = 0f;
+                ClampTweakMinimum(ref it.scale, 0f);
             }
         }
         internal static IItemTweak ScaleDelta(float d) => new ScaleDeltaRule(d);
@@ -879,8 +874,7 @@ namespace CalamityMod.Items
                 if (DisableScalingForOverhaul)
                     return;
                 it.scale = newScale;
-                if (it.scale < 0f)
-                    it.scale = 0f;
+                ClampTweakMinimum(ref it.scale, 0f);
             }
         }
         internal static IItemTweak ScaleExact(float s) => new ScaleExactRule(s);
@@ -896,8 +890,7 @@ namespace CalamityMod.Items
                 if (DisableScalingForOverhaul)
                     return;
                 it.scale *= ratio;
-                if (it.scale < 0f)
-                    it.scale = 0f;
+                ClampTweakMinimum(ref it.scale, 0f);
             }
         }
         internal static IItemTweak ScaleRatio(float f) => new ScaleRatioRule(f);
@@ -913,8 +906,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.shootSpeed += delta;
-                if (it.shootSpeed < 0f)
-                    it.shootSpeed = 0f;
+                ClampTweakMinimum(ref it.shootSpeed, 0f);
             }
         }
         internal static IItemTweak ShootSpeedDelta(float d) => new ShootSpeedDeltaRule(d);
@@ -928,8 +920,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.shootSpeed = newShootSpeed;
-                if (it.shootSpeed < 0f)
-                    it.shootSpeed = 0f;
+                ClampTweakMinimum(ref it.shootSpeed, 0f);
             }
         }
         internal static IItemTweak ShootSpeedExact(float s) => new ShootSpeedExactRule(s);
@@ -943,8 +934,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.shootSpeed *= ratio;
-                if (it.shootSpeed < 0f)
-                    it.shootSpeed = 0f;
+                ClampTweakMinimum(ref it.shootSpeed, 0f);
             }
         }
         internal static IItemTweak ShootSpeedRatio(float f) => new ShootSpeedRatioRule(f);
@@ -1081,8 +1071,7 @@ namespace CalamityMod.Items
             public void ApplyTweak(Item it)
             {
                 it.value = newValue;
-                if (it.value < 0)
-                    it.value = 0;
+                ClampTweakMinimum(ref it.value, 0);
             }
         }
         internal static IItemTweak Value(int v) => new ValueRule(v);

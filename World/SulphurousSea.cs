@@ -439,12 +439,20 @@ namespace CalamityMod.World
         }
 
         public static void GenerateSpaghettiWaterCaves()
+            => GenerateNoiseWaterCaves(true);
+
+        public static void GenerateCheeseWaterCaves()
+            => GenerateNoiseWaterCaves(false);
+
+        private static void GenerateNoiseWaterCaves(bool spaghetti)
         {
             int width = BiomeWidth;
             int depth = (int)(BlockDepth * 0.96f);
             ushort wallID = (ushort)ModContent.WallType<UnsafeSulphurousSandWall>();
 
-            for (int c = 0; c < SpaghettiCaveCarveOutThresholds.Length; c++)
+            float[] thresholds = spaghetti ? SpaghettiCaveCarveOutThresholds : CheeseCaveCarveOutThresholds;
+            float magnification = spaghetti ? SpaghettiCaveMagnification : CheeseCaveMagnification;
+            for (int c = 0; c < thresholds.Length; c++)
             {
                 int caveSeed = WorldGen.genRand.Next();
                 for (int i = 2; i < width; i++)
@@ -453,54 +461,31 @@ namespace CalamityMod.World
                     int x = GetActualX(i);
                     for (int y = YStart; y < YStart + depth; y++)
                     {
-                        float noise = FractalBrownianMotion(i * SpaghettiCaveMagnification, y * SpaghettiCaveMagnification, caveSeed, 5);
+                        float noise = FractalBrownianMotion(i * magnification, y * magnification, caveSeed, spaghetti ? 5 : 6);
 
                         // Bias noise away from 0, effectively making caves less likely to appear, based on how close it is to the bottom/horizontal edge.
                         // This causes caves to naturally stop as the reach ends instead of abruptly stopping like in the old Sulphurous Sea worldgen.
                         float distanceFromEdge = new Vector2(i / (float)width, (y - YStart) / (float)depth).Length();
-                        float biasAwayFrom0Interpolant = Utils.GetLerpValue(0.82f, 0.96f, distanceFromEdge * 0.8f, true);
-                        biasAwayFrom0Interpolant += Utils.GetLerpValue(YStart + 12f, YStart, y, true) * 0.2f;
-                        biasAwayFrom0Interpolant += Utils.GetLerpValue(width - 19f, width - 4f, i, true) * 0.6f;
-
-                        // If the noise is less than 0, bias to -1, if it's greater than 0, bias away to 1.
-                        // This is done instead of biasing to -1 or 1 without exception to ensure that in doing so the noise does not cross into the
-                        // cutout threshold near 0 as it interpolates.
-                        noise = MathHelper.Lerp(noise, Math.Sign(noise), biasAwayFrom0Interpolant);
-
-                        if (Math.Abs(noise) < SpaghettiCaveCarveOutThresholds[c])
+                        bool carve;
+                        if (spaghetti)
                         {
-                            CarveNoiseCaveTile(x, y, wallID);
+                            float biasAwayFrom0Interpolant = Utils.GetLerpValue(0.82f, 0.96f, distanceFromEdge * 0.8f, true);
+                            biasAwayFrom0Interpolant += Utils.GetLerpValue(YStart + 12f, YStart, y, true) * 0.2f;
+                            biasAwayFrom0Interpolant += Utils.GetLerpValue(width - 19f, width - 4f, i, true) * 0.6f;
+
+                            // Bias away from zero without crossing the cutout threshold.
+                            noise = MathHelper.Lerp(noise, Math.Sign(noise), biasAwayFrom0Interpolant);
+                            carve = Math.Abs(noise) < thresholds[c];
                         }
-                    }
-                }
-            }
-        }
-
-        public static void GenerateCheeseWaterCaves()
-        {
-            int width = BiomeWidth;
-            int depth = (int)(BlockDepth * 0.96f);
-            ushort wallID = (ushort)ModContent.WallType<UnsafeSulphurousSandWall>();
-
-            for (int c = 0; c < CheeseCaveCarveOutThresholds.Length; c++)
-            {
-                int caveSeed = WorldGen.genRand.Next();
-                for (int i = 2; i < width; i++)
-                {
-                    // Initialize variables for the cave.
-                    int x = GetActualX(i);
-                    for (int y = YStart; y < YStart + depth; y++)
-                    {
-                        float noise = FractalBrownianMotion(i * CheeseCaveMagnification, y * CheeseCaveMagnification, caveSeed, 6);
-                        float distanceFromEdge = new Vector2(i / (float)width, (y - YStart) / (float)depth).Length();
-
-                        float biasToNegativeOneInterpolant = Utils.GetLerpValue(0.82f, 0.96f, distanceFromEdge * 0.8f, true);
-                        biasToNegativeOneInterpolant += Utils.GetLerpValue(YStart + OpenCavernStartDepthPercentage * depth, YStart + OpenCavernStartDepthPercentage * depth - 25f, y, true);
-                        biasToNegativeOneInterpolant += Utils.GetLerpValue(width - 19f, width - 4f, i, true);
-                        if (noise - biasToNegativeOneInterpolant > CheeseCaveCarveOutThresholds[c])
+                        else
                         {
-                            CarveNoiseCaveTile(x, y, wallID);
+                            float biasToNegativeOneInterpolant = Utils.GetLerpValue(0.82f, 0.96f, distanceFromEdge * 0.8f, true);
+                            biasToNegativeOneInterpolant += Utils.GetLerpValue(YStart + OpenCavernStartDepthPercentage * depth, YStart + OpenCavernStartDepthPercentage * depth - 25f, y, true);
+                            biasToNegativeOneInterpolant += Utils.GetLerpValue(width - 19f, width - 4f, i, true);
+                            carve = noise - biasToNegativeOneInterpolant > thresholds[c];
                         }
+                        if (carve)
+                            CarveNoiseCaveTile(x, y, wallID);
                     }
                 }
             }

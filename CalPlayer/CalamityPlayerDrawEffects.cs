@@ -527,29 +527,11 @@ namespace CalamityMod.CalPlayer
             #endregion
 
             if (calamityPlayer.PinkJellyRegen && drawInfo.shadow == 0f)
-            {
-                if (Main.rand.NextBool(24))
-                {
-                    Particle Plus = new HealingPlus(Player.Center, Main.rand.NextFloat(0.5f, 1.2f), new Vector2(0, Main.rand.NextFloat(-2f, -3.5f)) + Player.velocity, Color.HotPink, Color.LightPink, Main.rand.Next(10, 15));
-                    GeneralParticleHandler.SpawnParticle(Plus);
-                }
-            }
+                SpawnHealingPlus(24, 0.5f, 1.2f, Color.HotPink, Color.LightPink);
             if (calamityPlayer.GreenJellyRegen && drawInfo.shadow == 0f)
-            {
-                if (Main.rand.NextBool(16))
-                {
-                    Particle Plus = new HealingPlus(Player.Center, Main.rand.NextFloat(0.6f, 1.3f), new Vector2(0, Main.rand.NextFloat(-2f, -3.5f)) + Player.velocity, Color.Lime, Color.LimeGreen, Main.rand.Next(10, 15));
-                    GeneralParticleHandler.SpawnParticle(Plus);
-                }
-            }
+                SpawnHealingPlus(16, 0.6f, 1.3f, Color.Lime, Color.LimeGreen);
             if (calamityPlayer.AbsorberRegen && drawInfo.shadow == 0f)
-            {
-                if (Main.rand.NextBool(11))
-                {
-                    Particle Plus = new HealingPlus(Player.Center, Main.rand.NextFloat(0.7f, 1.4f), new Vector2(0, Main.rand.NextFloat(-2f, -3.5f)) + Player.velocity, Color.DarkSeaGreen, Color.DarkSeaGreen, Main.rand.Next(10, 15));
-                    GeneralParticleHandler.SpawnParticle(Plus);
-                }
-            }
+                SpawnHealingPlus(11, 0.7f, 1.4f, Color.DarkSeaGreen, Color.DarkSeaGreen);
             if (calamityPlayer.bloomStoneBuffedHealRateTimer > 0 && drawInfo.shadow == 0f)
             {
                 if (Main.rand.NextBool(10))
@@ -574,11 +556,7 @@ namespace CalamityMod.CalPlayer
                     dust.velocity.Y -= 0.5f;
                     drawInfo.DustCache.Add(dust.dustIndex);
                 }
-                if (Main.rand.NextBool(16))
-                {
-                    Particle Plus = new HealingPlus(Player.Center - new Vector2(4, 0), Main.rand.NextFloat(0.4f, 0.8f), new Vector2(0, Main.rand.NextFloat(-2f, -3.5f)) + Player.velocity, Color.Red, Color.DarkRed, Main.rand.Next(10, 15));
-                    GeneralParticleHandler.SpawnParticle(Plus);
-                }
+                SpawnHealingPlus(16, 0.4f, 0.8f, Color.Red, Color.DarkRed, new Vector2(4, 0));
             }
 
             // Prideful Hunter's Planar Ripper movement speed boost
@@ -794,6 +772,15 @@ namespace CalamityMod.CalPlayer
                     howDoIDrawThings.shader = 0;
                     drawInfo.DrawDataCache.Add(howDoIDrawThings);
                 }
+            }
+        }
+
+        private void SpawnHealingPlus(int chance, float minScale, float maxScale, Color color, Color secondaryColor, Vector2? positionOffset = null)
+        {
+            if (Main.rand.NextBool(chance))
+            {
+                Particle plus = new HealingPlus(positionOffset.HasValue ? Player.Center - positionOffset.Value : Player.Center, Main.rand.NextFloat(minScale, maxScale), new Vector2(0, Main.rand.NextFloat(-2f, -3.5f)) + Player.velocity, color, secondaryColor, Main.rand.Next(10, 15));
+                GeneralParticleHandler.SpawnParticle(plus);
             }
         }
         #endregion

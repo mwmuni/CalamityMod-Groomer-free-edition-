@@ -565,12 +565,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                                 NPC.ai[3] = 1f;
 
                             SecondaryAIState = (float)SecondaryPhase.PassiveAndImmune;
-                            NPC.localAI[0] = 0f;
-                            NPC.localAI[2] = 0f;
-                            calamityGlobalNPC.newAI[2] = 0f;
-                            calamityGlobalNPC.newAI[3] = 0f;
-                            chargeVelocityScalar = 0f;
-                            NPC.TargetClosest();
+                            ResetMovementPhase(calamityGlobalNPC);
 
                             // Draedon text for the start of phase 2
                             if (draedonAlive)
@@ -601,12 +596,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                         {
                             // Tells Thanatos to return to the battle in passive state and reset everything
                             SecondaryAIState = (float)SecondaryPhase.Passive;
-                            NPC.localAI[0] = 0f;
-                            NPC.localAI[2] = 0f;
-                            calamityGlobalNPC.newAI[2] = 0f;
-                            calamityGlobalNPC.newAI[3] = 0f;
-                            chargeVelocityScalar = 0f;
-                            NPC.TargetClosest();
+                            ResetMovementPhase(calamityGlobalNPC);
                         }
 
                         // Go passive and immune if one of the other mechs is berserk
@@ -616,12 +606,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                         {
                             // Reset everything
                             SecondaryAIState = (float)SecondaryPhase.PassiveAndImmune;
-                            NPC.localAI[0] = 0f;
-                            NPC.localAI[2] = 0f;
-                            calamityGlobalNPC.newAI[2] = 0f;
-                            calamityGlobalNPC.newAI[3] = 0f;
-                            chargeVelocityScalar = 0f;
-                            NPC.TargetClosest();
+                            ResetMovementPhase(calamityGlobalNPC);
 
                             // Phase 6, when 1 mech goes berserk and the other one leaves
                             if (draedonAlive)
@@ -645,12 +630,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                     {
                         // Reset everything
                         SecondaryAIState = (float)SecondaryPhase.PassiveAndImmune;
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        chargeVelocityScalar = 0f;
-                        NPC.TargetClosest();
+                        ResetMovementPhase(calamityGlobalNPC);
                     }
 
                     // If Thanatos is the first mech to go berserk
@@ -658,12 +638,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                     {
                         // Reset everything
                         AIState = (float)Phase.Charge;
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        chargeVelocityScalar = 0f;
-                        NPC.TargetClosest();
+                        ResetMovementPhase(calamityGlobalNPC);
 
                         // Never be passive if berserk
                         SecondaryAIState = (float)SecondaryPhase.Nothing;
@@ -694,12 +669,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                         // Tells Thanatos to return to the battle in passive state and reset everything
                         // Return to normal phases if one or more mechs have been downed
                         SecondaryAIState = totalOtherExoMechLifeRatio > 5f ? (float)SecondaryPhase.Nothing : (float)SecondaryPhase.Passive;
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        chargeVelocityScalar = 0f;
-                        NPC.TargetClosest();
+                        ResetMovementPhase(calamityGlobalNPC);
 
                         // Phase 3, when all 3 mechs attack at the same time
                         if (exoPrimeAlive && exoTwinsAlive)
@@ -717,12 +687,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                     {
                         // Reset everything
                         AIState = (float)Phase.Charge;
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        chargeVelocityScalar = 0f;
-                        NPC.TargetClosest();
+                        ResetMovementPhase(calamityGlobalNPC);
 
                         // Never be passive if berserk
                         SecondaryAIState = (float)SecondaryPhase.Nothing;
@@ -955,12 +920,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                             {
                                 AIState = (float)Phase.Charge;
                             }
-                            NPC.localAI[0] = 0f;
-                            NPC.localAI[2] = 0f;
-                            calamityGlobalNPC.newAI[2] = 0f;
-                            calamityGlobalNPC.newAI[3] = 0f;
-                            chargeVelocityScalar = 0f;
-                            NPC.TargetClosest();
+                            ResetMovementPhase(calamityGlobalNPC);
                         }
                     }
 
@@ -1066,6 +1026,16 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                 minDist = hitboxBotRight;
 
             return minDist <= 50f && NPC.Opacity == 1f && noContactDamageTimer <= 0;
+        }
+
+        private void ResetMovementPhase(CalamityGlobalNPC calamityGlobalNPC)
+        {
+            NPC.localAI[0] = 0f;
+            NPC.localAI[2] = 0f;
+            calamityGlobalNPC.newAI[2] = 0f;
+            calamityGlobalNPC.newAI[3] = 0f;
+            chargeVelocityScalar = 0f;
+            NPC.TargetClosest();
         }
 
         public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)

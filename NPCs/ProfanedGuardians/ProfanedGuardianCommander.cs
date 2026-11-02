@@ -291,13 +291,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 }
             }
 
-            // Get a target
-            if (NPC.target < 0 || NPC.target == Main.maxPlayers || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
-                NPC.TargetClosest();
-
-            // Despawn safety, make sure to target another player if the current player target is too far away
-            if (Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > CalamityGlobalNPC.CatchUpDistance200Tiles)
-                NPC.TargetClosest();
+            NPCBehaviorUtils.TargetClosestIfInvalidOrTooFar(NPC, false);
 
             Player player = Main.player[NPC.target];
 
@@ -391,13 +385,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 // Avoid cheap bullshit
                 NPC.damage = 0;
 
-                // Face the target
-                if (Math.Abs(NPC.Center.X - player.Center.X) > 10f)
-                {
-                    float playerLocation = NPC.Center.X - player.Center.X;
-                    NPC.direction = playerLocation < 0f ? 1 : -1;
-                    NPC.spriteDirection = NPC.direction;
-                }
+                FaceTargetIfFar(NPC, player);
 
                 // Dictates when the commander and defender will swap to the other side in phase 1
                 if (healerAlive)
@@ -620,13 +608,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 // Set damage
                 NPC.damage = NPC.defDamage;
 
-                // Face the target
-                if (Math.Abs(NPC.Center.X - player.Center.X) > 10f)
-                {
-                    float playerLocation = NPC.Center.X - player.Center.X;
-                    NPC.direction = playerLocation < 0f ? 1 : -1;
-                    NPC.spriteDirection = NPC.direction;
-                }
+                FaceTargetIfFar(NPC, player);
 
                 NPC.ai[0] = 2f;
                 NPC.netUpdate = true;
@@ -770,13 +752,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 // Avoid cheap bullshit
                 NPC.damage = 0;
 
-                // Face the target
-                if (Math.Abs(NPC.Center.X - player.Center.X) > 10f)
-                {
-                    float playerLocation = NPC.Center.X - player.Center.X;
-                    NPC.direction = playerLocation < 0f ? 1 : -1;
-                    NPC.spriteDirection = NPC.direction;
-                }
+                FaceTargetIfFar(NPC, player);
 
                 // Catch up to the target
                 // Enrage after this occurs and fire spears twice as fast
@@ -886,13 +862,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 // Avoid cheap bullshit
                 NPC.damage = 0;
 
-                // Face the target
-                if (Math.Abs(NPC.Center.X - player.Center.X) > 10f)
-                {
-                    float playerLocation = NPC.Center.X - player.Center.X;
-                    NPC.direction = playerLocation < 0f ? 1 : -1;
-                    NPC.spriteDirection = NPC.direction;
-                }
+                FaceTargetIfFar(NPC, player);
 
                 float laserGateValue = 120f;
                 float velocity = death ? 4f : revenge ? 3.75f : expertMode ? 3.5f : 3f;
@@ -1184,6 +1154,16 @@ namespace CalamityMod.NPCs.ProfanedGuardians
         public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         {
             return CanGuardianHitPlayer(NPC, target, ref cooldownSlot);
+        }
+
+        internal static void FaceTargetIfFar(NPC npc, Player player)
+        {
+            if (Math.Abs(npc.Center.X - player.Center.X) > 10f)
+            {
+                float playerLocation = npc.Center.X - player.Center.X;
+                npc.direction = playerLocation < 0f ? 1 : -1;
+                npc.spriteDirection = npc.direction;
+            }
         }
 
         internal static bool CanGuardianHitPlayer(NPC npc, Player target, ref int cooldownSlot)

@@ -114,6 +114,11 @@ namespace CalamityMod.NPCs.AstrumDeus
 
         public override void AI()
         {
+            UpdateSegmentAI(NPC, true);
+        }
+
+        internal static void UpdateSegmentAI(NPC NPC, bool fireProjectiles)
+        {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
 
             // Difficulty variables
@@ -262,108 +267,112 @@ namespace CalamityMod.NPCs.AstrumDeus
                 segmentVelocity *= revMultiplier;
             }
 
-            // Shoot lasers
-            NPC.localAI[0] += 1f;
-
-            int shootTime = (doubleWormPhase && expertMode) ? 2 : 1;
-            float shootProjectile = (doubleWormPhase && expertMode) ? 200 : 400;
-            float timer = NPC.ai[0] + 15f;
-            float divisor = timer + shootProjectile;
-            bool canFireProjectiles = NPC.Opacity >= 1f;
-            bool shootGodRays = phase2 || deathModeEnragePhase_BodyAndTail;
-
-            if (canFireProjectiles)
+            // Only body segments advance the projectile clock and emit attacks.
+            if (fireProjectiles)
             {
-                if (!flyAtTarget || deathModeEnragePhase_BodyAndTail)
+                // Shoot lasers
+                NPC.localAI[0] += 1f;
+
+                int shootTime = (doubleWormPhase && expertMode) ? 2 : 1;
+                float shootProjectile = (doubleWormPhase && expertMode) ? 200 : 400;
+                float timer = NPC.ai[0] + 15f;
+                float divisor = timer + shootProjectile;
+                bool canFireProjectiles = NPC.Opacity >= 1f;
+                bool shootGodRays = phase2 || deathModeEnragePhase_BodyAndTail;
+
+                if (canFireProjectiles)
                 {
-                    float laserDivisor = (phase2 && !deathModeEnragePhase_BodyAndTail) ? 4f : 2f;
-                    if (NPC.localAI[0] % divisor == 0f && NPC.ai[0] % laserDivisor == 0f)
+                    if (!flyAtTarget || deathModeEnragePhase_BodyAndTail)
                     {
-                        NPC.TargetClosest();
-
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                        float laserDivisor = (phase2 && !deathModeEnragePhase_BodyAndTail) ? 4f : 2f;
+                        if (NPC.localAI[0] % divisor == 0f && NPC.ai[0] % laserDivisor == 0f)
                         {
-                            if (deathModeEnragePhase_BodyAndTail)
-                            {
-                                Vector2 velocity = Vector2.Zero;
-                                if (movingMines)
-                                {
-                                    Vector2 randomMineMovement = new Vector2(Main.rand.Next(-100, 101), Main.rand.Next(-100, 101));
-                                    randomMineMovement.Normalize();
-                                    randomMineMovement *= Main.rand.Next(90, 121) * 0.01f;
-                                    velocity = randomMineMovement;
-                                }
+                            NPC.TargetClosest();
 
-                                int type = ModContent.ProjectileType<DeusMine>();
-                                float split = (splittingMines && NPC.ai[0] % 3f == 0f) ? 1f : 0f;
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, velocity, type, MineDamage, 0f, Main.myPlayer, split, 0f);
-                            }
-                        }
-
-                        if (Vector2.Distance(player.Center, NPC.Center) > 80f)
-                        {
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
-                                float deusLaserSpeed = death ? 16f : revenge ? 14f : 13f;
-                                if (gfbWormCount > 0)
-                                    deusLaserSpeed += (gfbMaxWormCount - gfbWormCount) * 0.444f;
-
-                                Vector2 deusLaserCenter = NPC.Center;
-                                float deusLaserTargetX = player.Center.X - deusLaserCenter.X;
-                                float deusLaserTargetY = player.Center.Y - deusLaserCenter.Y;
-                                float deusLaserTargetDist = (float)Math.Sqrt(deusLaserTargetX * deusLaserTargetX + deusLaserTargetY * deusLaserTargetY);
-                                deusLaserTargetDist = deusLaserSpeed / deusLaserTargetDist;
-                                deusLaserTargetX *= deusLaserTargetDist;
-                                deusLaserTargetY *= deusLaserTargetDist;
-                                deusLaserCenter.X += deusLaserTargetX * 5f;
-                                deusLaserCenter.Y += deusLaserTargetY * 5f;
-
-                                Vector2 shootDirection = new Vector2(deusLaserTargetX, deusLaserTargetY).SafeNormalize(Vector2.UnitY);
-                                Vector2 laserVelocity = shootDirection * deusLaserSpeed;
-
-                                int type = shootGodRays ? ModContent.ProjectileType<AstralGodRay>() : ModContent.ProjectileType<AstralShot2>();
-                                int damage = shootGodRays ? HelixLaserDamage : LaserDamage;
-                                if (shootGodRays)
+                                if (deathModeEnragePhase_BodyAndTail)
                                 {
-                                    SoundEngine.PlaySound(AstrumDeusHead.GodRaySound, NPC.Center);
-                                    // Waving beams need to start offset so they cross each other neatly.
-                                    float waveSideOffset = Main.rand.NextFloat(9f, 14f);
-                                    Vector2 perp = shootDirection.RotatedBy(-MathHelper.PiOver2) * waveSideOffset;
-
-                                    for (int i = -1; i <= 1; i += 2)
+                                    Vector2 velocity = Vector2.Zero;
+                                    if (movingMines)
                                     {
-                                        Vector2 laserStartPos = deusLaserCenter + i * perp + Main.rand.NextVector2CircularEdge(6f, 6f);
-                                        Projectile godRay = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(), laserStartPos, laserVelocity, type, damage, 0f, Main.myPlayer, player.Center.X, player.Center.Y);
-
-                                        // Tell this Phased God Ray exactly which way it should be waving.
-                                        godRay.localAI[1] = i * 0.5f;
+                                        Vector2 randomMineMovement = new Vector2(Main.rand.Next(-100, 101), Main.rand.Next(-100, 101));
+                                        randomMineMovement.Normalize();
+                                        randomMineMovement *= Main.rand.Next(90, 121) * 0.01f;
+                                        velocity = randomMineMovement;
                                     }
+
+                                    int type = ModContent.ProjectileType<DeusMine>();
+                                    float split = (splittingMines && NPC.ai[0] % 3f == 0f) ? 1f : 0f;
+                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, velocity, type, MineDamage, 0f, Main.myPlayer, split, 0f);
                                 }
-                                else
+                            }
+
+                            if (Vector2.Distance(player.Center, NPC.Center) > 80f)
+                            {
+                                if (Main.netMode != NetmodeID.MultiplayerClient)
                                 {
-                                    SoundEngine.PlaySound(AstrumDeusHead.LaserSound, NPC.Center);
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), deusLaserCenter, laserVelocity, type, damage, 0f, Main.myPlayer, player.Center.X, player.Center.Y);
+                                    float deusLaserSpeed = death ? 16f : revenge ? 14f : 13f;
+                                    if (gfbWormCount > 0)
+                                        deusLaserSpeed += (gfbMaxWormCount - gfbWormCount) * 0.444f;
+
+                                    Vector2 deusLaserCenter = NPC.Center;
+                                    float deusLaserTargetX = player.Center.X - deusLaserCenter.X;
+                                    float deusLaserTargetY = player.Center.Y - deusLaserCenter.Y;
+                                    float deusLaserTargetDist = (float)Math.Sqrt(deusLaserTargetX * deusLaserTargetX + deusLaserTargetY * deusLaserTargetY);
+                                    deusLaserTargetDist = deusLaserSpeed / deusLaserTargetDist;
+                                    deusLaserTargetX *= deusLaserTargetDist;
+                                    deusLaserTargetY *= deusLaserTargetDist;
+                                    deusLaserCenter.X += deusLaserTargetX * 5f;
+                                    deusLaserCenter.Y += deusLaserTargetY * 5f;
+
+                                    Vector2 shootDirection = new Vector2(deusLaserTargetX, deusLaserTargetY).SafeNormalize(Vector2.UnitY);
+                                    Vector2 laserVelocity = shootDirection * deusLaserSpeed;
+
+                                    int type = shootGodRays ? ModContent.ProjectileType<AstralGodRay>() : ModContent.ProjectileType<AstralShot2>();
+                                    int damage = shootGodRays ? HelixLaserDamage : LaserDamage;
+                                    if (shootGodRays)
+                                    {
+                                        SoundEngine.PlaySound(AstrumDeusHead.GodRaySound, NPC.Center);
+                                        // Waving beams need to start offset so they cross each other neatly.
+                                        float waveSideOffset = Main.rand.NextFloat(9f, 14f);
+                                        Vector2 perp = shootDirection.RotatedBy(-MathHelper.PiOver2) * waveSideOffset;
+
+                                        for (int i = -1; i <= 1; i += 2)
+                                        {
+                                            Vector2 laserStartPos = deusLaserCenter + i * perp + Main.rand.NextVector2CircularEdge(6f, 6f);
+                                            Projectile godRay = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(), laserStartPos, laserVelocity, type, damage, 0f, Main.myPlayer, player.Center.X, player.Center.Y);
+
+                                            // Tell this Phased God Ray exactly which way it should be waving.
+                                            godRay.localAI[1] = i * 0.5f;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        SoundEngine.PlaySound(AstrumDeusHead.LaserSound, NPC.Center);
+                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), deusLaserCenter, laserVelocity, type, damage, 0f, Main.myPlayer, player.Center.X, player.Center.Y);
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                else
-                {
-                    if (NPC.localAI[0] % divisor == 0f && NPC.ai[0] % 2f == 0f)
+                    else
                     {
-                        Vector2 velocity = Vector2.Zero;
-                        if (movingMines)
+                        if (NPC.localAI[0] % divisor == 0f && NPC.ai[0] % 2f == 0f)
                         {
-                            Vector2 randomMineMovement = new Vector2(Main.rand.Next(-100, 101), Main.rand.Next(-100, 101));
-                            randomMineMovement.Normalize();
-                            randomMineMovement *= Main.rand.Next(30, 121) * 0.01f;
-                            velocity = randomMineMovement;
-                        }
+                            Vector2 velocity = Vector2.Zero;
+                            if (movingMines)
+                            {
+                                Vector2 randomMineMovement = new Vector2(Main.rand.Next(-100, 101), Main.rand.Next(-100, 101));
+                                randomMineMovement.Normalize();
+                                randomMineMovement *= Main.rand.Next(30, 121) * 0.01f;
+                                velocity = randomMineMovement;
+                            }
 
-                        int type = ModContent.ProjectileType<DeusMine>();
-                        float split = (splittingMines && NPC.ai[0] % 3f == 0f) ? 1f : 0f;
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, velocity, type, MineDamage, 0f, Main.myPlayer, split, 0f);
+                            int type = ModContent.ProjectileType<DeusMine>();
+                            float split = (splittingMines && NPC.ai[0] % 3f == 0f) ? 1f : 0f;
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, velocity, type, MineDamage, 0f, Main.myPlayer, split, 0f);
+                        }
                     }
                 }
             }

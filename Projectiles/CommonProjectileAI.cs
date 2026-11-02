@@ -11,6 +11,66 @@ namespace CalamityMod.Projectiles;
 
 internal static class CommonProjectileAI
 {
+    internal static Color CycleEnergyColor(float rate, System.Collections.Generic.List<Color> colors, bool inclusivePeak = false)
+    {
+        int colorIndex = (int)(rate / 2 % colors.Count);
+        Color currentColor = colors[colorIndex];
+        Color nextColor = colors[(colorIndex + 1) % colors.Count];
+        return Color.Lerp(currentColor, nextColor, (inclusivePeak ? rate % 2f >= 1f : rate % 2f > 1f) ? 1f : rate % 1f);
+    }
+
+    internal static void AllocateMinionSlots(this Projectile projectile, Player owner, int counterIndex, bool syncEachSlot)
+    {
+        float minionSlotsAvaliable = owner.maxMinions;
+        foreach (var item in Main.ActiveProjectiles)
+        {
+            if (item.owner == projectile.owner)
+                minionSlotsAvaliable -= item.minionSlots;
+        }
+        while (minionSlotsAvaliable >= 1 && (int)projectile.ai[counterIndex] > 0)
+        {
+            projectile.minionSlots++;
+            minionSlotsAvaliable--;
+            projectile.ai[counterIndex] = (int)projectile.ai[counterIndex] - 1;
+            if (syncEachSlot)
+                projectile.netUpdate = true;
+        }
+        projectile.ai[counterIndex] = 0;
+    }
+
+    internal static void LoopAnimation(this Projectile projectile, int frameDelay, int frameEnd, int firstFrame)
+    {
+        projectile.frameCounter++;
+        if (projectile.frameCounter > frameDelay)
+        {
+            projectile.frame++;
+            projectile.frameCounter = 0;
+        }
+        if (projectile.frame >= frameEnd)
+        {
+            projectile.frame = firstFrame;
+        }
+    }
+
+    internal static void FollowEnergyOwner(this Projectile projectile, Player owner, ref float time, ref float energyNumber, float energySpeed, float followDistance)
+    {
+        float homingSpeed = Utils.Remap(Utils.Distance(projectile.Center, owner.Center), 200, 600, 0.07f, 0.16f) + energySpeed * energyNumber;
+        float offsetPower = Utils.GetLerpValue(1, 5, owner.velocity.Length(), true);
+        float sine = (float)Math.Sin((time * 0.1f) / MathHelper.Pi);
+        float sine2 = (float)Math.Sin((time * 0.04f) / MathHelper.Pi);
+        Vector2 bonusMobility = (offsetPower > 0 ? ((Utils.DirectionTo(projectile.Center, owner.Center) * 90) * sine2).RotatedBy(0.8f * sine) * offsetPower : Vector2.Zero);
+        // Both families deliberately use AmuletEnergy's count, not their own type.
+        Vector2 goalPosition = owner.MountedCenter + bonusMobility + ((MathHelper.TwoPi * energyNumber) / Math.Max(owner.ownedProjectileCounts[ProjectileType<Typeless.AmuletEnergy>()], 1)).ToRotationVector2().RotatedBy(Main.GlobalTimeWrappedHourly * 0.4f) * 20;
+
+        bool outOfRange = Utils.Distance(projectile.Center, goalPosition) > followDistance;
+        if (projectile.velocity.Length() < 6 && outOfRange)
+            projectile.velocity = projectile.velocity * 0.995f + Utils.DirectionTo(projectile.Center, goalPosition) * homingSpeed;
+        else if (outOfRange)
+            projectile.velocity *= 0.985f;
+        if (!outOfRange)
+            projectile.velocity = projectile.velocity.RotatedBy(0.0065f * (energyNumber % 2 == 0 ? -1 : 1)) * 1.004f;
+    }
+
     public static void BounceOnTileCollision(this Projectile projectile, Vector2 oldVelocity)
     {
         if (projectile.velocity.X != oldVelocity.X)

@@ -242,7 +242,6 @@ namespace CalamityMod.CalPlayer
         public bool HandleHorizontalDash(out DashDirection direction, bool forceDash = false)
         {
             direction = DashDirection.Directionless;
-            bool dashWasExecuted = false;
 
             // If the manual hotkey is bound, standard Terraria dashes cannot be triggered by double tapping.
             var manualDashHotkeys = CalamityKeybinds.DashHotkey.GetAssignedKeysOrEmpty();
@@ -283,127 +282,49 @@ namespace CalamityMod.CalPlayer
 
 
             if (dashDirectionToUse == 1)
-            {
-                if (dashTimeMod > 0 || pressedManualHotkey)
-                {
-                    direction = DashDirection.Right;
-                    dashWasExecuted = true;
-                    dashTimeMod = 0;
-                }
-                else
-                    dashTimeMod = 15;
-            }
+                return TryStartDirectionalDash(DashDirection.Right, 1, out direction, pressedManualHotkey);
             else if (dashDirectionToUse == -1)
-            {
-                if (dashTimeMod < 0 || pressedManualHotkey)
-                {
-                    direction = DashDirection.Left;
-                    dashWasExecuted = true;
-                    dashTimeMod = 0;
-                }
-                else
-                    dashTimeMod = -15;
-            }
-            return dashWasExecuted;
+                return TryStartDirectionalDash(DashDirection.Left, -1, out direction, pressedManualHotkey);
+            return false;
         }
 
         public bool HandleOmnidirectionalDash(out DashDirection direction)
         {
-            direction = DashDirection.Directionless;
-            bool justDashed = false;
-
             if (Player.controlUp && Player.controlLeft)
-            {
-                if (dashTimeMod < 0)
-                {
-                    direction = DashDirection.UpLeft;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                }
-                else
-                    dashTimeMod = -15;
-            }
+                return TryStartDirectionalDash(DashDirection.UpLeft, -1, out direction);
             else if (Player.controlUp && Player.controlRight)
-            {
-                if (dashTimeMod > 0)
-                {
-                    direction = DashDirection.UpRight;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                }
-                else
-                    dashTimeMod = 15;
-            }
+                return TryStartDirectionalDash(DashDirection.UpRight, 1, out direction);
             else if (Player.controlDown && Player.controlLeft)
-            {
-                if (dashTimeMod < 0)
-                {
-                    direction = DashDirection.DownLeft;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                    Player.maxFallSpeed = 50f;
-                }
-                else
-                    dashTimeMod = -15;
-            }
+                return TryStartDirectionalDash(DashDirection.DownLeft, -1, out direction);
             else if (Player.controlDown && Player.controlRight)
-            {
-                if (dashTimeMod > 0)
-                {
-                    direction = DashDirection.DownRight;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                    Player.maxFallSpeed = 50f;
-                }
-                else
-                    dashTimeMod = 15;
-            }
+                return TryStartDirectionalDash(DashDirection.DownRight, 1, out direction);
             else if (Player.controlUp)
-            {
-                if (dashTimeMod < 0)
-                {
-                    direction = DashDirection.Up;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                }
-                else
-                    dashTimeMod = -15;
-            }
+                return TryStartDirectionalDash(DashDirection.Up, -1, out direction);
             else if (Player.controlDown)
-            {
-                if (dashTimeMod > 0)
-                {
-                    direction = DashDirection.Down;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                    Player.maxFallSpeed = 50f;
-                }
-                else
-                    dashTimeMod = 15;
-            }
+                return TryStartDirectionalDash(DashDirection.Down, 1, out direction);
             else if (Player.controlLeft)
-            {
-                if (dashTimeMod < 0)
-                {
-                    direction = DashDirection.Left;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                }
-                else
-                    dashTimeMod = -15;
-            }
+                return TryStartDirectionalDash(DashDirection.Left, -1, out direction);
             else if (Player.controlRight)
+                return TryStartDirectionalDash(DashDirection.Right, 1, out direction);
+
+            direction = DashDirection.Directionless;
+            return false;
+        }
+
+        private bool TryStartDirectionalDash(DashDirection requestedDirection, int tapSign, out DashDirection direction, bool forceDash = false)
+        {
+            direction = DashDirection.Directionless;
+            if ((tapSign < 0 ? dashTimeMod < 0 : dashTimeMod > 0) || forceDash)
             {
-                if (dashTimeMod > 0)
-                {
-                    direction = DashDirection.Right;
-                    justDashed = true;
-                    dashTimeMod = 0;
-                }
-                else
-                    dashTimeMod = 15;
+                direction = requestedDirection;
+                dashTimeMod = 0;
+                if (requestedDirection is DashDirection.DownLeft or DashDirection.DownRight or DashDirection.Down)
+                    Player.maxFallSpeed = 50f;
+                return true;
             }
-            return justDashed;
+
+            dashTimeMod = tapSign * 15;
+            return false;
         }
 
         public bool HandleGodSlayerDash(out DashDirection direction)

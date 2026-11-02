@@ -603,14 +603,14 @@ public static class TriangleStripBuilder
             float endU = progress[^1];
 
             if (startCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], startU, startLeftIndex, startRightIndex, true);
+                AddTriangleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], startU, startLeftIndex, startRightIndex, true, new TexturedCapVertex());
             else if (startCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], startU, startLeftIndex, startRightIndex, true, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], startU, startLeftIndex, startRightIndex, true, capSteps, new TexturedCapVertex());
 
             if (endCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], endU, endLeftIndex, endRightIndex, false);
+                AddTriangleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], endU, endLeftIndex, endRightIndex, false, new TexturedCapVertex());
             else if (endCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], endU, endLeftIndex, endRightIndex, false, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], endU, endLeftIndex, endRightIndex, false, capSteps, new TexturedCapVertex());
 
             return new PrimitiveMesh(vertexList.ToArray(), indexList.ToArray(), PrimitiveType.TriangleList);
         }
@@ -627,14 +627,14 @@ public static class TriangleStripBuilder
             int capSteps = Math.Max(2, capSegments);
 
             if (startCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], startLeftIndex, startRightIndex, true);
+                AddTriangleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], 0f, startLeftIndex, startRightIndex, true, new ColoredCapVertex());
             else if (startCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], startLeftIndex, startRightIndex, true, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers[0], tangents[0], rights[0], halfWidths[0], sectionColors[0], 0f, startLeftIndex, startRightIndex, true, capSteps, new ColoredCapVertex());
 
             if (endCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], endLeftIndex, endRightIndex, false);
+                AddTriangleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], 0f, endLeftIndex, endRightIndex, false, new ColoredCapVertex());
             else if (endCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], endLeftIndex, endRightIndex, false, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers[^1], tangents[^1], rights[^1], halfWidths[^1], sectionColors[^1], 0f, endLeftIndex, endRightIndex, false, capSteps, new ColoredCapVertex());
 
             return new PrimitiveMesh(vertexList.ToArray(), indexList.ToArray(), PrimitiveType.TriangleList);
         }
@@ -828,14 +828,14 @@ public static class TriangleStripBuilder
             float endU = progress[^1];
 
             if (startCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], startU, startLeftIndex, startRightIndex, true);
+                AddTriangleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], startU, startLeftIndex, startRightIndex, true, new TexturedCapVertex());
             else if (startCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], startU, startLeftIndex, startRightIndex, true, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], startU, startLeftIndex, startRightIndex, true, capSteps, new TexturedCapVertex());
 
             if (endCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], endU, endLeftIndex, endRightIndex, false);
+                AddTriangleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], endU, endLeftIndex, endRightIndex, false, new TexturedCapVertex());
             else if (endCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], endU, endLeftIndex, endRightIndex, false, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], endU, endLeftIndex, endRightIndex, false, capSteps, new TexturedCapVertex());
 
             var lease = cache.RentTextured(vertexList.Count, indexList.Count, PrimitiveType.TriangleList);
             vertexList.CopyTo(0, lease.TexturedVertices, 0, vertexList.Count);
@@ -855,14 +855,14 @@ public static class TriangleStripBuilder
             int capSteps = Math.Max(2, capSegments);
 
             if (startCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], startLeftIndex, startRightIndex, true);
+                AddTriangleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], 0f, startLeftIndex, startRightIndex, true, new ColoredCapVertex());
             else if (startCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], startLeftIndex, startRightIndex, true, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers![0], tangents![0], rights![0], halfWidths![0], sectionColors![0], 0f, startLeftIndex, startRightIndex, true, capSteps, new ColoredCapVertex());
 
             if (endCap == StripCapStyle.Triangle)
-                AddTriangleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], endLeftIndex, endRightIndex, false);
+                AddTriangleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], 0f, endLeftIndex, endRightIndex, false, new ColoredCapVertex());
             else if (endCap == StripCapStyle.HalfCircle)
-                AddHalfCircleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], endLeftIndex, endRightIndex, false, capSteps);
+                AddHalfCircleCap(vertexList, indexList, centers![^1], tangents![^1], rights![^1], halfWidths![^1], sectionColors![^1], 0f, endLeftIndex, endRightIndex, false, capSteps, new ColoredCapVertex());
 
             var lease = cache.RentColored(vertexList.Count, indexList.Count, PrimitiveType.TriangleList);
             vertexList.CopyTo(0, lease.ColorVertices, 0, vertexList.Count);
@@ -1087,73 +1087,26 @@ public static class TriangleStripBuilder
         }
     }
 
-    private static void AddTriangleCap(
-        List<VertexPositionColorTexture> vertices,
-        List<short> indices,
-        Vector3 center,
-        Vector3 tangent,
-        Vector3 rightDir,
-        float halfWidth,
-        Color color,
-        float uCoord,
-        int leftIndex,
-        int rightIndex,
-        bool isStart)
+    // Struct factories specialize the cap loops without delegate allocations or vertex boxing.
+    private interface ICapVertex<TVertex>
     {
-        if (halfWidth <= 1e-6f)
-            return;
-
-        var outward = isStart ? -tangent : tangent;
-        short apexIndex = AddVertex(vertices, CreateCapVertex(center + outward * halfWidth, color, uCoord, center, rightDir, halfWidth));
-
-        if (isStart)
-        {
-            indices.Add(apexIndex);
-            indices.Add((short)rightIndex);
-            indices.Add((short)leftIndex);
-        }
-        else
-        {
-            indices.Add(apexIndex);
-            indices.Add((short)leftIndex);
-            indices.Add((short)rightIndex);
-        }
+        TVertex Create(Vector3 position, Color color, float u, Vector3 center, Vector3 rightDir, float halfWidth);
     }
 
-    private static void AddTriangleCap(
-        List<VertexPositionColor> vertices,
-        List<short> indices,
-        Vector3 center,
-        Vector3 tangent,
-        Vector3 rightDir, // todo: remove
-        float halfWidth,
-        Color color,
-        int leftIndex,
-        int rightIndex,
-        bool isStart)
+    private readonly struct TexturedCapVertex : ICapVertex<VertexPositionColorTexture>
     {
-        if (halfWidth <= 1e-6f)
-            return;
-
-        var outward = isStart ? -tangent : tangent;
-        short apexIndex = AddVertex(vertices, new VertexPositionColor(center + outward * halfWidth, color));
-
-        if (isStart)
-        {
-            indices.Add(apexIndex);
-            indices.Add((short)rightIndex);
-            indices.Add((short)leftIndex);
-        }
-        else
-        {
-            indices.Add(apexIndex);
-            indices.Add((short)leftIndex);
-            indices.Add((short)rightIndex);
-        }
+        public VertexPositionColorTexture Create(Vector3 position, Color color, float u, Vector3 center, Vector3 rightDir, float halfWidth)
+            => CreateCapVertex(position, color, u, center, rightDir, halfWidth);
     }
 
-    private static void AddHalfCircleCap(
-        List<VertexPositionColorTexture> vertices,
+    private readonly struct ColoredCapVertex : ICapVertex<VertexPositionColor>
+    {
+        public VertexPositionColor Create(Vector3 position, Color color, float u, Vector3 center, Vector3 rightDir, float halfWidth)
+            => new VertexPositionColor(position, color);
+    }
+
+    private static void AddTriangleCap<TVertex, TFactory>(
+        List<TVertex> vertices,
         List<short> indices,
         Vector3 center,
         Vector3 tangent,
@@ -1164,13 +1117,48 @@ public static class TriangleStripBuilder
         int leftIndex,
         int rightIndex,
         bool isStart,
-        int segments)
+        TFactory factory) where TFactory : struct, ICapVertex<TVertex>
     {
         if (halfWidth <= 1e-6f)
             return;
 
         var outward = isStart ? -tangent : tangent;
-        short centerIndex = AddVertex(vertices, CreateCapVertex(center, color, uCoord, center, rightDir, halfWidth));
+        short apexIndex = AddVertex(vertices, factory.Create(center + outward * halfWidth, color, uCoord, center, rightDir, halfWidth));
+
+        if (isStart)
+        {
+            indices.Add(apexIndex);
+            indices.Add((short)rightIndex);
+            indices.Add((short)leftIndex);
+        }
+        else
+        {
+            indices.Add(apexIndex);
+            indices.Add((short)leftIndex);
+            indices.Add((short)rightIndex);
+        }
+    }
+
+    private static void AddHalfCircleCap<TVertex, TFactory>(
+        List<TVertex> vertices,
+        List<short> indices,
+        Vector3 center,
+        Vector3 tangent,
+        Vector3 rightDir,
+        float halfWidth,
+        Color color,
+        float uCoord,
+        int leftIndex,
+        int rightIndex,
+        bool isStart,
+        int segments,
+        TFactory factory) where TFactory : struct, ICapVertex<TVertex>
+    {
+        if (halfWidth <= 1e-6f)
+            return;
+
+        var outward = isStart ? -tangent : tangent;
+        short centerIndex = AddVertex(vertices, factory.Create(center, color, uCoord, center, rightDir, halfWidth));
 
         var arcVertices = new List<short>
         {
@@ -1182,7 +1170,7 @@ public static class TriangleStripBuilder
         {
             float angle = isStart ? step * i : MathF.PI - step * i;
             Vector3 offset = rightDir * MathF.Cos(angle) + outward * MathF.Sin(angle);
-            short arcIndex = AddVertex(vertices, CreateCapVertex(center + offset * halfWidth, color, uCoord, center, rightDir, halfWidth));
+            short arcIndex = AddVertex(vertices, factory.Create(center + offset * halfWidth, color, uCoord, center, rightDir, halfWidth));
             arcVertices.Add(arcIndex);
         }
 
@@ -1205,67 +1193,7 @@ public static class TriangleStripBuilder
         }
     }
 
-    private static void AddHalfCircleCap(
-        List<VertexPositionColor> vertices,
-        List<short> indices,
-        Vector3 center,
-        Vector3 tangent,
-        Vector3 rightDir,
-        float halfWidth,
-        Color color,
-        int leftIndex,
-        int rightIndex,
-        bool isStart,
-        int segments)
-    {
-        if (halfWidth <= 1e-6f)
-            return;
-
-        var outward = isStart ? -tangent : tangent;
-        short centerIndex = AddVertex(vertices, new VertexPositionColor(center, color));
-
-        var arcVertices = new List<short>
-        {
-            isStart ? (short)rightIndex : (short)leftIndex
-        };
-
-        float step = MathF.PI / segments;
-        for (int i = 1; i < segments; i++)
-        {
-            float angle = isStart ? step * i : MathF.PI - step * i;
-            Vector3 offset = rightDir * MathF.Cos(angle) + outward * MathF.Sin(angle);
-            short arcIndex = AddVertex(vertices, new VertexPositionColor(center + offset * halfWidth, color));
-            arcVertices.Add(arcIndex);
-        }
-
-        arcVertices.Add(isStart ? (short)leftIndex : (short)rightIndex);
-
-        for (int i = 0; i < arcVertices.Count - 1; i++)
-        {
-            if (isStart)
-            {
-                indices.Add(centerIndex);
-                indices.Add(arcVertices[i]);
-                indices.Add(arcVertices[i + 1]);
-            }
-            else
-            {
-                indices.Add(centerIndex);
-                indices.Add(arcVertices[i + 1]);
-                indices.Add(arcVertices[i]);
-            }
-        }
-    }
-
-    private static short AddVertex(List<VertexPositionColorTexture> vertices, VertexPositionColorTexture vertex)
-    {
-        if (vertices.Count >= short.MaxValue)
-            throw new InvalidOperationException("Primitive mesh exceeded 16-bit index capacity.");
-        vertices.Add(vertex);
-        return (short)(vertices.Count - 1);
-    }
-
-    private static short AddVertex(List<VertexPositionColor> vertices, VertexPositionColor vertex)
+    private static short AddVertex<TVertex>(List<TVertex> vertices, TVertex vertex)
     {
         if (vertices.Count >= short.MaxValue)
             throw new InvalidOperationException("Primitive mesh exceeded 16-bit index capacity.");

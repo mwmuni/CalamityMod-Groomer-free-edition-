@@ -490,19 +490,7 @@ namespace CalamityMod.NPCs.Crabulon
                         SoundEngine.PlaySound(SoundID.Item42, NPC.Center);
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
-                            float projectileVelocity = CalamityWorld.death ? 15f : 10f;
-                            Vector2 destination = new Vector2(NPC.Center.X, NPC.Center.Y - 100f) - NPC.Center;
-                            destination.Normalize();
-                            destination *= projectileVelocity;
-
-                            int numProj = phase4 ? 14 : CalamityWorld.death ? 16 : 12;
-                            float rotation = MathHelper.ToRadians(90);
-                            for (int i = 0; i < numProj; i++)
-                            {
-                                Vector2 perturbedSpeed = destination.RotatedBy(MathHelper.Lerp(-rotation, rotation, i / (float)(numProj - 1)));
-                                Vector2 randomVelocityVector = new Vector2((Main.rand.NextFloat() - 0.5f) * 4f, (Main.rand.NextFloat() - 0.5f) * 4f);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, new Vector2(perturbedSpeed.X, -projectileVelocity) + randomVelocityVector, type, MushroomShotDamage, 0f, Main.myPlayer, 0f, player.Center.Y);
-                            }
+                            FireMushroomSpread(player, type, phase4 ? 14 : CalamityWorld.death ? 16 : 12, 90);
                         }
                     }
 
@@ -514,19 +502,7 @@ namespace CalamityMod.NPCs.Crabulon
                             SoundEngine.PlaySound(SoundID.Item42, NPC.Center);
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
-                                float projectileVelocity = CalamityWorld.death ? 15f : 10f;
-                                Vector2 destination = new Vector2(NPC.Center.X, NPC.Center.Y - 100f) - NPC.Center;
-                                destination.Normalize();
-                                destination *= projectileVelocity;
-
-                                int numProj = 8;
-                                float rotation = MathHelper.ToRadians(60);
-                                for (int i = 0; i < numProj; i++)
-                                {
-                                    Vector2 perturbedSpeed = destination.RotatedBy(MathHelper.Lerp(-rotation, rotation, i / (float)(numProj - 1)));
-                                    Vector2 randomVelocityVector = new Vector2((Main.rand.NextFloat() - 0.5f) * 4f, (Main.rand.NextFloat() - 0.5f) * 4f);
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, new Vector2(perturbedSpeed.X, -projectileVelocity) + randomVelocityVector, type, MushroomShotDamage, 0f, Main.myPlayer, 0f, player.Center.Y);
-                                }
+                                FireMushroomSpread(player, type, 8, 60);
                             }
                         }
 
@@ -850,6 +826,22 @@ namespace CalamityMod.NPCs.Crabulon
         public override bool? CanFallThroughPlatforms() => NPC.target >= 0 && Main.player[NPC.target].position.Y > NPC.position.Y + NPC.height;
 
         // Can only hit the target if within certain distance
+        private void FireMushroomSpread(Player player, int type, int numProj, int spread)
+        {
+            float projectileVelocity = CalamityWorld.death ? 15f : 10f;
+            Vector2 destination = new Vector2(NPC.Center.X, NPC.Center.Y - 100f) - NPC.Center;
+            destination.Normalize();
+            destination *= projectileVelocity;
+
+            float rotation = MathHelper.ToRadians(spread);
+            for (int i = 0; i < numProj; i++)
+            {
+                Vector2 perturbedSpeed = destination.RotatedBy(MathHelper.Lerp(-rotation, rotation, i / (float)(numProj - 1)));
+                Vector2 randomVelocityVector = new Vector2((Main.rand.NextFloat() - 0.5f) * 4f, (Main.rand.NextFloat() - 0.5f) * 4f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, new Vector2(perturbedSpeed.X, -projectileVelocity) + randomVelocityVector, type, MushroomShotDamage, 0f, Main.myPlayer, 0f, player.Center.Y);
+            }
+        }
+
         private void DoStompEffects()
         {
             for (int j = (int)NPC.position.X - 20; j < (int)NPC.position.X + NPC.width + 40; j += 20)

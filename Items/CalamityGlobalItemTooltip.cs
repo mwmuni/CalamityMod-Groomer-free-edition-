@@ -1318,10 +1318,7 @@ namespace CalamityMod.Items
                 orange ? XyksBlessingOrange.baseMainColor : XyksBlessingBlue.baseMainColor,
                 orange ? XyksBlessingOrange.baseAccentColor : XyksBlessingBlue.baseAccentColor,
             };
-            int colorIndex = (int)(rate / 2 % eColors.Count);
-            Color currentColor = eColors[colorIndex];
-            Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
-            Color usedColor = Color.Lerp(currentColor, nextColor, rate % 2f >= 1f ? 1f : rate % 1f);
+            Color usedColor = Projectiles.CommonProjectileAI.CycleEnergyColor(rate, eColors, inclusivePeak: true);
             Vector2 backScale = line.BaseScale;
 
             Main.spriteBatch.End();

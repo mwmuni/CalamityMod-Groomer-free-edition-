@@ -177,6 +177,9 @@ namespace CalamityMod.Tiles
         }
 
         public static void ChestMouseOver<T>(int i, int j) where T : ModItem
+            => UpdateChestCursor<T, T>(i, j, false);
+
+        private static void UpdateChestCursor<C, K>(int i, int j, bool locked) where C : ModItem where K : ModItem
         {
             Player player = Main.LocalPlayer;
             Tile tile = Main.tile[i, j];
@@ -202,7 +205,9 @@ namespace CalamityMod.Tiles
                 player.cursorItemIconText = Main.chest[chest].name.Length > 0 ? Main.chest[chest].name : chestName;
                 if (player.cursorItemIconText == chestName)
                 {
-                    player.cursorItemIconID = ItemType<T>();
+                    player.cursorItemIconID = ItemType<C>();
+                    if (locked && Main.tile[left, top].TileFrameX / 36 == 1)
+                        player.cursorItemIconID = ItemType<K>();
                     player.cursorItemIconText = "";
                 }
             }
@@ -548,40 +553,7 @@ namespace CalamityMod.Tiles
 
         public static void LockedChestMouseOver<K, C>(int i, int j)
             where K : ModItem where C : ModItem
-        {
-            Player player = Main.LocalPlayer;
-            Tile tile = Main.tile[i, j];
-            string chestName = TileLoader.DefaultContainerName(tile.TileType, tile.TileFrameX, tile.TileFrameY);
-            int left = i;
-            int top = j;
-            if (tile.TileFrameX % 36 != 0)
-            {
-                left--;
-            }
-            if (tile.TileFrameY != 0)
-            {
-                top--;
-            }
-            int chest = Chest.FindChest(left, top);
-            player.cursorItemIconID = -1;
-            if (chest < 0)
-            {
-                player.cursorItemIconText = Language.GetTextValue("LegacyChestType.0");
-            }
-            else
-            {
-                player.cursorItemIconText = Main.chest[chest].name.Length > 0 ? Main.chest[chest].name : chestName;
-                if (player.cursorItemIconText == chestName)
-                {
-                    player.cursorItemIconID = ItemType<C>();
-                    if (Main.tile[left, top].TileFrameX / 36 == 1)
-                        player.cursorItemIconID = ItemType<K>();
-                    player.cursorItemIconText = "";
-                }
-            }
-            player.noThrow = 2;
-            player.cursorItemIconEnabled = true;
-        }
+            => UpdateChestCursor<C, K>(i, j, true);
 
         public static void LockedChestMouseOverFar<K, C>(int i, int j)
             where K : ModItem where C : ModItem
@@ -709,6 +681,24 @@ namespace CalamityMod.Tiles
             }
         }
 
+        private static void SetLightedFurnitureDefaults(ModTile mt, int itemDropID, bool lavaImmune)
+        {
+            mt.RegisterItemDrop(itemDropID);
+            Main.tileLighted[mt.Type] = true;
+            Main.tileFrameImportant[mt.Type] = true;
+            Main.tileLavaDeath[mt.Type] = !lavaImmune;
+            Main.tileWaterDeath[mt.Type] = false;
+        }
+
+        private static void CopyFurnitureStyle(TileObjectData style, bool lavaImmune, bool allowWater = false)
+        {
+            TileObjectData.newTile.CopyFrom(style);
+            TileObjectData.newTile.LavaDeath = !lavaImmune;
+            if (allowWater)
+                TileObjectData.newTile.WaterPlacement = LiquidPlacement.Allowed;
+            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+        }
+
         /// <summary>
         /// Extension which initializes a ModTile to be a 6x6 Painting.
         /// </summary>
@@ -764,12 +754,7 @@ namespace CalamityMod.Tiles
         /// <param name="lavaImmune">Whether this tile is supposed to be immune to lava. Defaults to false.</param>
         internal static void SetUpBathtub(this ModTile mt, int itemDropID, bool lavaImmune = false)
         {
-            mt.RegisterItemDrop(itemDropID);
-
-            Main.tileLighted[mt.Type] = true;
-            Main.tileFrameImportant[mt.Type] = true;
-            Main.tileLavaDeath[mt.Type] = !lavaImmune;
-            Main.tileWaterDeath[mt.Type] = false;
+            SetLightedFurnitureDefaults(mt, itemDropID, lavaImmune);
             SetUpBedOrBathtubObject(mt, lavaImmune);
 
             // All bathtubs count as tables.
@@ -842,10 +827,7 @@ namespace CalamityMod.Tiles
             Main.tileTable[mt.Type] = solidTop;
             Main.tileLavaDeath[mt.Type] = !lavaImmune;
             Main.tileWaterDeath[mt.Type] = false;
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style3x4);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.WaterPlacement = LiquidPlacement.Allowed;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style3x4, lavaImmune, true);
             TileObjectData.addTile(mt.Type);
 
             // Skip this for special bookcases such as Monolith Amalgam
@@ -865,17 +847,9 @@ namespace CalamityMod.Tiles
         /// <param name="lavaImmune">Whether this tile is supposed to be immune to lava. Defaults to false.</param>
         internal static void SetUpCandelabra(this ModTile mt, int itemDropID, bool lavaImmune = false)
         {
-            mt.RegisterItemDrop(itemDropID);
-
-            Main.tileLighted[mt.Type] = true;
-            Main.tileFrameImportant[mt.Type] = true;
-            Main.tileLavaDeath[mt.Type] = !lavaImmune;
-            Main.tileWaterDeath[mt.Type] = false;
+            SetLightedFurnitureDefaults(mt, itemDropID, lavaImmune);
             TileID.Sets.DisableSmartCursor[mt.Type] = true;
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.WaterPlacement = LiquidPlacement.Allowed;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style2x2, lavaImmune, true);
             TileObjectData.newTile.StyleLineSkip = 2;
             TileObjectData.addTile(mt.Type);
 
@@ -895,12 +869,7 @@ namespace CalamityMod.Tiles
         /// <param name="offset">The vertical offset of the tile. Defaults to -4.</param>
         internal static void SetUpCandle(this ModTile mt, int itemDropID, bool lavaImmune = false, bool autoMapEntry = true, int offset = -4)
         {
-            mt.RegisterItemDrop(itemDropID);
-
-            Main.tileLighted[mt.Type] = true;
-            Main.tileFrameImportant[mt.Type] = true;
-            Main.tileLavaDeath[mt.Type] = !lavaImmune;
-            Main.tileWaterDeath[mt.Type] = false;
+            SetLightedFurnitureDefaults(mt, itemDropID, lavaImmune);
             TileID.Sets.DisableSmartCursor[mt.Type] = true;
             TileObjectData.newTile.CopyFrom(TileObjectData.StyleOnTable1x1);
             TileObjectData.newTile.CoordinateHeights = new int[] { 20 };
@@ -1255,16 +1224,9 @@ namespace CalamityMod.Tiles
         /// <param name="lavaImmune">Whether this tile is supposed to be immune to lava. Defaults to false.</param>
         internal static void SetUpLamp(this ModTile mt, int itemDropID, bool lavaImmune = false)
         {
-            mt.RegisterItemDrop(itemDropID);
-
-            Main.tileLighted[mt.Type] = true;
-            Main.tileFrameImportant[mt.Type] = true;
-            Main.tileLavaDeath[mt.Type] = !lavaImmune;
-            Main.tileWaterDeath[mt.Type] = false;
+            SetLightedFurnitureDefaults(mt, itemDropID, lavaImmune);
             TileID.Sets.DisableSmartCursor[mt.Type] = true;
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style1xX);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style1xX, lavaImmune);
             TileObjectData.newTile.StyleLineSkip = 2;
             TileObjectData.addTile(mt.Type);
 
@@ -1283,17 +1245,10 @@ namespace CalamityMod.Tiles
         /// <param name="autoMapEntry">Whether this tile is supposed to use normal map entries. Defaults to true.</param>
         internal static void SetUpLantern(this ModTile mt, int itemDropID, bool lavaImmune = false, bool autoMapEntry = true)
         {
-            mt.RegisterItemDrop(itemDropID);
-
-            Main.tileLighted[mt.Type] = true;
-            Main.tileFrameImportant[mt.Type] = true;
-            Main.tileLavaDeath[mt.Type] = !lavaImmune;
-            Main.tileWaterDeath[mt.Type] = false;
+            SetLightedFurnitureDefaults(mt, itemDropID, lavaImmune);
             TileID.Sets.DisableSmartCursor[mt.Type] = true;
             TileID.Sets.MultiTileSway[mt.Type] = true;
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style1x2Top);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style1x2Top, lavaImmune);
             TileObjectData.newTile.StyleLineSkip = 2;
             TileObjectData.newTile.DrawYOffset = -2;
             TileObjectData.newAlternate.CopyFrom(TileObjectData.newTile);
@@ -1328,9 +1283,7 @@ namespace CalamityMod.Tiles
             Main.tileLavaDeath[mt.Type] = !lavaImmune;
             Main.tileWaterDeath[mt.Type] = false;
 
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style3x2);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style3x2, lavaImmune);
             TileObjectData.addTile(mt.Type);
 
             // All pianos count as tables.
@@ -1416,18 +1369,11 @@ namespace CalamityMod.Tiles
         /// <param name="honey">Whether this tile counts as a honey source. Defaults to false.</param>
         internal static void SetUpSink(this ModTile mt, int itemDropID, bool lavaImmune = false, bool water = true, bool lava = false, bool honey = false)
         {
-            mt.RegisterItemDrop(itemDropID);
-
-            Main.tileLighted[mt.Type] = true;
-            Main.tileFrameImportant[mt.Type] = true;
-            Main.tileLavaDeath[mt.Type] = !lavaImmune;
-            Main.tileWaterDeath[mt.Type] = false;
+            SetLightedFurnitureDefaults(mt, itemDropID, lavaImmune);
             TileID.Sets.CountsAsWaterSource[mt.Type] = water;
             TileID.Sets.CountsAsLavaSource[mt.Type] = lava;
             TileID.Sets.CountsAsHoneySource[mt.Type] = honey;
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style2x2, lavaImmune);
             TileObjectData.addTile(mt.Type);
 
             mt.AddMapEntry(new Color(191, 142, 111), Language.GetText("MapObject.Sink"));
@@ -1444,17 +1390,10 @@ namespace CalamityMod.Tiles
         /// <param name="bench">Whether this tile is displayed as bench instead of sofa on the map. Defaults to false.</param>
         internal static void SetUpSofa(this ModTile mt, int itemDropID, bool lavaImmune = false, bool bench = false)
         {
-            mt.RegisterItemDrop(itemDropID);
-
-            Main.tileLighted[mt.Type] = true;
-            Main.tileFrameImportant[mt.Type] = true;
-            Main.tileLavaDeath[mt.Type] = !lavaImmune;
-            Main.tileWaterDeath[mt.Type] = false;
+            SetLightedFurnitureDefaults(mt, itemDropID, lavaImmune);
             TileID.Sets.CanBeSatOnForPlayers[mt.Type] = true;
             TileID.Sets.HasOutlines[mt.Type] = true;
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style3x2);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style3x2, lavaImmune);
             TileObjectData.addTile(mt.Type);
 
             // All sofas count as chairs.
@@ -1480,9 +1419,7 @@ namespace CalamityMod.Tiles
             Main.tileLavaDeath[mt.Type] = !lavaImmune;
             Main.tileWaterDeath[mt.Type] = false;
 
-            TileObjectData.newTile.CopyFrom(TileObjectData.Style3x2);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
+            CopyFurnitureStyle(TileObjectData.Style3x2, lavaImmune);
             TileObjectData.addTile(mt.Type);
 
             // As you could probably guess, all tables count as tables.

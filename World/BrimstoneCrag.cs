@@ -465,8 +465,14 @@ namespace CalamityMod.World
         }
 
         public static bool PlaceTree(int x, int y, int tileType)
+            => PlaceCragPlant(x, y, tileType, false);
+
+        public static bool PlaceCragLily(int x, int y, int tileType)
+            => PlaceCragPlant(x, y, tileType, true);
+
+        private static bool PlaceCragPlant(int x, int y, int tileType, bool lily)
         {
-            int minDistance = 5;
+            int minDistance = lily ? 15 : 5;
             int treeNearby = 0;
 
             for (int i = x - minDistance; i < x + minDistance; i++)
@@ -484,40 +490,19 @@ namespace CalamityMod.World
                 }
             }
 
-            SpineTree.Spawn(x, y, 22, 28, false);
-
-            return true;
-        }
-
-        public static bool PlaceCragLily(int x, int y, int tileType)
-        {
-            int minDistance = 15;
-            int lilyNearby = 0;
-
-            for (int i = x - minDistance; i < x + minDistance; i++)
+            if (lily)
             {
-                for (int j = y - minDistance; j < y + minDistance; j++)
+                for (int upChechY = y - 10; upChechY < y; upChechY++)
                 {
-                    if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == tileType)
+                    if (Main.tile[x, upChechY].HasTile)
                     {
-                        lilyNearby++;
-                        if (lilyNearby > 0)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
+                WorldGen.PlaceObject(x, y, tileType);
             }
-
-            for (int upChechY = y - 10; upChechY < y; upChechY++)
-            {
-                if (Main.tile[x, upChechY].HasTile)
-                {
-                    return false;
-                }
-            }
-
-            WorldGen.PlaceObject(x, y, tileType);
+            else
+                SpineTree.Spawn(x, y, 22, 28, false);
 
             return true;
         }

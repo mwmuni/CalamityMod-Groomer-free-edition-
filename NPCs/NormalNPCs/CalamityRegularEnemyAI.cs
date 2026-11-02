@@ -62,62 +62,12 @@ namespace CalamityMod.NPCs.NormalNPCs
                 npc.ai[3] -= 1f;
             }
             UpdateTurnAroundTimer(npc, turnAroundDelay, 10, shouldTurnAround);
-            if (npc.ai[3] < turnAroundDelay)
-            {
-                npc.TargetClosest(true);
-            }
-            else
-            {
-                if (npc.velocity.X == 0f)
-                {
-                    if (npc.velocity.Y == 0f)
-                    {
-                        npc.ai[0] += 1f;
-                        if (npc.ai[0] >= 2f)
-                        {
-                            npc.direction *= -1;
-                            npc.spriteDirection = -npc.direction;
-                            npc.ai[0] = 0f;
-                        }
-                    }
-                }
-                else
-                {
-                    npc.ai[0] = 0f;
-                }
-                npc.directionY = -1;
-                if (npc.direction == 0)
-                {
-                    npc.direction = 1;
-                }
-            }
+            UpdateWalkingDirection(npc, turnAroundDelay, reversedSprite: true);
             var maxVelocity = speedDetect; //5
             var acceleration = speedAdditive; //0.05
             if (!unusedFlag && (npc.velocity.Y == 0f || npc.wet || npc.velocity.X <= 0f && npc.direction > 0 || npc.velocity.X >= 0f && npc.direction < 0))
             {
-                if (npc.velocity.X < -maxVelocity || npc.velocity.X > maxVelocity)
-                {
-                    if (npc.velocity.Y == 0f)
-                    {
-                        npc.velocity *= 0.8f;
-                    }
-                }
-                else if (npc.velocity.X < maxVelocity && npc.direction == -1)
-                {
-                    npc.velocity.X = npc.velocity.X + acceleration;
-                    if (npc.velocity.X > maxVelocity)
-                    {
-                        npc.velocity.X = maxVelocity;
-                    }
-                }
-                else if (npc.velocity.X > -maxVelocity && npc.direction == 1)
-                {
-                    npc.velocity.X = npc.velocity.X - acceleration;
-                    if (npc.velocity.X < -maxVelocity)
-                    {
-                        npc.velocity.X = -maxVelocity;
-                    }
-                }
+                AccelerateGroundMovement(npc, maxVelocity, acceleration, forwardDirection: -1);
             }
             if (npc.velocity.Y >= 0f)
             {
@@ -166,6 +116,66 @@ namespace CalamityMod.NPCs.NormalNPCs
             }
         }
         #endregion
+
+        private static void UpdateWalkingDirection(NPC npc, int turnAroundDelay, bool reversedSprite)
+        {
+            if (npc.ai[3] < turnAroundDelay)
+            {
+                npc.TargetClosest(true);
+            }
+            else
+            {
+                if (npc.velocity.X == 0f)
+                {
+                    if (npc.velocity.Y == 0f)
+                    {
+                        npc.ai[0] += 1f;
+                        if (npc.ai[0] >= 2f)
+                        {
+                            npc.direction *= -1;
+                            npc.spriteDirection = reversedSprite ? -npc.direction : npc.direction;
+                            npc.ai[0] = 0f;
+                        }
+                    }
+                }
+                else
+                {
+                    npc.ai[0] = 0f;
+                }
+                npc.directionY = -1;
+                if (npc.direction == 0)
+                {
+                    npc.direction = 1;
+                }
+            }
+        }
+
+        private static void AccelerateGroundMovement(NPC npc, float maxVelocity, float acceleration, int forwardDirection)
+        {
+            if (npc.velocity.X < -maxVelocity || npc.velocity.X > maxVelocity)
+            {
+                if (npc.velocity.Y == 0f)
+                {
+                    npc.velocity *= 0.8f;
+                }
+            }
+            else if (npc.velocity.X < maxVelocity && npc.direction == forwardDirection)
+            {
+                npc.velocity.X += acceleration;
+                if (npc.velocity.X > maxVelocity)
+                {
+                    npc.velocity.X = maxVelocity;
+                }
+            }
+            else if (npc.velocity.X > -maxVelocity && npc.direction == -forwardDirection)
+            {
+                npc.velocity.X -= acceleration;
+                if (npc.velocity.X < -maxVelocity)
+                {
+                    npc.velocity.X = -maxVelocity;
+                }
+            }
+        }
 
         #region Dungeon Spirit AI
         public static void DungeonSpiritAI(NPC npc, Mod mod, float speed, float rotation, bool lantern = false)
@@ -301,35 +311,7 @@ namespace CalamityMod.NPCs.NormalNPCs
                     }
                 }
             }
-            if (npc.ai[3] < turnAroundDelay)
-            {
-                npc.TargetClosest(true);
-            }
-            else
-            {
-                if (npc.velocity.X == 0f)
-                {
-                    if (npc.velocity.Y == 0f)
-                    {
-                        npc.ai[0] += 1f;
-                        if (npc.ai[0] >= 2f)
-                        {
-                            npc.direction *= -1;
-                            npc.spriteDirection = npc.direction;
-                            npc.ai[0] = 0f;
-                        }
-                    }
-                }
-                else
-                {
-                    npc.ai[0] = 0f;
-                }
-                npc.directionY = -1;
-                if (npc.direction == 0)
-                {
-                    npc.direction = 1;
-                }
-            }
+            UpdateWalkingDirection(npc, turnAroundDelay, reversedSprite: false);
 
             if (npc.velocity.Y == 0f || npc.wet || npc.velocity.X <= 0f && npc.direction < 0 || npc.velocity.X >= 0f && npc.direction > 0)
             {
@@ -344,29 +326,7 @@ namespace CalamityMod.NPCs.NormalNPCs
                 }
                 var maxVelocity = speedDetect;
                 var acceleration = speedAdditive;
-                if (npc.velocity.X < -maxVelocity || npc.velocity.X > maxVelocity)
-                {
-                    if (npc.velocity.Y == 0f)
-                    {
-                        npc.velocity *= 0.8f;
-                    }
-                }
-                else if (npc.velocity.X < maxVelocity && npc.direction == 1)
-                {
-                    npc.velocity.X += acceleration;
-                    if (npc.velocity.X > maxVelocity)
-                    {
-                        npc.velocity.X = maxVelocity;
-                    }
-                }
-                else if (npc.velocity.X > -maxVelocity && npc.direction == -1)
-                {
-                    npc.velocity.X -= acceleration;
-                    if (npc.velocity.X < -maxVelocity)
-                    {
-                        npc.velocity.X = -maxVelocity;
-                    }
-                }
+                AccelerateGroundMovement(npc, maxVelocity, acceleration, forwardDirection: 1);
             }
             if (npc.velocity.Y >= 0f)
             {

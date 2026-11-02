@@ -914,14 +914,7 @@ namespace CalamityMod.NPCs.OldDuke
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + 50f + calamityGlobalNPC.newAI[2]), (int)(NPC.Center.Y + 540f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, 1f, -sharkronVelocity, 255);
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - 50f - calamityGlobalNPC.newAI[2]), (int)(NPC.Center.Y + 540f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, -1f, -sharkronVelocity, 255);
-
-                            if (Main.getGoodWorld)
-                            {
-                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + 50f + calamityGlobalNPC.newAI[2] * 0.5f), (int)(NPC.Center.Y + 270f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, 1f, -sharkronVelocity, 255);
-                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - 50f - calamityGlobalNPC.newAI[2] * 0.5f), (int)(NPC.Center.Y + 270f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, -1f, -sharkronVelocity, 255);
-                            }
+                            SpawnTransitionSharkrons(calamityGlobalNPC, 540f, -sharkronVelocity, -sharkronVelocity);
                         }
                     }
                 }
@@ -1237,14 +1230,7 @@ namespace CalamityMod.NPCs.OldDuke
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + 50f + calamityGlobalNPC.newAI[2]), (int)(NPC.Center.Y - 540f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, 1f, sharkronVelocity, 255);
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - 50f - calamityGlobalNPC.newAI[2]), (int)(NPC.Center.Y - 540f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, -1f, sharkronVelocity, 255);
-
-                            if (Main.getGoodWorld)
-                            {
-                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + 50f + calamityGlobalNPC.newAI[2] * 0.5f), (int)(NPC.Center.Y + 270f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, 1f, -sharkronVelocity, 255);
-                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - 50f - calamityGlobalNPC.newAI[2] * 0.5f), (int)(NPC.Center.Y + 270f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, -1f, -sharkronVelocity, 255);
-                            }
+                            SpawnTransitionSharkrons(calamityGlobalNPC, -540f, sharkronVelocity, -sharkronVelocity);
                         }
                     }
                 }
@@ -1520,6 +1506,18 @@ namespace CalamityMod.NPCs.OldDuke
                     NPC.rotation += MathHelper.Pi;
 
                 NPC.spriteDirection = -NPC.direction;
+            }
+        }
+
+        private void SpawnTransitionSharkrons(CalamityGlobalNPC calamityGlobalNPC, float outerOffsetY, float outerVelocity, float innerVelocity)
+        {
+            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + 50f + calamityGlobalNPC.newAI[2]), (int)(NPC.Center.Y + outerOffsetY), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, 1f, outerVelocity, 255);
+            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - 50f - calamityGlobalNPC.newAI[2]), (int)(NPC.Center.Y + outerOffsetY), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, -1f, outerVelocity, 255);
+
+            if (Main.getGoodWorld)
+            {
+                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + 50f + calamityGlobalNPC.newAI[2] * 0.5f), (int)(NPC.Center.Y + 270f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, 1f, innerVelocity, 255);
+                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X - 50f - calamityGlobalNPC.newAI[2] * 0.5f), (int)(NPC.Center.Y + 270f), ModContent.NPCType<SulphurousSharkron>(), 0, 0f, 0f, -1f, innerVelocity, 255);
             }
         }
 

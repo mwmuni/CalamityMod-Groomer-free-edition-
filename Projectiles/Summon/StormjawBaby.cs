@@ -213,16 +213,7 @@ namespace CalamityMod.Projectiles.Summon
                 }
                 else
                 {
-                    Projectile.frameCounter++;
-                    if (Projectile.frameCounter > 3)
-                    {
-                        Projectile.frame++;
-                        Projectile.frameCounter = 0;
-                    }
-                    if (Projectile.frame >= 10)
-                    {
-                        Projectile.frame = 6;
-                    }
+                    Projectile.LoopAnimation(3, 10, 6);
                 }
                 if (Projectile.velocity.X > 0.5f)
                     Projectile.spriteDirection = 1;

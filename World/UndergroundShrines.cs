@@ -84,9 +84,12 @@ namespace CalamityMod.World
             MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceCorruptionShrine(StructureMap structures)
+            => PlaceEvilShrine(structures, true);
+
+        private static void PlaceEvilShrine(StructureMap structures, bool corruption)
         {
             int tries = 0;
-            string mapKey = CorruptionShrineKey;
+            string mapKey = corruption ? CorruptionShrineKey : CrimsonShrineKey;
 
             do
             {
@@ -94,11 +97,17 @@ namespace CalamityMod.World
                 int placementPositionY = WorldGen.genRand.Next((int)Main.worldSurface, (int)(Main.maxTilesY * 0.5f));
                 Point placementPoint = new Point(placementPositionX, placementPositionY);
 
-                Vector2 schematicSize = new Vector2(TileMaps[mapKey].GetLength(0) / 2, TileMaps[mapKey].GetLength(1)); //Fooling the system into thinking the shrine is smaller than it actually is so it fits into chasms
+                // Corruption alone uses half the footprint to fit into chasms.
+                Vector2 schematicSize = new Vector2(corruption ? TileMaps[mapKey].GetLength(0) / 2 : TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1));
                 int corruptStuffInArea = 0;
                 bool canGenerateInLocation = true;
                 bool inYourWalls = false;
 
+                if (!corruption)
+                {
+                    float groundThreshold = schematicSize.Y * 0.4f;
+                    float groundTiles = schematicSize.X * groundThreshold;
+                }
                 float totalTiles = schematicSize.X * schematicSize.Y;
                 for (int x = placementPoint.X; x < placementPoint.X + schematicSize.X; x++)
                 {
@@ -109,10 +118,10 @@ namespace CalamityMod.World
                             canGenerateInLocation = false;
 
                         //Should generate within the bounds of the walls.
-                        if (tile.TileType == TileID.Ebonstone || tile.WallType == WallID.EbonstoneUnsafe)
+                        if (tile.TileType == (corruption ? TileID.Ebonstone : TileID.Crimstone) || tile.WallType == (corruption ? WallID.EbonstoneUnsafe : WallID.CrimstoneUnsafe))
                             corruptStuffInArea++;
 
-                        if (tile.WallType == WallID.EbonstoneUnsafe)
+                        if (tile.WallType == (corruption ? WallID.EbonstoneUnsafe : WallID.CrimstoneUnsafe))
                             inYourWalls = true;
 
                         //Do not cut into the altars
@@ -120,15 +129,20 @@ namespace CalamityMod.World
                             canGenerateInLocation = false;
                     }
                 }
-                if (!canGenerateInLocation || corruptStuffInArea < totalTiles * 0.9f || !structures.CanPlace(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y)) || !inYourWalls)
+                if (!canGenerateInLocation || corruptStuffInArea < totalTiles * (corruption ? 0.9f : 0.4f) || !structures.CanPlace(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y)) || !inYourWalls)
                 {
                     tries++;
                 }
                 else
                 {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillCorruptionShrineChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X * 2, (int)schematicSize.Y), 4);
+                    if (corruption)
+                    {
+                        bool _ = true;
+                        PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillCorruptionShrineChest));
+                        CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X * 2, (int)schematicSize.Y), 4);
+                    }
+                    else
+                        PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillCrimsonShrineChest));
                     break;
                 }
                 //FUCK YOU FUCK YOU FUCK YOU
@@ -171,56 +185,7 @@ namespace CalamityMod.World
             MiscWorldgenRoutines.FillChestContents(chest, contents);
         }
         public static void PlaceCrimsonShrine(StructureMap structures)
-        {
-            int tries = 0;
-            string mapKey = CrimsonShrineKey;
-
-            do
-            {
-                int placementPositionX = WorldGen.genRand.Next((int)(Main.maxTilesX * 0.05f), (int)(Main.maxTilesX * 0.95f));
-                int placementPositionY = WorldGen.genRand.Next((int)Main.worldSurface, (int)(Main.maxTilesY * 0.5f));
-                Point placementPoint = new Point(placementPositionX, placementPositionY);
-
-                Vector2 schematicSize = new Vector2(TileMaps[mapKey].GetLength(0), TileMaps[mapKey].GetLength(1));
-                int crimsonStuffInArea = 0;
-                bool canGenerateInLocation = true;
-                bool inYourWalls = false;
-
-                float groundThreshold = schematicSize.Y * 0.4f;
-                float groundTiles = schematicSize.X * groundThreshold;
-                float totalTiles = schematicSize.X * schematicSize.Y;
-                for (int x = placementPoint.X; x < placementPoint.X + schematicSize.X; x++)
-                {
-                    for (int y = placementPoint.Y; y < placementPoint.Y + schematicSize.Y; y++)
-                    {
-                        Tile tile = CalamityUtils.ParanoidTileRetrieval(x, y);
-                        if (ShouldAvoidLocation(new Point(x, y)))
-                            canGenerateInLocation = false;
-
-                        //Crimson does not generate walls in blocks very much, so both walls and tiles are grouped
-                        if (tile.TileType == TileID.Crimstone || tile.WallType == WallID.CrimstoneUnsafe)
-                            crimsonStuffInArea++;
-
-                        if (tile.WallType == WallID.CrimstoneUnsafe)
-                            inYourWalls = true;
-
-                        //Do not cut into the altars
-                        if (tile.TileType == TileID.DemonAltar)
-                            canGenerateInLocation = false;
-                    }
-                }
-                if (!canGenerateInLocation || crimsonStuffInArea < totalTiles * 0.4f || !structures.CanPlace(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y)) || !inYourWalls)
-                {
-                    tries++;
-                }
-                else
-                {
-                    PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillCrimsonShrineChest));
-                    break;
-                }
-                //FUCK YOU TOO
-            } while (tries <= 60000);
-        }
+            => PlaceEvilShrine(structures, false);
         #endregion
 
         #region Desert Shrine
