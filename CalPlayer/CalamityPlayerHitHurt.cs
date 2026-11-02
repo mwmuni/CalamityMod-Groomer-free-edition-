@@ -675,26 +675,7 @@ namespace CalamityMod.CalPlayer
             if (Player.ownedProjectileCounts[ModContent.ProjectileType<RelicOfConvergenceCrystal>()] > 0 && Player.HeldItem.type == ModContent.ItemType<RelicOfConvergence>())
                 modifiers.FinalDamage *= RelicOfConvergence.IncomingDamageMultiplier;
 
-            bool lifeAndShieldCondition = Player.statLife >= Player.statLifeMax2 && (!HasAnyEnergyShield || TotalEnergyShielding >= TotalMaxShieldDurability);
-            if (theBee && theBeeCooldown <= 0 && lifeAndShieldCondition)
-            {
-                modifiers.FinalDamage *= 0.5f;
-                shouldTriggerBeeCooldown = true;
-            }
-
-            // Apply Adrenaline DR if available
-            if (AdrenalineEnabled)
-            {
-                bool fullAdrenWithoutDH = !draedonsHeart && (adrenaline == adrenalineMax) && !adrenalineModeActive;
-                bool usingNanomachinesWithDH = draedonsHeart && adrenalineModeActive;
-
-                // 18AUG2023: Ozzatron: Adrenaline DR does not apply if you have energy shields active.
-                // Otherwise, it becomes almost impossible to break energy shields due to Adrenaline DR.
-                // If the shield never breaks, you never lose full Adrenaline, meaning you keep the DR forever and are functionally immortal.
-                // This intentionally gives Adrenaline much-needed anti-synergy with energy shields, because they make gaining Adrenaline much safer.
-                if ((fullAdrenWithoutDH || usingNanomachinesWithDH) && TotalEnergyShielding <= 0)
-                    modifiers.IncomingDamageMultiplier *= (1f - this.GetAdrenalineDR());
-            }
+            ApplyBeeAndAdrenalineDamageReduction(ref modifiers);
 
             if (Main.hardMode && Main.expertMode)
             {
@@ -897,26 +878,7 @@ namespace CalamityMod.CalPlayer
             if (Player.ownedProjectileCounts[ModContent.ProjectileType<EnergyShell>()] > 0 && Player.HeldItem.type == ModContent.ItemType<LionHeart>())
                 modifiers.FinalDamage *= 0.5f;
 
-            bool lifeAndShieldCondition = Player.statLife >= Player.statLifeMax2 && (!HasAnyEnergyShield || TotalEnergyShielding >= TotalMaxShieldDurability);
-            if (theBee && theBeeCooldown <= 0 && lifeAndShieldCondition)
-            {
-                modifiers.FinalDamage *= 0.5f;
-                shouldTriggerBeeCooldown = true;
-            }
-
-            // Apply Adrenaline DR if available
-            if (AdrenalineEnabled)
-            {
-                bool fullAdrenWithoutDH = !draedonsHeart && (adrenaline == adrenalineMax) && !adrenalineModeActive;
-                bool usingNanomachinesWithDH = draedonsHeart && adrenalineModeActive;
-
-                // 18AUG2023: Ozzatron: Adrenaline DR does not apply if you have energy shields active.
-                // Otherwise, it becomes almost impossible to break energy shields due to Adrenaline DR.
-                // If the shield never breaks, you never lose full Adrenaline, meaning you keep the DR forever and are functionally immortal.
-                // This intentionally gives Adrenaline much-needed anti-synergy with energy shields, because they make gaining Adrenaline much safer.
-                if ((fullAdrenWithoutDH || usingNanomachinesWithDH) && TotalEnergyShielding <= 0)
-                    modifiers.IncomingDamageMultiplier *= (1f - this.GetAdrenalineDR());
-            }
+            ApplyBeeAndAdrenalineDamageReduction(ref modifiers);
 
             // Damage reduction from Shield of the High Ruler if facing the projectile that just hit.
             // If the projectile is in the exact center of the player on the X axis YOU GET NOTHING, GOOD DAY, SIR!
@@ -937,6 +899,30 @@ namespace CalamityMod.CalPlayer
             }
         }
         #endregion
+
+        private void ApplyBeeAndAdrenalineDamageReduction(ref Player.HurtModifiers modifiers)
+        {
+            bool lifeAndShieldCondition = Player.statLife >= Player.statLifeMax2 && (!HasAnyEnergyShield || TotalEnergyShielding >= TotalMaxShieldDurability);
+            if (theBee && theBeeCooldown <= 0 && lifeAndShieldCondition)
+            {
+                modifiers.FinalDamage *= 0.5f;
+                shouldTriggerBeeCooldown = true;
+            }
+
+            // Apply Adrenaline DR if available
+            if (AdrenalineEnabled)
+            {
+                bool fullAdrenWithoutDH = !draedonsHeart && (adrenaline == adrenalineMax) && !adrenalineModeActive;
+                bool usingNanomachinesWithDH = draedonsHeart && adrenalineModeActive;
+
+                // 18AUG2023: Ozzatron: Adrenaline DR does not apply if you have energy shields active.
+                // Otherwise, it becomes almost impossible to break energy shields due to Adrenaline DR.
+                // If the shield never breaks, you never lose full Adrenaline, meaning you keep the DR forever and are functionally immortal.
+                // This intentionally gives Adrenaline much-needed anti-synergy with energy shields, because they make gaining Adrenaline much safer.
+                if ((fullAdrenWithoutDH || usingNanomachinesWithDH) && TotalEnergyShielding <= 0)
+                    modifiers.IncomingDamageMultiplier *= (1f - this.GetAdrenalineDR());
+            }
+        }
 
         #region On Hit By NPC / Projectile
         public override void OnHitByNPC(NPC npc, Player.HurtInfo hurtInfo)

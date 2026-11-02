@@ -12,6 +12,25 @@ public static partial class RevengeanceAndDeathAI
 {
     public class WormAI : VanillaAIOverride
     {
+        private void SpawnBodyAndTailSegments(int segments, int bodyType, int tailType, ref int currentSegment)
+        {
+            for (int i = 0; i < segments; i++)
+            {
+                int segmentType = bodyType;
+                if (i == segments - 1)
+                {
+                    segmentType = tailType;
+                }
+                int segment = NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.position.X + (float)(NPC.width / 2)), (int)(NPC.position.Y + (float)NPC.height), segmentType, NPC.whoAmI, 0f, 0f, 0f, 0f, 255);
+                Main.npc[segment].ai[3] = (float)NPC.whoAmI;
+                Main.npc[segment].realLife = NPC.whoAmI;
+                Main.npc[segment].ai[1] = (float)currentSegment;
+                Main.npc[currentSegment].ai[0] = (float)segment;
+                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, segment, 0f, 0f, 0f, 0, 0, 0);
+                currentSegment = segment;
+            }
+        }
+
         public override bool AI(Mod mod)
         {
             if (NPC.type == NPCID.LeechHead && NPC.localAI[1] == 0f)
@@ -132,21 +151,7 @@ public static partial class RevengeanceAndDeathAI
                     NPC.realLife = NPC.whoAmI;
                     int currentTombCrawler = NPC.whoAmI;
                     int tombCrawlerSegments = Main.rand.Next(11, CalamityWorld.death ? 25 : 15);
-                    for (int m = 0; m < tombCrawlerSegments; m++)
-                    {
-                        int tombCrawlerSegmentType = NPCID.TombCrawlerBody;
-                        if (m == tombCrawlerSegments - 1)
-                        {
-                            tombCrawlerSegmentType = NPCID.TombCrawlerTail;
-                        }
-                        int tombCrawlerSegment = NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.position.X + (float)(NPC.width / 2)), (int)(NPC.position.Y + (float)NPC.height), tombCrawlerSegmentType, NPC.whoAmI, 0f, 0f, 0f, 0f, 255);
-                        Main.npc[tombCrawlerSegment].ai[3] = (float)NPC.whoAmI;
-                        Main.npc[tombCrawlerSegment].realLife = NPC.whoAmI;
-                        Main.npc[tombCrawlerSegment].ai[1] = (float)currentTombCrawler;
-                        Main.npc[currentTombCrawler].ai[0] = (float)tombCrawlerSegment;
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, tombCrawlerSegment, 0f, 0f, 0f, 0, 0, 0);
-                        currentTombCrawler = tombCrawlerSegment;
-                    }
+                    SpawnBodyAndTailSegments(tombCrawlerSegments, NPCID.TombCrawlerBody, NPCID.TombCrawlerTail, ref currentTombCrawler);
                 }
 
                 if (NPC.type == NPCID.SolarCrawltipedeHead && NPC.ai[0] == 0f)
@@ -155,21 +160,7 @@ public static partial class RevengeanceAndDeathAI
                     NPC.realLife = NPC.whoAmI;
                     int projTargetDistance = NPC.whoAmI;
                     int crawltipedeSegments = CalamityWorld.death ? 70 : 50;
-                    for (int n = 0; n < crawltipedeSegments; n++)
-                    {
-                        int crawltipedeSegmentType = NPCID.SolarCrawltipedeBody;
-                        if (n == crawltipedeSegments - 1)
-                        {
-                            crawltipedeSegmentType = NPCID.SolarCrawltipedeTail;
-                        }
-                        int crawltipedeSegment = NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.position.X + (float)(NPC.width / 2)), (int)(NPC.position.Y + (float)NPC.height), crawltipedeSegmentType, NPC.whoAmI, 0f, 0f, 0f, 0f, 255);
-                        Main.npc[crawltipedeSegment].ai[3] = (float)NPC.whoAmI;
-                        Main.npc[crawltipedeSegment].realLife = NPC.whoAmI;
-                        Main.npc[crawltipedeSegment].ai[1] = (float)projTargetDistance;
-                        Main.npc[projTargetDistance].ai[0] = (float)crawltipedeSegment;
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, crawltipedeSegment, 0f, 0f, 0f, 0, 0, 0);
-                        projTargetDistance = crawltipedeSegment;
-                    }
+                    SpawnBodyAndTailSegments(crawltipedeSegments, NPCID.SolarCrawltipedeBody, NPCID.SolarCrawltipedeTail, ref projTargetDistance);
                 }
 
                 if (NPC.type == NPCID.BloodEelHead && NPC.ai[0] == 0f)

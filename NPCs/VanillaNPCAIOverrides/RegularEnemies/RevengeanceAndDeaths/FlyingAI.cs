@@ -14,6 +14,29 @@ public static partial class RevengeanceAndDeathAI
 {
     public class FlyingAI : VanillaAIOverride
     {
+        private void BounceOffTiles(float reboundSpeed)
+        {
+            if (NPC.collideX)
+            {
+                NPC.netUpdate = true;
+                NPC.velocity.X = NPC.oldVelocity.X * -reboundSpeed;
+                if (NPC.direction == -1 && NPC.velocity.X > 0f && NPC.velocity.X < 2f)
+                    NPC.velocity.X = 2f;
+                if (NPC.direction == 1 && NPC.velocity.X < 0f && NPC.velocity.X > -2f)
+                    NPC.velocity.X = -2f;
+            }
+
+            if (NPC.collideY)
+            {
+                NPC.netUpdate = true;
+                NPC.velocity.Y = NPC.oldVelocity.Y * -reboundSpeed;
+                if (NPC.velocity.Y > 0f && (double)NPC.velocity.Y < 1.5)
+                    NPC.velocity.Y = 2f;
+                if (NPC.velocity.Y < 0f && (double)NPC.velocity.Y > -1.5)
+                    NPC.velocity.Y = -2f;
+            }
+        }
+
         public override bool AI(Mod mod)
         {
             if (NPC.target < 0 || NPC.target <= Main.maxPlayers || Main.player[NPC.target].dead)
@@ -276,25 +299,7 @@ public static partial class RevengeanceAndDeathAI
                 NPC.rotation = NPC.velocity.X * 0.1f;
 
                 float reboundSpeed = 0.7f;
-                if (NPC.collideX)
-                {
-                    NPC.netUpdate = true;
-                    NPC.velocity.X = NPC.oldVelocity.X * -reboundSpeed;
-                    if (NPC.direction == -1 && NPC.velocity.X > 0f && NPC.velocity.X < 2f)
-                        NPC.velocity.X = 2f;
-                    if (NPC.direction == 1 && NPC.velocity.X < 0f && NPC.velocity.X > -2f)
-                        NPC.velocity.X = -2f;
-                }
-
-                if (NPC.collideY)
-                {
-                    NPC.netUpdate = true;
-                    NPC.velocity.Y = NPC.oldVelocity.Y * -reboundSpeed;
-                    if (NPC.velocity.Y > 0f && (double)NPC.velocity.Y < 1.5)
-                        NPC.velocity.Y = 2f;
-                    if (NPC.velocity.Y < 0f && (double)NPC.velocity.Y > -1.5)
-                        NPC.velocity.Y = -2f;
-                }
+                BounceOffTiles(reboundSpeed);
             }
             else
             {
@@ -471,25 +476,7 @@ public static partial class RevengeanceAndDeathAI
                     if (NPC.type == NPCID.EaterofSouls || NPC.type == NPCID.Crimera)
                         reboundSpeed = 0.4f;
 
-                    if (NPC.collideX)
-                    {
-                        NPC.netUpdate = true;
-                        NPC.velocity.X = NPC.oldVelocity.X * -reboundSpeed;
-                        if (NPC.direction == -1 && NPC.velocity.X > 0f && NPC.velocity.X < 2f)
-                            NPC.velocity.X = 2f;
-                        if (NPC.direction == 1 && NPC.velocity.X < 0f && NPC.velocity.X > -2f)
-                            NPC.velocity.X = -2f;
-                    }
-
-                    if (NPC.collideY)
-                    {
-                        NPC.netUpdate = true;
-                        NPC.velocity.Y = NPC.oldVelocity.Y * -reboundSpeed;
-                        if (NPC.velocity.Y > 0f && (double)NPC.velocity.Y < 1.5)
-                            NPC.velocity.Y = 2f;
-                        if (NPC.velocity.Y < 0f && (double)NPC.velocity.Y > -1.5)
-                            NPC.velocity.Y = -2f;
-                    }
+                    BounceOffTiles(reboundSpeed);
 
                     if (NPC.type == NPCID.BloodSquid)
                     {

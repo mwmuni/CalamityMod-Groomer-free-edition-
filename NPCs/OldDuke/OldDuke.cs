@@ -766,35 +766,7 @@ namespace CalamityMod.NPCs.OldDuke
                 // The dumbest thing to ever exist
                 if (Main.zenithWorld && NPC.ai[2] % 10f == 0f)
                 {
-                    // Rotation and direction
-                    int dir = Math.Sign(player.Center.X - NPC.Center.X);
-                    if (dir != 0)
-                    {
-                        if (NPC.ai[2] == 0f && dir != NPC.direction)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.direction = dir;
-
-                        if (NPC.spriteDirection != -NPC.direction)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.spriteDirection = -NPC.direction;
-                    }
-
-                    Vector2 distanceVector = player.Center + player.velocity * 20f - NPC.Center;
-                    NPC.velocity = Vector2.Normalize(distanceVector) * chargeVelocity;
-                    NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X);
-
-                    // Direction
-                    if (dir != 0)
-                    {
-                        NPC.direction = dir;
-
-                        if (NPC.spriteDirection == 1)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.spriteDirection = -NPC.direction;
-                    }
+                    RedirectCharge(player, chargeVelocity);
                 }
                 else
                 {
@@ -854,36 +826,7 @@ namespace CalamityMod.NPCs.OldDuke
                         Main.npc[toothBall].netUpdate = true;
                     }
 
-                    for (int i = 0; i < 50; i++)
-                    {
-                        int dustID;
-                        switch (Main.rand.Next(6))
-                        {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 3:
-                                dustID = (int)CalamityDusts.SulphurousSeaAcid;
-                                break;
-                            default:
-                                dustID = DustID.Blood;
-                                break;
-                        }
-
-                        // Choose a random speed and angle to belch out the vomit
-                        float dustSpeed = Main.rand.NextFloat(3.0f, 12.0f);
-                        float angleRandom = 0.06f;
-                        Vector2 dustVel = new Vector2(dustSpeed, 0.0f).RotatedBy(toothBallVelocity.ToRotation());
-                        dustVel = dustVel.RotatedBy(-angleRandom);
-                        dustVel = dustVel.RotatedByRandom(2.0f * angleRandom);
-
-                        // Pick a size for the vomit particles
-                        float scale = Main.rand.NextFloat(1f, 2f);
-
-                        // Actually spawn the vomit
-                        int idx = Dust.NewDust(toothBallSpawnPos, 40, 40, dustID, dustVel.X, dustVel.Y, 0, default, scale);
-                        Main.dust[idx].noGravity = true;
-                    }
+                    SpawnVomitDust(toothBallVelocity, toothBallSpawnPos);
                 }
 
                 // Direction
@@ -1126,35 +1069,7 @@ namespace CalamityMod.NPCs.OldDuke
                 // The dumbest thing to ever exist
                 if (Main.zenithWorld && NPC.ai[2] % 8f == 0f)
                 {
-                    // Rotation and direction
-                    int dir = Math.Sign(player.Center.X - NPC.Center.X);
-                    if (dir != 0)
-                    {
-                        if (NPC.ai[2] == 0f && dir != NPC.direction)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.direction = dir;
-
-                        if (NPC.spriteDirection != -NPC.direction)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.spriteDirection = -NPC.direction;
-                    }
-
-                    Vector2 distanceVector = player.Center + player.velocity * 20f - NPC.Center;
-                    NPC.velocity = Vector2.Normalize(distanceVector) * chargeVelocity;
-                    NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X);
-
-                    // Direction
-                    if (dir != 0)
-                    {
-                        NPC.direction = dir;
-
-                        if (NPC.spriteDirection == 1)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.spriteDirection = -NPC.direction;
-                    }
+                    RedirectCharge(player, chargeVelocity);
                 }
                 else
                 {
@@ -1211,36 +1126,7 @@ namespace CalamityMod.NPCs.OldDuke
                         Main.npc[toothBall].ai[3] = phase3SpinAttack ? 60f : 30f;
                     }
 
-                    for (int i = 0; i < 50; i++)
-                    {
-                        int dustID;
-                        switch (Main.rand.Next(6))
-                        {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 3:
-                                dustID = (int)CalamityDusts.SulphurousSeaAcid;
-                                break;
-                            default:
-                                dustID = DustID.Blood;
-                                break;
-                        }
-
-                        // Choose a random speed and angle to belch out the vomit
-                        float dustSpeed = Main.rand.NextFloat(3.0f, 12.0f);
-                        float angleRandom = 0.06f;
-                        Vector2 dustVel = new Vector2(dustSpeed, 0.0f).RotatedBy(toothBallVelocity.ToRotation());
-                        dustVel = dustVel.RotatedBy(-angleRandom);
-                        dustVel = dustVel.RotatedByRandom(2.0f * angleRandom);
-
-                        // Pick a size for the vomit particles
-                        float scale = Main.rand.NextFloat(1f, 2f);
-
-                        // Actually spawn the vomit
-                        int idx = Dust.NewDust(toothBallSpawnPos, 40, 40, dustID, dustVel.X, dustVel.Y, 0, default, scale);
-                        Main.dust[idx].noGravity = true;
-                    }
+                    SpawnVomitDust(toothBallVelocity, toothBallSpawnPos);
                 }
 
                 // Velocity and rotation
@@ -1517,35 +1403,7 @@ namespace CalamityMod.NPCs.OldDuke
                 // The dumbest thing to ever exist
                 if (Main.zenithWorld && NPC.ai[2] % 6f == 0f)
                 {
-                    // Rotation and direction
-                    int dir = Math.Sign(player.Center.X - NPC.Center.X);
-                    if (dir != 0)
-                    {
-                        if (NPC.ai[2] == 0f && dir != NPC.direction)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.direction = dir;
-
-                        if (NPC.spriteDirection != -NPC.direction)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.spriteDirection = -NPC.direction;
-                    }
-
-                    Vector2 distanceVector = player.Center + player.velocity * 20f - NPC.Center;
-                    NPC.velocity = Vector2.Normalize(distanceVector) * chargeVelocity;
-                    NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X);
-
-                    // Direction
-                    if (dir != 0)
-                    {
-                        NPC.direction = dir;
-
-                        if (NPC.spriteDirection == 1)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.spriteDirection = -NPC.direction;
-                    }
+                    RedirectCharge(player, chargeVelocity);
                 }
                 else
                 {
@@ -1631,6 +1489,69 @@ namespace CalamityMod.NPCs.OldDuke
 
             if (SoundEngine.TryGetActiveSound(RoarSoundSlot, out var roarSound) && roarSound.IsPlaying)
                 roarSound.Position = NPC.Center;
+        }
+
+        private void RedirectCharge(Player player, float chargeVelocity)
+        {
+            // Rotation and direction
+            int dir = Math.Sign(player.Center.X - NPC.Center.X);
+            if (dir != 0)
+            {
+                if (NPC.ai[2] == 0f && dir != NPC.direction)
+                    NPC.rotation += MathHelper.Pi;
+
+                NPC.direction = dir;
+
+                if (NPC.spriteDirection != -NPC.direction)
+                    NPC.rotation += MathHelper.Pi;
+
+                NPC.spriteDirection = -NPC.direction;
+            }
+
+            Vector2 distanceVector = player.Center + player.velocity * 20f - NPC.Center;
+            NPC.velocity = Vector2.Normalize(distanceVector) * chargeVelocity;
+            NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X);
+
+            if (dir != 0)
+            {
+                NPC.direction = dir;
+
+                if (NPC.spriteDirection == 1)
+                    NPC.rotation += MathHelper.Pi;
+
+                NPC.spriteDirection = -NPC.direction;
+            }
+        }
+
+        private static void SpawnVomitDust(Vector2 toothBallVelocity, Vector2 toothBallSpawnPos)
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                int dustID;
+                switch (Main.rand.Next(6))
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                        dustID = (int)CalamityDusts.SulphurousSeaAcid;
+                        break;
+                    default:
+                        dustID = DustID.Blood;
+                        break;
+                }
+
+                // Choose a random speed and angle to belch out the vomit
+                float dustSpeed = Main.rand.NextFloat(3.0f, 12.0f);
+                float angleRandom = 0.06f;
+                Vector2 dustVel = new Vector2(dustSpeed, 0.0f).RotatedBy(toothBallVelocity.ToRotation());
+                dustVel = dustVel.RotatedBy(-angleRandom);
+                dustVel = dustVel.RotatedByRandom(2.0f * angleRandom);
+
+                float scale = Main.rand.NextFloat(1f, 2f);
+                int idx = Dust.NewDust(toothBallSpawnPos, 40, 40, dustID, dustVel.X, dustVel.Y, 0, default, scale);
+                Main.dust[idx].noGravity = true;
+            }
         }
 
         public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)

@@ -1309,6 +1309,34 @@ namespace CalamityMod.Items
         #endregion
 
         #region Enchanted Rarity Text Drawing
+        private static (Vector2 Position, Color UsedColor, Texture2D Texture) DrawXykTooltipHeader(DrawableTooltipLine line, bool orange)
+        {
+            Vector2 basePosition = new Vector2(line.X, line.Y);
+            float rate = Main.GlobalTimeWrappedHourly * 6;
+            List<Color> eColors = new List<Color>()
+            {
+                orange ? XyksBlessingOrange.baseMainColor : XyksBlessingBlue.baseMainColor,
+                orange ? XyksBlessingOrange.baseAccentColor : XyksBlessingBlue.baseAccentColor,
+            };
+            int colorIndex = (int)(rate / 2 % eColors.Count);
+            Color currentColor = eColors[colorIndex];
+            Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
+            Color usedColor = Color.Lerp(currentColor, nextColor, rate % 2f >= 1f ? 1f : rate % 1f);
+            Vector2 backScale = line.BaseScale;
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, null, null, null, null, Main.UIScaleMatrix);
+            int draws = 20;
+            for (int i = 0; i < draws; i++)
+            {
+                float clrProgress = Utils.GetLerpValue(0, draws - 1, i, true);
+                Vector2 backPosition = basePosition + (MathHelper.TwoPi * i / 20f).ToRotationVector2() * (3.5f);
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, line.Font, line.Text, backPosition, Color.Lerp(usedColor, orange ? XyksBlessingOrange.animEffectColor : XyksBlessingBlue.animEffectColor, clrProgress), line.Rotation, line.Origin, backScale, line.MaxWidth, line.Spread);
+            }
+            Texture2D texture = ModContent.Request<Texture2D>("CalamityMod/Particles/BloomCircle").Value;
+            return (basePosition, usedColor, texture);
+        }
+
         public override bool PreDrawTooltipLine(Item item, DrawableTooltipLine line, ref int yOffset)
         {
             if (line.Mod == "Terraria" && item.type == ModContent.ItemType<ElephantKiller>() && CalamityClientConfig.Instance.TextEffects && line.Name == "Damage")
@@ -1326,32 +1354,7 @@ namespace CalamityMod.Items
             if (line.Name == "ItemName" && line.Mod == "Terraria" && item.type == ModContent.ItemType<XyksBlessingBlue>() && CalamityClientConfig.Instance.TextEffects)
             {
                 Color rarityColor = Color.White;
-                Vector2 basePosition = new Vector2(line.X, line.Y);
-
-                float rate = Main.GlobalTimeWrappedHourly * 6;
-                List<Color> eColors = new List<Color>()
-                {
-                    XyksBlessingBlue.baseMainColor,
-                    XyksBlessingBlue.baseAccentColor,
-                };
-                int colorIndex = (int)(rate / 2 % eColors.Count);
-                Color currentColor = eColors[colorIndex];
-                Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
-                Color usedColor = Color.Lerp(currentColor, nextColor, rate % 2f >= 1f ? 1f : rate % 1f);
-
-                Vector2 backScale = line.BaseScale;
-
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, null, null, null, null, Main.UIScaleMatrix);
-
-                int draws = 20;
-                for (int i = 0; i < draws; i++)
-                {
-                    float clrProgress = Utils.GetLerpValue(0, draws - 1, i, true);
-                    Vector2 backPosition = basePosition + (MathHelper.TwoPi * i / 20f).ToRotationVector2() * (3.5f);
-                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, line.Font, line.Text, backPosition, Color.Lerp(usedColor, XyksBlessingBlue.animEffectColor, clrProgress), line.Rotation, line.Origin, backScale, line.MaxWidth, line.Spread);
-                }
-                Texture2D texture = ModContent.Request<Texture2D>("CalamityMod/Particles/BloomCircle").Value;
+                var (basePosition, usedColor, texture) = DrawXykTooltipHeader(line, orange: false);
                 Texture2D square = ModContent.Request<Texture2D>("CalamityMod/Particles/BloomRing").Value;
 
                 Vector2 drawPosition = basePosition;
@@ -1386,31 +1389,7 @@ namespace CalamityMod.Items
             if (line.Name == "ItemName" && line.Mod == "Terraria" && item.type == ModContent.ItemType<XyksBlessingOrange>() && CalamityClientConfig.Instance.TextEffects)
             {
                 Color rarityColor = Color.White;
-                Vector2 basePosition = new Vector2(line.X, line.Y);
-
-                float rate = Main.GlobalTimeWrappedHourly * 6;
-                List<Color> eColors = new List<Color>()
-                {
-                    XyksBlessingOrange.baseMainColor,
-                    XyksBlessingOrange.baseAccentColor,
-                };
-                int colorIndex = (int)(rate / 2 % eColors.Count);
-                Color currentColor = eColors[colorIndex];
-                Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
-                Color usedColor = Color.Lerp(currentColor, nextColor, rate % 2f >= 1f ? 1f : rate % 1f);
-
-                Vector2 backScale = line.BaseScale;
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, null, null, null, null, Main.UIScaleMatrix);
-
-                int draws = 20;
-                for (int i = 0; i < draws; i++)
-                {
-                    float clrProgress = Utils.GetLerpValue(0, draws - 1, i, true);
-                    Vector2 backPosition = basePosition + (MathHelper.TwoPi * i / 20f).ToRotationVector2() * (3.5f);
-                    ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, line.Font, line.Text, backPosition, Color.Lerp(usedColor, XyksBlessingOrange.animEffectColor, clrProgress), line.Rotation, line.Origin, backScale, line.MaxWidth, line.Spread);
-                }
-                Texture2D texture = ModContent.Request<Texture2D>("CalamityMod/Particles/BloomCircle").Value;
+                var (basePosition, usedColor, texture) = DrawXykTooltipHeader(line, orange: true);
                 Texture2D texture2 = ModContent.Request<Texture2D>("CalamityMod/Particles/SquareRotated").Value;
                 Texture2D square = ModContent.Request<Texture2D>("CalamityMod/Particles/GlowSquareParticleThick").Value;
 

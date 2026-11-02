@@ -583,79 +583,13 @@ namespace CalamityMod.NPCs
                 switch (npc.type)
                 {
                     case NPCID.TownCat:
-                        switch (npc.townNpcVariationIndex)
-                        {
-                            case 0:
-                                npc.GivenName = ChooseName(ref CalamityWorld.catName, npc.GivenName, TownCatSiameseVanillaNames, TownCatSiameseNames, TownCatNames);
-                                break;
-                            case 1:
-                                npc.GivenName = ChooseName(ref CalamityWorld.catName, npc.GivenName, TownCatBlackVanillaNames, TownCatBlackNames, TownCatNames);
-                                break;
-                            case 2:
-                                npc.GivenName = ChooseName(ref CalamityWorld.catName, npc.GivenName, TownCatOrangeTabbyVanillaNames, TownCatOrangeTabbyNames, TownCatNames);
-                                break;
-                            case 3:
-                                npc.GivenName = ChooseName(ref CalamityWorld.catName, npc.GivenName, TownCatRussianBlueVanillaNames, TownCatRussianBlueNames, TownCatNames);
-                                break;
-                            case 4:
-                                npc.GivenName = ChooseName(ref CalamityWorld.catName, npc.GivenName, TownCatSilverVanillaNames, TownCatSilverNames, TownCatNames);
-                                break;
-                            case 5:
-                                npc.GivenName = ChooseName(ref CalamityWorld.catName, npc.GivenName, TownCatWhiteVanillaNames, TownCatWhiteNames, TownCatNames);
-                                break;
-                            default:
-                                break;
-                        }
+                        SetTownPetName(npc, ref CalamityWorld.catName);
                         break;
                     case NPCID.TownDog:
-                        switch (npc.townNpcVariationIndex)
-                        {
-                            case 0:
-                                npc.GivenName = ChooseName(ref CalamityWorld.dogName, npc.GivenName, TownDogLabradorVanillaNames, TownDogLabradorNames, TownDogNames);
-                                break;
-                            case 1:
-                                npc.GivenName = ChooseName(ref CalamityWorld.dogName, npc.GivenName, TownDogPitBullVanillaNames, TownDogPitBullNames, TownDogNames);
-                                break;
-                            case 2:
-                                npc.GivenName = ChooseName(ref CalamityWorld.dogName, npc.GivenName, TownDogBeagleVanillaNames, TownDogBeagleNames, TownDogNames);
-                                break;
-                            case 3:
-                                npc.GivenName = ChooseName(ref CalamityWorld.dogName, npc.GivenName, TownDogCorgiVanillaNames, TownDogCorgiNames, TownDogNames);
-                                break;
-                            case 4:
-                                npc.GivenName = ChooseName(ref CalamityWorld.dogName, npc.GivenName, TownDogDalmatianVanillaNames, TownDogDalmatianNames, TownDogNames);
-                                break;
-                            case 5:
-                                npc.GivenName = ChooseName(ref CalamityWorld.dogName, npc.GivenName, TownDogHuskyVanillaNames, TownDogHuskyNames, TownDogNames);
-                                break;
-                            default:
-                                break;
-                        }
+                        SetTownPetName(npc, ref CalamityWorld.dogName);
                         break;
                     case NPCID.TownBunny:
-                        switch (npc.townNpcVariationIndex)
-                        {
-                            case 0:
-                                npc.GivenName = ChooseName(ref CalamityWorld.bunnyName, npc.GivenName, TownBunnyWhiteVanillaNames, TownBunnyWhiteNames, TownBunnyNames);
-                                break;
-                            case 1:
-                                npc.GivenName = ChooseName(ref CalamityWorld.bunnyName, npc.GivenName, TownBunnyAngoraVanillaNames, TownBunnyAngoraNames, TownBunnyNames);
-                                break;
-                            case 2:
-                                npc.GivenName = ChooseName(ref CalamityWorld.bunnyName, npc.GivenName, TownBunnyDutchVanillaNames, TownBunnyDutchNames, TownBunnyNames);
-                                break;
-                            case 3:
-                                npc.GivenName = ChooseName(ref CalamityWorld.bunnyName, npc.GivenName, TownBunnyFlemishVanillaNames, TownBunnyFlemishNames, TownBunnyNames);
-                                break;
-                            case 4:
-                                npc.GivenName = ChooseName(ref CalamityWorld.bunnyName, npc.GivenName, TownBunnyLopVanillaNames, TownBunnyLopNames, TownBunnyNames);
-                                break;
-                            case 5:
-                                npc.GivenName = ChooseName(ref CalamityWorld.bunnyName, npc.GivenName, TownBunnySilverVanillaNames, TownBunnySilverNames, TownBunnyNames);
-                                break;
-                            default:
-                                break;
-                        }
+                        SetTownPetName(npc, ref CalamityWorld.bunnyName);
                         break;
                     default:
                         break;
@@ -725,35 +659,42 @@ namespace CalamityMod.NPCs
                 _ => null
             };
 
-        private static string[] GetTownPetVariantNames(int npcType, int variationIndex) =>
+        private void SetTownPetName(NPC npc, ref bool alreadySet)
+        {
+            var variant = GetTownPetVariantNameData(npc.type, npc.townNpcVariationIndex);
+            if (variant.Names != null)
+                npc.GivenName = ChooseName(ref alreadySet, npc.GivenName, variant.VanillaNames, variant.Names, GetTownNPCNames(npc.type));
+        }
+
+        private static (int VanillaNames, string[] Names) GetTownPetVariantNameData(int npcType, int variationIndex) =>
             (npcType, variationIndex) switch
             {
-                (NPCID.TownCat, 0) => TownCatSiameseNames,
-                (NPCID.TownCat, 1) => TownCatBlackNames,
-                (NPCID.TownCat, 2) => TownCatOrangeTabbyNames,
-                (NPCID.TownCat, 3) => TownCatRussianBlueNames,
-                (NPCID.TownCat, 4) => TownCatSilverNames,
-                (NPCID.TownCat, 5) => TownCatWhiteNames,
-                (NPCID.TownDog, 0) => TownDogLabradorNames,
-                (NPCID.TownDog, 1) => TownDogPitBullNames,
-                (NPCID.TownDog, 2) => TownDogBeagleNames,
-                (NPCID.TownDog, 3) => TownDogCorgiNames,
-                (NPCID.TownDog, 4) => TownDogDalmatianNames,
-                (NPCID.TownDog, 5) => TownDogHuskyNames,
-                (NPCID.TownBunny, 0) => TownBunnyWhiteNames,
-                (NPCID.TownBunny, 1) => TownBunnyAngoraNames,
-                (NPCID.TownBunny, 2) => TownBunnyDutchNames,
-                (NPCID.TownBunny, 3) => TownBunnyFlemishNames,
-                (NPCID.TownBunny, 4) => TownBunnyLopNames,
-                (NPCID.TownBunny, 5) => TownBunnySilverNames,
-                _ => null
+                (NPCID.TownCat, 0) => (TownCatSiameseVanillaNames, TownCatSiameseNames),
+                (NPCID.TownCat, 1) => (TownCatBlackVanillaNames, TownCatBlackNames),
+                (NPCID.TownCat, 2) => (TownCatOrangeTabbyVanillaNames, TownCatOrangeTabbyNames),
+                (NPCID.TownCat, 3) => (TownCatRussianBlueVanillaNames, TownCatRussianBlueNames),
+                (NPCID.TownCat, 4) => (TownCatSilverVanillaNames, TownCatSilverNames),
+                (NPCID.TownCat, 5) => (TownCatWhiteVanillaNames, TownCatWhiteNames),
+                (NPCID.TownDog, 0) => (TownDogLabradorVanillaNames, TownDogLabradorNames),
+                (NPCID.TownDog, 1) => (TownDogPitBullVanillaNames, TownDogPitBullNames),
+                (NPCID.TownDog, 2) => (TownDogBeagleVanillaNames, TownDogBeagleNames),
+                (NPCID.TownDog, 3) => (TownDogCorgiVanillaNames, TownDogCorgiNames),
+                (NPCID.TownDog, 4) => (TownDogDalmatianVanillaNames, TownDogDalmatianNames),
+                (NPCID.TownDog, 5) => (TownDogHuskyVanillaNames, TownDogHuskyNames),
+                (NPCID.TownBunny, 0) => (TownBunnyWhiteVanillaNames, TownBunnyWhiteNames),
+                (NPCID.TownBunny, 1) => (TownBunnyAngoraVanillaNames, TownBunnyAngoraNames),
+                (NPCID.TownBunny, 2) => (TownBunnyDutchVanillaNames, TownBunnyDutchNames),
+                (NPCID.TownBunny, 3) => (TownBunnyFlemishVanillaNames, TownBunnyFlemishNames),
+                (NPCID.TownBunny, 4) => (TownBunnyLopVanillaNames, TownBunnyLopNames),
+                (NPCID.TownBunny, 5) => (TownBunnySilverVanillaNames, TownBunnySilverNames),
+                _ => (0, null)
             };
 
         public override void ModifyNPCNameList(NPC npc, List<string> nameList)
         {
             AddNewNames(nameList, GetTownNPCNames(npc.type));
             if (npc.type == NPCID.TownCat || npc.type == NPCID.TownDog || npc.type == NPCID.TownBunny)
-                AddNewNames(nameList, GetTownPetVariantNames(npc.type, npc.townNpcVariationIndex));
+                AddNewNames(nameList, GetTownPetVariantNameData(npc.type, npc.townNpcVariationIndex).Names);
         }
         #endregion
 

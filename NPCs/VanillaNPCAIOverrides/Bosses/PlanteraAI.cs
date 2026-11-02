@@ -45,6 +45,45 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         public static int GreenCloudDamage = 24; // 96
         public static float DashDamageMult = 1.25f; // 175
 
+        private static void CheckThornBallLimit(ref bool shootThornBall)
+        {
+            int numThornBalls = 0;
+            int thornBallLimit = 3;
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                if (Main.projectile[i].active && Main.projectile[i].type == ProjectileID.ThornBall)
+                {
+                    numThornBalls++;
+                    if (numThornBalls >= thornBallLimit)
+                    {
+                        shootThornBall = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private static void SpawnSeedDust(Vector2 spawnOffset, int dustSpawnBoxSize, int dustType, Vector2 dustVelocity, int dustAmount)
+        {
+            for (int k = 0; k < dustAmount; k++)
+            {
+                int dust = Dust.NewDust(spawnOffset, dustSpawnBoxSize, dustSpawnBoxSize, dustType, dustVelocity.X, dustVelocity.Y);
+                Main.dust[dust].noGravity = true;
+                Main.dust[dust].scale = 1.4f;
+            }
+        }
+
+        private void SpawnSporeTelegraphDust()
+        {
+            int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GreenFairy, 0f, 0f, 0, default, 1.4f);
+            Vector2 vector = new Vector2(Main.rand.Next(-100, 101), Main.rand.Next(-100, 101)).SafeNormalize(Vector2.UnitY);
+            vector *= Main.rand.Next(50, 100) * 0.04f;
+            Main.dust[dust].velocity = vector;
+            vector = vector.SafeNormalize(Vector2.UnitY);
+            vector *= 86f;
+            Main.dust[dust].position = NPC.Center - vector;
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -251,12 +290,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                                 Vector2 perturbedSpeed = projectileVelocity.RotatedBy(MathHelper.Lerp(-rotation, rotation, i / (float)(numProj - 1)));
                                 int dustType = shootPoisonSeed ? 74 : 73;
                                 Vector2 dustVelocity = perturbedSpeed * projectileSpeed;
-                                for (int k = 0; k < 5; k++)
-                                {
-                                    int dust = Dust.NewDust(spawnOffset, 14, 14, dustType, dustVelocity.X, dustVelocity.Y);
-                                    Main.dust[dust].noGravity = true;
-                                    Main.dust[dust].scale = 1.4f;
-                                }
+                                SpawnSeedDust(spawnOffset, 14, dustType, dustVelocity, 5);
 
                                 if (Main.netMode != NetmodeID.MultiplayerClient)
                                     Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnOffset, perturbedSpeed * projectileSpeed, projectileType, damage, 0f, Main.myPlayer);
@@ -268,12 +302,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             int dustSpawnBoxSize = shootThornBall ? 38 : 14;
                             int dustAmount = shootThornBall ? 15 : 5;
                             Vector2 dustVelocity = projectileVelocity * projectileSpeed;
-                            for (int k = 0; k < dustAmount; k++)
-                            {
-                                int dust = Dust.NewDust(spawnOffset, dustSpawnBoxSize, dustSpawnBoxSize, dustType, dustVelocity.X, dustVelocity.Y);
-                                Main.dust[dust].noGravity = true;
-                                Main.dust[dust].scale = 1.4f;
-                            }
+                            SpawnSeedDust(spawnOffset, dustSpawnBoxSize, dustType, dustVelocity, dustAmount);
 
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
@@ -296,13 +325,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         int dustChance = (int)Math.Round(MathHelper.Lerp(dustInXChanceMin, dustInXChanceMax, 1f - dustEmitAmount / SeedGatlingColorChangeDuration));
                         if (Main.rand.NextBool(dustChance))
                         {
-                            int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GreenFairy, 0f, 0f, 0, default, 1.4f);
-                            Vector2 vector = new Vector2(Main.rand.Next(-100, 101), Main.rand.Next(-100, 101)).SafeNormalize(Vector2.UnitY);
-                            vector *= Main.rand.Next(50, 100) * 0.04f;
-                            Main.dust[dust].velocity = vector;
-                            vector = vector.SafeNormalize(Vector2.UnitY);
-                            vector *= 86f;
-                            Main.dust[dust].position = NPC.Center - vector;
+                            SpawnSporeTelegraphDust();
                         }
                     }
                 }
@@ -490,13 +513,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     int dustChance = (int)Math.Round(MathHelper.Lerp(dustInXChanceMin, dustInXChanceMax, 1f - dustEmitAmount / Math.Abs(BeginChargeGateValue)));
                     if (Main.rand.NextBool(dustChance))
                     {
-                        int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.GreenFairy, 0f, 0f, 0, default, 1.4f);
-                        Vector2 vector = new Vector2(Main.rand.Next(-100, 101), Main.rand.Next(-100, 101)).SafeNormalize(Vector2.UnitY);
-                        vector *= Main.rand.Next(50, 100) * 0.04f;
-                        Main.dust[dust].velocity = vector;
-                        vector = vector.SafeNormalize(Vector2.UnitY);
-                        vector *= 86f;
-                        Main.dust[dust].position = NPC.Center - vector;
+                        SpawnSporeTelegraphDust();
                     }
 
                     float timeToLineUpChargeDecrement = phase4 ? 2f : 1f;
@@ -656,20 +673,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         bool shootThornBall = false;
                         if (useNewGatlingAttackVariant)
                         {
-                            int numThornBalls = 0;
-                            int thornBallLimit = 3;
-                            for (int i = 0; i < Main.maxProjectiles; i++)
-                            {
-                                if (Main.projectile[i].active && Main.projectile[i].type == ProjectileID.ThornBall)
-                                {
-                                    numThornBalls++;
-                                    if (numThornBalls >= thornBallLimit)
-                                    {
-                                        shootThornBall = false;
-                                        break;
-                                    }
-                                }
-                            }
+                            CheckThornBallLimit(ref shootThornBall);
                         }
 
                         bool shootPoisonSeed = (Main.getGoodWorld || Main.rand.NextBool(death ? 2 : 4)) && !shootThornBall;
@@ -683,12 +687,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         int dustSpawnBoxSize = shootThornBall ? 38 : 14;
                         int dustAmount = shootThornBall ? 15 : 5;
                         Vector2 dustVelocity = projectileVelocity * projectileSpeed;
-                        for (int k = 0; k < dustAmount; k++)
-                        {
-                            int dust = Dust.NewDust(spawnOffset, dustSpawnBoxSize, dustSpawnBoxSize, dustType, dustVelocity.X, dustVelocity.Y);
-                            Main.dust[dust].noGravity = true;
-                            Main.dust[dust].scale = 1.4f;
-                        }
+                        SpawnSeedDust(spawnOffset, dustSpawnBoxSize, dustType, dustVelocity, dustAmount);
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
@@ -831,20 +830,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         if (death)
                         {
                             bool shootThornBall = true;
-                            int numThornBalls = 0;
-                            int thornBallLimit = 3;
-                            for (int i = 0; i < Main.maxProjectiles; i++)
-                            {
-                                if (Main.projectile[i].active && Main.projectile[i].type == ProjectileID.ThornBall)
-                                {
-                                    numThornBalls++;
-                                    if (numThornBalls >= thornBallLimit)
-                                    {
-                                        shootThornBall = false;
-                                        break;
-                                    }
-                                }
-                            }
+                            CheckThornBallLimit(ref shootThornBall);
 
                             if (shootThornBall)
                             {

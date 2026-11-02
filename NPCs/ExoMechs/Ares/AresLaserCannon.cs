@@ -556,18 +556,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
             {
                 if (NPC.frameCounter >= 6D)
                 {
-                    // Reset frame counter
-                    NPC.frameCounter = 0D;
-
-                    // Increment the Y frame
-                    frameY++;
-
-                    // Reset the Y frame if greater than 8
-                    if (frameY == maxFramesY)
-                    {
-                        frameX++;
-                        frameY = 0;
-                    }
+                    AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                     // Reset the frames
                     if ((frameX * maxFramesY) + frameY > normalFrameLimit)
@@ -578,18 +567,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
             {
                 if (NPC.frameCounter >= 6D)
                 {
-                    // Reset frame counter
-                    NPC.frameCounter = 0D;
-
-                    // Increment the Y frame
-                    frameY++;
-
-                    // Reset the Y frame if greater than 8
-                    if (frameY == maxFramesY)
-                    {
-                        frameX++;
-                        frameY = 0;
-                    }
+                    AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                     // Reset the frames to frame 36, the start of the deathray firing animation loop
                     if ((frameX * maxFramesY) + frameY > finalStageDeathrayChargeFrameLimit)

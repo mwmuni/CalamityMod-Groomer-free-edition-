@@ -527,51 +527,33 @@ namespace CalamityMod.CalPlayer
 
             if (Player.mount.Active && Player.mount.Type == ModContent.MountType<ExoTank>() && Math.Abs(Player.velocity.X) > Player.mount.RunSpeed)
             {
-                Rectangle damageHitbox = Player.getRect();
-
-                if (Player.direction == 1)
-                    damageHitbox.Offset(Player.width - 1, 0);
-
-                damageHitbox.Width = 2;
-                damageHitbox.Inflate(6, 12);
-                float damage = Player.GetTotalDamage<SummonDamageClass>().ApplyTo(ExoTank.DashDamage);
-                float knockback = 10f;
-                int NPCImmuneTime = 30;
-                int playerImmuneTime = 6;
-                DoMountDashDamage(damageHitbox, damage, knockback, NPCImmuneTime, playerImmuneTime);
+                ApplyMountDashDamage(ExoTank.DashDamage, 10f);
             }
 
             if (Player.mount.Active && Player.mount.Type == ModContent.MountType<RimehoundMount>() && Math.Abs(Player.velocity.X) > Player.mount.RunSpeed / 2f)
             {
-                Rectangle damageHitbox = Player.getRect();
-
-                if (Player.direction == 1)
-                    damageHitbox.Offset(Player.width - 1, 0);
-
-                damageHitbox.Width = 2;
-                damageHitbox.Inflate(6, 12);
-                float damage = Player.GetTotalDamage<SummonDamageClass>().ApplyTo(50f);
-                float knockback2 = 8f;
-                int NPCImmuneTime = 30;
-                int playerImmuneTime = 6;
-                DoMountDashDamage(damageHitbox, damage, knockback2, NPCImmuneTime, playerImmuneTime);
+                ApplyMountDashDamage(50f, 8f);
             }
 
             if (Player.mount.Active && Player.mount.Type == ModContent.MountType<OnyxExcavator>() && Math.Abs(Player.velocity.X) > Player.mount.RunSpeed / 2f)
             {
-                Rectangle damageHitbox = Player.getRect();
-
-                if (Player.direction == 1)
-                    damageHitbox.Offset(Player.width - 1, 0);
-
-                damageHitbox.Width = 2;
-                damageHitbox.Inflate(6, 12);
-                float damage = Player.GetTotalDamage<SummonDamageClass>().ApplyTo(25f);
-                float knockback2 = 5f;
-                int NPCImmuneTime = 30;
-                int playerImmuneTime = 6;
-                DoMountDashDamage(damageHitbox, damage, knockback2, NPCImmuneTime, playerImmuneTime);
+                ApplyMountDashDamage(25f, 5f);
             }
+        }
+
+        private void ApplyMountDashDamage(float baseDamage, float knockback)
+        {
+            Rectangle damageHitbox = Player.getRect();
+
+            if (Player.direction == 1)
+                damageHitbox.Offset(Player.width - 1, 0);
+
+            damageHitbox.Width = 2;
+            damageHitbox.Inflate(6, 12);
+            float damage = Player.GetTotalDamage<SummonDamageClass>().ApplyTo(baseDamage);
+            int NPCImmuneTime = 30;
+            int playerImmuneTime = 6;
+            DoMountDashDamage(damageHitbox, damage, knockback, NPCImmuneTime, playerImmuneTime);
         }
 
         public int DoMountDashDamage(Rectangle myRect, float Damage, float Knockback, int NPCImmuneTime, int PlayerImmuneTime)

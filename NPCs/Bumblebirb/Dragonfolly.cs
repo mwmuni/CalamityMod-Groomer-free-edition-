@@ -243,21 +243,7 @@ namespace CalamityMod.NPCs.Bumblebirb
 
                         if (Main.zenithWorld)
                         {
-                            int spacing = 20;
-                            int amt = 5;
-                            SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, NPC.Center - Vector2.UnitY * 300f);
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                for (int i = 0; i < amt; i++)
-                                {
-                                    Vector2 fireFrom = new Vector2(NPC.Center.X + (spacing * i) - (spacing * amt / 2), NPC.Center.Y - 900f);
-                                    Vector2 ai0 = NPC.Center - fireFrom;
-                                    float ai = Main.rand.Next(100);
-                                    Vector2 velocity = Vector2.Normalize(ai0.RotatedByRandom(MathHelper.PiOver4)) * 7f;
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), fireFrom.X, fireFrom.Y, velocity.X, velocity.Y, ModContent.ProjectileType<RedLightning>(), LightningDamage, 0f, Main.myPlayer, ai0.ToRotation(), ai);
-                                }
-                            }
+                            SummonLightning(20, 5);
                         }
                     }
 
@@ -285,21 +271,7 @@ namespace CalamityMod.NPCs.Bumblebirb
 
                         if (Main.zenithWorld)
                         {
-                            int spacing = 20;
-                            int amt = 3;
-                            SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, NPC.Center - Vector2.UnitY * 300f);
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                for (int i = 0; i < amt; i++)
-                                {
-                                    Vector2 fireFrom = new Vector2(NPC.Center.X + (spacing * i) - (spacing * amt / 2), NPC.Center.Y - 900f);
-                                    Vector2 ai0 = NPC.Center - fireFrom;
-                                    float ai = Main.rand.Next(100);
-                                    Vector2 velocity = Vector2.Normalize(ai0.RotatedByRandom(MathHelper.PiOver4)) * 7f;
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), fireFrom.X, fireFrom.Y, velocity.X, velocity.Y, ModContent.ProjectileType<RedLightning>(), LightningDamage, 0f, Main.myPlayer, ai0.ToRotation(), ai);
-                                }
-                            }
+                            SummonLightning(20, 3);
                         }
                     }
 
@@ -820,21 +792,7 @@ namespace CalamityMod.NPCs.Bumblebirb
 
                         if (Main.zenithWorld)
                         {
-                            int spacing = 30;
-                            int amt = 3;
-                            SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, NPC.Center - Vector2.UnitY * 300f);
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                for (int i = 0; i < amt; i++)
-                                {
-                                    Vector2 fireFrom = new Vector2(NPC.Center.X + (spacing * i) - (spacing * amt / 2), NPC.Center.Y - 900f);
-                                    Vector2 ai0 = NPC.Center - fireFrom;
-                                    float ai = Main.rand.Next(100);
-                                    Vector2 velocity = Vector2.Normalize(ai0.RotatedByRandom(MathHelper.PiOver4)) * 7f;
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), fireFrom.X, fireFrom.Y, velocity.X, velocity.Y, ModContent.ProjectileType<RedLightning>(), LightningDamage, 0f, Main.myPlayer, ai0.ToRotation(), ai);
-                                }
-                            }
+                            SummonLightning(30, 3);
                         }
                     }
 
@@ -894,21 +852,7 @@ namespace CalamityMod.NPCs.Bumblebirb
 
                     if (Main.zenithWorld)
                     {
-                        int spacing = 30;
-                        int amt = 3;
-                        SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, NPC.Center - Vector2.UnitY * 300f);
-
-                        if (Main.netMode != NetmodeID.MultiplayerClient)
-                        {
-                            for (int i = 0; i < amt; i++)
-                            {
-                                Vector2 fireFrom = new Vector2(NPC.Center.X + (spacing * i) - (spacing * amt / 2), NPC.Center.Y - 900f);
-                                Vector2 ai0 = NPC.Center - fireFrom;
-                                float ai = Main.rand.Next(100);
-                                Vector2 velocity = Vector2.Normalize(ai0.RotatedByRandom(MathHelper.PiOver4)) * 7f;
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), fireFrom.X, fireFrom.Y, velocity.X, velocity.Y, ModContent.ProjectileType<RedLightning>(), LightningDamage, 0f, Main.myPlayer, ai0.ToRotation(), ai);
-                            }
-                        }
+                        SummonLightning(30, 3);
                     }
                 }
 
@@ -918,6 +862,23 @@ namespace CalamityMod.NPCs.Bumblebirb
                     NPC.ai[0] = 0f;
                     NPC.ai[1] = 0f;
                     NPC.ForceNetUpdate(false);
+                }
+            }
+        }
+
+        private void SummonLightning(int spacing, int amt)
+        {
+            SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, NPC.Center - Vector2.UnitY * 300f);
+
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                for (int i = 0; i < amt; i++)
+                {
+                    Vector2 fireFrom = new Vector2(NPC.Center.X + (spacing * i) - (spacing * amt / 2), NPC.Center.Y - 900f);
+                    Vector2 ai0 = NPC.Center - fireFrom;
+                    float ai = Main.rand.Next(100);
+                    Vector2 velocity = Vector2.Normalize(ai0.RotatedByRandom(MathHelper.PiOver4)) * 7f;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), fireFrom.X, fireFrom.Y, velocity.X, velocity.Y, ModContent.ProjectileType<RedLightning>(), LightningDamage, 0f, Main.myPlayer, ai0.ToRotation(), ai);
                 }
             }
         }
@@ -953,16 +914,7 @@ namespace CalamityMod.NPCs.Bumblebirb
                 int frameTimer = 180;
                 if (frameGateValue < (frameTimer - 60) || frameGateValue > (frameTimer - 20))
                 {
-                    NPC.frameCounter += 1D;
-                    if (NPC.frameCounter > 5D)
-                    {
-                        NPC.frameCounter = 0D;
-                        NPC.frame.Y += frameHeight;
-                    }
-                    if (NPC.frame.Y >= frameHeight * 5)
-                    {
-                        NPC.frame.Y = 0;
-                    }
+                    AdvanceTransitionFrame(frameHeight);
                 }
                 else
                 {
@@ -978,16 +930,7 @@ namespace CalamityMod.NPCs.Bumblebirb
                 int otherFrameTimer = 120;
                 if (NPC.ai[1] < (otherFrameTimer - 50) || NPC.ai[1] > (otherFrameTimer - 10))
                 {
-                    NPC.frameCounter += 1D;
-                    if (NPC.frameCounter > 5D)
-                    {
-                        NPC.frameCounter = 0D;
-                        NPC.frame.Y += frameHeight;
-                    }
-                    if (NPC.frame.Y >= frameHeight * 5)
-                    {
-                        NPC.frame.Y = 0;
-                    }
+                    AdvanceTransitionFrame(frameHeight);
                 }
                 else
                 {
@@ -1010,6 +953,20 @@ namespace CalamityMod.NPCs.Bumblebirb
                 {
                     NPC.frame.Y = 0;
                 }
+            }
+        }
+
+        private void AdvanceTransitionFrame(int frameHeight)
+        {
+            NPC.frameCounter += 1D;
+            if (NPC.frameCounter > 5D)
+            {
+                NPC.frameCounter = 0D;
+                NPC.frame.Y += frameHeight;
+            }
+            if (NPC.frame.Y >= frameHeight * 5)
+            {
+                NPC.frame.Y = 0;
             }
         }
 
@@ -1278,20 +1235,7 @@ namespace CalamityMod.NPCs.Bumblebirb
 
             if (Main.zenithWorld)
             {
-                int spacing = 40;
-                int amt = 7;
-                SoundEngine.PlaySound(CommonCalamitySounds.LightningSound, NPC.Center - Vector2.UnitY * 300f);
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                {
-                    for (int i = 0; i < amt; i++)
-                    {
-                        Vector2 fireFrom = new Vector2(NPC.Center.X + (spacing * i) - (spacing * amt / 2), NPC.Center.Y - 900f);
-                        Vector2 ai0 = NPC.Center - fireFrom;
-                        float ai = Main.rand.Next(100);
-                        Vector2 velocity = Vector2.Normalize(ai0.RotatedByRandom(MathHelper.PiOver4)) * 7f;
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(), fireFrom.X, fireFrom.Y, velocity.X, velocity.Y, ModContent.ProjectileType<RedLightning>(), LightningDamage, 0f, Main.myPlayer, ai0.ToRotation(), ai);
-                    }
-                }
+                SummonLightning(40, 7);
             }
 
         }

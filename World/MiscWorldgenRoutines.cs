@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using CalamityMod.Items.Materials;
 using CalamityMod.Items.Potions;
 using CalamityMod.Items.Potions.Food;
+using CalamityMod.Schematics;
 using CalamityMod.Tiles;
 using CalamityMod.Tiles.Abyss;
 using CalamityMod.Tiles.Astral;
 using CalamityMod.Tiles.FurnitureAuric;
-using CalamityMod.Schematics;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -327,14 +327,6 @@ namespace CalamityMod.World
                         maxChasmSize = 0f;
                     }
                 }
-                else if (Main.maxTilesY > 1500)
-                {
-                    if (((double)chasmGenPosition.Y > (Abyss.AbyssChasmBottom + limitIncrease) && maxChasmSize > 0f && ocean) ||
-                    (chasmGenPosition.Y > Main.maxTilesY && maxChasmSize > 0f && !ocean))
-                    {
-                        maxChasmSize = 0f;
-                    }
-                }
                 else
                 {
                     if (((double)chasmGenPosition.Y > (Abyss.AbyssChasmBottom + limitIncrease) && maxChasmSize > 0f && ocean) ||
@@ -377,18 +369,9 @@ namespace CalamityMod.World
                         {
                             if ((Math.Abs(k - chasmGenPosition.X) + Math.Abs(l - chasmGenPosition.Y)) < chasmWidth * 0.5 * (1.0 + WorldGen.genRand.Next(-5, 6) * 0.015))
                             {
-                                if (ocean)
-                                {
-                                    Main.tile[k, l].Get<TileWallWireStateData>().HasTile = false;
-                                    Main.tile[k, l].LiquidAmount = 255;
-                                    Main.tile[k, l].Get<LiquidData>().LiquidType = LiquidID.Water;
-                                }
-                                else
-                                {
-                                    Main.tile[k, l].Get<TileWallWireStateData>().HasTile = false;
-                                    Main.tile[k, l].LiquidAmount = 255;
-                                    Main.tile[k, l].Get<LiquidData>().LiquidType = LiquidID.Lava;
-                                }
+                                Main.tile[k, l].Get<TileWallWireStateData>().HasTile = false;
+                                Main.tile[k, l].LiquidAmount = 255;
+                                Main.tile[k, l].Get<LiquidData>().LiquidType = ocean ? LiquidID.Water : LiquidID.Lava;
                             }
                         }
                     }

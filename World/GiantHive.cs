@@ -313,6 +313,9 @@ namespace CalamityMod.World
             }
         }
         public static void CreateHexagon(int centerX, int centerY, int hexagonSize, int tileType, bool doWalls = false)
+            => CreateHexagonCore(centerX, centerY, hexagonSize, tileType, doWalls, false);
+
+        private static void CreateHexagonCore(int centerX, int centerY, int hexagonSize, int tileType, bool doWalls, bool giantHive)
         {
             int halfHexagonSize = hexagonSize / 2;
 
@@ -337,7 +340,7 @@ namespace CalamityMod.World
                         }
                         else
                         {
-                            tTile.WallType = WallID.HiveUnsafe;
+                            tTile.WallType = giantHive ? (ushort)ModContent.WallType<GiantHiveWall>() : WallID.HiveUnsafe;
                             WorldGen.SquareWallFrame(tileX, tileY);
                         }
                     }
@@ -345,38 +348,11 @@ namespace CalamityMod.World
             }
         }
         public static void CreateGiantHiveHexagon(int centerX, int centerY, int hexagonSize, int tileType, bool doWalls = false)
-        {
-            int halfHexagonSize = hexagonSize / 2;
-
-            for (int x = -halfHexagonSize; x <= halfHexagonSize; x++)
-            {
-                int y1 = Math.Abs(x) / 2;
-                int y2 = hexagonSize - Math.Abs(x) / 2;
-
-                for (int y = y1; y < y2; y++)
-                {
-                    int tileX = centerX + x;
-                    int tileY = centerY + y;
-
-                    if (WorldGen.InWorld(tileX, tileY))
-                    {
-                        Tile tTile = Main.tile[tileX, tileY];
-                        if (!doWalls)
-                        {
-                            tTile.HasTile = true;
-                            tTile.TileType = (ushort)tileType;
-                            WorldGen.SquareTileFrame(tileX, tileY);
-                        }
-                        else
-                        {
-                            tTile.WallType = (ushort)ModContent.WallType<GiantHiveWall>();
-                            WorldGen.SquareWallFrame(tileX, tileY);
-                        }
-                    }
-                }
-            }
-        }
+            => CreateHexagonCore(centerX, centerY, hexagonSize, tileType, doWalls, true);
         public static void ClearHexagon(int centerX, int centerY, int hexagonSize)
+            => ClearHexagonCore(centerX, centerY, hexagonSize, false);
+
+        private static void ClearHexagonCore(int centerX, int centerY, int hexagonSize, bool giantHive)
         {
             int halfHexagonSize = hexagonSize / 2;
 
@@ -394,7 +370,7 @@ namespace CalamityMod.World
                     {
                         Tile tTile = Main.tile[tileX, tileY];
                         tTile.HasTile = false;
-                        tTile.WallType = WallID.HiveUnsafe;
+                        tTile.WallType = giantHive ? (ushort)ModContent.WallType<GiantHiveWall>() : WallID.HiveUnsafe;
                         tTile.LiquidAmount = 0;
                         WorldGen.SquareWallFrame(tileX, tileY);
                         if (WorldGen.genRand.NextBool(15))
@@ -408,36 +384,7 @@ namespace CalamityMod.World
             }
         }
         public static void GiantHiveWallHexagon(int centerX, int centerY, int hexagonSize)
-        {
-            int halfHexagonSize = hexagonSize / 2;
-
-            for (int x = -halfHexagonSize; x <= halfHexagonSize; x++)
-            {
-                int y1 = Math.Abs(x) / 2;
-                int y2 = hexagonSize - Math.Abs(x) / 2;
-
-                for (int y = y1; y < y2; y++)
-                {
-                    int tileX = centerX + x;
-                    int tileY = centerY + y;
-
-                    if (WorldGen.InWorld(tileX, tileY))
-                    {
-                        Tile tTile = Main.tile[tileX, tileY];
-                        tTile.HasTile = false;
-                        tTile.WallType = (ushort)ModContent.WallType<GiantHiveWall>();
-                        tTile.LiquidAmount = 0;
-                        WorldGen.SquareWallFrame(tileX, tileY);
-                        if (WorldGen.genRand.NextBool(15))
-                        {
-                            tTile.LiquidAmount = 100;
-                            tTile.LiquidType = LiquidID.Honey;
-                            WorldGen.SquareTileFrame(tileX, tileY);
-                        }
-                    }
-                }
-            }
-        }
+            => ClearHexagonCore(centerX, centerY, hexagonSize, true);
         public static Vector2 MakeCell(int x, int y, UnifiedRandom random)
         {
          CreateHexagon(x, y - 30, 110, TileID.Hive);

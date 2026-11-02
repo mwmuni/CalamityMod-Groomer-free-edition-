@@ -727,34 +727,7 @@ namespace CalamityMod.NPCs.Polterghast
 
                     SoundEngine.PlaySound(P2Sound, NPC.Center);
 
-                    if (!Main.dedServ)
-                    {
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt2").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt3").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt4").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt5").Type, 1f);
-                    }
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        int ghostDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Necroplasm, 0f, 0f, 100, default, 2f);
-                        Main.dust[ghostDust].velocity *= 3f;
-                        Main.dust[ghostDust].noGravity = true;
-                        if (Main.rand.NextBool())
-                        {
-                            Main.dust[ghostDust].scale = 0.5f;
-                            Main.dust[ghostDust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
-                        }
-                    }
-                    for (int j = 0; j < 30; j++)
-                    {
-                        int ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 3f);
-                        Main.dust[ghostDust2].noGravity = true;
-                        Main.dust[ghostDust2].velocity *= 5f;
-                        ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 2f);
-                        Main.dust[ghostDust2].velocity *= 2f;
-                    }
+                    SpawnPhaseTransitionEffects();
                 }
 
                 NPC.damage = (int)Math.Round(NPC.defDamage * Phase2ContactDamageMult);
@@ -846,34 +819,7 @@ namespace CalamityMod.NPCs.Polterghast
 
                     SoundEngine.PlaySound(P3Sound, NPC.Center);
 
-                    if (!Main.dedServ)
-                    {
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt2").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt3").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt4").Type, 1f);
-                        Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt5").Type, 1f);
-                    }
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        int ghostDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Necroplasm, 0f, 0f, 100, default, 2f);
-                        Main.dust[ghostDust].velocity *= 3f;
-                        Main.dust[ghostDust].noGravity = true;
-                        if (Main.rand.NextBool())
-                        {
-                            Main.dust[ghostDust].scale = 0.5f;
-                            Main.dust[ghostDust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
-                        }
-                    }
-                    for (int j = 0; j < 30; j++)
-                    {
-                        int ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 3f);
-                        Main.dust[ghostDust2].noGravity = true;
-                        Main.dust[ghostDust2].velocity *= 5f;
-                        ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 2f);
-                        Main.dust[ghostDust2].velocity *= 2f;
-                    }
+                    SpawnPhaseTransitionEffects();
                 }
 
                 NPC.damage = (int)Math.Round(NPC.defDamage * Phase3ContactDamageMult);
@@ -927,6 +873,43 @@ namespace CalamityMod.NPCs.Polterghast
                         }
                     }
                 }
+            }
+        }
+
+        private void SpawnPhaseTransitionEffects()
+        {
+            if (!Main.dedServ)
+            {
+                Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt").Type, 1f);
+                Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt2").Type, 1f);
+                Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt3").Type, 1f);
+                Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt4").Type, 1f);
+                Gore.NewGore(NPC.GetSource_FromAI(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Polt5").Type, 1f);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                int ghostDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Necroplasm, 0f, 0f, 100, default, 2f);
+                Main.dust[ghostDust].velocity *= 3f;
+                Main.dust[ghostDust].noGravity = true;
+                if (Main.rand.NextBool())
+                {
+                    Main.dust[ghostDust].scale = 0.5f;
+                    Main.dust[ghostDust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
+                }
+            }
+            SpawnEctoplasm(30);
+        }
+
+        private void SpawnEctoplasm(int count)
+        {
+            for (int j = 0; j < count; j++)
+            {
+                int ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 3f);
+                Main.dust[ghostDust2].noGravity = true;
+                Main.dust[ghostDust2].velocity *= 5f;
+                ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 2f);
+                Main.dust[ghostDust2].velocity *= 2f;
             }
         }
 
@@ -1231,14 +1214,7 @@ namespace CalamityMod.NPCs.Polterghast
                         Main.dust[ghostDust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
                     }
                 }
-                for (int j = 0; j < 60; j++)
-                {
-                    int ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 3f);
-                    Main.dust[ghostDust2].noGravity = true;
-                    Main.dust[ghostDust2].velocity *= 5f;
-                    ghostDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Ectoplasm, 0f, 0f, 100, default, 2f);
-                    Main.dust[ghostDust2].velocity *= 2f;
-                }
+                SpawnEctoplasm(60);
             }
         }
     }

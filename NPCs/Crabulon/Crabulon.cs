@@ -551,38 +551,7 @@ namespace CalamityMod.NPCs.Crabulon
                         NPC.netUpdate = true;
                     }
 
-                    for (int j = (int)NPC.position.X - 20; j < (int)NPC.position.X + NPC.width + 40; j += 20)
-                    {
-                        for (int k = 0; k < 4; k++)
-                        {
-                            int stompDust = Dust.NewDust(new Vector2(NPC.position.X - 20f, NPC.position.Y + NPC.height), NPC.width + 20, 4, DustID.BlueFairy, 0f, 0f, 100, default, 1.5f);
-                            Main.dust[stompDust].velocity *= 0.2f;
-                        }
-
-                        // Destroy tiles with stomps in Zenith seed
-                        if (Main.zenithWorld)
-                        {
-                            int x = j / 16;
-                            int y = (int)(NPC.position.Y + NPC.height) / 16;
-                            Tile groundTile = CalamityUtils.ParanoidTileRetrieval(x, y);
-                            Tile walkTile = CalamityUtils.ParanoidTileRetrieval(x, y - 1);
-                            if (!walkTile.HasTile && walkTile.LiquidAmount == 0 && groundTile != null && WorldGen.SolidTile(groundTile))
-                            {
-                                walkTile.TileFrameY = 0;
-                                walkTile.Get<TileWallWireStateData>().Slope = SlopeType.Solid;
-                                walkTile.Get<TileWallWireStateData>().IsHalfBlock = false;
-                                if (groundTile.TileType == TileID.MushroomGrass || groundTile.TileType == TileID.Mud)
-                                {
-                                    walkTile.Get<TileWallWireStateData>().HasTile = true;
-                                    walkTile.TileType = TileID.MushroomPlants;
-                                    walkTile.TileFrameX = (short)(Main.rand.Next(5) * 18);
-
-                                    if (Main.netMode == NetmodeID.MultiplayerClient)
-                                        NetMessage.SendTileSquare(-1, x, y - 1, 1, TileChangeType.None);
-                                }
-                            }
-                        }
-                    }
+                    DoStompEffects();
                 }
                 else
                 {
@@ -729,38 +698,7 @@ namespace CalamityMod.NPCs.Crabulon
                                     Projectile.NewProjectile(NPC.GetSource_FromAI(), initialSpawnLocation + new Vector2(Main.rand.Next(-81, 0), Main.rand.Next(-20, 1)), -(initialVelocity * (i / (float)numProj)), type, MushroomShotDamage, 0f, Main.myPlayer);
                             }
 
-                            for (int j = (int)NPC.position.X - 20; j < (int)NPC.position.X + NPC.width + 40; j += 20)
-                            {
-                                for (int k = 0; k < 4; k++)
-                                {
-                                    int stompDust = Dust.NewDust(new Vector2(NPC.position.X - 20f, NPC.position.Y + NPC.height), NPC.width + 20, 4, DustID.BlueFairy, 0f, 0f, 100, default, 1.5f);
-                                    Main.dust[stompDust].velocity *= 0.2f;
-                                }
-
-                                // Destroy tiles with stomps in Zenith seed
-                                if (Main.zenithWorld)
-                                {
-                                    int x = j / 16;
-                                    int y = (int)(NPC.position.Y + NPC.height) / 16;
-                                    Tile groundTile = CalamityUtils.ParanoidTileRetrieval(x, y);
-                                    Tile walkTile = CalamityUtils.ParanoidTileRetrieval(x, y - 1);
-                                    if (!walkTile.HasTile && walkTile.LiquidAmount == 0 && groundTile != null && WorldGen.SolidTile(groundTile))
-                                    {
-                                        walkTile.TileFrameY = 0;
-                                        walkTile.Get<TileWallWireStateData>().Slope = SlopeType.Solid;
-                                        walkTile.Get<TileWallWireStateData>().IsHalfBlock = false;
-                                        if (groundTile.TileType == TileID.MushroomGrass || groundTile.TileType == TileID.Mud)
-                                        {
-                                            walkTile.Get<TileWallWireStateData>().HasTile = true;
-                                            walkTile.TileType = TileID.MushroomPlants;
-                                            walkTile.TileFrameX = (short)(Main.rand.Next(5) * 18);
-
-                                            if (Main.netMode == NetmodeID.MultiplayerClient)
-                                                NetMessage.SendTileSquare(-1, x, y - 1, 1, TileChangeType.None);
-                                        }
-                                    }
-                                }
-                            }
+                            DoStompEffects();
                         }
                     }
                 }
@@ -864,38 +802,7 @@ namespace CalamityMod.NPCs.Crabulon
                         NPC.netUpdate = true;
                     }
 
-                    for (int j = (int)NPC.position.X - 20; j < (int)NPC.position.X + NPC.width + 40; j += 20)
-                    {
-                        for (int k = 0; k < 4; k++)
-                        {
-                            int stompDust = Dust.NewDust(new Vector2(NPC.position.X - 20f, NPC.position.Y + NPC.height), NPC.width + 20, 4, DustID.BlueFairy, 0f, 0f, 100, default, 1.5f);
-                            Main.dust[stompDust].velocity *= 0.2f;
-                        }
-
-                        // Destroy tiles with stomps in Zenith seed (this is going to be so awful with this attack lol)
-                        if (Main.zenithWorld)
-                        {
-                            int x = j / 16;
-                            int y = (int)(NPC.position.Y + NPC.height) / 16;
-                            Tile groundTile = CalamityUtils.ParanoidTileRetrieval(x, y);
-                            Tile walkTile = CalamityUtils.ParanoidTileRetrieval(x, y - 1);
-                            if (!walkTile.HasTile && walkTile.LiquidAmount == 0 && groundTile != null && WorldGen.SolidTile(groundTile))
-                            {
-                                walkTile.TileFrameY = 0;
-                                walkTile.Get<TileWallWireStateData>().Slope = SlopeType.Solid;
-                                walkTile.Get<TileWallWireStateData>().IsHalfBlock = false;
-                                if (groundTile.TileType == TileID.MushroomGrass || groundTile.TileType == TileID.Mud)
-                                {
-                                    walkTile.Get<TileWallWireStateData>().HasTile = true;
-                                    walkTile.TileType = TileID.MushroomPlants;
-                                    walkTile.TileFrameX = (short)(Main.rand.Next(5) * 18);
-
-                                    if (Main.netMode == NetmodeID.MultiplayerClient)
-                                        NetMessage.SendTileSquare(-1, x, y - 1, 1, TileChangeType.None);
-                                }
-                            }
-                        }
-                    }
+                    DoStompEffects();
                 }
                 else
                 {
@@ -943,6 +850,42 @@ namespace CalamityMod.NPCs.Crabulon
         public override bool? CanFallThroughPlatforms() => NPC.target >= 0 && Main.player[NPC.target].position.Y > NPC.position.Y + NPC.height;
 
         // Can only hit the target if within certain distance
+        private void DoStompEffects()
+        {
+            for (int j = (int)NPC.position.X - 20; j < (int)NPC.position.X + NPC.width + 40; j += 20)
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    int stompDust = Dust.NewDust(new Vector2(NPC.position.X - 20f, NPC.position.Y + NPC.height), NPC.width + 20, 4, DustID.BlueFairy, 0f, 0f, 100, default, 1.5f);
+                    Main.dust[stompDust].velocity *= 0.2f;
+                }
+
+                // Destroy tiles with stomps in Zenith seed
+                if (Main.zenithWorld)
+                {
+                    int x = j / 16;
+                    int y = (int)(NPC.position.Y + NPC.height) / 16;
+                    Tile groundTile = CalamityUtils.ParanoidTileRetrieval(x, y);
+                    Tile walkTile = CalamityUtils.ParanoidTileRetrieval(x, y - 1);
+                    if (!walkTile.HasTile && walkTile.LiquidAmount == 0 && groundTile != null && WorldGen.SolidTile(groundTile))
+                    {
+                        walkTile.TileFrameY = 0;
+                        walkTile.Get<TileWallWireStateData>().Slope = SlopeType.Solid;
+                        walkTile.Get<TileWallWireStateData>().IsHalfBlock = false;
+                        if (groundTile.TileType == TileID.MushroomGrass || groundTile.TileType == TileID.Mud)
+                        {
+                            walkTile.Get<TileWallWireStateData>().HasTile = true;
+                            walkTile.TileType = TileID.MushroomPlants;
+                            walkTile.TileFrameX = (short)(Main.rand.Next(5) * 18);
+
+                            if (Main.netMode == NetmodeID.MultiplayerClient)
+                                NetMessage.SendTileSquare(-1, x, y - 1, 1, TileChangeType.None);
+                        }
+                    }
+                }
+            }
+        }
+
         public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         {
             Vector2 npcCenter = NPC.Center;
@@ -958,52 +901,36 @@ namespace CalamityMod.NPCs.Crabulon
 
             Rectangle targetHitbox = target.Hitbox;
 
-            float leftDist1 = Vector2.Distance(leftHitboxCenter, targetHitbox.TopLeft());
-            float leftDist2 = Vector2.Distance(leftHitboxCenter, targetHitbox.TopRight());
-            float leftDist3 = Vector2.Distance(leftHitboxCenter, targetHitbox.BottomLeft());
-            float leftDist4 = Vector2.Distance(leftHitboxCenter, targetHitbox.BottomRight());
-
-            float minLeftDist = leftDist1;
-            if (leftDist2 < minLeftDist)
-                minLeftDist = leftDist2;
-            if (leftDist3 < minLeftDist)
-                minLeftDist = leftDist3;
-            if (leftDist4 < minLeftDist)
-                minLeftDist = leftDist4;
+            float minLeftDist = MinimumCornerDistance(leftHitboxCenter, targetHitbox);
 
             bool insideLeftHitbox = minLeftDist <= 45f * NPC.scale;
 
-            float bodyDist1 = Vector2.Distance(bodyHitboxCenter, targetHitbox.TopLeft());
-            float bodyDist2 = Vector2.Distance(bodyHitboxCenter, targetHitbox.TopRight());
-            float bodyDist3 = Vector2.Distance(bodyHitboxCenter, targetHitbox.BottomLeft());
-            float bodyDist4 = Vector2.Distance(bodyHitboxCenter, targetHitbox.BottomRight());
-
-            float minBodyDist = bodyDist1;
-            if (bodyDist2 < minBodyDist)
-                minBodyDist = bodyDist2;
-            if (bodyDist3 < minBodyDist)
-                minBodyDist = bodyDist3;
-            if (bodyDist4 < minBodyDist)
-                minBodyDist = bodyDist4;
+            float minBodyDist = MinimumCornerDistance(bodyHitboxCenter, targetHitbox);
 
             bool insideBodyHitbox = minBodyDist <= 90f * NPC.scale;
 
-            float rightDist1 = Vector2.Distance(rightHitboxCenter, targetHitbox.TopLeft());
-            float rightDist2 = Vector2.Distance(rightHitboxCenter, targetHitbox.TopRight());
-            float rightDist3 = Vector2.Distance(rightHitboxCenter, targetHitbox.BottomLeft());
-            float rightDist4 = Vector2.Distance(rightHitboxCenter, targetHitbox.BottomRight());
-
-            float minRightDist = rightDist1;
-            if (rightDist2 < minRightDist)
-                minRightDist = rightDist2;
-            if (rightDist3 < minRightDist)
-                minRightDist = rightDist3;
-            if (rightDist4 < minRightDist)
-                minRightDist = rightDist4;
+            float minRightDist = MinimumCornerDistance(rightHitboxCenter, targetHitbox);
 
             bool insideRightHitbox = minRightDist <= 45f * NPC.scale;
 
             return insideLeftHitbox || insideBodyHitbox || insideRightHitbox;
+        }
+
+        private static float MinimumCornerDistance(Vector2 hitboxCenter, Rectangle targetHitbox)
+        {
+            float dist1 = Vector2.Distance(hitboxCenter, targetHitbox.TopLeft());
+            float dist2 = Vector2.Distance(hitboxCenter, targetHitbox.TopRight());
+            float dist3 = Vector2.Distance(hitboxCenter, targetHitbox.BottomLeft());
+            float dist4 = Vector2.Distance(hitboxCenter, targetHitbox.BottomRight());
+
+            float minDist = dist1;
+            if (dist2 < minDist)
+                minDist = dist2;
+            if (dist3 < minDist)
+                minDist = dist3;
+            if (dist4 < minDist)
+                minDist = dist4;
+            return minDist;
         }
 
         public override void FindFrame(int frameHeight)

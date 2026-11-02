@@ -304,15 +304,9 @@ namespace CalamityMod.Events
                     NPC.SpawnOnPlayer(ClosestPlayerToWorldCenter, type);
                 }, usesSpecialSound: true, permittedNPCs: new int[] { ModContent.NPCType<AstrumDeusBody>(), ModContent.NPCType<AstrumDeusTail>() }),
 
-                new Boss(NPCID.MoonLordCore, spawnContext: type =>
-                {
-                    NPC.SpawnOnPlayer(ClosestPlayerToWorldCenter, type);
-                }, permittedNPCs: new int[] { NPCID.MoonLordLeechBlob, NPCID.MoonLordHand, NPCID.MoonLordHead, NPCID.MoonLordFreeEye }),
+                new Boss(NPCID.MoonLordCore, permittedNPCs: new int[] { NPCID.MoonLordLeechBlob, NPCID.MoonLordHand, NPCID.MoonLordHead, NPCID.MoonLordFreeEye }),
 
-                new Boss(ModContent.NPCType<ProfanedGuardianCommander>(), TimeChangeContext.Day, type =>
-                {
-                    NPC.SpawnOnPlayer(ClosestPlayerToWorldCenter, type);
-                }, permittedNPCs: new int[] { ModContent.NPCType<ProfanedGuardianDefender>(), ModContent.NPCType<ProfanedGuardianHealer>(), ModContent.NPCType<ProfanedRocks>() }),
+                new Boss(ModContent.NPCType<ProfanedGuardianCommander>(), TimeChangeContext.Day, permittedNPCs: new int[] { ModContent.NPCType<ProfanedGuardianDefender>(), ModContent.NPCType<ProfanedGuardianHealer>(), ModContent.NPCType<ProfanedRocks>() }),
 
                 new Boss(ModContent.NPCType<Dragonfolly>(), permittedNPCs: new int[] { ModContent.NPCType<DraconicSwarmer>() }),
 

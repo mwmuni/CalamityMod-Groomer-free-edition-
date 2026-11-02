@@ -374,6 +374,49 @@ namespace CalamityMod.NPCs.Providence
                 NPC.ForceNetUpdate();
         }
 
+        private static void CountGuardian(int index, ref int guardianAmt, ref bool alive)
+        {
+            if (index != -1)
+            {
+                if (Main.npc[index].active)
+                {
+                    guardianAmt++;
+                    alive = true;
+                }
+            }
+        }
+
+        private void UpdateGuardianDespawnTimer(bool guardianAlive, int timerIndex, float duration)
+        {
+            if (guardianAlive && NPC.localAI[timerIndex] == 0f)
+                NPC.localAI[timerIndex] = 1f;
+
+            if (!guardianAlive && NPC.localAI[timerIndex] > 0f)
+            {
+                if (NPC.localAI[timerIndex] < duration)
+                {
+                    // Star Wrath use sound
+                    if (NPC.localAI[timerIndex] == 1f)
+                        SoundEngine.PlaySound(SoundID.Item105, NPC.Center);
+
+                    NPC.localAI[timerIndex] += 1f;
+                }
+            }
+        }
+
+        private void AdvanceBlastShotTimer(bool death, bool expertMode, float lifeRatio, double attackRateMult)
+        {
+            NPC.ai[3] += 1f;
+
+            int shootBoost = death ? (int)Math.Round(5f * (1f - lifeRatio)) : (int)Math.Round(4f * (1f - lifeRatio));
+            int projectileShootGateValue = (expertMode ? 24 : 26) - shootBoost;
+
+            projectileShootGateValue = (int)(projectileShootGateValue * attackRateMult);
+
+            if (NPC.ai[3] >= projectileShootGateValue)
+                NPC.ai[3] = -projectileShootGateValue;
+        }
+
         public override void AI()
         {
             //ensure projectiles all despawn when she does
@@ -545,64 +588,15 @@ namespace CalamityMod.NPCs.Providence
             bool attackerAlive = false;
             bool defenderAlive = false;
             bool healerAlive = false;
-            if (CalamityGlobalNPC.holyBossAttacker != -1)
-            {
-                if (Main.npc[CalamityGlobalNPC.holyBossAttacker].active)
-                {
-                    guardianAmt++;
-                    attackerAlive = true;
-                }
-            }
-            if (CalamityGlobalNPC.holyBossDefender != -1)
-            {
-                if (Main.npc[CalamityGlobalNPC.holyBossDefender].active)
-                {
-                    guardianAmt++;
-                    defenderAlive = true;
-                }
-            }
-            if (CalamityGlobalNPC.holyBossHealer != -1)
-            {
-                if (Main.npc[CalamityGlobalNPC.holyBossHealer].active)
-                {
-                    guardianAmt++;
-                    healerAlive = true;
-                }
-            }
+            CountGuardian(CalamityGlobalNPC.holyBossAttacker, ref guardianAmt, ref attackerAlive);
+            CountGuardian(CalamityGlobalNPC.holyBossDefender, ref guardianAmt, ref defenderAlive);
+            CountGuardian(CalamityGlobalNPC.holyBossHealer, ref guardianAmt, ref healerAlive);
 
             // Makes it so star shit can only happen if the attacker has spawned
-            if (attackerAlive && NPC.localAI[0] == 0f)
-                NPC.localAI[0] = 1f;
-
-            // Can only run after the attacker has spawned and died
-            if (!attackerAlive && NPC.localAI[0] > 0f)
-            {
-                if (NPC.localAI[0] < TimeForStarDespawn)
-                {
-                    // Star Wrath use sound
-                    if (NPC.localAI[0] == 1f)
-                        SoundEngine.PlaySound(SoundID.Item105, NPC.Center);
-
-                    NPC.localAI[0] += 1f;
-                }
-            }
+            UpdateGuardianDespawnTimer(attackerAlive, 0, TimeForStarDespawn);
 
             // Makes it so shield shit can only happen if the defender has spawned
-            if (defenderAlive && NPC.localAI[3] == 0f)
-                NPC.localAI[3] = 1f;
-
-            // Can only run after the defender has spawned and died
-            if (!defenderAlive && NPC.localAI[3] > 0f)
-            {
-                if (NPC.localAI[3] < TimeForShieldDespawn)
-                {
-                    // Star Wrath use sound
-                    if (NPC.localAI[3] == 1f)
-                        SoundEngine.PlaySound(SoundID.Item105, NPC.Center);
-
-                    NPC.localAI[3] += 1f;
-                }
-            }
+            UpdateGuardianDespawnTimer(defenderAlive, 3, TimeForShieldDespawn);
 
             // Change projectile fire rate depending on Guardian amount
             if (guardianAmt > 0)
@@ -1113,15 +1107,7 @@ namespace CalamityMod.NPCs.Providence
 
                     if (distanceX > distanceNeededToShoot && NPC.position.Y < player.position.Y)
                     {
-                        NPC.ai[3] += 1f;
-
-                        int shootBoost = death ? (int)Math.Round(5f * (1f - lifeRatio)) : (int)Math.Round(4f * (1f - lifeRatio));
-                        int projectileShootGateValue = (expertMode ? 24 : 26) - shootBoost;
-
-                        projectileShootGateValue = (int)(projectileShootGateValue * attackRateMult);
-
-                        if (NPC.ai[3] >= projectileShootGateValue)
-                            NPC.ai[3] = -projectileShootGateValue;
+                        AdvanceBlastShotTimer(death, expertMode, lifeRatio, attackRateMult);
 
                         if (NPC.ai[3] == 0f && Main.netMode != NetmodeID.MultiplayerClient)
                         {
@@ -1386,15 +1372,7 @@ namespace CalamityMod.NPCs.Providence
 
                     if (distanceX > distanceNeededToShoot && NPC.position.Y < player.position.Y)
                     {
-                        NPC.ai[3] += 1f;
-
-                        int shootBoost = death ? (int)Math.Round(5f * (1f - lifeRatio)) : (int)Math.Round(4f * (1f - lifeRatio));
-                        int projectileShootGateValue = (expertMode ? 24 : 26) - shootBoost;
-
-                        projectileShootGateValue = (int)(projectileShootGateValue * attackRateMult);
-
-                        if (NPC.ai[3] >= projectileShootGateValue)
-                            NPC.ai[3] = -projectileShootGateValue;
+                        AdvanceBlastShotTimer(death, expertMode, lifeRatio, attackRateMult);
 
                         if (NPC.ai[3] == 0f && Main.netMode != NetmodeID.MultiplayerClient)
                         {
@@ -1757,24 +1735,7 @@ namespace CalamityMod.NPCs.Providence
             {
                 CalamityUtils.AddScreenshakeAt(NPC.Center, 5, 2000);
 
-                Color hiColor = ProvUtils.GetProjectileColor(255, false);
-                Color loColor = ProvUtils.GetProjectileColor(0, true);
-
-                for (int i = 0; i < 30; i++)
-                {
-                    Particle p = new FlameParticle(NPC.Center + new Vector2(Main.rand.NextFloat(150), 0).RotatedByRandom(MathHelper.TwoPi), 40, Main.rand.NextFloat(0.5f, 0.75f), Main.rand.NextFloat(1f, 2.5f), hiColor, loColor);
-                    p.Velocity = new Vector2(Main.rand.NextFloat(3f, 19f), 0).RotatedByRandom(MathHelper.TwoPi);
-                    GeneralParticleHandler.SpawnParticle(p);
-                    GeneralParticleHandler.SpawnParticle(new HeavySmokeParticle(NPC.Center, new Vector2(Main.rand.NextFloat(12f, 40f), 0).RotatedByRandom(MathHelper.TwoPi), loColor, 60, Main.rand.NextFloat(0.75f, 1.75f), 1f, Main.rand.NextFloat(-0.05f, 0.05f), true));
-                }
-
-                GeneralParticleHandler.SpawnParticle(new CustomPulse(NPC.Center, Vector2.Zero, hiColor, "CalamityMod/Particles/BloomCircle", Vector2.One, Main.rand.NextFloat(MathHelper.TwoPi), 1f, 0.1f, 15));
-
-                for (float i = 0; i < 3; i += 0.25f)
-                {
-                    GeneralParticleHandler.SpawnParticle(new CustomPulse(NPC.Center, Vector2.Zero, hiColor, "CalamityMod/Particles/SoftRoundExplosion", Vector2.One * i, Main.rand.NextFloat(MathHelper.TwoPi), 0.05f, 0.25f, 35));
-                    GeneralParticleHandler.SpawnParticle(new CustomPulse(NPC.Center, Vector2.Zero, hiColor, "CalamityMod/Particles/ShatteredExplosion", Vector2.One * i, Main.rand.NextFloat(MathHelper.TwoPi), 0.05f, 0.175f, 25));
-                }
+                SpawnDeathExplosion(0.25f, 0.175f);
 
                 SoundEngine.PlaySound(HolyBlast.ImpactSound, NPC.Center);
             }
@@ -1923,10 +1884,8 @@ namespace CalamityMod.NPCs.Providence
             return false;
         }
 
-        public override void OnKill()
+        private void SpawnDeathExplosion(float softPulseScale, float shatteredPulseScale)
         {
-            CalamityUtils.AddScreenshakeAt(NPC.Center, 10, 2000);
-
             Color hiColor = ProvUtils.GetProjectileColor(255, false);
             Color loColor = ProvUtils.GetProjectileColor(0, true);
 
@@ -1942,9 +1901,16 @@ namespace CalamityMod.NPCs.Providence
 
             for (float i = 0; i < 3; i += 0.25f)
             {
-                GeneralParticleHandler.SpawnParticle(new CustomPulse(NPC.Center, Vector2.Zero, hiColor, "CalamityMod/Particles/SoftRoundExplosion", Vector2.One * i, Main.rand.NextFloat(MathHelper.TwoPi), 0.05f, 0.35f, 35));
-                GeneralParticleHandler.SpawnParticle(new CustomPulse(NPC.Center, Vector2.Zero, hiColor, "CalamityMod/Particles/ShatteredExplosion", Vector2.One * i, Main.rand.NextFloat(MathHelper.TwoPi), 0.05f, 0.275f, 25));
+                GeneralParticleHandler.SpawnParticle(new CustomPulse(NPC.Center, Vector2.Zero, hiColor, "CalamityMod/Particles/SoftRoundExplosion", Vector2.One * i, Main.rand.NextFloat(MathHelper.TwoPi), 0.05f, softPulseScale, 35));
+                GeneralParticleHandler.SpawnParticle(new CustomPulse(NPC.Center, Vector2.Zero, hiColor, "CalamityMod/Particles/ShatteredExplosion", Vector2.One * i, Main.rand.NextFloat(MathHelper.TwoPi), 0.05f, shatteredPulseScale, 25));
             }
+        }
+
+        public override void OnKill()
+        {
+            CalamityUtils.AddScreenshakeAt(NPC.Center, 10, 2000);
+
+            SpawnDeathExplosion(0.35f, 0.275f);
 
             // Don't bother running any of this in Boss Rush.
             if (BossRushEvent.BossRushActive)
@@ -2878,28 +2844,33 @@ namespace CalamityMod.NPCs.Providence
             if (CalamityGlobalNPC.holyBoss == -1)
                 return FinalColor;
 
+            ApplyProjectileColor(ref FinalColor, alpha, Outline, 255, 255);
+
+            return FinalColor;
+        }
+
+        private static void ApplyProjectileColor(ref Color color, int alpha, bool outline, int yellowGreen, int yellowBlue)
+        {
             if (Main.zenithWorld)
             {
                 if (Main.GlobalTimeWrappedHourly % 6f >= 5f) // Violet
-                    FinalColor = new Color(Outline ? 100 : 150, Outline ? 150 : 100, 250, alpha);
+                    color = new Color(outline ? 100 : 150, outline ? 150 : 100, 250, alpha);
                 else if (Main.GlobalTimeWrappedHourly % 6f >= 4f) // Blue
-                    FinalColor = new Color(100, Outline ? 250 : 200, Outline ? 200 : 250, alpha);
+                    color = new Color(100, outline ? 250 : 200, outline ? 200 : 250, alpha);
                 else if (Main.GlobalTimeWrappedHourly % 6f >= 3f) // Green
-                    FinalColor = new Color(Outline ? 200 : 100, 250, 100, alpha);
+                    color = new Color(outline ? 200 : 100, 250, 100, alpha);
                 else if (Main.GlobalTimeWrappedHourly % 6f >= 2f) // Yellow
-                    FinalColor = new Color(255, Outline ? 0 : 255, Outline ? 0 : 255, alpha);
+                    color = new Color(255, outline ? 0 : yellowGreen, outline ? 0 : yellowBlue, alpha);
                 else if (Main.GlobalTimeWrappedHourly % 6f >= 1f) // Orange
-                    FinalColor = new Color(250, 150, Outline ? 150 : 100, alpha);
+                    color = new Color(250, 150, outline ? 150 : 100, alpha);
                 else // Red
-                    FinalColor = new Color(250, 100, Outline ? 200 : 100, alpha);
+                    color = new Color(250, 100, outline ? 200 : 100, alpha);
             }
             else if (!StandardAI())
-                FinalColor = new Color(100, Outline ? 250 : 200, Outline ? 200 : 250, alpha);
+                color = new Color(100, outline ? 250 : 200, outline ? 200 : 250, alpha);
 
-            if (Outline)
-                FinalColor *= 0.1f;
-
-            return FinalColor;
+            if (outline)
+                color *= 0.1f;
         }
 
         public static Color GetProjectileColor(int Alpha, bool Outline = false)
@@ -2909,26 +2880,7 @@ namespace CalamityMod.NPCs.Providence
             if (CalamityGlobalNPC.holyBoss == -1)
                 return FinalColor;
 
-            if (Main.zenithWorld)
-            {
-                if (Main.GlobalTimeWrappedHourly % 6f >= 5f) // Violet
-                    FinalColor = new Color(Outline ? 100 : 150, Outline ? 150 : 100, 250, Alpha);
-                else if (Main.GlobalTimeWrappedHourly % 6f >= 4f) // Blue
-                    FinalColor = new Color(100, Outline ? 250 : 200, Outline ? 200 : 250, Alpha);
-                else if (Main.GlobalTimeWrappedHourly % 6f >= 3f) // Green
-                    FinalColor = new Color(Outline ? 200 : 100, 250, 100, Alpha);
-                else if (Main.GlobalTimeWrappedHourly % 6f >= 2f) // Yellow
-                    FinalColor = new Color(255, Outline ? 0 : 155, Outline ? 0 : 25, Alpha);
-                else if (Main.GlobalTimeWrappedHourly % 6f >= 1f) // Orange
-                    FinalColor = new Color(250, 150, Outline ? 150 : 100, Alpha);
-                else // Red
-                    FinalColor = new Color(250, 100, Outline ? 200 : 100, Alpha);
-            }
-            else if (!StandardAI())
-                FinalColor = new Color(100, Outline ? 250 : 200, Outline ? 200 : 250, Alpha);
-
-            if (Outline)
-                FinalColor *= 0.1f;
+            ApplyProjectileColor(ref FinalColor, Alpha, Outline, 155, 25);
 
             return FinalColor;
         }

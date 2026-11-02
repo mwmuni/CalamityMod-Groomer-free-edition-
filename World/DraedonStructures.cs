@@ -63,18 +63,21 @@ namespace CalamityMod.World
 
         #region Workshop
         public static void FillWorkshopChest(Chest chest)
+            => FillOutpostChest(chest, true);
+
+        private static void FillOutpostChest(Chest chest, bool workshop)
         {
             int potionType = Utils.SelectRandom(WorldGen.genRand, ItemID.EndurancePotion, ItemID.GravitationPotion, ItemID.HeartreachPotion, ItemID.LifeforcePotion);
             List<ChestItem> contents = new List<ChestItem>()
             {
-                new ChestItem(ModContent.ItemType<DubiousPlating>(), WorldGen.genRand.Next(8, 14 + 1)),
-                new ChestItem(ModContent.ItemType<MysteriousCircuitry>(), WorldGen.genRand.Next(7, 12 + 1)),
+                new ChestItem(ModContent.ItemType<DubiousPlating>(), WorldGen.genRand.Next(workshop ? 8 : 10, (workshop ? 14 : 17) + 1)),
+                new ChestItem(ModContent.ItemType<MysteriousCircuitry>(), WorldGen.genRand.Next(workshop ? 7 : 10, (workshop ? 12 : 15) + 1)),
                 new ChestItem(ModContent.ItemType<SuspiciousScrap>(), 1),
-                new ChestItem(ItemID.Torch, WorldGen.genRand.Next(15, 29 + 1)),
-                new ChestItem(ItemID.GoldCoin, WorldGen.genRand.Next(5, 11 + 1)),
-                new ChestItem(ItemID.HealingPotion, WorldGen.genRand.Next(5, 7 + 1)),
-                new ChestItem(ItemID.Bomb, WorldGen.genRand.Next(6, 7 + 1)),
-                new ChestItem(potionType, WorldGen.genRand.Next(3, 5 + 1)),
+                new ChestItem(ItemID.Torch, WorldGen.genRand.Next(workshop ? 15 : 20, (workshop ? 29 : 40) + 1)),
+                new ChestItem(ItemID.GoldCoin, WorldGen.genRand.Next(workshop ? 5 : 8, (workshop ? 11 : 16) + 1)),
+                new ChestItem(ItemID.HealingPotion, WorldGen.genRand.Next(workshop ? 5 : 7, (workshop ? 7 : 10) + 1)),
+                new ChestItem(workshop ? ItemID.Bomb : ItemID.Dynamite, WorldGen.genRand.Next(workshop ? 6 : 4, (workshop ? 7 : 6) + 1)),
+                new ChestItem(potionType, WorldGen.genRand.Next(workshop ? 3 : 4, (workshop ? 5 : 7) + 1)),
             };
             float rng = WorldGen.genRand.NextFloat();
 
@@ -138,37 +141,7 @@ namespace CalamityMod.World
 
         #region Research Facility
         public static void FillLaboratoryChest(Chest chest)
-        {
-            int potionType = Utils.SelectRandom(WorldGen.genRand, ItemID.EndurancePotion, ItemID.GravitationPotion, ItemID.HeartreachPotion, ItemID.LifeforcePotion);
-            List<ChestItem> contents = new List<ChestItem>()
-            {
-                new ChestItem(ModContent.ItemType<DubiousPlating>(), WorldGen.genRand.Next(10, 17 + 1)),
-                new ChestItem(ModContent.ItemType<MysteriousCircuitry>(), WorldGen.genRand.Next(10, 15 + 1)),
-                new ChestItem(ModContent.ItemType<SuspiciousScrap>(), 1),
-                new ChestItem(ItemID.Torch, WorldGen.genRand.Next(20, 40 + 1)),
-                new ChestItem(ItemID.GoldCoin, WorldGen.genRand.Next(8, 16 + 1)),
-                new ChestItem(ItemID.HealingPotion, WorldGen.genRand.Next(7, 10 + 1)),
-                new ChestItem(ItemID.Dynamite, WorldGen.genRand.Next(4, 6 + 1)),
-                new ChestItem(potionType, WorldGen.genRand.Next(4, 7 + 1)),
-            };
-            float rng = WorldGen.genRand.NextFloat();
-
-            //Adds a Lab Seeking Mechanism at a 50% chance, or any of the 5 Bio Lab Seeking Mechanisms at a 10% chance each
-            if (rng < 0.5f)
-                contents.Insert(0, new ChestItem(ModContent.ItemType<LabSeekingMechanism>(), 1));
-            else if (rng < 0.6f)
-                contents.Insert(0, new ChestItem(ModContent.ItemType<CyanSeekingMechanism>(), 1));
-            else if (rng < 0.7f)
-                contents.Insert(0, new ChestItem(ModContent.ItemType<GreenSeekingMechanism>(), 1));
-            else if (rng < 0.8f)
-                contents.Insert(0, new ChestItem(ModContent.ItemType<WhiteSeekingMechanism>(), 1));
-            else if (rng < 0.9f)
-                contents.Insert(0, new ChestItem(ModContent.ItemType<RedSeekingMechanism>(), 1));
-            else
-                contents.Insert(0, new ChestItem(ModContent.ItemType<YellowSeekingMechanism>(), 1));
-
-            MiscWorldgenRoutines.FillChestContents(chest, contents);
-        }
+            => FillOutpostChest(chest, false);
         public static void PlaceResearchFacility(out Point placementPoint, List<Point> workshopPoints, StructureMap structures)
         {
             int tries = 0;

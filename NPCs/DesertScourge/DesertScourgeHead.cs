@@ -271,48 +271,7 @@ namespace CalamityMod.NPCs.DesertScourge
                         bool finsInSolidTile = Framing.GetTileSafely(Main.npc[(int)NPC.ai[0]].Center.ToTileCoordinates()).HasUnactuatedTile;
                         if (!inSolidTile && finsInSolidTile && Collision.CanHit(NPC.Top, 1, 1, player.Center, 1, 1))
                         {
-                            NPC.localAI[3] = 1f;
-                            SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
-
-                            int bestY = headTileCenter.Y;
-                            for (int j = 0; j < 20; j++)
-                            {
-                                if (bestY < 10)
-                                    break;
-
-                                if (!WorldGen.SolidTile(headTileCenter.X, bestY))
-                                    break;
-
-                                bestY--;
-                            }
-
-                            for (int k = 0; k < 20; k++)
-                            {
-                                if (bestY > Main.maxTilesY - 10)
-                                    break;
-
-                                if (WorldGen.ActiveAndWalkableTile(headTileCenter.X, bestY))
-                                    break;
-
-                                bestY++;
-                            }
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Vector2 sandSplashSpawnPos = new Vector2(headTileCenter.X * 16 + 8, bestY * 16 - 40);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), sandSplashSpawnPos, Vector2.Zero, ModContent.ProjectileType<DesertScourgeDiveSplash>(), 0, 0f, Main.myPlayer);
-
-                                if (death)
-                                {
-                                    int type = ModContent.ProjectileType<DesertScourgeSpit>();
-                                    for (int i = 0; i < 7; i++)
-                                    {
-                                        Vector2 sandSpitPos = new Vector2((i - 2) * 16f, -Math.Abs((i - 2) * 16f));
-                                        Vector2 sandSpitVelocity = ((sandSplashSpawnPos + Vector2.UnitY * 80f) - (sandSplashSpawnPos + sandSpitPos)).SafeNormalize(Vector2.UnitY) * -((Math.Abs(i - 3) + 1) * 3f);
-                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), sandSplashSpawnPos + sandSpitPos, sandSpitVelocity, type, SpitDamage, 0f, Main.myPlayer);
-                                    }
-                                }
-                            }
+                            SpawnSandSplash(headTileCenter, death);
                         }
                     }
                 }
@@ -325,48 +284,7 @@ namespace CalamityMod.NPCs.DesertScourge
                         bool inSolidTile = tileSafely.HasUnactuatedTile;
                         if (inSolidTile && Collision.CanHit(NPC.Top, 1, 1, player.Center, 1, 1))
                         {
-                            NPC.localAI[3] = 1f;
-                            SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
-
-                            int bestY = headTileCenter.Y;
-                            for (int j = 0; j < 20; j++)
-                            {
-                                if (bestY < 10)
-                                    break;
-
-                                if (!WorldGen.SolidTile(headTileCenter.X, bestY))
-                                    break;
-
-                                bestY--;
-                            }
-
-                            for (int k = 0; k < 20; k++)
-                            {
-                                if (bestY > Main.maxTilesY - 10)
-                                    break;
-
-                                if (WorldGen.ActiveAndWalkableTile(headTileCenter.X, bestY))
-                                    break;
-
-                                bestY++;
-                            }
-
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                Vector2 sandSplashSpawnPos = new Vector2(headTileCenter.X * 16 + 8, bestY * 16 - 40);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), sandSplashSpawnPos, Vector2.Zero, ModContent.ProjectileType<DesertScourgeDiveSplash>(), 0, 0f, Main.myPlayer);
-
-                                if (death)
-                                {
-                                    int type = ModContent.ProjectileType<DesertScourgeSpit>();
-                                    for (int i = 0; i < 7; i++)
-                                    {
-                                        Vector2 sandSpitPos = new Vector2((i - 2) * 16f, -Math.Abs((i - 2) * 16f));
-                                        Vector2 sandSpitVelocity = ((sandSplashSpawnPos + Vector2.UnitY * 80f) - (sandSplashSpawnPos + sandSpitPos)).SafeNormalize(Vector2.UnitY) * -((Math.Abs(i - 3) + 1) * 3f);
-                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), sandSplashSpawnPos + sandSpitPos, sandSpitVelocity, type, SpitDamage, 0f, Main.myPlayer);
-                                    }
-                                }
-                            }
+                            SpawnSandSplash(headTileCenter, death);
                         }
                     }
                 }
@@ -661,135 +579,11 @@ namespace CalamityMod.NPCs.DesertScourge
                         NPC.velocity.Y += 0.05f;
                 }
 
-                if (NPC.velocity.Y > maxChaseSpeed)
-                    NPC.velocity.Y = maxChaseSpeed;
-
-                // This bool exists to stop the strange wiggle behavior when worms are falling down
-                bool slowXVelocity = Math.Abs(NPC.velocity.X) > speed;
-                if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.4)
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X -= speed * 1.1f;
-                    else
-                        NPC.velocity.X += speed * 1.1f;
-                }
-                else if (NPC.velocity.Y == maxChaseSpeed)
-                {
-                    if (slowXVelocity)
-                    {
-                        if (NPC.velocity.X < playerX)
-                            NPC.velocity.X += speed;
-                        else if (NPC.velocity.X > playerX)
-                            NPC.velocity.X -= speed;
-                    }
-                    else
-                        NPC.velocity.X = 0f;
-                }
-                else if (NPC.velocity.Y > 4f)
-                {
-                    if (slowXVelocity)
-                    {
-                        if (NPC.velocity.X < 0f)
-                            NPC.velocity.X += speed * 0.9f;
-                        else
-                            NPC.velocity.X -= speed * 0.9f;
-                    }
-                    else
-                        NPC.velocity.X = 0f;
-                }
+                UpdateFallingVelocity(NPC, maxChaseSpeed, speed, playerX);
             }
             else
             {
-                if (NPC.soundDelay == 0)
-                {
-                    float soundDelay = targetDistance / 40f;
-                    if (soundDelay < 10f)
-                        soundDelay = 10f;
-                    if (soundDelay > 20f)
-                        soundDelay = 20f;
-
-                    NPC.soundDelay = (int)soundDelay;
-                    SoundEngine.PlaySound(SoundID.WormDig, NPC.Center);
-                }
-
-                targetDistance = (float)Math.Sqrt((double)(playerX * playerX + targettingPosition * targettingPosition));
-                float absolutePlayerX = Math.Abs(playerX);
-                float absoluteTargetPos = Math.Abs(targettingPosition);
-                float timeToReachTarget = maxChaseSpeed / targetDistance;
-                playerX *= timeToReachTarget;
-                targettingPosition *= timeToReachTarget;
-
-                if (((NPC.velocity.X > 0f && playerX > 0f) || (NPC.velocity.X < 0f && playerX < 0f)) && ((NPC.velocity.Y > 0f && targettingPosition > 0f) || (NPC.velocity.Y < 0f && targettingPosition < 0f)))
-                {
-                    if (NPC.velocity.X < playerX)
-                        NPC.velocity.X += turnSpeed;
-                    else if (NPC.velocity.X > playerX)
-                        NPC.velocity.X -= turnSpeed;
-
-                    if (NPC.velocity.Y < targettingPosition)
-                        NPC.velocity.Y += turnSpeed;
-                    else if (NPC.velocity.Y > targettingPosition)
-                        NPC.velocity.Y -= turnSpeed;
-                }
-
-                if ((NPC.velocity.X > 0f && playerX > 0f) || (NPC.velocity.X < 0f && playerX < 0f) || (NPC.velocity.Y > 0f && targettingPosition > 0f) || (NPC.velocity.Y < 0f && targettingPosition < 0f))
-                {
-                    if (NPC.velocity.X < playerX)
-                        NPC.velocity.X += speed;
-                    else if (NPC.velocity.X > playerX)
-                        NPC.velocity.X -= speed;
-
-                    if (NPC.velocity.Y < targettingPosition)
-                        NPC.velocity.Y += speed;
-                    else if (NPC.velocity.Y > targettingPosition)
-                        NPC.velocity.Y -= speed;
-
-                    if ((double)Math.Abs(targettingPosition) < maxChaseSpeed * 0.2 && ((NPC.velocity.X > 0f && playerX < 0f) || (NPC.velocity.X < 0f && playerX > 0f)))
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y += speed * 2f;
-                        else
-                            NPC.velocity.Y -= speed * 2f;
-                    }
-
-                    if ((double)Math.Abs(playerX) < maxChaseSpeed * 0.2 && ((NPC.velocity.Y > 0f && targettingPosition < 0f) || (NPC.velocity.Y < 0f && targettingPosition > 0f)))
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X += speed * 2f;
-                        else
-                            NPC.velocity.X -= speed * 2f;
-                    }
-                }
-                else if (absolutePlayerX > absoluteTargetPos)
-                {
-                    if (NPC.velocity.X < playerX)
-                        NPC.velocity.X += speed * 1.1f;
-                    else if (NPC.velocity.X > playerX)
-                        NPC.velocity.X -= speed * 1.1f;
-
-                    if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y += speed;
-                        else
-                            NPC.velocity.Y -= speed;
-                    }
-                }
-                else
-                {
-                    if (NPC.velocity.Y < targettingPosition)
-                        NPC.velocity.Y += speed * 1.1f;
-                    else if (NPC.velocity.Y > targettingPosition)
-                        NPC.velocity.Y -= speed * 1.1f;
-
-                    if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X += speed;
-                        else
-                            NPC.velocity.X -= speed;
-                    }
-                }
+                UpdateDiggingVelocity(NPC, targetDistance, playerX, targettingPosition, maxChaseSpeed, speed, turnSpeed);
             }
 
             if ((!burrow || lungeUpward) && !quickFall && !hide)
@@ -818,6 +612,186 @@ namespace CalamityMod.NPCs.DesertScourge
 
             if (((NPC.velocity.X > 0f && NPC.oldVelocity.X < 0f) || (NPC.velocity.X < 0f && NPC.oldVelocity.X > 0f) || (NPC.velocity.Y > 0f && NPC.oldVelocity.Y < 0f) || (NPC.velocity.Y < 0f && NPC.oldVelocity.Y > 0f)) && !NPC.justHit)
                 NPC.netUpdate = true;
+        }
+
+        private void SpawnSandSplash(Point headTileCenter, bool death)
+        {
+            NPC.localAI[3] = 1f;
+            SoundEngine.PlaySound(SoundID.Item74, NPC.Center);
+
+            int bestY = headTileCenter.Y;
+            for (int j = 0; j < 20; j++)
+            {
+                if (bestY < 10)
+                    break;
+
+                if (!WorldGen.SolidTile(headTileCenter.X, bestY))
+                    break;
+
+                bestY--;
+            }
+
+            for (int k = 0; k < 20; k++)
+            {
+                if (bestY > Main.maxTilesY - 10)
+                    break;
+
+                if (WorldGen.ActiveAndWalkableTile(headTileCenter.X, bestY))
+                    break;
+
+                bestY++;
+            }
+
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Vector2 sandSplashSpawnPos = new Vector2(headTileCenter.X * 16 + 8, bestY * 16 - 40);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), sandSplashSpawnPos, Vector2.Zero, ModContent.ProjectileType<DesertScourgeDiveSplash>(), 0, 0f, Main.myPlayer);
+
+                if (death)
+                {
+                    int type = ModContent.ProjectileType<DesertScourgeSpit>();
+                    for (int i = 0; i < 7; i++)
+                    {
+                        Vector2 sandSpitPos = new Vector2((i - 2) * 16f, -Math.Abs((i - 2) * 16f));
+                        Vector2 sandSpitVelocity = ((sandSplashSpawnPos + Vector2.UnitY * 80f) - (sandSplashSpawnPos + sandSpitPos)).SafeNormalize(Vector2.UnitY) * -((Math.Abs(i - 3) + 1) * 3f);
+                        Projectile.NewProjectile(NPC.GetSource_FromAI(), sandSplashSpawnPos + sandSpitPos, sandSpitVelocity, type, SpitDamage, 0f, Main.myPlayer);
+                    }
+                }
+            }
+        }
+
+        internal static void UpdateFallingVelocity(NPC NPC, float maxChaseSpeed, float speed, float playerX)
+        {
+            if (NPC.velocity.Y > maxChaseSpeed)
+                NPC.velocity.Y = maxChaseSpeed;
+
+            // This bool exists to stop the strange wiggle behavior when worms are falling down
+            bool slowXVelocity = Math.Abs(NPC.velocity.X) > speed;
+            if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.4)
+            {
+                if (NPC.velocity.X < 0f)
+                    NPC.velocity.X -= speed * 1.1f;
+                else
+                    NPC.velocity.X += speed * 1.1f;
+            }
+            else if (NPC.velocity.Y == maxChaseSpeed)
+            {
+                if (slowXVelocity)
+                {
+                    if (NPC.velocity.X < playerX)
+                        NPC.velocity.X += speed;
+                    else if (NPC.velocity.X > playerX)
+                        NPC.velocity.X -= speed;
+                }
+                else
+                    NPC.velocity.X = 0f;
+            }
+            else if (NPC.velocity.Y > 4f)
+            {
+                if (slowXVelocity)
+                {
+                    if (NPC.velocity.X < 0f)
+                        NPC.velocity.X += speed * 0.9f;
+                    else
+                        NPC.velocity.X -= speed * 0.9f;
+                }
+                else
+                    NPC.velocity.X = 0f;
+            }
+        }
+
+        internal static void UpdateDiggingVelocity(NPC NPC, float targetDistance, float playerX, float targettingPosition, float maxChaseSpeed, float speed, float turnSpeed)
+        {
+            if (NPC.soundDelay == 0)
+            {
+                float soundDelay = targetDistance / 40f;
+                if (soundDelay < 10f)
+                    soundDelay = 10f;
+                if (soundDelay > 20f)
+                    soundDelay = 20f;
+
+                NPC.soundDelay = (int)soundDelay;
+                SoundEngine.PlaySound(SoundID.WormDig, NPC.Center);
+            }
+
+            targetDistance = (float)Math.Sqrt((double)(playerX * playerX + targettingPosition * targettingPosition));
+            float absolutePlayerX = Math.Abs(playerX);
+            float absoluteTargetPos = Math.Abs(targettingPosition);
+            float timeToReachTarget = maxChaseSpeed / targetDistance;
+            playerX *= timeToReachTarget;
+            targettingPosition *= timeToReachTarget;
+
+            if (((NPC.velocity.X > 0f && playerX > 0f) || (NPC.velocity.X < 0f && playerX < 0f)) && ((NPC.velocity.Y > 0f && targettingPosition > 0f) || (NPC.velocity.Y < 0f && targettingPosition < 0f)))
+            {
+                if (NPC.velocity.X < playerX)
+                    NPC.velocity.X += turnSpeed;
+                else if (NPC.velocity.X > playerX)
+                    NPC.velocity.X -= turnSpeed;
+
+                if (NPC.velocity.Y < targettingPosition)
+                    NPC.velocity.Y += turnSpeed;
+                else if (NPC.velocity.Y > targettingPosition)
+                    NPC.velocity.Y -= turnSpeed;
+            }
+
+            if ((NPC.velocity.X > 0f && playerX > 0f) || (NPC.velocity.X < 0f && playerX < 0f) || (NPC.velocity.Y > 0f && targettingPosition > 0f) || (NPC.velocity.Y < 0f && targettingPosition < 0f))
+            {
+                if (NPC.velocity.X < playerX)
+                    NPC.velocity.X += speed;
+                else if (NPC.velocity.X > playerX)
+                    NPC.velocity.X -= speed;
+
+                if (NPC.velocity.Y < targettingPosition)
+                    NPC.velocity.Y += speed;
+                else if (NPC.velocity.Y > targettingPosition)
+                    NPC.velocity.Y -= speed;
+
+                if ((double)Math.Abs(targettingPosition) < maxChaseSpeed * 0.2 && ((NPC.velocity.X > 0f && playerX < 0f) || (NPC.velocity.X < 0f && playerX > 0f)))
+                {
+                    if (NPC.velocity.Y > 0f)
+                        NPC.velocity.Y += speed * 2f;
+                    else
+                        NPC.velocity.Y -= speed * 2f;
+                }
+
+                if ((double)Math.Abs(playerX) < maxChaseSpeed * 0.2 && ((NPC.velocity.Y > 0f && targettingPosition < 0f) || (NPC.velocity.Y < 0f && targettingPosition > 0f)))
+                {
+                    if (NPC.velocity.X > 0f)
+                        NPC.velocity.X += speed * 2f;
+                    else
+                        NPC.velocity.X -= speed * 2f;
+                }
+            }
+            else if (absolutePlayerX > absoluteTargetPos)
+            {
+                if (NPC.velocity.X < playerX)
+                    NPC.velocity.X += speed * 1.1f;
+                else if (NPC.velocity.X > playerX)
+                    NPC.velocity.X -= speed * 1.1f;
+
+                if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
+                {
+                    if (NPC.velocity.Y > 0f)
+                        NPC.velocity.Y += speed;
+                    else
+                        NPC.velocity.Y -= speed;
+                }
+            }
+            else
+            {
+                if (NPC.velocity.Y < targettingPosition)
+                    NPC.velocity.Y += speed * 1.1f;
+                else if (NPC.velocity.Y > targettingPosition)
+                    NPC.velocity.Y -= speed * 1.1f;
+
+                if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
+                {
+                    if (NPC.velocity.X > 0f)
+                        NPC.velocity.X += speed;
+                    else
+                        NPC.velocity.X -= speed;
+                }
+            }
         }
 
         public override bool CheckActive() => false;
@@ -854,6 +828,11 @@ namespace CalamityMod.NPCs.DesertScourge
                 (Main.player[NPC.target].Center - NPC.Center).SafeNormalize(Vector2.UnitY).ToRotation().AngleTowards(NPC.velocity.ToRotation(), MathHelper.PiOver4) == NPC.velocity.ToRotation() &&
                 NPC.ai[3] == 0f;
 
+            UpdateMouthFrame(NPC, Type, frameHeight, openMouth || aboutToSpitSpread);
+        }
+
+        internal static void UpdateMouthFrame(NPC NPC, int Type, int frameHeight, bool openMouth)
+        {
             bool closeMouthBite = NPC.ai[3] == 1f;
             if (closeMouthBite)
             {
@@ -877,7 +856,7 @@ namespace CalamityMod.NPCs.DesertScourge
                     NPC.frame.Y = 0;
                 }
             }
-            else if (openMouth || aboutToSpitSpread)
+            else if (openMouth)
             {
                 NPC.frameCounter += 1D;
                 if (NPC.frameCounter > 4D)

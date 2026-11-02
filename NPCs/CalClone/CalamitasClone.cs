@@ -589,21 +589,7 @@ namespace CalamityMod.NPCs.CalClone
                                 Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + distance, player.position.Y, velocity, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
                             }
 
-                            if (calamityGlobalNPC.newAI[3] < 300f) // Blasts from above
-                            {
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, projSpeed, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                            }
-                            else if (calamityGlobalNPC.newAI[3] < 600f) // Blasts from left and right
-                            {
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -(projSpeed - 0.5f), 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), projSpeed - 0.5f, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                            }
-                            else // Blasts from above, left, and right
-                            {
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, projSpeed - 1f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -(projSpeed - 1f), 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), projSpeed - 1f, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                            }
+                            FireHellblastPattern(player, calamityGlobalNPC, type, damage, projSpeed);
                         }
                     }
 
@@ -713,21 +699,7 @@ namespace CalamityMod.NPCs.CalClone
                             Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + distance, player.position.Y, velocity, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
                         }
 
-                        if (calamityGlobalNPC.newAI[3] < 300f) // Blasts from above
-                        {
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, projSpeed, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                        }
-                        else if (calamityGlobalNPC.newAI[3] < 600f) // Blasts from left and right
-                        {
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -(projSpeed - 0.5f), 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), projSpeed - 0.5f, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                        }
-                        else // Blasts from above, left, and right
-                        {
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, projSpeed - 1f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -(projSpeed - 1f), 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), projSpeed - 1f, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
-                        }
+                        FireHellblastPattern(player, calamityGlobalNPC, type, damage, projSpeed);
                     }
                 }
             }
@@ -946,6 +918,25 @@ namespace CalamityMod.NPCs.CalClone
             }
         }
 
+        private void FireHellblastPattern(Player player, CalamityGlobalNPC calamityGlobalNPC, int type, int damage, float projSpeed)
+        {
+            if (calamityGlobalNPC.newAI[3] < 300f) // Blasts from above
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, projSpeed, type, damage, 0f, Main.myPlayer, 2f, 0f);
+            }
+            else if (calamityGlobalNPC.newAI[3] < 600f) // Blasts from left and right
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -(projSpeed - 0.5f), 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), projSpeed - 0.5f, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
+            }
+            else // Blasts from above, left, and right
+            {
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + Main.rand.Next(-1000, 1001), player.position.Y - 1000f, 0f, projSpeed - 1f, type, damage, 0f, Main.myPlayer, 2f, 0f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X + 1000f, player.position.Y + Main.rand.Next(-1000, 1001), -(projSpeed - 1f), 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), player.position.X - 1000f, player.position.Y + Main.rand.Next(-1000, 1001), projSpeed - 1f, 0f, type, damage, 0f, Main.myPlayer, 2f, 0f);
+            }
+        }
+
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             SpriteEffects spriteEffects = SpriteEffects.None;
@@ -1114,30 +1105,35 @@ namespace CalamityMod.NPCs.CalClone
                     Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Calamitas5").Type, NPC.scale);
                     Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("Calamitas6").Type, NPC.scale);
                 }
-                NPC.position.X = NPC.position.X + (float)(NPC.width / 2);
-                NPC.position.Y = NPC.position.Y + (float)(NPC.height / 2);
-                NPC.width = 100;
-                NPC.height = 100;
-                NPC.position.X = NPC.position.X - (float)(NPC.width / 2);
-                NPC.position.Y = NPC.position.Y - (float)(NPC.height / 2);
-                for (int i = 0; i < 40; i++)
+                CreateCloneDeathDust(NPC);
+            }
+        }
+
+        internal static void CreateCloneDeathDust(NPC NPC)
+        {
+            NPC.position.X = NPC.position.X + (float)(NPC.width / 2);
+            NPC.position.Y = NPC.position.Y + (float)(NPC.height / 2);
+            NPC.width = 100;
+            NPC.height = 100;
+            NPC.position.X = NPC.position.X - (float)(NPC.width / 2);
+            NPC.position.Y = NPC.position.Y - (float)(NPC.height / 2);
+            for (int i = 0; i < 40; i++)
+            {
+                int brimDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 2f);
+                Main.dust[brimDust].velocity *= 3f;
+                if (Main.rand.NextBool())
                 {
-                    int brimDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 2f);
-                    Main.dust[brimDust].velocity *= 3f;
-                    if (Main.rand.NextBool())
-                    {
-                        Main.dust[brimDust].scale = 0.5f;
-                        Main.dust[brimDust].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
-                    }
+                    Main.dust[brimDust].scale = 0.5f;
+                    Main.dust[brimDust].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
                 }
-                for (int j = 0; j < 70; j++)
-                {
-                    int brimDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 3f);
-                    Main.dust[brimDust2].noGravity = true;
-                    Main.dust[brimDust2].velocity *= 5f;
-                    brimDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 2f);
-                    Main.dust[brimDust2].velocity *= 2f;
-                }
+            }
+            for (int j = 0; j < 70; j++)
+            {
+                int brimDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 3f);
+                Main.dust[brimDust2].noGravity = true;
+                Main.dust[brimDust2].velocity *= 5f;
+                brimDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 2f);
+                Main.dust[brimDust2].velocity *= 2f;
             }
         }
 

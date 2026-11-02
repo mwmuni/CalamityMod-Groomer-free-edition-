@@ -488,28 +488,12 @@ namespace CalamityMod.NPCs.Astral
                 if (!idle_impulseWalk)
                 {
                     NPC.frame.X = 0;
-                    if (NPC.frameCounter > 9)
-                    {
-                        NPC.frameCounter = 0;
-                        NPC.frame.Y += height;
-                        if (NPC.frame.Y >= sheetHeight)
-                        {
-                            NPC.frame.Y = 0;
-                        }
-                    }
+                    AdvanceLoopingFrame(height, 9);
                 }
                 else
                 {
                     NPC.frame.X = width;
-                    if (NPC.frameCounter > 8)
-                    {
-                        NPC.frameCounter = 0;
-                        NPC.frame.Y += height;
-                        if (NPC.frame.Y >= sheetHeight)
-                        {
-                            NPC.frame.Y = 0;
-                        }
-                    }
+                    AdvanceLoopingFrame(height, 8);
                 }
             }
             else if (swinging)
@@ -552,15 +536,7 @@ namespace CalamityMod.NPCs.Astral
                 //if walking
                 NPC.frameCounter++;
                 NPC.frame.X = width;
-                if (NPC.frameCounter > 7)
-                {
-                    NPC.frameCounter = 0;
-                    NPC.frame.Y += height;
-                    if (NPC.frame.Y >= sheetHeight)
-                    {
-                        NPC.frame.Y = 0;
-                    }
-                }
+                AdvanceLoopingFrame(height, 7);
             }
 
             //if we're in the air
@@ -568,6 +544,19 @@ namespace CalamityMod.NPCs.Astral
             {
                 NPC.frame.X = width;
                 NPC.frame.Y = height * 4; //5th frame down
+            }
+        }
+
+        private void AdvanceLoopingFrame(int height, int frameDelay)
+        {
+            if (NPC.frameCounter > frameDelay)
+            {
+                NPC.frameCounter = 0;
+                NPC.frame.Y += height;
+                if (NPC.frame.Y >= sheetHeight)
+                {
+                    NPC.frame.Y = 0;
+                }
             }
         }
 

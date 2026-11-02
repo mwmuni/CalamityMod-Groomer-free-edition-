@@ -20,6 +20,55 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         public static int LightningDamage = 30; // 120
         public static int DoomDamage = 45; // 180 (Also fixes Master Mode scaling)
 
+        private void CollectClones(List<int> clones)
+        {
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                if (Main.npc[i].active && Main.npc[i].type == NPCID.CultistBossClone && Main.npc[i].ai[3] == NPC.whoAmI)
+                    clones.Add(i);
+            }
+        }
+
+        private void FireCloneFireball(int cloneIndex, Player player, ref Vector2 playerDirection, float fireballSpeed, int damage)
+        {
+            NPC clone = Main.npc[cloneIndex];
+            Vector2 center = clone.Center;
+
+            int faceDirection = Math.Sign(player.Center.X - center.X);
+            if (faceDirection != 0)
+                clone.direction = clone.spriteDirection = faceDirection;
+
+            playerDirection = Vector2.Normalize(player.Center - center);
+            if (playerDirection.HasNaNs())
+                playerDirection = new Vector2(NPC.direction, 0f);
+
+            Vector2 shadowFireballDirection = center + new Vector2(NPC.direction * 30, 12f);
+            Vector2 shadowFireballVelocity = playerDirection * (fireballSpeed + (float)Main.rand.NextDouble());
+            shadowFireballVelocity = shadowFireballVelocity.RotatedByRandom(Math.PI / 6D);
+            Projectile.NewProjectile(NPC.GetSource_FromAI(), shadowFireballDirection, shadowFireballVelocity, ProjectileID.CultistBossFireBallClone, damage, 0f, Main.myPlayer);
+        }
+
+        private void FaceRitualCenter(Vector2 ritualCenter)
+        {
+            Vector2 ritualCenterDirection = ritualCenter;
+            ritualCenterDirection -= NPC.Center;
+            if (ritualCenterDirection == Vector2.Zero)
+                ritualCenterDirection = -Vector2.UnitY;
+
+            ritualCenterDirection.Normalize();
+
+            if (Math.Abs(ritualCenterDirection.Y) < 0.77f)
+                NPC.localAI[2] = 11f;
+            else if (ritualCenterDirection.Y < 0f)
+                NPC.localAI[2] = 12f;
+            else
+                NPC.localAI[2] = 10f;
+
+            int ritualFaceDirection = Math.Sign(ritualCenterDirection.X);
+            if (ritualFaceDirection != 0)
+                NPC.direction = NPC.spriteDirection = ritualFaceDirection;
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -351,11 +400,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             List<int> list2 = new List<int>();
                             int cloneAmt = 0;
                             list2.Add(NPC.whoAmI);
-                            for (int k = 0; k < Main.maxNPCs; k++)
-                            {
-                                if (Main.npc[k].active && Main.npc[k].type == NPCID.CultistBossClone && Main.npc[k].ai[3] == NPC.whoAmI)
-                                    list2.Add(k);
-                            }
+                            CollectClones(list2);
 
                             // Move self and clones to location
                             bool cloneAmtIsEven = list2.Count % 2 == 0;
@@ -459,29 +504,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         List<int> list3 = new List<int>();
-                        for (int l = 0; l < Main.maxNPCs; l++)
-                        {
-                            if (Main.npc[l].active && Main.npc[l].type == NPCID.CultistBossClone && Main.npc[l].ai[3] == NPC.whoAmI)
-                                list3.Add(l);
-                        }
+                        CollectClones(list3);
 
                         foreach (int current3 in list3)
                         {
-                            NPC nPC3 = Main.npc[current3];
-                            Vector2 center3 = nPC3.Center;
-
-                            int cloneFacePlayerDirection = Math.Sign(player.Center.X - center3.X);
-                            if (cloneFacePlayerDirection != 0)
-                                nPC3.direction = nPC3.spriteDirection = cloneFacePlayerDirection;
-
-                            vec = Vector2.Normalize(player.Center - center3);
-                            if (vec.HasNaNs())
-                                vec = new Vector2(NPC.direction, 0f);
-
-                            Vector2 shadowFireballDirection = center3 + new Vector2(NPC.direction * 30, 12f);
-                            Vector2 shadowFireballVelocity = vec * (fireballSpeed + (float)Main.rand.NextDouble());
-                            shadowFireballVelocity = shadowFireballVelocity.RotatedByRandom(Math.PI / 6D);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), shadowFireballDirection, shadowFireballVelocity, ProjectileID.CultistBossFireBallClone, fireballDamage, 0f, Main.myPlayer);
+                            FireCloneFireball(current3, player, ref vec, fireballSpeed, fireballDamage);
                         }
                     }
 
@@ -523,31 +550,13 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if ((int)(NPC.ai[1] - 4f) / fireballFireRate == 2)
                     {
                         List<int> list4 = new List<int>();
-                        for (int i = 0; i < Main.maxNPCs; i++)
-                        {
-                            if (Main.npc[i].active && Main.npc[i].type == NPCID.CultistBossClone && Main.npc[i].ai[3] == NPC.whoAmI)
-                                list4.Add(i);
-                        }
+                        CollectClones(list4);
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
                             foreach (int current4 in list4)
                             {
-                                NPC nPC4 = Main.npc[current4];
-                                Vector2 center4 = nPC4.Center;
-
-                                int cloneFireballFaceDirection = Math.Sign(player.Center.X - center4.X);
-                                if (cloneFireballFaceDirection != 0)
-                                    nPC4.direction = nPC4.spriteDirection = cloneFireballFaceDirection;
-
-                                playerDirection = Vector2.Normalize(player.Center - center4);
-                                if (playerDirection.HasNaNs())
-                                    playerDirection = new Vector2(NPC.direction, 0f);
-
-                                Vector2 shadowFireballDirection = center4 + new Vector2(NPC.direction * 30, 12f);
-                                Vector2 shadowFireballVelocity = playerDirection * (fireballSpeed + (float)Main.rand.NextDouble());
-                                shadowFireballVelocity = shadowFireballVelocity.RotatedByRandom(Math.PI / 6D);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), shadowFireballDirection, shadowFireballVelocity, ProjectileID.CultistBossFireBallClone, CloneFireballDamage, 0f, Main.myPlayer);
+                                FireCloneFireball(current4, player, ref playerDirection, fireballSpeed, CloneFireballDamage);
                             }
                         }
                     }
@@ -592,11 +601,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if ((NPC.ai[1] == 20f & isCultist) && Main.netMode != NetmodeID.MultiplayerClient)
                 {
                     List<int> list5 = new List<int>();
-                    for (int j = 0; j < Main.maxNPCs; j++)
-                    {
-                        if (Main.npc[j].active && Main.npc[j].type == NPCID.CultistBossClone && Main.npc[j].ai[3] == NPC.whoAmI)
-                            list5.Add(j);
-                    }
+                    CollectClones(list5);
 
                     foreach (int current5 in list5)
                     {
@@ -659,11 +664,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         Vector2 spinningpoint = new Vector2(180f, 0f);
 
                         List<int> list6 = new List<int>();
-                        for (int k = 0; k < Main.maxNPCs; k++)
-                        {
-                            if (Main.npc[k].active && Main.npc[k].type == NPCID.CultistBossClone && Main.npc[k].ai[3] == NPC.whoAmI)
-                                list6.Add(k);
-                        }
+                        CollectClones(list6);
                         int maxClonesSpawned = 2;
                         if (death)
                             maxClonesSpawned += 2;
@@ -729,43 +730,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                     if (isCultist)
                     {
-                        Vector2 ritualCenterDirection = Main.projectile[(int)NPC.ai[2]].Center;
-                        ritualCenterDirection -= NPC.Center;
-                        if (ritualCenterDirection == Vector2.Zero)
-                            ritualCenterDirection = -Vector2.UnitY;
-
-                        ritualCenterDirection.Normalize();
-
-                        if (Math.Abs(ritualCenterDirection.Y) < 0.77f)
-                            NPC.localAI[2] = 11f;
-                        else if (ritualCenterDirection.Y < 0f)
-                            NPC.localAI[2] = 12f;
-                        else
-                            NPC.localAI[2] = 10f;
-
-                        int ritualFaceDirection = Math.Sign(ritualCenterDirection.X);
-                        if (ritualFaceDirection != 0)
-                            NPC.direction = NPC.spriteDirection = ritualFaceDirection;
+                        FaceRitualCenter(Main.projectile[(int)NPC.ai[2]].Center);
                     }
                     else
                     {
-                        Vector2 ritualCenterFailDirection = Main.projectile[(int)Main.npc[(int)NPC.ai[3]].ai[2]].Center;
-                        ritualCenterFailDirection -= NPC.Center;
-                        if (ritualCenterFailDirection == Vector2.Zero)
-                            ritualCenterFailDirection = -Vector2.UnitY;
-
-                        ritualCenterFailDirection.Normalize();
-
-                        if (Math.Abs(ritualCenterFailDirection.Y) < 0.77f)
-                            NPC.localAI[2] = 11f;
-                        else if (ritualCenterFailDirection.Y < 0f)
-                            NPC.localAI[2] = 12f;
-                        else
-                            NPC.localAI[2] = 10f;
-
-                        int ritualFailFaceDirection = Math.Sign(ritualCenterFailDirection.X);
-                        if (ritualFailFaceDirection != 0)
-                            NPC.direction = NPC.spriteDirection = ritualFailFaceDirection;
+                        FaceRitualCenter(Main.projectile[(int)Main.npc[(int)NPC.ai[3]].ai[2]].Center);
                     }
                 }
                 else if (NPC.ai[1] >= 90f && NPC.ai[1] < 120f)
@@ -780,43 +749,11 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                     if (isCultist)
                     {
-                        Vector2 ritualTimeAlmostUpCenterDirection = Main.projectile[(int)NPC.ai[2]].Center;
-                        ritualTimeAlmostUpCenterDirection -= NPC.Center;
-                        if (ritualTimeAlmostUpCenterDirection == Vector2.Zero)
-                            ritualTimeAlmostUpCenterDirection = -Vector2.UnitY;
-
-                        ritualTimeAlmostUpCenterDirection.Normalize();
-
-                        if (Math.Abs(ritualTimeAlmostUpCenterDirection.Y) < 0.77f)
-                            NPC.localAI[2] = 11f;
-                        else if (ritualTimeAlmostUpCenterDirection.Y < 0f)
-                            NPC.localAI[2] = 12f;
-                        else
-                            NPC.localAI[2] = 10f;
-
-                        int ritualTimeAlmostUpFaceDirection = Math.Sign(ritualTimeAlmostUpCenterDirection.X);
-                        if (ritualTimeAlmostUpFaceDirection != 0)
-                            NPC.direction = NPC.spriteDirection = ritualTimeAlmostUpFaceDirection;
+                        FaceRitualCenter(Main.projectile[(int)NPC.ai[2]].Center);
                     }
                     else
                     {
-                        Vector2 ritualTimeUpCenterDirection = Main.projectile[(int)Main.npc[(int)NPC.ai[3]].ai[2]].Center;
-                        ritualTimeUpCenterDirection -= NPC.Center;
-                        if (ritualTimeUpCenterDirection == Vector2.Zero)
-                            ritualTimeUpCenterDirection = -Vector2.UnitY;
-
-                        ritualTimeUpCenterDirection.Normalize();
-
-                        if (Math.Abs(ritualTimeUpCenterDirection.Y) < 0.77f)
-                            NPC.localAI[2] = 11f;
-                        else if (ritualTimeUpCenterDirection.Y < 0f)
-                            NPC.localAI[2] = 12f;
-                        else
-                            NPC.localAI[2] = 10f;
-
-                        int ritualTimeUpFaceDirection = Math.Sign(ritualTimeUpCenterDirection.X);
-                        if (ritualTimeUpFaceDirection != 0)
-                            NPC.direction = NPC.spriteDirection = ritualTimeUpFaceDirection;
+                        FaceRitualCenter(Main.projectile[(int)Main.npc[(int)NPC.ai[3]].ai[2]].Center);
                     }
                 }
 
@@ -866,11 +803,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if ((int)(NPC.ai[1] - 4f) / ancientLightSpawnRate == 2)
                     {
                         List<int> list7 = new List<int>();
-                        for (int i = 0; i < Main.maxNPCs; i++)
-                        {
-                            if (Main.npc[i].active && Main.npc[i].type == NPCID.CultistBossClone && Main.npc[i].ai[3] == NPC.whoAmI)
-                                list7.Add(i);
-                        }
+                        CollectClones(list7);
 
                         foreach (int current6 in list7)
                         {
@@ -930,11 +863,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if ((NPC.ai[1] >= 4f & isCultist) && (int)(NPC.ai[1] - 4f) % 20f == 0f && NPC.ai[1] <= 64)
                 {
                     List<int> list8 = new List<int>();
-                    for (int k = 0; k < Main.maxNPCs; k++)
-                    {
-                        if (Main.npc[k].active && Main.npc[k].type == NPCID.CultistBossClone && Main.npc[k].ai[3] == NPC.whoAmI)
-                            list8.Add(k);
-                    }
+                    CollectClones(list8);
 
                     int ancientDoomAmount = 2;
                     if (lifeRatio < 0.75f && death)

@@ -20,6 +20,27 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         public static int LaserDamage = 29; // 116 (modified to be always at maximum Expert damage and does not scale)
         public static int InfernoBoltDamage = 35; // 140
 
+        private static void CheckTempleWall(NPC npc, ref bool enrage, ref bool turboEnrage)
+        {
+            int targetTilePosX = (int)Main.player[npc.target].Center.X / 16;
+            int targetTilePosY = (int)Main.player[npc.target].Center.Y / 16;
+
+            Tile tile = Framing.GetTileSafely(targetTilePosX, targetTilePosY);
+            if (tile.WallType == WallID.LihzahrdBrickUnsafe)
+                enrage = false;
+            else
+                turboEnrage = Main.getGoodWorld;
+        }
+
+        private static void ConfigureLaser(NPC npc, int projectileIndex, bool enrage, bool turboEnrage)
+        {
+            Main.projectile[projectileIndex].timeLeft = enrage ? 600 : 300;
+            if (turboEnrage)
+                Main.projectile[projectileIndex].extraUpdates += 1;
+
+            npc.netUpdate = true;
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -59,14 +80,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             bool turboEnrage = false;
             if (Main.player[NPC.target].Center.Y > Main.worldSurface * 16.0)
             {
-                int targetTilePosX = (int)Main.player[NPC.target].Center.X / 16;
-                int targetTilePosY = (int)Main.player[NPC.target].Center.Y / 16;
-
-                Tile tile = Framing.GetTileSafely(targetTilePosX, targetTilePosY);
-                if (tile.WallType == WallID.LihzahrdBrickUnsafe)
-                    enrage = false;
-                else
-                    turboEnrage = Main.getGoodWorld;
+                CheckTempleWall(NPC, ref enrage, ref turboEnrage);
             }
             else
                 turboEnrage = Main.getGoodWorld;
@@ -838,14 +852,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 bool turboEnrage = false;
                 if (Main.player[NPC.target].Center.Y > Main.worldSurface * 16.0 && !BossRushEvent.BossRushActive)
                 {
-                    int targetTilePosX = (int)Main.player[NPC.target].Center.X / 16;
-                    int targetTilePosY = (int)Main.player[NPC.target].Center.Y / 16;
-
-                    Tile tile = Framing.GetTileSafely(targetTilePosX, targetTilePosY);
-                    if (tile.WallType == WallID.LihzahrdBrickUnsafe)
-                        enrage = false;
-                    else
-                        turboEnrage = Main.getGoodWorld;
+                    CheckTempleWall(NPC, ref enrage, ref turboEnrage);
                 }
                 else
                     turboEnrage = Main.getGoodWorld;
@@ -1002,11 +1009,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                                 if (Main.netMode != NetmodeID.MultiplayerClient)
                                 {
                                     int bodyLaser = Projectile.NewProjectile(NPC.GetSource_FromAI(), projectileFirePos + laserVelocity.SafeNormalize(Vector2.UnitY) * 40f, laserVelocity, projType, dmg, 0f, Main.myPlayer);
-                                    Main.projectile[bodyLaser].timeLeft = enrage ? 600 : 300;
-                                    if (turboEnrage)
-                                        Main.projectile[bodyLaser].extraUpdates += 1;
-
-                                    NPC.netUpdate = true;
+                                    ConfigureLaser(NPC, bodyLaser, enrage, turboEnrage);
                                 }
                             }
                         }
@@ -1031,11 +1034,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
                                 int extraLasers = Projectile.NewProjectile(NPC.GetSource_FromAI(), projectileFirePos + laserVelocity.SafeNormalize(Vector2.UnitY) * 40f, laserVelocity, projType, dmg, 0f, Main.myPlayer);
-                                Main.projectile[extraLasers].timeLeft = enrage ? 600 : 300;
-                                if (turboEnrage)
-                                    Main.projectile[extraLasers].extraUpdates += 1;
-
-                                NPC.netUpdate = true;
+                                ConfigureLaser(NPC, extraLasers, enrage, turboEnrage);
                             }
                         }
                     }
@@ -1065,11 +1064,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
                             int extraLasers = Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnLocation + laserVelocity.SafeNormalize(Vector2.UnitY) * 40f, laserVelocity, ProjectileID.EyeBeam, LaserDamage, 0f, Main.myPlayer, 0f, 1f);
-                            Main.projectile[extraLasers].timeLeft = enrage ? 600 : 300;
-                            if (turboEnrage)
-                                Main.projectile[extraLasers].extraUpdates += 1;
-
-                            NPC.netUpdate = true;
+                            ConfigureLaser(NPC, extraLasers, enrage, turboEnrage);
                         }
                     }
 
@@ -1153,14 +1148,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 bool turboEnrage = false;
                 if (Main.player[NPC.target].Center.Y > Main.worldSurface * 16.0 && !BossRushEvent.BossRushActive)
                 {
-                    int targetTilePosX = (int)Main.player[NPC.target].Center.X / 16;
-                    int targetTilePosY = (int)Main.player[NPC.target].Center.Y / 16;
-
-                    Tile tile = Framing.GetTileSafely(targetTilePosX, targetTilePosY);
-                    if (tile.WallType == WallID.LihzahrdBrickUnsafe)
-                        enrage = false;
-                    else
-                        turboEnrage = Main.getGoodWorld;
+                    CheckTempleWall(NPC, ref enrage, ref turboEnrage);
                 }
                 else
                     turboEnrage = Main.getGoodWorld;
@@ -1305,11 +1293,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
                                 int spreadLasers = Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnLocation + laserVelocity.SafeNormalize(Vector2.UnitY) * 40f, laserVelocity, ProjectileID.EyeBeam, LaserDamage, 0f, Main.myPlayer, 0f, 1f);
-                                Main.projectile[spreadLasers].timeLeft = enrage ? 600 : 300;
-                                if (turboEnrage)
-                                    Main.projectile[spreadLasers].extraUpdates += 1;
-
-                                NPC.netUpdate = true;
+                                ConfigureLaser(NPC, spreadLasers, enrage, turboEnrage);
                             }
                         }
                     }

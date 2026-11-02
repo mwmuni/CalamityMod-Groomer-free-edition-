@@ -4358,18 +4358,7 @@ namespace CalamityMod.NPCs
                     }
                     foreach (int enemy in PossibleEnemies.Select(enemyType => enemyType.Key))
                     {
-                        bool canSpawn = true;
-                        switch (PossibleEnemies[enemy].SpawnRequirement)
-                        {
-                            case AcidRainSpawnRequirement.Anywhere:
-                                break;
-                            case AcidRainSpawnRequirement.Land:
-                                canSpawn = !spawnInfo.Water;
-                                break;
-                            case AcidRainSpawnRequirement.Water:
-                                canSpawn = spawnInfo.Water;
-                                break;
-                        }
+                        bool canSpawn = CanAcidRainEnemySpawn(PossibleEnemies[enemy].SpawnRequirement, spawnInfo);
                         if (canSpawn)
                         {
                             if (!pool.ContainsKey(enemy))
@@ -4382,18 +4371,7 @@ namespace CalamityMod.NPCs
                     {
                         foreach (int miniboss in PossibleMinibosses.Select(miniboss => miniboss.Key).ToList())
                         {
-                            bool canSpawn = true;
-                            switch (PossibleMinibosses[miniboss].SpawnRequirement)
-                            {
-                                case AcidRainSpawnRequirement.Anywhere:
-                                    break;
-                                case AcidRainSpawnRequirement.Land:
-                                    canSpawn = !spawnInfo.Water;
-                                    break;
-                                case AcidRainSpawnRequirement.Water:
-                                    canSpawn = spawnInfo.Water;
-                                    break;
-                            }
+                            bool canSpawn = CanAcidRainEnemySpawn(PossibleMinibosses[miniboss].SpawnRequirement, spawnInfo);
                             if (canSpawn)
                             {
                                 pool.Add(miniboss, PossibleMinibosses[miniboss].SpawnRate);
@@ -5059,6 +5037,47 @@ namespace CalamityMod.NPCs
             return shouldDrawBool;
         }
 
+        private static bool CanAcidRainEnemySpawn(AcidRainSpawnRequirement requirement, NPCSpawnInfo spawnInfo)
+        {
+            bool canSpawn = true;
+            switch (requirement)
+            {
+                case AcidRainSpawnRequirement.Anywhere:
+                    break;
+                case AcidRainSpawnRequirement.Land:
+                    canSpawn = !spawnInfo.Water;
+                    break;
+                case AcidRainSpawnRequirement.Water:
+                    canSpawn = spawnInfo.Water;
+                    break;
+            }
+            return canSpawn;
+        }
+
+        private static void BounceOffTiles(NPC npc, float collisionDamp, float verticalBounceSpeed)
+        {
+            if (npc.collideX)
+            {
+                npc.netUpdate = true;
+                npc.velocity.X = npc.oldVelocity.X * -collisionDamp;
+
+                if (npc.direction == -1 && npc.velocity.X > 0f && npc.velocity.X < 2f)
+                    npc.velocity.X = 2f;
+                if (npc.direction == 1 && npc.velocity.X < 0f && npc.velocity.X > -2f)
+                    npc.velocity.X = -2f;
+            }
+            if (npc.collideY)
+            {
+                npc.netUpdate = true;
+                npc.velocity.Y = npc.oldVelocity.Y * -collisionDamp;
+
+                if (npc.velocity.Y > 0f && npc.velocity.Y < 1.5f)
+                    npc.velocity.Y = verticalBounceSpeed;
+                if (npc.velocity.Y < 0f && npc.velocity.Y > -1.5f)
+                    npc.velocity.Y = -verticalBounceSpeed;
+            }
+        }
+
         public static Color buffColor(Color newColor, float R, float G, float B, float A)
         {
             newColor.R = (byte)((float)newColor.R * R);
@@ -5516,26 +5535,7 @@ namespace CalamityMod.NPCs
 
             // Tile collision
             float collisionDamp = 0.7f;
-            if (npc.collideX)
-            {
-                npc.netUpdate = true;
-                npc.velocity.X = npc.oldVelocity.X * -collisionDamp;
-
-                if (npc.direction == -1 && npc.velocity.X > 0f && npc.velocity.X < 2f)
-                    npc.velocity.X = 2f;
-                if (npc.direction == 1 && npc.velocity.X < 0f && npc.velocity.X > -2f)
-                    npc.velocity.X = -2f;
-            }
-            if (npc.collideY)
-            {
-                npc.netUpdate = true;
-                npc.velocity.Y = npc.oldVelocity.Y * -collisionDamp;
-
-                if (npc.velocity.Y > 0f && npc.velocity.Y < 1.5f)
-                    npc.velocity.Y = 1.5f;
-                if (npc.velocity.Y < 0f && npc.velocity.Y > -1.5f)
-                    npc.velocity.Y = -1.5f;
-            }
+            BounceOffTiles(npc, collisionDamp, 1.5f);
 
             // Water collision
             if (npc.wet)
@@ -5648,26 +5648,7 @@ namespace CalamityMod.NPCs
 
             // DAMP COLLISIONS OFF OF WALLS
             float collisionDamp = 0.5f;
-            if (npc.collideX)
-            {
-                npc.netUpdate = true;
-                npc.velocity.X = npc.oldVelocity.X * -collisionDamp;
-
-                if (npc.direction == -1 && npc.velocity.X > 0f && npc.velocity.X < 2f)
-                    npc.velocity.X = 2f;
-                if (npc.direction == 1 && npc.velocity.X < 0f && npc.velocity.X > -2f)
-                    npc.velocity.X = -2f;
-            }
-            if (npc.collideY)
-            {
-                npc.netUpdate = true;
-                npc.velocity.Y = npc.oldVelocity.Y * -collisionDamp;
-
-                if (npc.velocity.Y > 0f && npc.velocity.Y < 1.5f)
-                    npc.velocity.Y = 2f;
-                if (npc.velocity.Y < 0f && npc.velocity.Y > -1.5f)
-                    npc.velocity.Y = -2f;
-            }
+            BounceOffTiles(npc, collisionDamp, 2f);
 
             if (((npc.velocity.X > 0f && npc.oldVelocity.X < 0f) || (npc.velocity.X < 0f && npc.oldVelocity.X > 0f) || (npc.velocity.Y > 0f && npc.oldVelocity.Y < 0f) || (npc.velocity.Y < 0f && npc.oldVelocity.Y > 0f)) && !npc.justHit)
             {

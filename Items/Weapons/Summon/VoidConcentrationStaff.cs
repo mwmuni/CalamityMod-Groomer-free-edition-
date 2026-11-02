@@ -8,6 +8,7 @@ using CalamityMod.Graphics.Primitives;
 using CalamityMod.Items.Weapons.Summon;
 using CalamityMod.NPCs.CeaselessVoid;
 using CalamityMod.Particles;
+using CalamityMod.Projectiles;
 using CalamityMod.Projectiles.Magic;
 using CalamityMod.Projectiles.Summon;
 using CalamityMod.Rarities;
@@ -322,10 +323,11 @@ namespace CalamityMod.Projectiles.Summon
             }
         }
     }
-    public class VoidConcentrationBeam : ModProjectile, ILocalizedModType
+    public class VoidConcentrationBeam : BaseFireTrailProjectile, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Summon";
         public override string Texture => "CalamityMod/Projectiles/InvisibleProj";
+        protected override float FireBodyWidth => 38f;
 
         public override void SetStaticDefaults()
         {
@@ -420,24 +422,7 @@ namespace CalamityMod.Projectiles.Summon
             return false;
         }
 
-        public float FireWidthFunction(float completion, Vector2 pos)
-        {
-            float width;
-            float maxBodyWidth = 38f * Projectile.scale;
-            float curveRatio = 0.2f;
-            var positions = Projectile.oldPos.ToList();
-            positions.RemoveAll(x => x == Vector2.Zero);
-            // Crop the tip of the trail into a conic shape.
-            if (completion < curveRatio)
-                width = MathF.Pow(completion / curveRatio, 0.5f) * maxBodyWidth;
-            else
-                width = Utils.Remap(completion, curveRatio, 1f, maxBodyWidth, 0f);
-
-            // Pulse inwards and outwards over time.
-            float pulseInterpolant = MathF.Cos(MathHelper.Pi * completion - Main.GlobalTimeWrappedHourly * 20f) * 0.5f + 0.5f;
-            float additionalPulseWidth = MathHelper.Lerp(0f, 12f, pulseInterpolant);
-            return (width + additionalPulseWidth) * positions.Count() / (float)ProjectileID.Sets.TrailCacheLength[Type];
-        }
+        public new float FireWidthFunction(float completion, Vector2 pos) => base.FireWidthFunction(completion, pos);
 
         public Color FireColorFunction(float completion, Vector2 pos)
         {
@@ -446,20 +431,7 @@ namespace CalamityMod.Projectiles.Summon
             return Color.Lerp(mainColor, endColor, completion) * Projectile.Opacity;
         }
 
-        public float FireCoreWidthFunction(float completion, Vector2 pos)
-        {
-            float width;
-            float maxBodyWidth = Projectile.scale * 16;
-            float curveRatio = 0.25f;
-            var positions = Projectile.oldPos.ToList();
-            positions.RemoveAll(x => x == Vector2.Zero);
-
-            if (completion < curveRatio)
-                width = MathF.Sin(completion / curveRatio * MathHelper.PiOver2) * maxBodyWidth + curveRatio;
-            else
-                width = Utils.Remap(completion, curveRatio, 1f, maxBodyWidth, 0f);
-            return width * positions.Count() / (float)ProjectileID.Sets.TrailCacheLength[Type];
-        }
+        public new float FireCoreWidthFunction(float completion, Vector2 pos) => base.FireCoreWidthFunction(completion, pos);
 
         public Color FireCoreColorFunction(float completion, Vector2 pos)
         {

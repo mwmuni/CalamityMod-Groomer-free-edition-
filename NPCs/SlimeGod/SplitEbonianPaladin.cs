@@ -246,24 +246,7 @@ namespace CalamityMod.NPCs.SlimeGod
                 }
                 else
                 {
-                    // Set damage
-                    NPC.damage = setDamage;
-
-                    NPC.velocity.X *= 0.99f;
-                    if (NPC.direction < 0 && NPC.velocity.X > -1f)
-                        NPC.velocity.X = -1f;
-                    if (NPC.direction > 0 && NPC.velocity.X < 1f)
-                        NPC.velocity.X = 1f;
-
-                    if (!player.dead)
-                    {
-                        if (NPC.velocity.Y > 0f && NPC.Bottom.Y > player.Top.Y)
-                            NPC.noTileCollide = false;
-                        else if (Collision.CanHit(NPC.position, NPC.width, NPC.height, player.Center, 1, 1) && !Collision.SolidCollision(NPC.position, NPC.width, NPC.height))
-                            NPC.noTileCollide = false;
-                        else
-                            NPC.noTileCollide = true;
-                    }
+                    SlimeGodPaladinBehavior.UpdateAirborneJump(NPC, player, setDamage);
                 }
 
                 NPC.ai[2] += 1f;
@@ -450,20 +433,7 @@ namespace CalamityMod.NPCs.SlimeGod
                             // Fire slime balls directly at players with a max of 2
                             if (enraged && expertMode)
                             {
-                                List<int> targets = new List<int>();
-                                foreach (Player plr in Main.ActivePlayers)
-                                {
-                                    if (!plr.dead)
-                                        targets.Add(plr.whoAmI);
-
-                                    if (targets.Count > 1)
-                                        break;
-                                }
-                                foreach (int t in targets)
-                                {
-                                    Vector2 projFireDirection = Vector2.Normalize(Main.player[t].Center - NPC.Center) * projectileVelocity;
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projFireDirection) * 30f * NPC.scale, projFireDirection, type, damage, 0f, Main.myPlayer);
-                                }
+                                SlimeGodPaladinBehavior.FireAtPlayers(NPC, projectileVelocity, type, damage);
                             }
                         }
 
@@ -502,24 +472,7 @@ namespace CalamityMod.NPCs.SlimeGod
 
                         NPC.ai[1] = 0f;
 
-                        NPC.velocity.Y -= 6f;
-                        if (player.position.Y + player.height < NPC.Center.Y)
-                            NPC.velocity.Y -= 1.2f;
-                        if (player.position.Y + player.height < NPC.Center.Y - 40f)
-                            NPC.velocity.Y -= 1.4f;
-                        if (player.position.Y + player.height < NPC.Center.Y - 80f)
-                            NPC.velocity.Y -= 1.7f;
-                        if (player.position.Y + player.height < NPC.Center.Y - 120f)
-                            NPC.velocity.Y -= 2f;
-                        if (player.position.Y + player.height < NPC.Center.Y - 160f)
-                            NPC.velocity.Y -= 2.2f;
-                        if (player.position.Y + player.height < NPC.Center.Y - 200f)
-                            NPC.velocity.Y -= 2.4f;
-                        if (!Collision.CanHit(NPC.Center, 1, 1, player.Center, 1, 1))
-                            NPC.velocity.Y -= 2f;
-
-                        NPC.velocity.X = ((death ? 11f : revenge ? 10f : expertMode ? 9f : 8f) + distanceSpeedBoost) * NPC.direction;
-                        NPC.ai[2] += 1f;
+                        SlimeGodPaladinBehavior.StartEbonianHop(NPC, player, death, revenge, expertMode, distanceSpeedBoost);
                     }
                     else
                         NPC.aiAction = 1;
@@ -553,124 +506,26 @@ namespace CalamityMod.NPCs.SlimeGod
             // Despawn
             else if (NPC.ai[0] == 4f)
             {
-                // Avoid cheap bullshit
-                NPC.damage = 0;
-
-                NPC.noTileCollide = true;
-                NPC.Opacity -= 0.03f;
-
-                if (NPC.timeLeft > 10)
-                    NPC.timeLeft = 10;
-
-                if (NPC.Opacity < 0f)
-                    NPC.Opacity = 0f;
-
-                NPC.velocity.X *= 0.98f;
+                SlimeGodPaladinBehavior.Despawn(NPC);
             }
 
             else if (NPC.ai[0] == 5f)
             {
-                // Set damage
-                NPC.damage = setDamage;
-
-                if (NPC.velocity.X > 0f)
-                    NPC.direction = 1;
-                else
-                    NPC.direction = -1;
-
-                NPC.spriteDirection = NPC.direction;
-                NPC.noTileCollide = true;
-                NPC.noGravity = true;
-                NPC.knockBackResist = 0f;
-                Vector2 distanceFromTarget = player.Center - NPC.Center;
-                distanceFromTarget.Y -= 16f;
-                if (Main.netMode != NetmodeID.MultiplayerClient && distanceFromTarget.Length() < 500f && !Collision.SolidCollision(NPC.position, NPC.width, NPC.height) &&
-                    Collision.CanHit(NPC.position, NPC.width, NPC.height, player.position, player.width, player.height))
-                {
-                    // Avoid cheap bullshit
-                    NPC.damage = 0;
-
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.ai[2] = 0f;
-                    NPC.netUpdate = true;
-                }
-
-                if (distanceFromTarget.Length() > 12f)
-                {
-                    distanceFromTarget.Normalize();
-                    distanceFromTarget *= 12f;
-                }
-
-                NPC.velocity = (NPC.velocity * 4f + distanceFromTarget) / 5f;
+                SlimeGodPaladinBehavior.CatchUpToTarget(NPC, player, setDamage, false);
             }
             else if (NPC.ai[0] == 6f)
             {
-                // Avoid cheap bullshit
-                NPC.damage = 0;
-
-                NPC.aiAction = 1;
-                NPC.ai[1] += 1f;
-                float teleportTime = death ? 30f : 40f;
-                scale = MathHelper.Clamp((teleportTime - NPC.ai[1]) / teleportTime, 0f, 1f);
-                scale = 0.5f + scale * 0.5f;
-                if (NPC.ai[1] >= teleportTime && Main.netMode != NetmodeID.MultiplayerClient)
-                {
-                    NPC.Bottom = new Vector2(NPC.localAI[0], NPC.localAI[3]);
-                    NPC.ai[0] = 7f;
-                    NPC.ai[1] = 0f;
-                    NPC.netUpdate = true;
-                }
-
-                if (Main.netMode == NetmodeID.MultiplayerClient && NPC.ai[1] >= teleportTime * 2f)
-                {
-                    NPC.ai[0] = 7f;
-                    NPC.ai[1] = 0f;
-                }
+                SlimeGodPaladinBehavior.FadeOutForTeleport(NPC, death, ref scale, 7f);
 
                 // Emit teleport dust
-                Color dustColor = Color.Lavender;
-                dustColor.A = 150;
-                for (int i = 0; i < 10; i++)
-                {
-                    int corruptDust = Dust.NewDust(NPC.position + Vector2.UnitX * -20f, NPC.width + 40, NPC.height, DustID.TintableDust, NPC.velocity.X, NPC.velocity.Y, NPC.alpha, dustColor, 2f);
-                    Main.dust[corruptDust].noGravity = true;
-                    Main.dust[corruptDust].velocity *= 0.5f;
-                }
+                SlimeGodPaladinBehavior.EmitTeleportDust(NPC, Color.Lavender);
             }
             else if (NPC.ai[0] == 7f)
             {
-                // Avoid cheap bullshit
-                NPC.damage = 0;
-
-                NPC.ai[1] += 1f;
-                float teleportEndTime = death ? 15f : 20f;
-                scale = MathHelper.Clamp(NPC.ai[1] / teleportEndTime, 0f, 1f);
-                scale = 0.5f + scale * 0.5f;
-                if (NPC.ai[1] >= teleportEndTime && Main.netMode != NetmodeID.MultiplayerClient)
-                {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.netUpdate = true;
-                    NPC.TargetClosest();
-                }
-
-                if (Main.netMode == NetmodeID.MultiplayerClient && NPC.ai[1] >= teleportEndTime * 2f)
-                {
-                    NPC.ai[0] = 0f;
-                    NPC.ai[1] = 0f;
-                    NPC.TargetClosest();
-                }
+                SlimeGodPaladinBehavior.FadeInAfterTeleport(NPC, death, ref scale);
 
                 // Emit teleport dust
-                Color dustColor = Color.Lavender;
-                dustColor.A = 150;
-                for (int i = 0; i < 10; i++)
-                {
-                    int corruptDust = Dust.NewDust(NPC.position + Vector2.UnitX * -20f, NPC.width + 40, NPC.height, DustID.TintableDust, NPC.velocity.X, NPC.velocity.Y, NPC.alpha, dustColor, 2f);
-                    Main.dust[corruptDust].noGravity = true;
-                    Main.dust[corruptDust].velocity *= 0.5f;
-                }
+                SlimeGodPaladinBehavior.EmitTeleportDust(NPC, Color.Lavender);
             }
 
             if (bossLife == 0f && NPC.life > 0)
@@ -678,20 +533,7 @@ namespace CalamityMod.NPCs.SlimeGod
 
             if (NPC.life > 0)
             {
-                float scaleRatio = lifeRatio;
-                scaleRatio = scaleRatio * 0.5f + 0.75f;
-                scaleRatio *= scale;
-
-                if (scaleRatio != NPC.scale)
-                {
-                    NPC.position.X = NPC.position.X + (float)(NPC.width / 2);
-                    NPC.position.Y = NPC.position.Y + (float)NPC.height;
-                    NPC.scale = scaleRatio * 0.75f;
-                    NPC.width = (int)(150f * NPC.scale);
-                    NPC.height = (int)(92f * NPC.scale);
-                    NPC.position.X = NPC.position.X - (float)(NPC.width / 2);
-                    NPC.position.Y = NPC.position.Y - (float)NPC.height;
-                }
+                SlimeGodPaladinBehavior.UpdateScale(NPC, lifeRatio, scale, true);
 
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {

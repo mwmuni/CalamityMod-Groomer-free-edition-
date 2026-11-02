@@ -601,39 +601,17 @@ namespace CalamityMod
             bool isValidProjectileArg(object o) => o is int || o is Projectile;
             bool isValidNPCArg(object o) => o is int || o is NPC;
 
-            Player castPlayer(object o)
-            {
-                if (o is int i)
-                    return Main.player[i];
-                else if (o is Player p)
-                    return p;
-                return null;
-            }
+            Player castPlayer(object o) => castEntity(o, Main.player);
+            Item castItem(object o) => castEntity(o, Main.item);
+            Projectile castProjectile(object o) => castEntity(o, Main.projectile);
+            NPC castNPC(object o) => castEntity(o, Main.npc);
 
-            Item castItem(object o)
+            T castEntity<T>(object o, T[] entities) where T : class
             {
                 if (o is int i)
-                    return Main.item[i];
-                else if (o is Item it)
-                    return it;
-                return null;
-            }
-
-            Projectile castProjectile(object o)
-            {
-                if (o is int i)
-                    return Main.projectile[i];
-                else if (o is Projectile p)
-                    return p;
-                return null;
-            }
-
-            NPC castNPC(object o)
-            {
-                if (o is int i)
-                    return Main.npc[i];
-                else if (o is NPC n)
-                    return n;
+                    return entities[i];
+                else if (o is T entity)
+                    return entity;
                 return null;
             }
 

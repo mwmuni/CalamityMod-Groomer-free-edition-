@@ -568,16 +568,19 @@ namespace CalamityMod.ILEditing
 
         #region Make Magma Stone & Fire Gauntlet Dust Toggleable
         private static void MakeMagmaStoneFireGauntletDustToggleable(ILContext il)
+            => MakeMagmaStoneDustToggleable(il, "Make Magma Stone & Fire Gauntlet Dust Toggleable", "Could not locate the Magma Stone variable.", OpCodes.Ldarg_0);
+
+        private static void MakeMagmaStoneDustToggleable(ILContext il, string editName, string failureReason, OpCode loadPlayer)
         {
             // Allows Magma Stone and Fire Gauntlet's obnoxious dust on melee swings to be toggled off with visbility
             var cursor = new ILCursor(il);
             if (!cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("magmaStone"))) // Flag for if Magma Stone is equipped. Fire Gauntlet also uses this.
             {
-                LogFailure("Make Magma Stone & Fire Gauntlet Dust Toggleable", "Could not locate the Magma Stone variable.");
+                LogFailure(editName, failureReason);
                 return;
             }
             // Load the player itself onto the stack so that it becomes an argument for the following delegate.
-            cursor.Emit(OpCodes.Ldarg_0);
+            cursor.Emit(loadPlayer);
 
             // Emit a delegate which places whether the player has their Magma Stone visuals enabled onto the stack.
             cursor.EmitDelegate<Func<Player, bool>>(MagmaStoneVisualsEnabled);
@@ -587,21 +590,7 @@ namespace CalamityMod.ILEditing
         private static readonly Func<Player, bool> MagmaStoneVisualsEnabled = (Player p) => p.Calamity().magmaStoneVisuals;
 
         private static void MakeMagmaStoneFireGauntletProjectileDustToggleable(ILContext il)
-        {
-            // Allows Magma Stone and Fire Gauntlet's obnoxious dust on projectiles to be toggled off with visbility
-            var cursor = new ILCursor(il);
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchLdfld<Player>("magmaStone"))) // Flag for if Magma Stone is equipped. Fire Gauntlet also uses this.
-            {
-                LogFailure("Make Magma Stone & Fire Gauntlet Projectile Dust Toggleable", "Could not locate the magma stone variable.");
-                return;
-            }
-            // Load the player itself onto the stack so that it becomes an argument for the following delegate.
-            cursor.Emit(OpCodes.Ldloc_0);
-
-            // Emit a delegate which places whether the player has their Magma Stone visuals enabled onto the stack.
-            cursor.EmitDelegate<Func<Player, bool>>(MagmaStoneVisualsEnabled);
-            cursor.Emit(OpCodes.And);
-        }
+            => MakeMagmaStoneDustToggleable(il, "Make Magma Stone & Fire Gauntlet Projectile Dust Toggleable", "Could not locate the magma stone variable.", OpCodes.Ldloc_0);
 
         #endregion Make Magma Stone & Fire Gauntlet Dust Toggleable
 

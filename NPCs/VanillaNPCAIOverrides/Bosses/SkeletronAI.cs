@@ -29,6 +29,46 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             DisableMultiplayerSmoothing = true;
         }
 
+        private void SpawnCasterNearHead(int npcType)
+        {
+            for (int i = 0; i < 1000; i++)
+            {
+                int headYAcceleration = (int)(NPC.Center.X / 16f) + Main.rand.Next(-50, 51);
+                int headYTopSpeed;
+                for (headYTopSpeed = (int)(NPC.Center.Y / 16f) + Main.rand.Next(-50, 51); headYTopSpeed < Main.maxTilesY - 10 && !WorldGen.SolidTile(headYAcceleration, headYTopSpeed); headYTopSpeed++)
+                {
+                }
+
+                headYTopSpeed--;
+                if (!WorldGen.SolidTile(headYAcceleration, headYTopSpeed))
+                {
+                    int headXAcceleration = NPC.NewNPC(NPC.GetSource_FromAI(), headYAcceleration * 16 + 8, headYTopSpeed * 16, npcType);
+                    if (Main.dedServ && headXAcceleration < Main.maxNPCs)
+                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, headXAcceleration);
+
+                    break;
+                }
+            }
+        }
+
+        private static void FireHandSwipeSkull(NPC hand, bool death, bool cancelSlap, bool phase2, bool phase3, float handSwipeVelocity)
+        {
+            if (death && Collision.CanHit(hand.Center, 1, 1, Main.player[hand.target].position, Main.player[hand.target].width, Main.player[hand.target].height) && !cancelSlap)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    if (phase2 && Vector2.Distance(Main.player[hand.target].Center, hand.Center) > 160f)
+                    {
+                        float skullProjSpeed = handSwipeVelocity * (phase3 ? 0.6f : 0.2f);
+                        Vector2 initialProjectileVelocity = hand.Center.DirectionTo(Main.player[hand.target].Center) * skullProjSpeed;
+                        int type = ProjectileID.Skull;
+                        int skullProjectile = Projectile.NewProjectile(hand.GetSource_FromAI(), hand.Center, initialProjectileVelocity, type, SkullDamage, 0f, Main.myPlayer, -(phase3 ? 2f : 1f));
+                        Main.projectile[skullProjectile].timeLeft = 600;
+                    }
+                }
+            }
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -521,48 +561,14 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     {
                         if (NPC.CountNPCS(NPCID.DarkCaster) < 6)
                         {
-                            for (int i = 0; i < 1000; i++)
-                            {
-                                int headYAcceleration = (int)(NPC.Center.X / 16f) + Main.rand.Next(-50, 51);
-                                int headYTopSpeed;
-                                for (headYTopSpeed = (int)(NPC.Center.Y / 16f) + Main.rand.Next(-50, 51); headYTopSpeed < Main.maxTilesY - 10 && !WorldGen.SolidTile(headYAcceleration, headYTopSpeed); headYTopSpeed++)
-                                {
-                                }
-
-                                headYTopSpeed--;
-                                if (!WorldGen.SolidTile(headYAcceleration, headYTopSpeed))
-                                {
-                                    int headXAcceleration = NPC.NewNPC(NPC.GetSource_FromAI(), headYAcceleration * 16 + 8, headYTopSpeed * 16, NPCID.DarkCaster);
-                                    if (Main.dedServ && headXAcceleration < Main.maxNPCs)
-                                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, headXAcceleration);
-
-                                    break;
-                                }
-                            }
+                            SpawnCasterNearHead(NPCID.DarkCaster);
                         }
 
                         if (Main.zenithWorld)
                         {
                             if (!NPC.AnyNPCs(NPCID.DiabolistWhite))
                             {
-                                for (int i = 0; i < 1000; i++)
-                                {
-                                    int headYAcceleration = (int)(NPC.Center.X / 16f) + Main.rand.Next(-50, 51);
-                                    int headYTopSpeed;
-                                    for (headYTopSpeed = (int)(NPC.Center.Y / 16f) + Main.rand.Next(-50, 51); headYTopSpeed < Main.maxTilesY - 10 && !WorldGen.SolidTile(headYAcceleration, headYTopSpeed); headYTopSpeed++)
-                                    {
-                                    }
-
-                                    headYTopSpeed--;
-                                    if (!WorldGen.SolidTile(headYAcceleration, headYTopSpeed))
-                                    {
-                                        int headXAcceleration = NPC.NewNPC(NPC.GetSource_FromAI(), headYAcceleration * 16 + 8, headYTopSpeed * 16, NPCID.DiabolistWhite);
-                                        if (Main.dedServ && headXAcceleration < Main.maxNPCs)
-                                            NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, headXAcceleration);
-
-                                        break;
-                                    }
-                                }
+                                SpawnCasterNearHead(NPCID.DiabolistWhite);
                             }
                         }
                     }
@@ -598,24 +604,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     {
                         if (Main.netMode != NetmodeID.MultiplayerClient && NPC.CountNPCS(NPCID.DarkCaster) < 6)
                         {
-                            for (int j = 0; j < 1000; j++)
-                            {
-                                int headYAcceleration = (int)(NPC.Center.X / 16f) + Main.rand.Next(-50, 51);
-                                int headYTopSpeed;
-                                for (headYTopSpeed = (int)(NPC.Center.Y / 16f) + Main.rand.Next(-50, 51); headYTopSpeed < Main.maxTilesY - 10 && !WorldGen.SolidTile(headYAcceleration, headYTopSpeed); headYTopSpeed++)
-                                {
-                                }
-
-                                headYTopSpeed--;
-                                if (!WorldGen.SolidTile(headYAcceleration, headYTopSpeed))
-                                {
-                                    int headXAcceleration = NPC.NewNPC(NPC.GetSource_FromAI(), headYAcceleration * 16 + 8, headYTopSpeed * 16, NPCID.DarkCaster);
-                                    if (Main.dedServ && headXAcceleration < Main.maxNPCs)
-                                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, headXAcceleration);
-
-                                    break;
-                                }
-                            }
+                            SpawnCasterNearHead(NPCID.DarkCaster);
                         }
                     }
 
@@ -1015,20 +1004,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         NPC.netUpdate = true;
 
                         // Spawn projectiles
-                        if (death && Collision.CanHit(NPC.Center, 1, 1, Main.player[NPC.target].position, Main.player[NPC.target].width, Main.player[NPC.target].height) && !cancelSlap)
-                        {
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                if (phase2 && Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > 160f)
-                                {
-                                    float skullProjSpeed = handSwipeVelocity * (phase3 ? 0.6f : 0.2f);
-                                    Vector2 initialProjectileVelocity = NPC.Center.DirectionTo(Main.player[NPC.target].Center) * skullProjSpeed;
-                                    int type = ProjectileID.Skull;
-                                    int skullProjectile = Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, initialProjectileVelocity, type, SkullDamage, 0f, Main.myPlayer, -(phase3 ? 2f : 1f));
-                                    Main.projectile[skullProjectile].timeLeft = 600;
-                                }
-                            }
-                        }
+                        FireHandSwipeSkull(NPC, death, cancelSlap, phase2, phase3, handSwipeVelocity);
                     }
                 }
                 else if (NPC.ai[2] == 4f)
@@ -1064,20 +1040,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         NPC.netUpdate = true;
 
                         // Spawn projectiles
-                        if (death && Collision.CanHit(NPC.Center, 1, 1, Main.player[NPC.target].position, Main.player[NPC.target].width, Main.player[NPC.target].height) && !cancelSlap)
-                        {
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                            {
-                                if (phase2 && Vector2.Distance(Main.player[NPC.target].Center, NPC.Center) > 160f)
-                                {
-                                    float skullProjSpeed = handSwipeVelocity * (phase3 ? 0.6f : 0.2f);
-                                    Vector2 initialProjectileVelocity = NPC.Center.DirectionTo(Main.player[NPC.target].Center) * skullProjSpeed;
-                                    int type = ProjectileID.Skull;
-                                    int skullProjectile = Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, initialProjectileVelocity, type, SkullDamage, 0f, Main.myPlayer, -(phase3 ? 2f : 1f));
-                                    Main.projectile[skullProjectile].timeLeft = 600;
-                                }
-                            }
-                        }
+                        FireHandSwipeSkull(NPC, death, cancelSlap, phase2, phase3, handSwipeVelocity);
                     }
                 }
 

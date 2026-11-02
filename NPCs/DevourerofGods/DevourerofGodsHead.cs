@@ -1045,26 +1045,6 @@ namespace CalamityMod.NPCs.DevourerofGods
                         NPC.spriteDirection = 1;
 
                     var VelocityRotation = NPC.velocity.ToRotation();
-                    void TurnTowards(Vector2 goal, float offset = 0, float maxSpeed = 1)
-                    {
-                        float goal2 = (goal - NPC.Center).ToRotation() + offset;
-                        maxSpeed *= (float)Math.PI / 180f;
-                        var dif = MathF.Atan2(MathF.Sin(goal2 - VelocityRotation), MathF.Cos(goal2 - VelocityRotation));
-                        if (dif < 0)
-                        {
-                            if (-dif > maxSpeed)
-                                VelocityRotation -= maxSpeed;
-                            else
-                                VelocityRotation += dif;
-                        }
-                        else
-                        {
-                            if (dif > maxSpeed)
-                                VelocityRotation += maxSpeed;
-                            else
-                                VelocityRotation += dif;
-                        }
-                    }
 
                     // Flight
                     #region Air AI
@@ -1156,239 +1136,7 @@ namespace CalamityMod.NPCs.DevourerofGods
                         else if (increaseSpeed)
                             groundPhaseTurnSpeed *= 2f;
 
-                        #region Digging AI
-                        if (!flies)
-                        {
-                            for (int r = tilePositionX; r < tileWidthPosX; r++)
-                            {
-                                for (int s = tilePositionY; s < tileWidthPosY; s++)
-                                {
-                                    if (Main.tile[r, s] != null && ((Main.tile[r, s].HasUnactuatedTile && (Main.tileSolid[Main.tile[r, s].TileType] || (Main.tileSolidTop[Main.tile[r, s].TileType] && Main.tile[r, s].TileFrameY == 0))) || Main.tile[r, s].LiquidAmount > 64))
-                                    {
-                                        Vector2 positionCheck;
-                                        positionCheck.X = r * 16;
-                                        positionCheck.Y = s * 16;
-                                        if (NPC.position.X + NPC.width > positionCheck.X && NPC.position.X < positionCheck.X + 16f && NPC.position.Y + NPC.height > positionCheck.Y && NPC.position.Y < positionCheck.Y + 16f)
-                                        {
-                                            flies = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (!flies)
-                        {
-                            NPC.localAI[1] = 1f;
-
-                            Rectangle rectangle12 = new Rectangle((int)NPC.position.X, (int)NPC.position.Y, NPC.width, NPC.height);
-
-                            int directChargeRange = death ? 1125 : 1200;
-
-                            if (expertMode)
-                                directChargeRange -= (int)(150f * (1f - lifeRatio));
-
-                            if (directChargeRange < 1050)
-                                directChargeRange = 1050;
-
-                            bool canDirectlyCharge = true;
-                            if (NPC.position.Y > player.position.Y)
-                            {
-                                for (int k = 0; k < Main.maxPlayers; k++)
-                                {
-                                    if (Main.player[k].active)
-                                    {
-                                        Rectangle rectangle13 = new Rectangle((int)Main.player[k].position.X - 1000, (int)Main.player[k].position.Y - 1000, 2000, directChargeRange);
-                                        if (rectangle12.Intersects(rectangle13))
-                                        {
-                                            canDirectlyCharge = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (canDirectlyCharge)
-                                    flies = true;
-                            }
-                        }
-                        else
-                            NPC.localAI[1] = 0f;
-
-                        float turnSpeedCopy = groundPhaseTurnSpeed;
-                        Vector2 npcCenter = NPC.Center;
-                        float targetX = destination.X;
-                        float targetY = destination.Y;
-                        targetX = (int)(targetX / 16f) * 16;
-                        targetY = (int)(targetY / 16f) * 16;
-                        npcCenter.X = (int)(npcCenter.X / 16f) * 16;
-                        npcCenter.Y = (int)(npcCenter.Y / 16f) * 16;
-                        targetX -= npcCenter.X;
-                        targetY -= npcCenter.Y;
-
-                        if (!flies)
-                        {
-                            NPC.velocity.Y += groundPhaseTurnSpeed;
-                            if (NPC.velocity.Y > segmentVelocity)
-                                NPC.velocity.Y = segmentVelocity;
-
-                            // This bool exists to stop the strange wiggle behavior when worms are falling down
-                            bool slowXVelocity = Math.Abs(NPC.velocity.X) > turnSpeedCopy;
-                            if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * 2.2)
-                            {
-                                if (NPC.velocity.X < 0f)
-                                    NPC.velocity.X -= turnSpeedCopy * 1.1f;
-                                else
-                                    NPC.velocity.X += turnSpeedCopy * 1.1f;
-                            }
-                            else if (NPC.velocity.Y == segmentVelocity)
-                            {
-                                if (slowXVelocity)
-                                {
-                                    if (NPC.velocity.X < targetX)
-                                        NPC.velocity.X += turnSpeedCopy;
-                                    else if (NPC.velocity.X > targetX)
-                                        NPC.velocity.X -= turnSpeedCopy;
-                                }
-                                else
-                                    NPC.velocity.X = 0f;
-                            }
-                            else if (NPC.velocity.Y > 4f)
-                            {
-                                if (slowXVelocity)
-                                {
-                                    if (NPC.velocity.X < 0f)
-                                        NPC.velocity.X += turnSpeedCopy * 0.9f;
-                                    else
-                                        NPC.velocity.X -= turnSpeedCopy * 0.9f;
-                                }
-                                else
-                                    NPC.velocity.X = 0f;
-                            }
-                        }
-                        #endregion
-
-                        #region Flying AI
-                        else
-                        {
-                            double maximumSpeed1 = death ? 0.46 : 0.4;
-                            double maximumSpeed2 = death ? 1.125 : 1D;
-
-                            if (expertMode)
-                            {
-                                maximumSpeed1 += 0.1f * (1f - lifeRatio);
-                                maximumSpeed2 += 0.2f * (1f - lifeRatio);
-                            }
-
-                            float targetDistance = (float)Math.Sqrt(targetX * targetX + targetY * targetY);
-                            float absoluteTargetX2 = Math.Abs(targetX);
-                            float absoluteTargetY2 = Math.Abs(targetY);
-                            float timeToReachTarget2 = segmentVelocity / targetDistance;
-                            targetX *= timeToReachTarget2;
-                            targetY *= timeToReachTarget2;
-
-                            if (((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f)) && ((NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f)))
-                            {
-                                if (NPC.velocity.X < targetX)
-                                    NPC.velocity.X += groundPhaseTurnSpeed * 1.5f;
-                                else if (NPC.velocity.X > targetX)
-                                    NPC.velocity.X -= groundPhaseTurnSpeed * 1.5f;
-
-                                if (NPC.velocity.Y < targetY)
-                                    NPC.velocity.Y += groundPhaseTurnSpeed * 1.5f;
-                                else if (NPC.velocity.Y > targetY)
-                                    NPC.velocity.Y -= groundPhaseTurnSpeed * 1.5f;
-                            }
-
-                            if ((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f) || (NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f))
-                            {
-                                if (NPC.velocity.X < targetX)
-                                    NPC.velocity.X += groundPhaseTurnSpeed;
-                                else if (NPC.velocity.X > targetX)
-                                    NPC.velocity.X -= groundPhaseTurnSpeed;
-
-                                if (NPC.velocity.Y < targetY)
-                                    NPC.velocity.Y += groundPhaseTurnSpeed;
-                                else if (NPC.velocity.Y > targetY)
-                                    NPC.velocity.Y -= groundPhaseTurnSpeed;
-
-                                if (Math.Abs(targetY) < segmentVelocity * maximumSpeed1 && ((NPC.velocity.X > 0f && targetX < 0f) || (NPC.velocity.X < 0f && targetX > 0f)))
-                                {
-                                    if (NPC.velocity.Y > 0f)
-                                        NPC.velocity.Y += groundPhaseTurnSpeed * 2f;
-                                    else
-                                        NPC.velocity.Y -= groundPhaseTurnSpeed * 2f;
-                                }
-
-                                if (Math.Abs(targetX) < segmentVelocity * maximumSpeed1 && ((NPC.velocity.Y > 0f && targetY < 0f) || (NPC.velocity.Y < 0f && targetY > 0f)))
-                                {
-                                    if (NPC.velocity.X > 0f)
-                                        NPC.velocity.X += groundPhaseTurnSpeed * 2f;
-                                    else
-                                        NPC.velocity.X -= groundPhaseTurnSpeed * 2f;
-                                }
-                            }
-                            else if (absoluteTargetX2 > absoluteTargetY2)
-                            {
-                                if (NPC.velocity.X < targetX)
-                                    NPC.velocity.X += groundPhaseTurnSpeed * 1.1f;
-                                else if (NPC.velocity.X > targetX)
-                                    NPC.velocity.X -= groundPhaseTurnSpeed * 1.1f;
-
-                                if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * maximumSpeed2)
-                                {
-                                    if (NPC.velocity.Y > 0f)
-                                        NPC.velocity.Y += groundPhaseTurnSpeed;
-                                    else
-                                        NPC.velocity.Y -= groundPhaseTurnSpeed;
-                                }
-                            }
-                            else
-                            {
-                                if (NPC.velocity.Y < targetY)
-                                    NPC.velocity.Y += groundPhaseTurnSpeed * 1.1f;
-                                else if (NPC.velocity.Y > targetY)
-                                    NPC.velocity.Y -= groundPhaseTurnSpeed * 1.1f;
-
-                                if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * maximumSpeed2)
-                                {
-                                    if (NPC.velocity.X > 0f)
-                                        NPC.velocity.X += groundPhaseTurnSpeed;
-                                    else
-                                        NPC.velocity.X -= groundPhaseTurnSpeed;
-                                }
-                            }
-                        }
-                        #endregion
-                        // Set velocity so that DoG cannot speed burst instantly at the start of a phase swap
-                        if (calamityGlobalNPC.velocityPriorToPhaseSwap > 0f)
-                        {
-                            if (NPC.velocity.Length() > calamityGlobalNPC.velocityPriorToPhaseSwap)
-                            {
-                                NPC.velocity.Normalize();
-                                NPC.velocity *= calamityGlobalNPC.velocityPriorToPhaseSwap;
-                                calamityGlobalNPC.velocityPriorToPhaseSwap += CalamityGlobalNPC.velocityPriorToPhaseSwapIncrement;
-                            }
-                        }
-
-                        NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
-
-                        if (flies)
-                        {
-                            if (NPC.localAI[0] != 1f)
-                                NPC.ForceNetUpdate(false);
-
-                            NPC.localAI[0] = 1f;
-                        }
-                        else
-                        {
-                            if (NPC.localAI[0] != 0f)
-                                NPC.ForceNetUpdate(false);
-
-                            NPC.localAI[0] = 0f;
-                        }
-
-                        if (((NPC.velocity.X > 0f && NPC.oldVelocity.X < 0f) || (NPC.velocity.X < 0f && NPC.oldVelocity.X > 0f) || (NPC.velocity.Y > 0f && NPC.oldVelocity.Y < 0f) || (NPC.velocity.Y < 0f && NPC.oldVelocity.Y > 0f)) && !NPC.justHit)
-                            NPC.ForceNetUpdate(false);
+                        UpdateGroundMovement(tilePositionX, tileWidthPosX, tilePositionY, tileWidthPosY);
 
                         if (calamityGlobalNPC.newAI[2] > phaseLimit)
                         {
@@ -1424,7 +1172,7 @@ namespace CalamityMod.NPCs.DevourerofGods
                             var currentVelLength = NPC.velocity.Length();
                             var goalVel = NPC.DirectionTo(goalpos) * currentVelLength;
 
-                            TurnTowards(goalpos, maxSpeed: 6f * calamityGlobalNPC.newAI[2] / 120f);
+                            TurnTowards(goalpos, ref VelocityRotation, maxSpeed: 6f * calamityGlobalNPC.newAI[2] / 120f);
                             NPC.velocity = VelocityRotation.ToRotationVector2() * (currentVelLength < 40 ? currentVelLength + 0.2f : currentVelLength > 42 ? currentVelLength - 0.2f : currentVelLength);
 
                             NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
@@ -1597,26 +1345,6 @@ namespace CalamityMod.NPCs.DevourerofGods
                     NPC.spriteDirection = 1;
 
                 var VelocityRotation = NPC.velocity.ToRotation();
-                void TurnTowards(Vector2 goal, float offset = 0, float maxSpeed = 1)
-                {
-                    float goal2 = (goal - NPC.Center).ToRotation() + offset;
-                    maxSpeed *= (float)Math.PI / 180f;
-                    var dif = MathF.Atan2(MathF.Sin(goal2 - VelocityRotation), MathF.Cos(goal2 - VelocityRotation));
-                    if (dif < 0)
-                    {
-                        if (-dif > maxSpeed)
-                            VelocityRotation -= maxSpeed;
-                        else
-                            VelocityRotation += dif;
-                    }
-                    else
-                    {
-                        if (dif > maxSpeed)
-                            VelocityRotation += maxSpeed;
-                        else
-                            VelocityRotation += dif;
-                    }
-                }
 
                 // Flight
                 #region Phase 1 Air AI
@@ -1682,235 +1410,7 @@ namespace CalamityMod.NPCs.DevourerofGods
                     else if (increaseSpeed)
                         groundPhaseTurnSpeed *= 2f;
 
-                    if (!flies)
-                    {
-                        for (int r = tilePositionX; r < tileWidthPosX; r++)
-                        {
-                            for (int s = tilePositionY; s < tileWidthPosY; s++)
-                            {
-                                if (Main.tile[r, s] != null && ((Main.tile[r, s].HasUnactuatedTile && (Main.tileSolid[Main.tile[r, s].TileType] || (Main.tileSolidTop[Main.tile[r, s].TileType] && Main.tile[r, s].TileFrameY == 0))) || Main.tile[r, s].LiquidAmount > 64))
-                                {
-                                    Vector2 positionCheck;
-                                    positionCheck.X = r * 16;
-                                    positionCheck.Y = s * 16;
-                                    if (NPC.position.X + NPC.width > positionCheck.X && NPC.position.X < positionCheck.X + 16f && NPC.position.Y + NPC.height > positionCheck.Y && NPC.position.Y < positionCheck.Y + 16f)
-                                    {
-                                        flies = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (!flies)
-                    {
-                        NPC.localAI[1] = 1f;
-
-                        Rectangle rectangle12 = new Rectangle((int)NPC.position.X, (int)NPC.position.Y, NPC.width, NPC.height);
-
-                        int directChargeRange = death ? 1125 : 1200;
-
-                        if (expertMode)
-                            directChargeRange -= (int)(150f * (1f - lifeRatio));
-
-                        if (directChargeRange < 1050)
-                            directChargeRange = 1050;
-
-                        bool canDirectlyCharge = true;
-                        if (NPC.position.Y > player.position.Y)
-                        {
-                            for (int k = 0; k < Main.maxPlayers; k++)
-                            {
-                                if (Main.player[k].active)
-                                {
-                                    Rectangle rectangle13 = new Rectangle((int)Main.player[k].position.X - 1000, (int)Main.player[k].position.Y - 1000, 2000, directChargeRange);
-                                    if (rectangle12.Intersects(rectangle13))
-                                    {
-                                        canDirectlyCharge = false;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (canDirectlyCharge)
-                                flies = true;
-                        }
-                    }
-                    else
-                        NPC.localAI[1] = 0f;
-
-                    float turnSpeedCopy = groundPhaseTurnSpeed;
-                    Vector2 npcCenter = NPC.Center;
-                    float targetX = destination.X;
-                    float targetY = destination.Y;
-                    targetX = (int)(targetX / 16f) * 16;
-                    targetY = (int)(targetY / 16f) * 16;
-                    npcCenter.X = (int)(npcCenter.X / 16f) * 16;
-                    npcCenter.Y = (int)(npcCenter.Y / 16f) * 16;
-                    targetX -= npcCenter.X;
-                    targetY -= npcCenter.Y;
-
-                    if (!flies)
-                    {
-                        NPC.velocity.Y += groundPhaseTurnSpeed;
-                        if (NPC.velocity.Y > segmentVelocity)
-                            NPC.velocity.Y = segmentVelocity;
-
-                        // This bool exists to stop the strange wiggle behavior when worms are falling down
-                        bool slowXVelocity = Math.Abs(NPC.velocity.X) > turnSpeedCopy;
-                        if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * 2.2)
-                        {
-                            if (NPC.velocity.X < 0f)
-                                NPC.velocity.X -= turnSpeedCopy * 1.1f;
-                            else
-                                NPC.velocity.X += turnSpeedCopy * 1.1f;
-                        }
-                        else if (NPC.velocity.Y == segmentVelocity)
-                        {
-                            if (slowXVelocity)
-                            {
-                                if (NPC.velocity.X < targetX)
-                                    NPC.velocity.X += turnSpeedCopy;
-                                else if (NPC.velocity.X > targetX)
-                                    NPC.velocity.X -= turnSpeedCopy;
-                            }
-                            else
-                                NPC.velocity.X = 0f;
-                        }
-                        else if (NPC.velocity.Y > 4f)
-                        {
-                            if (slowXVelocity)
-                            {
-                                if (NPC.velocity.X < 0f)
-                                    NPC.velocity.X += turnSpeedCopy * 0.9f;
-                                else
-                                    NPC.velocity.X -= turnSpeedCopy * 0.9f;
-                            }
-                            else
-                                NPC.velocity.X = 0f;
-                        }
-                    }
-                    else
-                    {
-                        double maximumSpeed1 = death ? 0.46 : 0.4;
-                        double maximumSpeed2 = death ? 1.125 : 1D;
-
-                        if (expertMode)
-                        {
-                            maximumSpeed1 += 0.1f * (1f - lifeRatio);
-                            maximumSpeed2 += 0.2f * (1f - lifeRatio);
-                        }
-
-                        float targetDistance = (float)Math.Sqrt(targetX * targetX + targetY * targetY);
-                        float absoluteTargetX2 = Math.Abs(targetX);
-                        float absoluteTargetY2 = Math.Abs(targetY);
-                        float timeToReachTarget2 = segmentVelocity / targetDistance;
-                        targetX *= timeToReachTarget2;
-                        targetY *= timeToReachTarget2;
-
-                        if (((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f)) && ((NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f)))
-                        {
-                            if (NPC.velocity.X < targetX)
-                                NPC.velocity.X += groundPhaseTurnSpeed * 1.5f;
-                            else if (NPC.velocity.X > targetX)
-                                NPC.velocity.X -= groundPhaseTurnSpeed * 1.5f;
-
-                            if (NPC.velocity.Y < targetY)
-                                NPC.velocity.Y += groundPhaseTurnSpeed * 1.5f;
-                            else if (NPC.velocity.Y > targetY)
-                                NPC.velocity.Y -= groundPhaseTurnSpeed * 1.5f;
-                        }
-
-                        if ((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f) || (NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f))
-                        {
-                            if (NPC.velocity.X < targetX)
-                                NPC.velocity.X += groundPhaseTurnSpeed;
-                            else if (NPC.velocity.X > targetX)
-                                NPC.velocity.X -= groundPhaseTurnSpeed;
-
-                            if (NPC.velocity.Y < targetY)
-                                NPC.velocity.Y += groundPhaseTurnSpeed;
-                            else if (NPC.velocity.Y > targetY)
-                                NPC.velocity.Y -= groundPhaseTurnSpeed;
-
-                            if (Math.Abs(targetY) < segmentVelocity * maximumSpeed1 && ((NPC.velocity.X > 0f && targetX < 0f) || (NPC.velocity.X < 0f && targetX > 0f)))
-                            {
-                                if (NPC.velocity.Y > 0f)
-                                    NPC.velocity.Y += groundPhaseTurnSpeed * 2f;
-                                else
-                                    NPC.velocity.Y -= groundPhaseTurnSpeed * 2f;
-                            }
-
-                            if (Math.Abs(targetX) < segmentVelocity * maximumSpeed1 && ((NPC.velocity.Y > 0f && targetY < 0f) || (NPC.velocity.Y < 0f && targetY > 0f)))
-                            {
-                                if (NPC.velocity.X > 0f)
-                                    NPC.velocity.X += groundPhaseTurnSpeed * 2f;
-                                else
-                                    NPC.velocity.X -= groundPhaseTurnSpeed * 2f;
-                            }
-                        }
-                        else if (absoluteTargetX2 > absoluteTargetY2)
-                        {
-                            if (NPC.velocity.X < targetX)
-                                NPC.velocity.X += groundPhaseTurnSpeed * 1.1f;
-                            else if (NPC.velocity.X > targetX)
-                                NPC.velocity.X -= groundPhaseTurnSpeed * 1.1f;
-
-                            if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * maximumSpeed2)
-                            {
-                                if (NPC.velocity.Y > 0f)
-                                    NPC.velocity.Y += groundPhaseTurnSpeed;
-                                else
-                                    NPC.velocity.Y -= groundPhaseTurnSpeed;
-                            }
-                        }
-                        else
-                        {
-                            if (NPC.velocity.Y < targetY)
-                                NPC.velocity.Y += groundPhaseTurnSpeed * 1.1f;
-                            else if (NPC.velocity.Y > targetY)
-                                NPC.velocity.Y -= groundPhaseTurnSpeed * 1.1f;
-
-                            if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * maximumSpeed2)
-                            {
-                                if (NPC.velocity.X > 0f)
-                                    NPC.velocity.X += groundPhaseTurnSpeed;
-                                else
-                                    NPC.velocity.X -= groundPhaseTurnSpeed;
-                            }
-                        }
-                    }
-
-                    // Set velocity so that DoG cannot speed burst instantly at the start of a phase swap
-                    if (calamityGlobalNPC.velocityPriorToPhaseSwap > 0f)
-                    {
-                        if (NPC.velocity.Length() > calamityGlobalNPC.velocityPriorToPhaseSwap)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= calamityGlobalNPC.velocityPriorToPhaseSwap;
-                            calamityGlobalNPC.velocityPriorToPhaseSwap += CalamityGlobalNPC.velocityPriorToPhaseSwapIncrement;
-                        }
-                    }
-
-                    NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
-
-                    if (flies)
-                    {
-                        if (NPC.localAI[0] != 1f)
-                            NPC.ForceNetUpdate(false);
-
-                        NPC.localAI[0] = 1f;
-                    }
-                    else
-                    {
-                        if (NPC.localAI[0] != 0f)
-                            NPC.ForceNetUpdate(false);
-
-                        NPC.localAI[0] = 0f;
-                    }
-
-                    if (((NPC.velocity.X > 0f && NPC.oldVelocity.X < 0f) || (NPC.velocity.X < 0f && NPC.oldVelocity.X > 0f) || (NPC.velocity.Y > 0f && NPC.oldVelocity.Y < 0f) || (NPC.velocity.Y < 0f && NPC.oldVelocity.Y > 0f)) && !NPC.justHit)
-                        NPC.ForceNetUpdate(false);
+                    UpdateGroundMovement(tilePositionX, tileWidthPosX, tilePositionY, tileWidthPosY);
 
                     if (calamityGlobalNPC.newAI[2] > phaseLimit)
                     {
@@ -1937,7 +1437,7 @@ namespace CalamityMod.NPCs.DevourerofGods
                         var currentVelLength = NPC.velocity.Length();
                         var goalVel = NPC.DirectionTo(goalpos) * currentVelLength;
 
-                        TurnTowards(goalpos, maxSpeed: 6f * calamityGlobalNPC.newAI[2] / 120f);
+                        TurnTowards(goalpos, ref VelocityRotation, maxSpeed: 6f * calamityGlobalNPC.newAI[2] / 120f);
                         NPC.velocity = VelocityRotation.ToRotationVector2() * (currentVelLength < 40 ? currentVelLength + 0.2f : currentVelLength);
 
                         NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
@@ -2022,6 +1522,260 @@ namespace CalamityMod.NPCs.DevourerofGods
             }
             if (NPC.life > Main.npc[(int)NPC.ai[0]].life)
                 NPC.life = Main.npc[(int)NPC.ai[0]].life;
+
+            void UpdateGroundMovement(int tilePositionX, int tileWidthPosX, int tilePositionY, int tileWidthPosY)
+            {
+                if (!flies)
+                {
+                    for (int r = tilePositionX; r < tileWidthPosX; r++)
+                    {
+                        for (int s = tilePositionY; s < tileWidthPosY; s++)
+                        {
+                            if (Main.tile[r, s] != null && ((Main.tile[r, s].HasUnactuatedTile && (Main.tileSolid[Main.tile[r, s].TileType] || (Main.tileSolidTop[Main.tile[r, s].TileType] && Main.tile[r, s].TileFrameY == 0))) || Main.tile[r, s].LiquidAmount > 64))
+                            {
+                                Vector2 positionCheck;
+                                positionCheck.X = r * 16;
+                                positionCheck.Y = s * 16;
+                                if (NPC.position.X + NPC.width > positionCheck.X && NPC.position.X < positionCheck.X + 16f && NPC.position.Y + NPC.height > positionCheck.Y && NPC.position.Y < positionCheck.Y + 16f)
+                                {
+                                    flies = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!flies)
+                {
+                    NPC.localAI[1] = 1f;
+
+                    Rectangle rectangle12 = new Rectangle((int)NPC.position.X, (int)NPC.position.Y, NPC.width, NPC.height);
+
+                    int directChargeRange = death ? 1125 : 1200;
+
+                    if (expertMode)
+                        directChargeRange -= (int)(150f * (1f - lifeRatio));
+
+                    if (directChargeRange < 1050)
+                        directChargeRange = 1050;
+
+                    bool canDirectlyCharge = true;
+                    if (NPC.position.Y > player.position.Y)
+                    {
+                        for (int k = 0; k < Main.maxPlayers; k++)
+                        {
+                            if (Main.player[k].active)
+                            {
+                                Rectangle rectangle13 = new Rectangle((int)Main.player[k].position.X - 1000, (int)Main.player[k].position.Y - 1000, 2000, directChargeRange);
+                                if (rectangle12.Intersects(rectangle13))
+                                {
+                                    canDirectlyCharge = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (canDirectlyCharge)
+                            flies = true;
+                    }
+                }
+                else
+                    NPC.localAI[1] = 0f;
+
+                float turnSpeedCopy = groundPhaseTurnSpeed;
+                Vector2 npcCenter = NPC.Center;
+                float targetX = destination.X;
+                float targetY = destination.Y;
+                targetX = (int)(targetX / 16f) * 16;
+                targetY = (int)(targetY / 16f) * 16;
+                npcCenter.X = (int)(npcCenter.X / 16f) * 16;
+                npcCenter.Y = (int)(npcCenter.Y / 16f) * 16;
+                targetX -= npcCenter.X;
+                targetY -= npcCenter.Y;
+
+                if (!flies)
+                {
+                    NPC.velocity.Y += groundPhaseTurnSpeed;
+                    if (NPC.velocity.Y > segmentVelocity)
+                        NPC.velocity.Y = segmentVelocity;
+
+                    // This bool exists to stop the strange wiggle behavior when worms are falling down
+                    bool slowXVelocity = Math.Abs(NPC.velocity.X) > turnSpeedCopy;
+                    if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * 2.2)
+                    {
+                        if (NPC.velocity.X < 0f)
+                            NPC.velocity.X -= turnSpeedCopy * 1.1f;
+                        else
+                            NPC.velocity.X += turnSpeedCopy * 1.1f;
+                    }
+                    else if (NPC.velocity.Y == segmentVelocity)
+                    {
+                        if (slowXVelocity)
+                        {
+                            if (NPC.velocity.X < targetX)
+                                NPC.velocity.X += turnSpeedCopy;
+                            else if (NPC.velocity.X > targetX)
+                                NPC.velocity.X -= turnSpeedCopy;
+                        }
+                        else
+                            NPC.velocity.X = 0f;
+                    }
+                    else if (NPC.velocity.Y > 4f)
+                    {
+                        if (slowXVelocity)
+                        {
+                            if (NPC.velocity.X < 0f)
+                                NPC.velocity.X += turnSpeedCopy * 0.9f;
+                            else
+                                NPC.velocity.X -= turnSpeedCopy * 0.9f;
+                        }
+                        else
+                            NPC.velocity.X = 0f;
+                    }
+                }
+                else
+                {
+                    double maximumSpeed1 = death ? 0.46 : 0.4;
+                    double maximumSpeed2 = death ? 1.125 : 1D;
+
+                    if (expertMode)
+                    {
+                        maximumSpeed1 += 0.1f * (1f - lifeRatio);
+                        maximumSpeed2 += 0.2f * (1f - lifeRatio);
+                    }
+
+                    float targetDistance = (float)Math.Sqrt(targetX * targetX + targetY * targetY);
+                    float absoluteTargetX2 = Math.Abs(targetX);
+                    float absoluteTargetY2 = Math.Abs(targetY);
+                    float timeToReachTarget2 = segmentVelocity / targetDistance;
+                    targetX *= timeToReachTarget2;
+                    targetY *= timeToReachTarget2;
+
+                    if (((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f)) && ((NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f)))
+                    {
+                        if (NPC.velocity.X < targetX)
+                            NPC.velocity.X += groundPhaseTurnSpeed * 1.5f;
+                        else if (NPC.velocity.X > targetX)
+                            NPC.velocity.X -= groundPhaseTurnSpeed * 1.5f;
+
+                        if (NPC.velocity.Y < targetY)
+                            NPC.velocity.Y += groundPhaseTurnSpeed * 1.5f;
+                        else if (NPC.velocity.Y > targetY)
+                            NPC.velocity.Y -= groundPhaseTurnSpeed * 1.5f;
+                    }
+
+                    if ((NPC.velocity.X > 0f && targetX > 0f) || (NPC.velocity.X < 0f && targetX < 0f) || (NPC.velocity.Y > 0f && targetY > 0f) || (NPC.velocity.Y < 0f && targetY < 0f))
+                    {
+                        if (NPC.velocity.X < targetX)
+                            NPC.velocity.X += groundPhaseTurnSpeed;
+                        else if (NPC.velocity.X > targetX)
+                            NPC.velocity.X -= groundPhaseTurnSpeed;
+
+                        if (NPC.velocity.Y < targetY)
+                            NPC.velocity.Y += groundPhaseTurnSpeed;
+                        else if (NPC.velocity.Y > targetY)
+                            NPC.velocity.Y -= groundPhaseTurnSpeed;
+
+                        if (Math.Abs(targetY) < segmentVelocity * maximumSpeed1 && ((NPC.velocity.X > 0f && targetX < 0f) || (NPC.velocity.X < 0f && targetX > 0f)))
+                        {
+                            if (NPC.velocity.Y > 0f)
+                                NPC.velocity.Y += groundPhaseTurnSpeed * 2f;
+                            else
+                                NPC.velocity.Y -= groundPhaseTurnSpeed * 2f;
+                        }
+
+                        if (Math.Abs(targetX) < segmentVelocity * maximumSpeed1 && ((NPC.velocity.Y > 0f && targetY < 0f) || (NPC.velocity.Y < 0f && targetY > 0f)))
+                        {
+                            if (NPC.velocity.X > 0f)
+                                NPC.velocity.X += groundPhaseTurnSpeed * 2f;
+                            else
+                                NPC.velocity.X -= groundPhaseTurnSpeed * 2f;
+                        }
+                    }
+                    else if (absoluteTargetX2 > absoluteTargetY2)
+                    {
+                        if (NPC.velocity.X < targetX)
+                            NPC.velocity.X += groundPhaseTurnSpeed * 1.1f;
+                        else if (NPC.velocity.X > targetX)
+                            NPC.velocity.X -= groundPhaseTurnSpeed * 1.1f;
+
+                        if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * maximumSpeed2)
+                        {
+                            if (NPC.velocity.Y > 0f)
+                                NPC.velocity.Y += groundPhaseTurnSpeed;
+                            else
+                                NPC.velocity.Y -= groundPhaseTurnSpeed;
+                        }
+                    }
+                    else
+                    {
+                        if (NPC.velocity.Y < targetY)
+                            NPC.velocity.Y += groundPhaseTurnSpeed * 1.1f;
+                        else if (NPC.velocity.Y > targetY)
+                            NPC.velocity.Y -= groundPhaseTurnSpeed * 1.1f;
+
+                        if ((Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < segmentVelocity * maximumSpeed2)
+                        {
+                            if (NPC.velocity.X > 0f)
+                                NPC.velocity.X += groundPhaseTurnSpeed;
+                            else
+                                NPC.velocity.X -= groundPhaseTurnSpeed;
+                        }
+                    }
+                }
+
+                // Set velocity so that DoG cannot speed burst instantly at the start of a phase swap
+                if (calamityGlobalNPC.velocityPriorToPhaseSwap > 0f)
+                {
+                    if (NPC.velocity.Length() > calamityGlobalNPC.velocityPriorToPhaseSwap)
+                    {
+                        NPC.velocity.Normalize();
+                        NPC.velocity *= calamityGlobalNPC.velocityPriorToPhaseSwap;
+                        calamityGlobalNPC.velocityPriorToPhaseSwap += CalamityGlobalNPC.velocityPriorToPhaseSwapIncrement;
+                    }
+                }
+
+                NPC.rotation = (float)Math.Atan2(NPC.velocity.Y, NPC.velocity.X) + MathHelper.PiOver2;
+
+                if (flies)
+                {
+                    if (NPC.localAI[0] != 1f)
+                        NPC.ForceNetUpdate(false);
+
+                    NPC.localAI[0] = 1f;
+                }
+                else
+                {
+                    if (NPC.localAI[0] != 0f)
+                        NPC.ForceNetUpdate(false);
+
+                    NPC.localAI[0] = 0f;
+                }
+
+                if (((NPC.velocity.X > 0f && NPC.oldVelocity.X < 0f) || (NPC.velocity.X < 0f && NPC.oldVelocity.X > 0f) || (NPC.velocity.Y > 0f && NPC.oldVelocity.Y < 0f) || (NPC.velocity.Y < 0f && NPC.oldVelocity.Y > 0f)) && !NPC.justHit)
+                    NPC.ForceNetUpdate(false);
+            }
+        }
+
+        private void TurnTowards(Vector2 goal, ref float VelocityRotation, float offset = 0, float maxSpeed = 1)
+        {
+            float goal2 = (goal - NPC.Center).ToRotation() + offset;
+            maxSpeed *= (float)Math.PI / 180f;
+            var dif = MathF.Atan2(MathF.Sin(goal2 - VelocityRotation), MathF.Cos(goal2 - VelocityRotation));
+            if (dif < 0)
+            {
+                if (-dif > maxSpeed)
+                    VelocityRotation -= maxSpeed;
+                else
+                    VelocityRotation += dif;
+            }
+            else
+            {
+                if (dif > maxSpeed)
+                    VelocityRotation += maxSpeed;
+                else
+                    VelocityRotation += dif;
+            }
         }
 
         private void ShootFireballs(Player player, float distanceFromTarget, bool revenge)

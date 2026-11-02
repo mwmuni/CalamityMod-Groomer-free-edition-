@@ -19,6 +19,35 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         public static float Phase3ContactDamageMult = 1.8f; // 54 (buffed from 40)
         public static int BloodShotDamage = 8; // 32
 
+        private void SpawnServant(Vector2 servantSpawnCenter, Vector2 servantSpawnVelocity)
+        {
+            int servantSpawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)servantSpawnCenter.X, (int)servantSpawnCenter.Y, NPCID.ServantofCthulhu);
+            Main.npc[servantSpawn].velocity.X = servantSpawnVelocity.X;
+            Main.npc[servantSpawn].velocity.Y = servantSpawnVelocity.Y;
+
+            if (Main.dedServ && servantSpawn < Main.maxNPCs)
+                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, servantSpawn);
+        }
+
+        private void UpdateChargeLineUp(float lineUpDistControl)
+        {
+            NPC.ai[2] += 1f;
+
+            if (NPC.ai[2] == lineUpDistControl && Vector2.Distance(NPC.position, Main.player[NPC.target].position) < 200f)
+                NPC.ai[2] -= 1f;
+
+            if (NPC.ai[2] >= lineUpDistControl)
+            {
+                NPC.velocity *= 0.95f;
+                if (NPC.velocity.X > -0.1 && NPC.velocity.X < 0.1)
+                    NPC.velocity.X = 0f;
+                if (NPC.velocity.Y > -0.1 && NPC.velocity.Y < 0.1)
+                    NPC.velocity.Y = 0f;
+            }
+            else
+                NPC.rotation = NPC.velocity.ToRotation() - MathHelper.PiOver2;
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -309,12 +338,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         //Phase Transition Servant Spawn
-                        int servantSpawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)servantSpawnCenter.X, (int)servantSpawnCenter.Y, NPCID.ServantofCthulhu);
-                        Main.npc[servantSpawn].velocity.X = servantSpawnVelocity.X;
-                        Main.npc[servantSpawn].velocity.Y = servantSpawnVelocity.Y;
-
-                        if (Main.dedServ && servantSpawn < Main.maxNPCs)
-                            NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, servantSpawn);
+                        SpawnServant(servantSpawnCenter, servantSpawnVelocity);
                     }
 
                     for (int n = 0; n < 10; n++)
@@ -577,21 +601,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         SoundEngine.PlaySound(SoundID.ForceRoarPitched, NPC.Center);
 
                     float lineUpDistControl = lineUpDist;
-                    NPC.ai[2] += 1f;
-
-                    if (NPC.ai[2] == lineUpDistControl && Vector2.Distance(NPC.position, Main.player[NPC.target].position) < 200f)
-                        NPC.ai[2] -= 1f;
-
-                    if (NPC.ai[2] >= lineUpDistControl)
-                    {
-                        NPC.velocity *= 0.95f;
-                        if (NPC.velocity.X > -0.1 && NPC.velocity.X < 0.1)
-                            NPC.velocity.X = 0f;
-                        if (NPC.velocity.Y > -0.1 && NPC.velocity.Y < 0.1)
-                            NPC.velocity.Y = 0f;
-                    }
-                    else
-                        NPC.rotation = NPC.velocity.ToRotation() - MathHelper.PiOver2;
+                    UpdateChargeLineUp(lineUpDistControl);
 
                     float lineUpDistNetUpdate = lineUpDistControl + 13f;
                     if (NPC.ai[2] >= lineUpDistNetUpdate)
@@ -676,12 +686,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             if (spawnServant)
                             {
                                 //Final Phase Servant Spawn
-                                int eye = NPC.NewNPC(NPC.GetSource_FromAI(), (int)servantSpawnCenter.X, (int)servantSpawnCenter.Y, NPCID.ServantofCthulhu);
-                                Main.npc[eye].velocity.X = servantSpawnVelocity.X;
-                                Main.npc[eye].velocity.Y = servantSpawnVelocity.Y;
-
-                                if (Main.dedServ && eye < Main.maxNPCs)
-                                    NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, eye);
+                                SpawnServant(servantSpawnCenter, servantSpawnVelocity);
                             }
                             else if (!Main.getGoodWorld)
                             {
@@ -772,21 +777,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                         SoundEngine.PlaySound(SoundID.ForceRoar, NPC.Center);
 
                     float lineUpDistControl = (float)Math.Round(lineUpDist * 2.5f);
-                    NPC.ai[2] += 1f;
-
-                    if (NPC.ai[2] == lineUpDistControl && Vector2.Distance(NPC.position, Main.player[NPC.target].position) < 200f)
-                        NPC.ai[2] -= 1f;
-
-                    if (NPC.ai[2] >= lineUpDistControl)
-                    {
-                        NPC.velocity *= 0.95f;
-                        if (NPC.velocity.X > -0.1 && NPC.velocity.X < 0.1)
-                            NPC.velocity.X = 0f;
-                        if (NPC.velocity.Y > -0.1 && NPC.velocity.Y < 0.1)
-                            NPC.velocity.Y = 0f;
-                    }
-                    else
-                        NPC.rotation = NPC.velocity.ToRotation() - MathHelper.PiOver2;
+                    UpdateChargeLineUp(lineUpDistControl);
 
                     float lineUpDistNetUpdate = lineUpDistControl + 13f;
                     if (NPC.ai[2] >= lineUpDistNetUpdate)

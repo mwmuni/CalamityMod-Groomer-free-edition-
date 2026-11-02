@@ -1324,19 +1324,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
 
             if (NPC.life <= 0)
             {
-                for (int i = 0; i < 2; i++)
-                {
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 100, new Color(0, 255, 255), 1.5f);
-                }
-                for (int j = 0; j < 20; j++)
-                {
-                    int plasmaDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 0, new Color(0, 255, 255), 2.5f);
-                    Main.dust[plasmaDust].noGravity = true;
-                    Main.dust[plasmaDust].velocity *= 3f;
-                    plasmaDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 100, new Color(0, 255, 255), 1.5f);
-                    Main.dust[plasmaDust].velocity *= 2f;
-                    Main.dust[plasmaDust].noGravity = true;
-                }
+                CreateThanatosDeathDust(NPC);
 
                 if (!Main.dedServ)
                 {
@@ -1344,6 +1332,23 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                     Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("ThanatosHead2").Type, 1f);
                     Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>("ThanatosHead3").Type, 1f);
                 }
+            }
+        }
+
+        internal static void CreateThanatosDeathDust(NPC NPC)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 100, new Color(0, 255, 255), 1.5f);
+            }
+            for (int j = 0; j < 20; j++)
+            {
+                int plasmaDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 0, new Color(0, 255, 255), 2.5f);
+                Main.dust[plasmaDust].noGravity = true;
+                Main.dust[plasmaDust].velocity *= 3f;
+                plasmaDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 100, new Color(0, 255, 255), 1.5f);
+                Main.dust[plasmaDust].velocity *= 2f;
+                Main.dust[plasmaDust].noGravity = true;
             }
         }
 

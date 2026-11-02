@@ -824,31 +824,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
                         calamityGlobalNPC.newAI[2] += 1f;
                         if (calamityGlobalNPC.newAI[2] > deathrayPhaseGateValue)
                         {
-                            // Despawn stupid fucking dog shit to avoid screaming the word "cunt"
-                            for (int x = 0; x < Main.maxProjectiles; x++)
-                            {
-                                Projectile projectile = Main.projectile[x];
-                                if (projectile.active)
-                                {
-                                    if (projectile.type == ModContent.ProjectileType<AresTeslaOrb>() || projectile.type == ModContent.ProjectileType<AresPlasmaFireball>() ||
-                                        projectile.type == ModContent.ProjectileType<AresPlasmaBolt>() || projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>() ||
-                                        projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileSpark>())
-                                    {
-                                        if (projectile.timeLeft > 15)
-                                            projectile.timeLeft = 15;
-
-                                        if (projectile.type == ModContent.ProjectileType<AresPlasmaFireball>())
-                                        {
-                                            projectile.ai[0] = -1f;
-                                            projectile.ai[1] = -1f;
-                                        }
-                                        else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>())
-                                            projectile.ai[0] = -1f;
-                                    }
-                                    else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileBoom>())
-                                        projectile.Kill();
-                                }
-                            }
+                            ClearAttackProjectiles();
 
                             calamityGlobalNPC.newAI[2] = 0f;
                             AIState = (float)Phase.Deathrays;
@@ -922,31 +898,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
                             // Fire deathray telegraph beams
                             if (calamityGlobalNPC.newAI[2] == 1f)
                             {
-                                // Despawn stupid fucking dog shit to avoid screaming the word "cunt", again
-                                for (int x = 0; x < Main.maxProjectiles; x++)
-                                {
-                                    Projectile projectile = Main.projectile[x];
-                                    if (projectile.active)
-                                    {
-                                        if (projectile.type == ModContent.ProjectileType<AresTeslaOrb>() || projectile.type == ModContent.ProjectileType<AresPlasmaFireball>() ||
-                                            projectile.type == ModContent.ProjectileType<AresPlasmaBolt>() || projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>() ||
-                                            projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileSpark>())
-                                        {
-                                            if (projectile.timeLeft > 15)
-                                                projectile.timeLeft = 15;
-
-                                            if (projectile.type == ModContent.ProjectileType<AresPlasmaFireball>())
-                                            {
-                                                projectile.ai[0] = -1f;
-                                                projectile.ai[1] = -1f;
-                                            }
-                                            else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>())
-                                                projectile.ai[0] = -1f;
-                                        }
-                                        else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileBoom>())
-                                            projectile.Kill();
-                                    }
-                                }
+                                ClearAttackProjectiles();
 
                                 // Set frames to deathray charge up frames, which begin on frame 12
                                 // Reset the frame counter
@@ -1053,31 +1005,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
                             }
                             else
                             {
-                                // Despawn stupid fucking dog shit to avoid screaming the word "cunt"
-                                for (int x = 0; x < Main.maxProjectiles; x++)
-                                {
-                                    Projectile projectile = Main.projectile[x];
-                                    if (projectile.active)
-                                    {
-                                        if (projectile.type == ModContent.ProjectileType<AresTeslaOrb>() || projectile.type == ModContent.ProjectileType<AresPlasmaFireball>() ||
-                                            projectile.type == ModContent.ProjectileType<AresPlasmaBolt>() || projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>() ||
-                                            projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileSpark>())
-                                        {
-                                            if (projectile.timeLeft > 15)
-                                                projectile.timeLeft = 15;
-
-                                            if (projectile.type == ModContent.ProjectileType<AresPlasmaFireball>())
-                                            {
-                                                projectile.ai[0] = -1f;
-                                                projectile.ai[1] = -1f;
-                                            }
-                                            else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>())
-                                                projectile.ai[0] = -1f;
-                                        }
-                                        else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileBoom>())
-                                            projectile.Kill();
-                                    }
-                                }
+                                ClearAttackProjectiles();
 
                                 calamityGlobalNPC.newAI[2] = 0f;
                                 calamityGlobalNPC.newAI[3] = 0f;
@@ -1094,6 +1022,45 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
                     }
 
                     break;
+            }
+        }
+
+        private static void ClearAttackProjectiles()
+        {
+            for (int x = 0; x < Main.maxProjectiles; x++)
+            {
+                Projectile projectile = Main.projectile[x];
+                if (projectile.active)
+                {
+                    if (projectile.type == ModContent.ProjectileType<AresTeslaOrb>() || projectile.type == ModContent.ProjectileType<AresPlasmaFireball>() ||
+                        projectile.type == ModContent.ProjectileType<AresPlasmaBolt>() || projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>() ||
+                        projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileSpark>())
+                    {
+                        if (projectile.timeLeft > 15)
+                            projectile.timeLeft = 15;
+
+                        if (projectile.type == ModContent.ProjectileType<AresPlasmaFireball>())
+                        {
+                            projectile.ai[0] = -1f;
+                            projectile.ai[1] = -1f;
+                        }
+                        else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectile>())
+                            projectile.ai[0] = -1f;
+                    }
+                    else if (projectile.type == ModContent.ProjectileType<AresGaussNukeProjectileBoom>())
+                        projectile.Kill();
+                }
+            }
+        }
+
+        internal static void AdvanceAnimationFrame(NPC NPC, ref int frameX, ref int frameY, int maxFramesY)
+        {
+            NPC.frameCounter = 0D;
+            frameY++;
+            if (frameY == maxFramesY)
+            {
+                frameX++;
+                frameY = 0;
             }
         }
 
@@ -1114,18 +1081,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
             {
                 if (NPC.frameCounter >= 6D)
                 {
-                    // Reset frame counter
-                    NPC.frameCounter = 0D;
-
-                    // Increment the Y frame
-                    frameY++;
-
-                    // Reset the Y frame if greater than 8
-                    if (frameY == maxFramesY)
-                    {
-                        frameX++;
-                        frameY = 0;
-                    }
+                    AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                     // Reset the frames to frame 0
                     if ((frameX * maxFramesY) + frameY > normalFrameLimit)
@@ -1136,18 +1092,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
             {
                 if (NPC.frameCounter >= 6D)
                 {
-                    // Reset frame counter
-                    NPC.frameCounter = 0D;
-
-                    // Increment the Y frame
-                    frameY++;
-
-                    // Reset the Y frame if greater than 8
-                    if (frameY == maxFramesY)
-                    {
-                        frameX++;
-                        frameY = 0;
-                    }
+                    AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                     // Reset the frames to frame 36, the start of the deathray firing animation loop
                     if ((frameX * maxFramesY) + frameY > finalStageDeathrayChargeFrameLimit)
@@ -1257,40 +1202,32 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
             Vector2 vector = new Vector2(NPC.width / 2, NPC.height / 2);
             int numAfterimages = 5;
 
-            if (CalamityClientConfig.Instance.Afterimages)
+            void DrawAfterimages()
             {
-                for (int i = 1; i < numAfterimages; i += 2)
+                if (CalamityClientConfig.Instance.Afterimages)
                 {
-                    Color afterimageColor = drawColor;
-                    afterimageColor = Color.Lerp(afterimageColor, afterimageBaseColor, 0.5f);
-                    afterimageColor = NPC.GetAlpha(afterimageColor);
-                    afterimageColor *= (numAfterimages - i) / 15f;
-                    Vector2 afterimageCenter = NPC.oldPos[i] + new Vector2(NPC.width, NPC.height) / 2f - screenPos;
-                    afterimageCenter -= new Vector2(texture.Width, texture.Height) / new Vector2(maxFramesX, maxFramesY) * NPC.scale / 2f;
-                    afterimageCenter += vector * NPC.scale + new Vector2(0f, NPC.gfxOffY);
-                    spriteBatch.Draw(texture, afterimageCenter, NPC.frame, afterimageColor, NPC.oldRot[i], vector, NPC.scale, SpriteEffects.None, 0f);
+                    for (int i = 1; i < numAfterimages; i += 2)
+                    {
+                        Color afterimageColor = drawColor;
+                        afterimageColor = Color.Lerp(afterimageColor, afterimageBaseColor, 0.5f);
+                        afterimageColor = NPC.GetAlpha(afterimageColor);
+                        afterimageColor *= (numAfterimages - i) / 15f;
+                        Vector2 afterimageCenter = NPC.oldPos[i] + new Vector2(NPC.width, NPC.height) / 2f - screenPos;
+                        afterimageCenter -= new Vector2(texture.Width, texture.Height) / new Vector2(maxFramesX, maxFramesY) * NPC.scale / 2f;
+                        afterimageCenter += vector * NPC.scale + new Vector2(0f, NPC.gfxOffY);
+                        spriteBatch.Draw(texture, afterimageCenter, NPC.frame, afterimageColor, NPC.oldRot[i], vector, NPC.scale, SpriteEffects.None, 0f);
+                    }
                 }
             }
+
+            DrawAfterimages();
 
             Vector2 center = NPC.Center - screenPos;
             spriteBatch.Draw(texture, center, frame, NPC.GetAlpha(drawColor), NPC.rotation, vector, NPC.scale, SpriteEffects.None, 0f);
 
             texture = GlowTexture.Value;
 
-            if (CalamityClientConfig.Instance.Afterimages)
-            {
-                for (int i = 1; i < numAfterimages; i += 2)
-                {
-                    Color afterimageColor = drawColor;
-                    afterimageColor = Color.Lerp(afterimageColor, afterimageBaseColor, 0.5f);
-                    afterimageColor = NPC.GetAlpha(afterimageColor);
-                    afterimageColor *= (numAfterimages - i) / 15f;
-                    Vector2 afterimageCenter = NPC.oldPos[i] + new Vector2(NPC.width, NPC.height) / 2f - screenPos;
-                    afterimageCenter -= new Vector2(texture.Width, texture.Height) / new Vector2(maxFramesX, maxFramesY) * NPC.scale / 2f;
-                    afterimageCenter += vector * NPC.scale + new Vector2(0f, NPC.gfxOffY);
-                    spriteBatch.Draw(texture, afterimageCenter, NPC.frame, afterimageColor, NPC.oldRot[i], vector, NPC.scale, SpriteEffects.None, 0f);
-                }
-            }
+            DrawAfterimages();
 
             spriteBatch.Draw(texture, center, frame, afterimageBaseColor * NPC.Opacity, NPC.rotation, vector, NPC.scale, SpriteEffects.None, 0f);
 

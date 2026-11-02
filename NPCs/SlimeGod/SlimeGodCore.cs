@@ -285,15 +285,7 @@ namespace CalamityMod.NPCs.SlimeGod
                     }
                     else
                     {
-                        for (int x = 0; x < Main.maxNPCs; x++)
-                        {
-                            if (Main.npc[x].type == ModContent.NPCType<EbonianPaladin>() || Main.npc[x].type == ModContent.NPCType<SplitEbonianPaladin>() ||
-                                Main.npc[x].type == ModContent.NPCType<CrimulanPaladin>() || Main.npc[x].type == ModContent.NPCType<SplitCrimulanPaladin>())
-                            {
-                                Main.npc[x].active = false;
-                                Main.npc[x].netUpdate = true;
-                            }
-                        }
+                        DeactivatePaladins();
 
                         NPC.active = false;
                         NPC.HitEffect();
@@ -319,15 +311,7 @@ namespace CalamityMod.NPCs.SlimeGod
 
                     if (NPC.position.Y > Main.worldSurface * 16.0)
                     {
-                        for (int x = 0; x < Main.maxNPCs; x++)
-                        {
-                            if (Main.npc[x].type == ModContent.NPCType<EbonianPaladin>() || Main.npc[x].type == ModContent.NPCType<SplitEbonianPaladin>() ||
-                                Main.npc[x].type == ModContent.NPCType<CrimulanPaladin>() || Main.npc[x].type == ModContent.NPCType<SplitCrimulanPaladin>())
-                            {
-                                Main.npc[x].active = false;
-                                Main.npc[x].netUpdate = true;
-                            }
-                        }
+                        DeactivatePaladins();
                         NPC.active = false;
                         NPC.netUpdate = true;
                     }
@@ -554,6 +538,19 @@ namespace CalamityMod.NPCs.SlimeGod
 
             // Otherwise, use the average general position as a place to hover.
             return generalSlimeArea;
+        }
+
+        private static void DeactivatePaladins()
+        {
+            for (int x = 0; x < Main.maxNPCs; x++)
+            {
+                if (Main.npc[x].type == ModContent.NPCType<EbonianPaladin>() || Main.npc[x].type == ModContent.NPCType<SplitEbonianPaladin>() ||
+                    Main.npc[x].type == ModContent.NPCType<CrimulanPaladin>() || Main.npc[x].type == ModContent.NPCType<SplitCrimulanPaladin>())
+                {
+                    Main.npc[x].active = false;
+                    Main.npc[x].netUpdate = true;
+                }
+            }
         }
 
         public override Color? GetAlpha(Color drawColor)

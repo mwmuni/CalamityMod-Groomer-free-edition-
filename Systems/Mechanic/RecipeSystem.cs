@@ -813,6 +813,13 @@ namespace CalamityMod.Systems
         #endregion
 
         #region Astral Recipe Variants
+        private static void RegisterRecipeVariant(Recipe r, int result)
+        {
+            r.Register();
+            r.SortAfterFirstRecipesOf(result);
+            r.DisableDecraft();
+        }
+
         private static void AddAstralRecipeVariants()
         {
             #region Astral Clay
@@ -822,104 +829,80 @@ namespace CalamityMod.Systems
             r.AddIngredient(ItemID.ArgonMoss);
             r.AddIngredient<AstralClay>(10);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.ArgonMossBlock);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.ArgonMossBlock);
 
             // Bowl
             r = Recipe.Create(ItemID.Bowl);
             r.AddIngredient<AstralClay>(2);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.Bowl);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.Bowl);
 
             // Clay Pot
             r = Recipe.Create(ItemID.ClayPot);
             r.AddIngredient<AstralClay>(5);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.ClayPot);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.ClayPot);
 
             // Helium Moss Brick
             r = Recipe.Create(ItemID.RainbowMossBlock, 10);
             r.AddIngredient(ItemID.RainbowMoss);
             r.AddIngredient<AstralClay>(10);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.RainbowMossBlock);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.RainbowMossBlock);
 
             // Krypton Moss Brick
             r = Recipe.Create(ItemID.KryptonMossBlock, 10);
             r.AddIngredient(ItemID.KryptonMoss);
             r.AddIngredient<AstralClay>(10);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.KryptonMossBlock);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.KryptonMossBlock);
 
             // Lava Moss Brick
             r = Recipe.Create(ItemID.LavaMossBlock, 10);
             r.AddIngredient(ItemID.LavaMoss);
             r.AddIngredient<AstralClay>(10);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.LavaMossBlock);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.LavaMossBlock);
 
             // Neon Moss Brick
             r = Recipe.Create(ItemID.VioletMossBlock, 10);
             r.AddIngredient(ItemID.VioletMoss);
             r.AddIngredient<AstralClay>(10);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.VioletMossBlock);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.VioletMossBlock);
 
             // Pink Vase
             r = Recipe.Create(ItemID.PinkVase);
             r.AddIngredient<AstralClay>(4);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.PinkVase);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.PinkVase);
 
             // Plate
             r = Recipe.Create(ItemID.FoodPlatter);
             r.AddIngredient<AstralClay>(2);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.FoodPlatter);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.FoodPlatter);
 
             // Teapot
             r = Recipe.Create(ItemID.TeaKettle);
             r.AddIngredient<AstralClay>(12);
             r.AddIngredient(ItemID.Bone, 12);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.TeaKettle);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.TeaKettle);
 
             // Wandering Jingasa
             r = Recipe.Create(ItemID.RoninHat);
             r.AddIngredient<AstralClay>(10);
             r.AddIngredient(ItemID.Firefly, 3); // Does not use the recipe group in Vanilla
             r.AddTile(TileID.Loom);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.RoninHat);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.RoninHat);
 
             // Xenon Moss Brick
             r = Recipe.Create(ItemID.XenonMossBlock, 10);
             r.AddIngredient(ItemID.XenonMoss);
             r.AddIngredient<AstralClay>(10);
             r.AddTile(TileID.Furnaces);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.XenonMossBlock);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.XenonMossBlock);
             #endregion
 
             #region Astral Dirt
@@ -930,25 +913,19 @@ namespace CalamityMod.Systems
             r.AddIngredient<AstralDirt>(10);
             r.AddIngredient(ItemID.Daybloom);
             r.AddTile(TileID.Loom);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.FloretProtectorHelmet);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.FloretProtectorHelmet);
 
             r = Recipe.Create(ItemID.FloretProtectorChestplate);
             r.AddIngredient(ItemID.Silk, 20);
             r.AddIngredient<AstralDirt>(15);
             r.AddTile(TileID.Loom);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.FloretProtectorChestplate);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.FloretProtectorChestplate);
 
             r = Recipe.Create(ItemID.FloretProtectorLegs);
             r.AddIngredient(ItemID.Silk, 20);
             r.AddIngredient<AstralDirt>(15);
             r.AddTile(TileID.Loom);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.FloretProtectorLegs);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.FloretProtectorLegs);
             #endregion
 
             #region Astral Ice
@@ -956,9 +933,7 @@ namespace CalamityMod.Systems
             r = Recipe.Create(ItemID.IceTorch, 3);
             r.AddIngredient(ItemID.Torch, 3);
             r.AddIngredient<AstralIce>();
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.IceTorch);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.IceTorch);
             #endregion
 
             #region Astral Snow
@@ -968,16 +943,12 @@ namespace CalamityMod.Systems
             r.AddIngredient(ItemID.Bottle);
             r.AddIngredient<AstralSnow>();
             r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.BananaDaiquiri);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.BananaDaiquiri);
 
             // Snowball
             r = Recipe.Create(ItemID.Snowball, 15);
             r.AddIngredient<AstralSnow>();
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.Snowball);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.Snowball);
             #endregion
 
             #region Hardened Astral Sand
@@ -985,9 +956,7 @@ namespace CalamityMod.Systems
             r = Recipe.Create(ItemID.DesertTorch, 3);
             r.AddIngredient(ItemID.Torch, 3);
             r.AddIngredient<HardenedAstralSand>();
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.DesertTorch);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.DesertTorch);
             #endregion
         }
         #endregion
@@ -1054,38 +1023,21 @@ namespace CalamityMod.Systems
                 ItemID.InfernoPotion,
                 ItemID.LuckPotionGreater
             };
-            Recipe r;
-
             foreach (var potion in FiveOrbGroup)
-            {
-                r = Recipe.Create(potion);
-                r.AddIngredient(ItemID.BottledWater);
-                r.AddIngredient<BloodOrb>(5);
-                r.AddTile(TileID.AlchemyTable);
-                r.Register();
-                r.SortAfterFirstRecipesOf(potion);
-                r.DisableDecraft();
-            }
+                AddBloodOrbPotionRecipe(potion, 5);
             foreach (var potion in TenOrbGroup)
-            {
-                r = Recipe.Create(potion);
-                r.AddIngredient(ItemID.BottledWater);
-                r.AddIngredient<BloodOrb>(10);
-                r.AddTile(TileID.AlchemyTable);
-                r.Register();
-                r.SortAfterFirstRecipesOf(potion);
-                r.DisableDecraft();
-            }
+                AddBloodOrbPotionRecipe(potion, 10);
             foreach (var potion in FifteenOrbGroup)
-            {
-                r = Recipe.Create(potion);
-                r.AddIngredient(ItemID.BottledWater);
-                r.AddIngredient<BloodOrb>(15);
-                r.AddTile(TileID.AlchemyTable);
-                r.Register();
-                r.SortAfterFirstRecipesOf(potion);
-                r.DisableDecraft();
-            }
+                AddBloodOrbPotionRecipe(potion, 15);
+        }
+
+        private static void AddBloodOrbPotionRecipe(int potion, int orbCount)
+        {
+            Recipe r = Recipe.Create(potion);
+            r.AddIngredient(ItemID.BottledWater);
+            r.AddIngredient<BloodOrb>(orbCount);
+            r.AddTile(TileID.AlchemyTable);
+            RegisterRecipeVariant(r, potion);
         }
         #endregion
 
@@ -1093,120 +1045,45 @@ namespace CalamityMod.Systems
         private static void AddCookedFood()
         {
             #region Cooked Fish
-            Recipe r = Recipe.Create(ItemID.CookedFish);
-            r.AddIngredient<TwinklingPollox>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedFish);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.CookedFish);
-            r.AddIngredient<PrismaticGuppy>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedFish);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.CookedFish);
-            r.AddIngredient<CoralskinFoolfish>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedFish);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.CookedFish);
-            r.AddIngredient<GleamingCucumber>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedFish);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.CookedFish);
-            r.AddIngredient<MoltenFishron>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedFish);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.CookedFish);
-            r.AddIngredient<SpecularSturgeon>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedFish);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.CookedFish);
-            r.AddIngredient<Squidoom>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedFish);
-            r.DisableDecraft();
+            AddCookedFoodRecipe<TwinklingPollox>(ItemID.CookedFish);
+            AddCookedFoodRecipe<PrismaticGuppy>(ItemID.CookedFish);
+            AddCookedFoodRecipe<CoralskinFoolfish>(ItemID.CookedFish);
+            AddCookedFoodRecipe<GleamingCucumber>(ItemID.CookedFish);
+            AddCookedFoodRecipe<MoltenFishron>(ItemID.CookedFish);
+            AddCookedFoodRecipe<SpecularSturgeon>(ItemID.CookedFish);
+            AddCookedFoodRecipe<Squidoom>(ItemID.CookedFish);
             #endregion
 
             #region Seafood Dinner
-            r = Recipe.Create(ItemID.SeafoodDinner);
-            r.AddIngredient<AldebaranAlewife>(2);
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.SeafoodDinner);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.SeafoodDinner);
-            r.AddIngredient<Bloodfin>(2);
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.SeafoodDinner);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.SeafoodDinner);
-            r.AddIngredient<CoastalDemonfish>(2);
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.SeafoodDinner);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.SeafoodDinner);
-            r.AddIngredient<Shadowfish>(2);
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.SeafoodDinner);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.SeafoodDinner);
-            r.AddIngredient<SunkenSailfish>(2);
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.SeafoodDinner);
-            r.DisableDecraft();
+            AddCookedFoodRecipe<AldebaranAlewife>(ItemID.SeafoodDinner, 2);
+            AddCookedFoodRecipe<Bloodfin>(ItemID.SeafoodDinner, 2);
+            AddCookedFoodRecipe<CoastalDemonfish>(ItemID.SeafoodDinner, 2);
+            AddCookedFoodRecipe<Shadowfish>(ItemID.SeafoodDinner, 2);
+            AddCookedFoodRecipe<SunkenSailfish>(ItemID.SeafoodDinner, 2);
             #endregion
 
-            r = Recipe.Create(ItemID.BowlofSoup);
+            Recipe r = Recipe.Create(ItemID.BowlofSoup);
             r.AddIngredient(ItemID.Mushroom);
             r.AddIngredient<SeaMinnowItem>();
             r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.BowlofSoup);
-            r.DisableDecraft();
+            RegisterRecipeVariant(r, ItemID.BowlofSoup);
 
-            r = Recipe.Create(ItemID.Sashimi);
-            r.AddIngredient<CragBullhead>();
-            r.AddTile(TileID.WorkBenches);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.Sashimi);
-            r.DisableDecraft();
-
-            r = Recipe.Create(ItemID.CookedShrimp);
-            r.AddIngredient<ProcyonidPrawn>();
-            r.AddTile(TileID.CookingPots);
-            r.Register();
-            r.SortAfterFirstRecipesOf(ItemID.CookedShrimp);
-            r.DisableDecraft();
+            AddCookedFoodRecipe<CragBullhead>(ItemID.Sashimi, tile: TileID.WorkBenches);
+            AddCookedFoodRecipe<ProcyonidPrawn>(ItemID.CookedShrimp);
 
             r = Recipe.Create(ItemID.GoldenDelight);
             r.AddIngredient<PiggyGoldItem>();
             r.AddTile(TileID.CookingPots);
             r.Register();
             r.DisableDecraft();
+        }
+
+        private static void AddCookedFoodRecipe<T>(int result, int stack = 1, int tile = TileID.CookingPots) where T : ModItem
+        {
+            Recipe r = Recipe.Create(result);
+            r.AddIngredient<T>(stack);
+            r.AddTile(tile);
+            RegisterRecipeVariant(r, result);
         }
         #endregion
 

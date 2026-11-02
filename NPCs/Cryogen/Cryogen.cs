@@ -351,20 +351,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
-                            int totalProjectiles = 16;
-                            float radians = MathHelper.TwoPi / totalProjectiles;
-                            int type = iceBlast;
-                            float velocity = death ? 9.5f : 9f;
-                            float projectileVelocityToPass = 0f;
-                            if (type == ModContent.ProjectileType<BrimstoneBarrage>())
-                                projectileVelocityToPass = velocity * 2f;
-
-                            Vector2 spinningPoint = new Vector2(0f, -velocity);
-                            for (int k = 0; k < totalProjectiles; k++)
-                            {
-                                Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceBlastDamage, 0f, Main.myPlayer, 0f, 0f, projectileVelocityToPass);
-                            }
+                            FireIceBlastRing(16, iceBlast, death ? 9.5f : 9f);
                         }
                     }
                 }
@@ -376,16 +363,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                 float cryogenSpeed = death ? 7f : revenge ? 5f : 4f;
 
-                playerDistance = cryogenSpeed / playerDistance;
-                playerXDist *= playerDistance;
-                playerYDist *= playerDistance;
-
-                float inertia = 50f;
-                if (Main.getGoodWorld)
-                    inertia *= 0.5f;
-
-                NPC.velocity.X = (NPC.velocity.X * inertia + playerXDist) / (inertia + 1f);
-                NPC.velocity.Y = (NPC.velocity.Y * inertia + playerYDist) / (inertia + 1f);
+                ApplyApproachVelocity(playerDistance, playerXDist, playerYDist, cryogenSpeed);
 
                 if (phase2)
                 {
@@ -394,14 +372,7 @@ namespace CalamityMod.NPCs.Cryogen
                     NPC.localAI[0] = 0f;
                     NPC.netUpdate = true;
 
-                    SoundEngine.PlaySound(ShieldRegenSound, NPC.Center);
-                    if (NPC.ai[2] == 0f && Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        int shieldSpawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<CryogenShield>(), NPC.whoAmI);
-                        NPC.ai[2] = shieldSpawn + 1;
-                        Main.npc[shieldSpawn].ai[0] = NPC.whoAmI;
-                        Main.npc[shieldSpawn].netUpdate = true;
-                    }
+                    RegenerateShield();
                 }
             }
             else if (NPC.ai[0] == 1f)
@@ -425,20 +396,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
-                                int totalProjectiles = 12;
-                                float radians = MathHelper.TwoPi / totalProjectiles;
-                                int type = iceBlast;
-                                float velocity2 = death ? 9.5f : 9f;
-                                float projectileVelocityToPass = 0f;
-                                if (type == ModContent.ProjectileType<BrimstoneBarrage>())
-                                    projectileVelocityToPass = velocity2 * 2f;
-
-                                Vector2 spinningPoint = new Vector2(0f, -velocity2);
-                                for (int k = 0; k < totalProjectiles; k++)
-                                {
-                                    Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceBlastDamage, 0f, Main.myPlayer, 0f, 0f, projectileVelocityToPass);
-                                }
+                                FireIceBlastRing(12, iceBlast, death ? 9.5f : 9f);
                             }
                         }
                     }
@@ -507,24 +465,7 @@ namespace CalamityMod.NPCs.Cryogen
                                 int totalProjectiles = 10;
                                 int maxTotalProjectileReductionBasedOnRotationSpeed = (int)(totalProjectiles * 0.7f);
                                 int totalProjectilesShot = totalProjectiles - (int)Math.Round(calamityGlobalNPC.newAI[0] * maxTotalProjectileReductionBasedOnRotationSpeed);
-                                for (int i = 0; i < 2; i++)
-                                {
-                                    float radians = MathHelper.TwoPi / totalProjectilesShot;
-                                    float newVelocity = velocity - (velocity * 0.5f * i);
-                                    float projectileVelocityToPass = 0f;
-                                    if (type == ModContent.ProjectileType<BrimstoneBarrage>())
-                                        projectileVelocityToPass = velocity * 2f;
-
-                                    double angleA = radians * 0.5;
-                                    double angleB = MathHelper.ToRadians(90f) - angleA;
-                                    float velocityX = (float)(newVelocity * Math.Sin(angleA) / Math.Sin(angleB));
-                                    Vector2 spinningPoint = i == 0 ? new Vector2(0f, -newVelocity) : new Vector2(-velocityX, -newVelocity);
-                                    for (int k = 0; k < totalProjectilesShot; k++)
-                                    {
-                                        Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
-                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceRainDamage, 0f, Main.myPlayer, 0f, type == ModContent.ProjectileType<BrimstoneBarrage>() ? 0f : velocity, projectileVelocityToPass);
-                                    }
-                                }
+                                FireIceRainRings(type, velocity, totalProjectilesShot, 2, 0.5f, 0);
                             }
                         }
                     }
@@ -540,20 +481,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                     if (NPC.ai[1] == chargeGateValue)
                     {
-                        float chargeVelocity = Vector2.Distance(NPC.Center, player.Center) / chargeDuration * 2f;
-                        NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * (chargeVelocity + (death ? 1f : 0f));
-
-                        if (NPC.velocity.Length() < chargeVelocityMin)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= chargeVelocityMin;
-                        }
-
-                        if (NPC.velocity.Length() > chargeVelocityMax)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= chargeVelocityMax;
-                        }
+                        StartCharge(player, death, chargeDuration, chargeVelocityMin, chargeVelocityMax);
 
                         NPC.ai[1] = chargeGateValue + chargeDuration;
                         calamityGlobalNPC.newAI[0] = 0f;
@@ -588,14 +516,7 @@ namespace CalamityMod.NPCs.Cryogen
                     calamityGlobalNPC.newAI[2] = 0f;
                     NPC.netUpdate = true;
 
-                    SoundEngine.PlaySound(ShieldRegenSound, NPC.Center);
-                    if (NPC.ai[2] == 0f && Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        int shieldSpawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<CryogenShield>(), NPC.whoAmI);
-                        NPC.ai[2] = shieldSpawn + 1;
-                        Main.npc[shieldSpawn].ai[0] = NPC.whoAmI;
-                        Main.npc[shieldSpawn].netUpdate = true;
-                    }
+                    RegenerateShield();
                 }
             }
             else if (NPC.ai[0] == 2f)
@@ -619,20 +540,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
-                                int totalProjectiles = 12;
-                                float radians = MathHelper.TwoPi / totalProjectiles;
-                                int type = iceBlast;
-                                float velocity = death ? 9.5f : 9f;
-                                float projectileVelocityToPass = 0f;
-                                if (type == ModContent.ProjectileType<BrimstoneBarrage>())
-                                    projectileVelocityToPass = velocity * 2f;
-
-                                Vector2 spinningPoint = new Vector2(0f, -velocity);
-                                for (int k = 0; k < totalProjectiles; k++)
-                                {
-                                    Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceBlastDamage, 0f, Main.myPlayer, 0f, 0f, projectileVelocityToPass);
-                                }
+                                FireIceBlastRing(12, iceBlast, death ? 9.5f : 9f);
                             }
                         }
                     }
@@ -644,16 +552,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                     float cryogenSpeed = death ? 9f : revenge ? 7f : 6f;
 
-                    playerDistance = cryogenSpeed / playerDistance;
-                    playerXDist *= playerDistance;
-                    playerYDist *= playerDistance;
-
-                    float inertia = 50f;
-                    if (Main.getGoodWorld)
-                        inertia *= 0.5f;
-
-                    NPC.velocity.X = (NPC.velocity.X * inertia + playerXDist) / (inertia + 1f);
-                    NPC.velocity.Y = (NPC.velocity.Y * inertia + playerYDist) / (inertia + 1f);
+                    ApplyApproachVelocity(playerDistance, playerXDist, playerYDist, cryogenSpeed);
                 }
                 else if (NPC.ai[1] < chargeGateValue)
                 {
@@ -674,24 +573,7 @@ namespace CalamityMod.NPCs.Cryogen
                                 int totalProjectiles = calamityGlobalNPC.newAI[1] == 0f ? 8 : 4;
                                 int maxTotalProjectileReductionBasedOnRotationSpeed = (int)(totalProjectiles * 0.4f);
                                 int totalProjectilesShot = totalProjectiles - (int)Math.Round(calamityGlobalNPC.newAI[0] * maxTotalProjectileReductionBasedOnRotationSpeed);
-                                for (int i = 0; i < 3; i++)
-                                {
-                                    float radians = MathHelper.TwoPi / totalProjectilesShot;
-                                    float newVelocity = velocity - (velocity * 0.33f * i);
-                                    float projectileVelocityToPass = 0f;
-                                    if (type == ModContent.ProjectileType<BrimstoneBarrage>())
-                                        projectileVelocityToPass = velocity * 2f;
-
-                                    double angleA = radians * 0.5;
-                                    double angleB = MathHelper.ToRadians(90f) - angleA;
-                                    float velocityX = (float)(newVelocity * Math.Sin(angleA) / Math.Sin(angleB));
-                                    Vector2 spinningPoint = i == 1 ? new Vector2(0f, -newVelocity) : new Vector2(-velocityX, -newVelocity);
-                                    for (int k = 0; k < totalProjectilesShot; k++)
-                                    {
-                                        Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
-                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceRainDamage, 0f, Main.myPlayer, 0f, type == ModContent.ProjectileType<BrimstoneBarrage>() ? 0f : velocity, projectileVelocityToPass);
-                                    }
-                                }
+                                FireIceRainRings(type, velocity, totalProjectilesShot, 3, 0.33f, 1);
                             }
                         }
                     }
@@ -707,20 +589,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                     if (NPC.ai[1] == chargeGateValue)
                     {
-                        float chargeVelocity = Vector2.Distance(NPC.Center, player.Center) / chargeDuration * 2f;
-                        NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * (chargeVelocity + (death ? 1f : 0f));
-
-                        if (NPC.velocity.Length() < chargeVelocityMin)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= chargeVelocityMin;
-                        }
-
-                        if (NPC.velocity.Length() > chargeVelocityMax)
-                        {
-                            NPC.velocity.Normalize();
-                            NPC.velocity *= chargeVelocityMax;
-                        }
+                        StartCharge(player, death, chargeDuration, chargeVelocityMin, chargeVelocityMax);
 
                         NPC.ai[1] = chargeGateValue + chargeDuration;
                         calamityGlobalNPC.newAI[0] = 0f;
@@ -779,20 +648,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
-                            int totalProjectiles = 12;
-                            float radians = MathHelper.TwoPi / totalProjectiles;
-                            int type = iceBlast;
-                            float velocity = death ? 10.5f : 10f;
-                            float projectileVelocityToPass = 0f;
-                            if (type == ModContent.ProjectileType<BrimstoneBarrage>())
-                                projectileVelocityToPass = velocity * 2f;
-
-                            Vector2 spinningPoint = new Vector2(0f, -velocity);
-                            for (int k = 0; k < totalProjectiles; k++)
-                            {
-                                Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceBlastDamage, 0f, Main.myPlayer, 0f, 0f, projectileVelocityToPass);
-                            }
+                            FireIceBlastRing(12, iceBlast, death ? 10.5f : 10f);
                         }
                     }
                 }
@@ -804,16 +660,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                 float speed = death ? 7f : revenge ? 5.5f : 5f;
 
-                playerDistance = speed / playerDistance;
-                playerXDist *= playerDistance;
-                playerYDist *= playerDistance;
-
-                float inertia = 50f;
-                if (Main.getGoodWorld)
-                    inertia *= 0.5f;
-
-                NPC.velocity.X = (NPC.velocity.X * inertia + playerXDist) / (inertia + 1f);
-                NPC.velocity.Y = (NPC.velocity.Y * inertia + playerYDist) / (inertia + 1f);
+                ApplyApproachVelocity(playerDistance, playerXDist, playerYDist, speed);
 
                 if (NPC.ai[1] == 0f)
                 {
@@ -943,14 +790,7 @@ namespace CalamityMod.NPCs.Cryogen
 
                     if (death)
                     {
-                        SoundEngine.PlaySound(ShieldRegenSound, NPC.Center);
-                        if (NPC.ai[2] == 0f && Main.netMode != NetmodeID.MultiplayerClient)
-                        {
-                            int shieldSpawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<CryogenShield>(), NPC.whoAmI);
-                            NPC.ai[2] = shieldSpawn + 1;
-                            Main.npc[shieldSpawn].ai[0] = NPC.whoAmI;
-                            Main.npc[shieldSpawn].netUpdate = true;
-                        }
+                        RegenerateShield();
                     }
 
                     int chance = 100;
@@ -1186,6 +1026,87 @@ namespace CalamityMod.NPCs.Cryogen
                     if (NPC.velocity.X < -velocity)
                         NPC.velocity.X = -velocity;
                 }
+            }
+        }
+
+        private void ApplyApproachVelocity(float playerDistance, float playerXDist, float playerYDist, float approachSpeed)
+        {
+            playerDistance = approachSpeed / playerDistance;
+            playerXDist *= playerDistance;
+            playerYDist *= playerDistance;
+
+            float inertia = 50f;
+            if (Main.getGoodWorld)
+                inertia *= 0.5f;
+
+            NPC.velocity.X = (NPC.velocity.X * inertia + playerXDist) / (inertia + 1f);
+            NPC.velocity.Y = (NPC.velocity.Y * inertia + playerYDist) / (inertia + 1f);
+        }
+
+        private void StartCharge(Player player, bool death, float chargeDuration, float chargeVelocityMin, float chargeVelocityMax)
+        {
+            float chargeVelocity = Vector2.Distance(NPC.Center, player.Center) / chargeDuration * 2f;
+            NPC.velocity = Vector2.Normalize(player.Center - NPC.Center) * (chargeVelocity + (death ? 1f : 0f));
+
+            if (NPC.velocity.Length() < chargeVelocityMin)
+            {
+                NPC.velocity.Normalize();
+                NPC.velocity *= chargeVelocityMin;
+            }
+
+            if (NPC.velocity.Length() > chargeVelocityMax)
+            {
+                NPC.velocity.Normalize();
+                NPC.velocity *= chargeVelocityMax;
+            }
+        }
+
+        private void RegenerateShield()
+        {
+            SoundEngine.PlaySound(ShieldRegenSound, NPC.Center);
+            if (NPC.ai[2] == 0f && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                int shieldSpawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<CryogenShield>(), NPC.whoAmI);
+                NPC.ai[2] = shieldSpawn + 1;
+                Main.npc[shieldSpawn].ai[0] = NPC.whoAmI;
+                Main.npc[shieldSpawn].netUpdate = true;
+            }
+        }
+
+        private void FireIceRainRings(int type, float velocity, int totalProjectilesShot, int ringCount, float velocityReduction, int centeredRing)
+        {
+            for (int i = 0; i < ringCount; i++)
+            {
+                float radians = MathHelper.TwoPi / totalProjectilesShot;
+                float newVelocity = velocity - (velocity * velocityReduction * i);
+                float projectileVelocityToPass = 0f;
+                if (type == ModContent.ProjectileType<BrimstoneBarrage>())
+                    projectileVelocityToPass = velocity * 2f;
+
+                double angleA = radians * 0.5;
+                double angleB = MathHelper.ToRadians(90f) - angleA;
+                float velocityX = (float)(newVelocity * Math.Sin(angleA) / Math.Sin(angleB));
+                Vector2 spinningPoint = i == centeredRing ? new Vector2(0f, -newVelocity) : new Vector2(-velocityX, -newVelocity);
+                for (int k = 0; k < totalProjectilesShot; k++)
+                {
+                    Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceRainDamage, 0f, Main.myPlayer, 0f, type == ModContent.ProjectileType<BrimstoneBarrage>() ? 0f : velocity, projectileVelocityToPass);
+                }
+            }
+        }
+
+        private void FireIceBlastRing(int totalProjectiles, int type, float velocity)
+        {
+            float radians = MathHelper.TwoPi / totalProjectiles;
+            float projectileVelocityToPass = 0f;
+            if (type == ModContent.ProjectileType<BrimstoneBarrage>())
+                projectileVelocityToPass = velocity * 2f;
+
+            Vector2 spinningPoint = new Vector2(0f, -velocity);
+            for (int k = 0; k < totalProjectiles; k++)
+            {
+                Vector2 projSpreadRotation = spinningPoint.RotatedBy(radians * k);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + Vector2.Normalize(projSpreadRotation) * 30f, projSpreadRotation, type, IceBlastDamage, 0f, Main.myPlayer, 0f, 0f, projectileVelocityToPass);
             }
         }
 

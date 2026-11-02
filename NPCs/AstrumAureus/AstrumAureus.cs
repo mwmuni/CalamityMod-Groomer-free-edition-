@@ -1436,52 +1436,36 @@ namespace CalamityMod.NPCs.AstrumAureus
 
             Rectangle targetHitbox = target.Hitbox;
 
-            float leftDist1 = Vector2.Distance(leftHitboxCenter, targetHitbox.TopLeft());
-            float leftDist2 = Vector2.Distance(leftHitboxCenter, targetHitbox.TopRight());
-            float leftDist3 = Vector2.Distance(leftHitboxCenter, targetHitbox.BottomLeft());
-            float leftDist4 = Vector2.Distance(leftHitboxCenter, targetHitbox.BottomRight());
-
-            float minLeftDist = leftDist1;
-            if (leftDist2 < minLeftDist)
-                minLeftDist = leftDist2;
-            if (leftDist3 < minLeftDist)
-                minLeftDist = leftDist3;
-            if (leftDist4 < minLeftDist)
-                minLeftDist = leftDist4;
+            float minLeftDist = MinimumCornerDistance(leftHitboxCenter, targetHitbox);
 
             bool insideLeftHitbox = minLeftDist <= 120f * NPC.scale;
 
-            float bodyDist1 = Vector2.Distance(bodyHitboxCenter, targetHitbox.TopLeft());
-            float bodyDist2 = Vector2.Distance(bodyHitboxCenter, targetHitbox.TopRight());
-            float bodyDist3 = Vector2.Distance(bodyHitboxCenter, targetHitbox.BottomLeft());
-            float bodyDist4 = Vector2.Distance(bodyHitboxCenter, targetHitbox.BottomRight());
-
-            float minBodyDist = bodyDist1;
-            if (bodyDist2 < minBodyDist)
-                minBodyDist = bodyDist2;
-            if (bodyDist3 < minBodyDist)
-                minBodyDist = bodyDist3;
-            if (bodyDist4 < minBodyDist)
-                minBodyDist = bodyDist4;
+            float minBodyDist = MinimumCornerDistance(bodyHitboxCenter, targetHitbox);
 
             bool insideBodyHitbox = minBodyDist <= 160f * NPC.scale;
 
-            float rightDist1 = Vector2.Distance(rightHitboxCenter, targetHitbox.TopLeft());
-            float rightDist2 = Vector2.Distance(rightHitboxCenter, targetHitbox.TopRight());
-            float rightDist3 = Vector2.Distance(rightHitboxCenter, targetHitbox.BottomLeft());
-            float rightDist4 = Vector2.Distance(rightHitboxCenter, targetHitbox.BottomRight());
-
-            float minRightDist = rightDist1;
-            if (rightDist2 < minRightDist)
-                minRightDist = rightDist2;
-            if (rightDist3 < minRightDist)
-                minRightDist = rightDist3;
-            if (rightDist4 < minRightDist)
-                minRightDist = rightDist4;
+            float minRightDist = MinimumCornerDistance(rightHitboxCenter, targetHitbox);
 
             bool insideRightHitbox = minRightDist <= 120f * NPC.scale;
 
             return (insideLeftHitbox || insideBodyHitbox || insideRightHitbox) && NPC.alpha == 0 && NPC.ai[0] > 1f;
+        }
+
+        private static float MinimumCornerDistance(Vector2 hitboxCenter, Rectangle targetHitbox)
+        {
+            float dist1 = Vector2.Distance(hitboxCenter, targetHitbox.TopLeft());
+            float dist2 = Vector2.Distance(hitboxCenter, targetHitbox.TopRight());
+            float dist3 = Vector2.Distance(hitboxCenter, targetHitbox.BottomLeft());
+            float dist4 = Vector2.Distance(hitboxCenter, targetHitbox.BottomRight());
+
+            float minDist = dist1;
+            if (dist2 < minDist)
+                minDist = dist2;
+            if (dist3 < minDist)
+                minDist = dist3;
+            if (dist4 < minDist)
+                minDist = dist4;
+            return minDist;
         }
 
         public override void OnHitPlayer(Player target, Player.HurtInfo hurtInfo)

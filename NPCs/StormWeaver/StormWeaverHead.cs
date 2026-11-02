@@ -343,11 +343,7 @@ namespace CalamityMod.NPCs.StormWeaver
                 bool useTornadoes = calamityGlobalNPC.newAI[3] % 2f != 0f;
 
                 // Gate value that decides when Storm Weaver will charge
-                float attackGateValue = death ? 320f : revenge ? 340f : expertMode ? 360f : 400f;
-                if (!phase3)
-                    attackGateValue *= 0.5f;
-                if (phase4 && expertMode)
-                    attackGateValue *= 0.9f;
+                float attackGateValue = GetChargeGateValue(death, revenge, expertMode, phase3, phase4);
 
                 // Gate value for when Storm Weaver fires projectiles
                 float resetGateValue = attackGateValue + 100f;
@@ -794,6 +790,16 @@ namespace CalamityMod.NPCs.StormWeaver
             }
         }
 
+        private static float GetChargeGateValue(bool death, bool revenge, bool expertMode, bool phase3, bool phase4)
+        {
+            float attackGateValue = death ? 320f : revenge ? 340f : expertMode ? 360f : 400f;
+            if (!phase3)
+                attackGateValue *= 0.5f;
+            if (phase4 && expertMode)
+                attackGateValue *= 0.9f;
+            return attackGateValue;
+        }
+
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (NPC.IsABestiaryIconDummy)
@@ -819,11 +825,7 @@ namespace CalamityMod.NPCs.StormWeaver
             bool phase4 = lifeRatio < 0.3f;
 
             // Gate value that decides when Storm Weaver will charge
-            float attackGateValue = death ? 320f : revenge ? 340f : expertMode ? 360f : 400f;
-            if (!phase3)
-                attackGateValue *= 0.5f;
-            if (phase4 && expertMode)
-                attackGateValue *= 0.9f;
+            float attackGateValue = GetChargeGateValue(death, revenge, expertMode, phase3, phase4);
 
             Texture2D texture = phase2 ? Phase2Texture.Value : TextureAssets.Npc[Type].Value;
             Vector2 halfSizeTexture = new Vector2(texture.Width / 2, texture.Height / 2);
@@ -857,11 +859,7 @@ namespace CalamityMod.NPCs.StormWeaver
             bool phase4 = lifeRatio < 0.3f;
 
             // Gate value that decides when Storm Weaver will charge
-            float attackGateValue = death ? 320f : revenge ? 340f : expertMode ? 360f : 400f;
-            if (!phase3)
-                attackGateValue *= 0.5f;
-            if (phase4 && expertMode)
-                attackGateValue *= 0.9f;
+            float attackGateValue = GetChargeGateValue(death, revenge, expertMode, phase3, phase4);
 
             int buffDuration = NPC.Calamity().newAI[0] >= attackGateValue ? 360 : 240;
             if (hurtInfo.Damage > 0)

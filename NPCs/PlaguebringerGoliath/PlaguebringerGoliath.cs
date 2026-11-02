@@ -308,18 +308,7 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                     {
                         do
                         {
-                            switch (Main.rand.Next(3))
-                            {
-                                case 0:
-                                    chargeDistance = 0;
-                                    break;
-                                case 1:
-                                    chargeDistance = 400;
-                                    break;
-                                case 2:
-                                    chargeDistance = -400;
-                                    break;
-                            }
+                            ChooseChargeDistance();
                         }
                         while (chargeDistance == NPC.ai[3]);
 
@@ -398,18 +387,7 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
 
                         if (diagonalDash)
                         {
-                            switch (Main.rand.Next(3))
-                            {
-                                case 0:
-                                    chargeDistance = 0;
-                                    break;
-                                case 1:
-                                    chargeDistance = 400;
-                                    break;
-                                case 2:
-                                    chargeDistance = -400;
-                                    break;
-                            }
+                            ChooseChargeDistance();
                         }
 
                         charging = true;
@@ -459,31 +437,7 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                     maxLineUpSpeed += 7f * enrageScale;
                     lineUpAccel += 0.35f * enrageScale;
 
-                    if (NPC.Center.Y < (player.Center.Y - chargeDistance - chargeDistanceY))
-                        NPC.velocity.Y += lineUpAccel;
-                    else if (NPC.Center.Y > (player.Center.Y - chargeDistance + chargeDistanceY))
-                        NPC.velocity.Y -= lineUpAccel;
-                    else
-                        NPC.velocity.Y *= 0.7f;
-
-                    if (NPC.velocity.Y < -maxLineUpSpeed)
-                        NPC.velocity.Y = -maxLineUpSpeed;
-                    if (NPC.velocity.Y > maxLineUpSpeed)
-                        NPC.velocity.Y = maxLineUpSpeed;
-
-                    float distanceXMax = 100f;
-                    float distanceXMin = 20f;
-                    if (distanceFromTargetX > chargeDistanceX + distanceXMax)
-                        NPC.velocity.X += lineUpAccel * NPC.direction;
-                    else if (distanceFromTargetX < chargeDistanceX + distanceXMin)
-                        NPC.velocity.X -= lineUpAccel * NPC.direction;
-                    else
-                        NPC.velocity.X *= 0.7f;
-
-                    if (NPC.velocity.X < -maxLineUpSpeed)
-                        NPC.velocity.X = -maxLineUpSpeed;
-                    if (NPC.velocity.X > maxLineUpSpeed)
-                        NPC.velocity.X = maxLineUpSpeed;
+                    AdjustChargeLineup(player, chargeDistance, chargeDistanceY, lineUpAccel, maxLineUpSpeed, distanceFromTargetX, chargeDistanceX);
 
                     NPC.direction = playerLocation < 0 ? 1 : -1;
                     NPC.spriteDirection = NPC.direction;
@@ -686,31 +640,11 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                 }
 
                 // Move closer
-                float distanceAboveTarget = !canHitTarget ? 0f : 400f;
-                float distanceAwayFromTargetX = !canHitTarget ? 80f : 240f;
-                float distanceAwayFromTargetY = player.Center.Y - NPC.Center.Y;
-                float distanceAwayFromTargetYLeeway = !canHitTarget ? 16f : 80f;
-                bool tooFarX = Math.Abs(player.Center.X - NPC.Center.X) > distanceAwayFromTargetX;
-                bool tooFarY = distanceAwayFromTargetY > distanceAboveTarget + distanceAwayFromTargetYLeeway || distanceAwayFromTargetY < distanceAboveTarget - distanceAwayFromTargetYLeeway;
-                bool tooFar = tooFarX || tooFarY;
-                if (tooFar)
-                    Movement(distanceAboveTarget, player, enrageScale);
-
-                float playerLocation = NPC.Center.X - player.Center.X;
-                NPC.direction = playerLocation < 0 ? 1 : -1;
-                NPC.spriteDirection = NPC.direction;
+                MoveCloserToTarget(player, canHitTarget, enrageScale);
 
                 if (NPC.ai[2] > 3f)
                 {
-                    NPC.ai[0] = -1f;
-                    NPC.ai[1] = 2f;
-                    NPC.ai[2] = 0f;
-
-                    // Prevent netUpdate from being blocked by the spam counter.
-                    // A phase switch sync is a critical operation that must be synced.
-                    NPC.ForceNetUpdate(false);
-
-                    SoundEngine.PlaySound(AttackSwitchSound, NPC.Center);
+                    FinishAttack(2f);
                 }
             }
 
@@ -773,31 +707,11 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                 }
 
                 // Move closer
-                float distanceAboveTarget = !canHitTarget ? 0f : 400f;
-                float distanceAwayFromTargetX = !canHitTarget ? 80f : 240f;
-                float distanceAwayFromTargetY = player.Center.Y - NPC.Center.Y;
-                float distanceAwayFromTargetYLeeway = !canHitTarget ? 16f : 80f;
-                bool tooFarX = Math.Abs(player.Center.X - NPC.Center.X) > distanceAwayFromTargetX;
-                bool tooFarY = distanceAwayFromTargetY > distanceAboveTarget + distanceAwayFromTargetYLeeway || distanceAwayFromTargetY < distanceAboveTarget - distanceAwayFromTargetYLeeway;
-                bool tooFar = tooFarX || tooFarY;
-                if (tooFar)
-                    Movement(distanceAboveTarget, player, enrageScale);
-
-                float playerLocation = NPC.Center.X - player.Center.X;
-                NPC.direction = playerLocation < 0 ? 1 : -1;
-                NPC.spriteDirection = NPC.direction;
+                MoveCloserToTarget(player, canHitTarget, enrageScale);
 
                 if (NPC.ai[2] > 5f)
                 {
-                    NPC.ai[0] = -1f;
-                    NPC.ai[1] = 2f;
-                    NPC.ai[2] = 0f;
-
-                    // Prevent netUpdate from being blocked by the spam counter.
-                    // A phase switch sync is a critical operation that must be synced.
-                    NPC.ForceNetUpdate(false);
-
-                    SoundEngine.PlaySound(AttackSwitchSound, NPC.Center);
+                    FinishAttack(2f);
                 }
             }
 
@@ -863,31 +777,11 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                 }
 
                 // Move closer
-                float distanceAboveTarget = !canHitTarget ? 0f : 400f;
-                float distanceAwayFromTargetX = !canHitTarget ? 80f : 240f;
-                float distanceAwayFromTargetY = player.Center.Y - NPC.Center.Y;
-                float distanceAwayFromTargetYLeeway = !canHitTarget ? 16f : 80f;
-                bool tooFarX = Math.Abs(player.Center.X - NPC.Center.X) > distanceAwayFromTargetX;
-                bool tooFarY = distanceAwayFromTargetY > distanceAboveTarget + distanceAwayFromTargetYLeeway || distanceAwayFromTargetY < distanceAboveTarget - distanceAwayFromTargetYLeeway;
-                bool tooFar = tooFarX || tooFarY;
-                if (tooFar)
-                    Movement(distanceAboveTarget, player, enrageScale);
-
-                float playerLocation = NPC.Center.X - player.Center.X;
-                NPC.direction = playerLocation < 0 ? 1 : -1;
-                NPC.spriteDirection = NPC.direction;
+                MoveCloserToTarget(player, canHitTarget, enrageScale);
 
                 if (NPC.ai[1] > stingerFireDelay * 10f)
                 {
-                    NPC.ai[0] = -1f;
-                    NPC.ai[1] = 3f;
-                    NPC.ai[2] = 0f;
-
-                    // Prevent netUpdate from being blocked by the spam counter.
-                    // A phase switch sync is a critical operation that must be synced.
-                    NPC.ForceNetUpdate(false);
-
-                    SoundEngine.PlaySound(AttackSwitchSound, NPC.Center);
+                    FinishAttack(3f);
                 }
             }
 
@@ -1011,31 +905,7 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                     maxLineUpSpeed += 7f * enrageScale;
                     lineUpAccel += 0.35f * enrageScale;
 
-                    if (NPC.Center.Y < (player.Center.Y - 500f - chargeDistanceY))
-                        NPC.velocity.Y += lineUpAccel;
-                    else if (NPC.Center.Y > (player.Center.Y - 500f + chargeDistanceY))
-                        NPC.velocity.Y -= lineUpAccel;
-                    else
-                        NPC.velocity.Y *= 0.7f;
-
-                    if (NPC.velocity.Y < -maxLineUpSpeed)
-                        NPC.velocity.Y = -maxLineUpSpeed;
-                    if (NPC.velocity.Y > maxLineUpSpeed)
-                        NPC.velocity.Y = maxLineUpSpeed;
-
-                    float distanceXMax = 100f;
-                    float distanceXMin = 20f;
-                    if (distanceFromTargetX > chargeDistanceX + distanceXMax)
-                        NPC.velocity.X += lineUpAccel * NPC.direction;
-                    else if (distanceFromTargetX < chargeDistanceX + distanceXMin)
-                        NPC.velocity.X -= lineUpAccel * NPC.direction;
-                    else
-                        NPC.velocity.X *= 0.7f;
-
-                    if (NPC.velocity.X < -maxLineUpSpeed)
-                        NPC.velocity.X = -maxLineUpSpeed;
-                    if (NPC.velocity.X > maxLineUpSpeed)
-                        NPC.velocity.X = maxLineUpSpeed;
+                    AdjustChargeLineup(player, 500f, chargeDistanceY, lineUpAccel, maxLineUpSpeed, distanceFromTargetX, chargeDistanceX);
 
                     NPC.direction = playerLocation < 0 ? 1 : -1;
                     NPC.spriteDirection = NPC.direction;
@@ -1127,6 +997,80 @@ namespace CalamityMod.NPCs.PlaguebringerGoliath
                     }
                 }
             }
+        }
+
+        private void AdjustChargeLineup(Player player, float chargeHeight, float chargeDistanceY, float lineUpAccel, float maxLineUpSpeed, float distanceFromTargetX, int chargeDistanceX)
+        {
+            if (NPC.Center.Y < (player.Center.Y - chargeHeight - chargeDistanceY))
+                NPC.velocity.Y += lineUpAccel;
+            else if (NPC.Center.Y > (player.Center.Y - chargeHeight + chargeDistanceY))
+                NPC.velocity.Y -= lineUpAccel;
+            else
+                NPC.velocity.Y *= 0.7f;
+
+            if (NPC.velocity.Y < -maxLineUpSpeed)
+                NPC.velocity.Y = -maxLineUpSpeed;
+            if (NPC.velocity.Y > maxLineUpSpeed)
+                NPC.velocity.Y = maxLineUpSpeed;
+
+            float distanceXMax = 100f;
+            float distanceXMin = 20f;
+            if (distanceFromTargetX > chargeDistanceX + distanceXMax)
+                NPC.velocity.X += lineUpAccel * NPC.direction;
+            else if (distanceFromTargetX < chargeDistanceX + distanceXMin)
+                NPC.velocity.X -= lineUpAccel * NPC.direction;
+            else
+                NPC.velocity.X *= 0.7f;
+
+            if (NPC.velocity.X < -maxLineUpSpeed)
+                NPC.velocity.X = -maxLineUpSpeed;
+            if (NPC.velocity.X > maxLineUpSpeed)
+                NPC.velocity.X = maxLineUpSpeed;
+        }
+
+        private void ChooseChargeDistance()
+        {
+            switch (Main.rand.Next(3))
+            {
+                case 0:
+                    chargeDistance = 0;
+                    break;
+                case 1:
+                    chargeDistance = 400;
+                    break;
+                case 2:
+                    chargeDistance = -400;
+                    break;
+            }
+        }
+
+        private void MoveCloserToTarget(Player player, bool canHitTarget, float enrageScale)
+        {
+            float distanceAboveTarget = !canHitTarget ? 0f : 400f;
+            float distanceAwayFromTargetX = !canHitTarget ? 80f : 240f;
+            float distanceAwayFromTargetY = player.Center.Y - NPC.Center.Y;
+            float distanceAwayFromTargetYLeeway = !canHitTarget ? 16f : 80f;
+            bool tooFarX = Math.Abs(player.Center.X - NPC.Center.X) > distanceAwayFromTargetX;
+            bool tooFarY = distanceAwayFromTargetY > distanceAboveTarget + distanceAwayFromTargetYLeeway || distanceAwayFromTargetY < distanceAboveTarget - distanceAwayFromTargetYLeeway;
+            bool tooFar = tooFarX || tooFarY;
+            if (tooFar)
+                Movement(distanceAboveTarget, player, enrageScale);
+
+            float playerLocation = NPC.Center.X - player.Center.X;
+            NPC.direction = playerLocation < 0 ? 1 : -1;
+            NPC.spriteDirection = NPC.direction;
+        }
+
+        private void FinishAttack(float previousAttack)
+        {
+            NPC.ai[0] = -1f;
+            NPC.ai[1] = previousAttack;
+            NPC.ai[2] = 0f;
+
+            // A phase switch must bypass the net spam counter.
+            NPC.ForceNetUpdate(false);
+
+            SoundEngine.PlaySound(AttackSwitchSound, NPC.Center);
         }
 
         private void Movement(float distanceAboveTarget, Player player, float enrageScale)

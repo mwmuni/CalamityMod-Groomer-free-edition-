@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using CalamityMod.Dusts;
 using CalamityMod.Events;
 using CalamityMod.Items.Accessories;
@@ -18,7 +19,6 @@ using CalamityMod.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -397,19 +397,7 @@ namespace CalamityMod.NPCs.CeaselessVoid
                                 int type = ProjectileType<DarkEnergyBall2>();
                                 bool normalSpread = NPC.localAI[0] % 2f != 0f;
                                 float speed = 2f;
-                                int totalProjectiles = 2;
-                                float radians = MathHelper.TwoPi / totalProjectiles;
-                                double angleA = radians * 0.5;
-                                double angleB = MathHelper.ToRadians(90f) - angleA;
-                                float velocityX = (float)(speed * Math.Sin(angleA) / Math.Sin(angleB));
-                                Vector2 spinningPoint = new Vector2(normalSpread ? 0f : -velocityX, -speed);
-                                float radialOffset = MathHelper.ToRadians(NPC.localAI[1] * 0.25f);
-                                for (int i = 0; i < totalProjectiles; i++)
-                                {
-                                    Vector2 spawnVector = NPC.Center + Vector2.Normalize(spinningPoint.RotatedBy(radians * i + radialOffset)) * suckDistance;
-                                    Vector2 velocity = Vector2.Normalize(NPC.Center - spawnVector) * speed;
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, DarkEnergyProjectileDamage, 0f, Main.myPlayer);
-                                }
+                                FireInwardEnergyBalls(type, normalSpread, speed, suckDistance);
                             }
                         }
                     }
@@ -427,19 +415,7 @@ namespace CalamityMod.NPCs.CeaselessVoid
                                 int type = ProjectileType<DarkEnergyBall2>();
                                 bool normalSpread = NPC.localAI[0] % 2f == 0f;
                                 float speed = 4f;
-                                int totalProjectiles = 2;
-                                float radians = MathHelper.TwoPi / totalProjectiles;
-                                double angleA = radians * 0.5;
-                                double angleB = MathHelper.ToRadians(90f) - angleA;
-                                float velocityX = (float)(speed * Math.Sin(angleA) / Math.Sin(angleB));
-                                Vector2 spinningPoint = new Vector2(normalSpread ? 0f : -velocityX, -speed);
-                                float radialOffset = MathHelper.ToRadians(NPC.localAI[1] * 0.25f);
-                                for (int i = 0; i < totalProjectiles; i++)
-                                {
-                                    Vector2 spawnVector = NPC.Center + Vector2.Normalize(spinningPoint.RotatedBy(radians * i + radialOffset)) * suckDistance;
-                                    Vector2 velocity = Vector2.Normalize(NPC.Center - spawnVector) * speed;
-                                    Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, DarkEnergyProjectileDamage, 0f, Main.myPlayer);
-                                }
+                                FireInwardEnergyBalls(type, normalSpread, speed, suckDistance);
                             }
                         }
                     }
@@ -650,6 +626,23 @@ namespace CalamityMod.NPCs.CeaselessVoid
                         }
                     }
                 }
+            }
+        }
+
+        private void FireInwardEnergyBalls(int type, bool normalSpread, float speed, float suckDistance)
+        {
+            int totalProjectiles = 2;
+            float radians = MathHelper.TwoPi / totalProjectiles;
+            double angleA = radians * 0.5;
+            double angleB = MathHelper.ToRadians(90f) - angleA;
+            float velocityX = (float)(speed * Math.Sin(angleA) / Math.Sin(angleB));
+            Vector2 spinningPoint = new Vector2(normalSpread ? 0f : -velocityX, -speed);
+            float radialOffset = MathHelper.ToRadians(NPC.localAI[1] * 0.25f);
+            for (int i = 0; i < totalProjectiles; i++)
+            {
+                Vector2 spawnVector = NPC.Center + Vector2.Normalize(spinningPoint.RotatedBy(radians * i + radialOffset)) * suckDistance;
+                Vector2 velocity = Vector2.Normalize(NPC.Center - spawnVector) * speed;
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnVector, velocity, type, DarkEnergyProjectileDamage, 0f, Main.myPlayer);
             }
         }
 

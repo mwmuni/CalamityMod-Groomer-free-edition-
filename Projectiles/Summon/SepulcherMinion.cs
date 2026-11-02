@@ -427,19 +427,7 @@ namespace CalamityMod.Projectiles.Summon
             else if (Projectile.velocity.Length() < 29f)
             {
                 Projectile.velocity *= 1.035f;
-                if (JawSnapTimer <= 0f)
-                {
-                    // Open the mouth of the jaw if close but not super close to the target.
-                    if (Projectile.WithinRange(target.Center, 270f))
-                        JawRotation = JawRotation.AngleLerp(0.87f, 0.12f);
-
-                    // If really close, snap.
-                    if (Projectile.WithinRange(target.Center, 165f))
-                    {
-                        SoundEngine.PlaySound(SoundID.DD2_SkeletonHurt, Projectile.Center);
-                        JawSnapTimer = 45f;
-                    }
-                }
+                UpdateJawSnap(target, 270f, 165f);
             }
 
             // Determine the head rotation.
@@ -493,23 +481,26 @@ namespace CalamityMod.Projectiles.Summon
             else if (Projectile.velocity.Length() < 36f)
             {
                 Projectile.velocity *= 1.066f;
-                if (JawSnapTimer <= 0f)
-                {
-                    // Open the mouth of the jaw if close but not super close to the owner.
-                    if (Projectile.WithinRange(targetHeart.Center, 150f))
-                        JawRotation = JawRotation.AngleLerp(0.87f, 0.12f);
-
-                    // If really close, snap.
-                    if (Projectile.WithinRange(targetHeart.Center, 90f))
-                    {
-                        SoundEngine.PlaySound(SoundID.DD2_SkeletonHurt, Projectile.Center);
-                        JawSnapTimer = 45f;
-                    }
-                }
+                UpdateJawSnap(targetHeart, 150f, 90f);
             }
 
             // Determine the head rotation.
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
+        }
+
+        private void UpdateJawSnap(NPC target, float openDistance, float snapDistance)
+        {
+            if (JawSnapTimer <= 0f)
+            {
+                if (Projectile.WithinRange(target.Center, openDistance))
+                    JawRotation = JawRotation.AngleLerp(0.87f, 0.12f);
+
+                if (Projectile.WithinRange(target.Center, snapDistance))
+                {
+                    SoundEngine.PlaySound(SoundID.DD2_SkeletonHurt, Projectile.Center);
+                    JawSnapTimer = 45f;
+                }
+            }
         }
 
         public NPC AttemptToFindTarget(float searchDistance)

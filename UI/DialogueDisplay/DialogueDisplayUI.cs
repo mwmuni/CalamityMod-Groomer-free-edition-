@@ -310,14 +310,7 @@ namespace CalamityMod.UI.DialogueDisplay
 
             float textWidth = 0f;
 
-            float highestFirstLineYScale = 1f;
-            for (int j = 0; j < Text.Length; j++)
-            {
-                if (Text[j] == '\n')
-                    break;
-                if (UniqueScales.TryGetValue(j, out Vector2 uniqueScale) && uniqueScale.Y > highestFirstLineYScale)
-                    highestFirstLineYScale = uniqueScale.Y;
-            }
+            float highestFirstLineYScale = GetLineYScale(0);
 
             SizeOffsetFromStart = new(8, 16 * highestFirstLineYScale);
 
@@ -341,14 +334,7 @@ namespace CalamityMod.UI.DialogueDisplay
 
                         zero.X = 0;
 
-                        float highestYscale = 1f;
-                        for (int j = i + 1; j < Text.Length; j++)
-                        {
-                            if (Text[j] == '\n')
-                                break;
-                            if (UniqueScales.TryGetValue(j, out Vector2 uniqueScale) && uniqueScale.Y > highestYscale)
-                                highestYscale = uniqueScale.Y;
-                        }
+                        float highestYscale = GetLineYScale(i + 1);
                         zero.Y += Font.Value.LineSpacing * highestYscale;
                         newLine = true;
                         continue;
@@ -363,14 +349,7 @@ namespace CalamityMod.UI.DialogueDisplay
 
                     zero.X = 0;
 
-                    float highestYscale = 1f;
-                    for (int j = i + 1; j < Text.Length; j++)
-                    {
-                        if (Text[j] == '\n')
-                            break;
-                        if (UniqueScales.TryGetValue(j, out Vector2 uniqueScale) && uniqueScale.Y > highestYscale)
-                            highestYscale = uniqueScale.Y;
-                    }
+                    float highestYscale = GetLineYScale(i + 1);
                     zero.Y += Font.Value.LineSpacing * highestYscale;
                     newLine = true;
                 }
@@ -418,6 +397,19 @@ namespace CalamityMod.UI.DialogueDisplay
             }
 
             TextSize = new Vector2(textWidth + 8, textHeight + 12) + SizeOffsetFromStart;
+        }
+
+        private float GetLineYScale(int start)
+        {
+            float highestYscale = 1f;
+            for (int j = start; j < Text.Length; j++)
+            {
+                if (Text[j] == '\n')
+                    break;
+                if (UniqueScales.TryGetValue(j, out Vector2 uniqueScale) && uniqueScale.Y > highestYscale)
+                    highestYscale = uniqueScale.Y;
+            }
+            return highestYscale;
         }
 
         private void FindEffects(ref string fullLine, int fullLength)
@@ -1094,20 +1086,7 @@ namespace CalamityMod.UI.DialogueDisplay
                 ProgressDialogue = progressDialogue,
             };
 
-            int slot;
-            for (slot = 0; slot <= DialogueDisplayUI.Dialogues.Count; slot++)
-                if (!DialogueDisplayUI.Dialogues.ContainsKey(slot))
-                    break;
-
-            DialogueDisplayUI.Dialogues.Add(slot, (name, display, textData, null, Uptime));
-
-            State.Append(display);
-            display.Activate();
-
-            if (UI.CurrentState != State)
-                UI?.SetState(State);
-
-            return slot;
+            return RegisterDialogue(name, display, textData, null, Uptime);
         }
 
         /// <summary>
@@ -1155,6 +1134,11 @@ namespace CalamityMod.UI.DialogueDisplay
                 ProgressDialogue = progressDialogue,
             };
 
+            return RegisterDialogue(name, display, textData, entity, Uptime);
+        }
+
+        private static int RegisterDialogue(string name, DialogueDisplay display, DialogueTextData textData, Entity entity, int Uptime)
+        {
             int slot;
             for (slot = 0; slot <= DialogueDisplayUI.Dialogues.Count; slot++)
                 if (!DialogueDisplayUI.Dialogues.ContainsKey(slot))

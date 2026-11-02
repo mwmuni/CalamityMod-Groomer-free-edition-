@@ -405,16 +405,7 @@ namespace CalamityMod.NPCs.GreatSandShark
                                 velocityY = 11f;
                                 break;
                         }
-                        if (revenge || lowerLife)
-                        {
-                            velocityX *= 1.1f;
-                            velocityY *= 1.1f;
-                        }
-                        if (youMustDie)
-                        {
-                            velocityX *= 1.5f;
-                            velocityY *= 1.5f;
-                        }
+                        ScaleLungeVelocity(ref velocityX, ref velocityY);
                         NPC.velocity.X = MathHelper.Clamp(NPC.velocity.X, -velocityX, velocityX);
                         NPC.velocity.Y = MathHelper.Clamp(NPC.velocity.Y, -velocityY, velocityY);
                         Vector2 shorkDirection = NPC.Center + NPC.velocity.SafeNormalize(Vector2.Zero) * NPC.Size.Length() / 2f + NPC.velocity;
@@ -527,16 +518,7 @@ namespace CalamityMod.NPCs.GreatSandShark
                                 velocityY = 16f;
                                 break;
                         }
-                        if (revenge || lowerLife)
-                        {
-                            velocityX *= 1.1f;
-                            velocityY *= 1.1f;
-                        }
-                        if (youMustDie)
-                        {
-                            velocityX *= 1.5f;
-                            velocityY *= 1.5f;
-                        }
+                        ScaleLungeVelocity(ref velocityX, ref velocityY);
                         NPC.velocity.Y = -velocityY;
                         NPC.velocity.X = velocityX * NPC.direction;
                         NPC.netUpdate = true;
@@ -572,6 +554,20 @@ namespace CalamityMod.NPCs.GreatSandShark
                         }
                     }
                     NPC.Calamity().newAI[0] = 0;
+                }
+            }
+
+            void ScaleLungeVelocity(ref float velocityX, ref float velocityY)
+            {
+                if (revenge || lowerLife)
+                {
+                    velocityX *= 1.1f;
+                    velocityY *= 1.1f;
+                }
+                if (youMustDie)
+                {
+                    velocityX *= 1.5f;
+                    velocityY *= 1.5f;
                 }
             }
         }

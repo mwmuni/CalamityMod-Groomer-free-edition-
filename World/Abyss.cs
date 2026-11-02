@@ -927,28 +927,7 @@ namespace CalamityMod.World
             //always place abyss gravel because chests will never place outside of layer 2 for now
             AbyssIsland(i, j + 2, 55, 75, 35, 45, ModContent.TileType<AbyssGravel>(), false, true, false);
 
-            //clear decently big circular area where the chest will be
-            for (int clearX = i - 2; clearX <= i + 2; clearX++)
-            {
-                for (int clearY = j - 8; clearY <= j - 1; clearY++)
-                {
-                    //clear area for the chest to place
-                    ShapeData circle = new ShapeData();
-                    GenAction blotchMod = new Modifiers.Blotches(2, 0.4);
-
-                    int radius = (int)(WorldGen.genRand.Next(3, 5) * WorldGen.genRand.NextFloat(0.74f, 0.82f));
-
-                    WorldUtils.Gen(new Point(clearX, clearY), new Shapes.Circle(radius), Actions.Chain(new GenAction[]
-                    {
-                        blotchMod.Output(circle)
-                    }));
-
-                    WorldUtils.Gen(new Point(clearX, clearY), new ModShapes.All(circle), Actions.Chain(new GenAction[]
-                    {
-                        new Actions.ClearTile()
-                    }));
-                }
-            }
+            ClearIslandObjectSpace(i, j);
 
             //place cluster where chest will spawn
             WorldGen.TileRunner(i, j + 4, 8, 5, ModContent.TileType<AbyssGravel>(), true, 0, 0, false, true);
@@ -1036,28 +1015,7 @@ namespace CalamityMod.World
             //place an island
             AbyssIsland(i, j + 2, 55, 75, 35, 45, ModContent.TileType<Voidstone>(), false, false, false);
 
-            //clear decently big circular area where the chest will be
-            for (int clearX = i - 2; clearX <= i + 2; clearX++)
-            {
-                for (int clearY = j - 8; clearY <= j - 1; clearY++)
-                {
-                    //clear area for the chest to place
-                    ShapeData circle = new ShapeData();
-                    GenAction blotchMod = new Modifiers.Blotches(2, 0.4);
-
-                    int radius = (int)(WorldGen.genRand.Next(3, 5) * WorldGen.genRand.NextFloat(0.74f, 0.82f));
-
-                    WorldUtils.Gen(new Point(clearX, clearY), new Shapes.Circle(radius), Actions.Chain(new GenAction[]
-                    {
-                        blotchMod.Output(circle)
-                    }));
-
-                    WorldUtils.Gen(new Point(clearX, clearY), new ModShapes.All(circle), Actions.Chain(new GenAction[]
-                    {
-                        new Actions.ClearTile()
-                    }));
-                }
-            }
+            ClearIslandObjectSpace(i, j);
 
             //place cluster where chest will spawn
             WorldGen.TileRunner(i, j + 4, 8, 5, ModContent.TileType<Voidstone>(), true, 0, 0, false, true);
@@ -1078,6 +1036,31 @@ namespace CalamityMod.World
         /// Unlocks all abyss chests, automatically synced across the server.
         /// It SHOULD only run initally on the server.
         /// </summary>
+        private static void ClearIslandObjectSpace(int i, int j)
+        {
+            // Clear a circular area for the chest or fossil without changing the generation order.
+            for (int clearX = i - 2; clearX <= i + 2; clearX++)
+            {
+                for (int clearY = j - 8; clearY <= j - 1; clearY++)
+                {
+                    ShapeData circle = new ShapeData();
+                    GenAction blotchMod = new Modifiers.Blotches(2, 0.4);
+
+                    int radius = (int)(WorldGen.genRand.Next(3, 5) * WorldGen.genRand.NextFloat(0.74f, 0.82f));
+
+                    WorldUtils.Gen(new Point(clearX, clearY), new Shapes.Circle(radius), Actions.Chain(new GenAction[]
+                    {
+                        blotchMod.Output(circle)
+                    }));
+
+                    WorldUtils.Gen(new Point(clearX, clearY), new ModShapes.All(circle), Actions.Chain(new GenAction[]
+                    {
+                        new Actions.ClearTile()
+                    }));
+                }
+            }
+        }
+
         public static void UnlockAllAbyssChests()
         {
             if (Main.dedServ)

@@ -349,30 +349,14 @@ namespace CalamityMod.UI.DraedonSummoning
                             }
                             codebreakerTileEntity.ContainsBloodyVein = true;
 
-                            int spaceLeft = TECodebreaker.MaxCellCapacity - temporaryItem.stack;
-
-                            // If the player has more cells than there is space left, insert as many as possible. Otherwise insert all the cells.
-                            int cellsToInsert = Math.Min(playerHandItem.stack, spaceLeft);
-                            cellStackDiff = (short)cellsToInsert;
-                            playerHandItem.stack -= cellsToInsert;
-                            if (playerHandItem.stack == 0)
-                                playerHandItem.TurnToAir();
-                            AwaitingDecryptionTextClose = false;
+                            InsertPowercells(playerHandItem, temporaryItem, ref cellStackDiff);
                         }
                         // If theres nothing inside or there are cells inside, cells can be inserted
                         if (playerHandItem.type == powercellID && (temporaryItem.stack == 0 || powercellsinserted))
                         {
                             codebreakerTileEntity.ContainsBloodyVein = false;
 
-                            int spaceLeft = TECodebreaker.MaxCellCapacity - temporaryItem.stack;
-
-                            // If the player has more cells than there is space left, insert as many as possible. Otherwise insert all the cells.
-                            int cellsToInsert = Math.Min(playerHandItem.stack, spaceLeft);
-                            cellStackDiff = (short)cellsToInsert;
-                            playerHandItem.stack -= cellsToInsert;
-                            if (playerHandItem.stack == 0)
-                                playerHandItem.TurnToAir();
-                            AwaitingDecryptionTextClose = false;
+                            InsertPowercells(playerHandItem, temporaryItem, ref cellStackDiff);
                         }
                     }
 
@@ -405,6 +389,19 @@ namespace CalamityMod.UI.DraedonSummoning
             // Since HoverItem is active, we don't need to input anything into this method.
             if (temporaryItem.stack > 0)
                 Main.instance.MouseTextHackZoom(string.Empty);
+        }
+
+        private static void InsertPowercells(Item playerHandItem, Item temporaryItem, ref short cellStackDiff)
+        {
+            int spaceLeft = TECodebreaker.MaxCellCapacity - temporaryItem.stack;
+
+            // Insert as many of the held cells as the codebreaker can accept.
+            int cellsToInsert = Math.Min(playerHandItem.stack, spaceLeft);
+            cellStackDiff = (short)cellsToInsert;
+            playerHandItem.stack -= cellsToInsert;
+            if (playerHandItem.stack == 0)
+                playerHandItem.TurnToAir();
+            AwaitingDecryptionTextClose = false;
         }
 
         public static void HandleSchematicSlotInteractions(TECodebreaker codebreakerTileEntity, Vector2 schematicIconCenter, Vector2 area)

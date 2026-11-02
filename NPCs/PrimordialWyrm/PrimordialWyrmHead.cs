@@ -539,23 +539,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                                 int numProjectiles = 0;
                                 float maxDistance = 2400f;
 
-                                foreach (Player plr in Main.ActivePlayers)
-                                {
-                                    if (plr.dead)
-                                        continue;
-
-                                    Vector2 playerCenter = plr.Center;
-                                    float distance = Vector2.Distance(playerCenter, NPC.Center);
-                                    if (distance < maxDistance)
-                                    {
-                                        whoAmIArray[numProjectiles] = plr.whoAmI;
-                                        targetCenterArray[numProjectiles] = playerCenter;
-                                        int projectileLimit = numProjectiles + 1;
-                                        numProjectiles = projectileLimit;
-                                        if (projectileLimit >= targetCenterArray.Length)
-                                            break;
-                                    }
-                                }
+                                SelectProjectileTargets(whoAmIArray, targetCenterArray, ref numProjectiles, maxDistance);
 
                                 float predictionAmt = targetDownDeep ? 45f : 60f;
                                 float lightningVelocityScale = death ? 0.9f : revenge ? 0.75f : expertMode ? 0.6f : 0f;
@@ -678,23 +662,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                             int numProjectiles = 0;
                             float maxDistance = 2400f;
 
-                            foreach (Player plr in Main.ActivePlayers)
-                            {
-                                if (plr.dead)
-                                    continue;
-
-                                Vector2 playerCenter = plr.Center;
-                                float distance = Vector2.Distance(playerCenter, NPC.Center);
-                                if (distance < maxDistance)
-                                {
-                                    whoAmIArray[numProjectiles] = plr.whoAmI;
-                                    targetCenterArray[numProjectiles] = playerCenter;
-                                    int projectileLimit = numProjectiles + 1;
-                                    numProjectiles = projectileLimit;
-                                    if (projectileLimit >= targetCenterArray.Length)
-                                        break;
-                                }
-                            }
+                            SelectProjectileTargets(whoAmIArray, targetCenterArray, ref numProjectiles, maxDistance);
 
                             float predictionAmt = targetDownDeep ? 90f : 120f;
                             float iceMistVelocityScale = death ? 1.8f : revenge ? 1.5f : expertMode ? 1.2f : 0f;
@@ -772,18 +740,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                         float spinVelocityDivisor = targetDownDeep ? 120f : 90f;
                         if (rotationDirection == 0)
                         {
-                            // Set spin direction
-                            if (Main.player[NPC.target].velocity.X > 0f)
-                                rotationDirection = 1;
-                            else if (Main.player[NPC.target].velocity.X < 0f)
-                                rotationDirection = -1;
-                            else
-                                rotationDirection = player.direction;
-
-                            // Set spin velocity
-                            NPC.velocity.X = MathHelper.Pi * spinRadius / spinVelocityDivisor;
-                            NPC.velocity *= -rotationDirection;
-                            NPC.netUpdate = true;
+                            StartSpin(player, spinRadius, spinVelocityDivisor);
                         }
                         else
                         {
@@ -822,16 +779,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                                 // Spawn 3 (or more) circles of Ancient Dooms around the target
                                 if (Main.netMode != NetmodeID.MultiplayerClient)
                                 {
-                                    int ancientDoomScale2 = (int)(aiGateValue / ancientDoomGateValue);
-                                    ancientDoomLimit += ancientDoomScale2;
-                                    ancientDoomDistance += ancientDoomScale2 * 45;
-                                    int ancientDoomDegrees = 360 / ancientDoomLimit;
-                                    for (int i = 0; i < ancientDoomLimit; i++)
-                                    {
-                                        float ai2 = i * ancientDoomDegrees;
-                                        NPC.NewNPC(NPC.GetSource_FromAI(), (int)(player.Center.X + (float)(Math.Sin(i * ancientDoomDegrees) * ancientDoomDistance)), (int)(player.Center.Y + (float)(Math.Cos(i * ancientDoomDegrees) * ancientDoomDistance)),
-                                            NPCID.AncientDoom, 0, NPC.whoAmI, 0f, ai2, 0f, Main.maxPlayers);
-                                    }
+                                    SpawnAncientDoomRing(player, aiGateValue, ancientDoomGateValue, ref ancientDoomLimit, ref ancientDoomDistance);
                                 }
                                 NPC.localAI[1] += 1f;
                                 NPC.TargetClosest();
@@ -930,16 +878,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                             // Spawn 3 (or more) circles of Ancient Dooms around the target
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
-                                int ancientDoomScale2 = (int)(aiGateValue / ancientDoomGateValue);
-                                ancientDoomLimit += ancientDoomScale2;
-                                ancientDoomDistance += ancientDoomScale2 * 45;
-                                int ancientDoomDegrees = 360 / ancientDoomLimit;
-                                for (int i = 0; i < ancientDoomLimit; i++)
-                                {
-                                    float ai2 = i * ancientDoomDegrees;
-                                    NPC.NewNPC(NPC.GetSource_FromAI(), (int)(player.Center.X + (float)(Math.Sin(i * ancientDoomDegrees) * ancientDoomDistance)), (int)(player.Center.Y + (float)(Math.Cos(i * ancientDoomDegrees) * ancientDoomDistance)),
-                                        NPCID.AncientDoom, 0, NPC.whoAmI, 0f, ai2, 0f, Main.maxPlayers);
-                                }
+                                SpawnAncientDoomRing(player, aiGateValue, ancientDoomGateValue, ref ancientDoomLimit, ref ancientDoomDistance);
                             }
 
                             if (calamityGlobalNPC.newAI[2] >= 240f)
@@ -967,18 +906,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                         float spinVelocityDivisor = targetDownDeep ? 90f : 60f;
                         if (rotationDirection == 0)
                         {
-                            // Set spin direction
-                            if (Main.player[NPC.target].velocity.X > 0f)
-                                rotationDirection = 1;
-                            else if (Main.player[NPC.target].velocity.X < 0f)
-                                rotationDirection = -1;
-                            else
-                                rotationDirection = player.direction;
-
-                            // Set spin velocity
-                            NPC.velocity.X = MathHelper.Pi * spinRadius / spinVelocityDivisor;
-                            NPC.velocity *= -rotationDirection;
-                            NPC.netUpdate = true;
+                            StartSpin(player, spinRadius, spinVelocityDivisor);
                         }
                         else
                         {
@@ -1218,6 +1146,55 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                     if (NPC.velocity.ManhattanDistance(Vector2.Zero) < baseVelocity * 0.5)
                         NPC.velocity.X += NPC.velocity.X.DirectionalSign() * turnSpeed;
                 }
+            }
+        }
+
+        private void SelectProjectileTargets(int[] whoAmIArray, Vector2[] targetCenterArray, ref int numProjectiles, float maxDistance)
+        {
+            foreach (Player plr in Main.ActivePlayers)
+            {
+                if (plr.dead)
+                    continue;
+
+                Vector2 playerCenter = plr.Center;
+                float distance = Vector2.Distance(playerCenter, NPC.Center);
+                if (distance < maxDistance)
+                {
+                    whoAmIArray[numProjectiles] = plr.whoAmI;
+                    targetCenterArray[numProjectiles] = playerCenter;
+                    int projectileLimit = numProjectiles + 1;
+                    numProjectiles = projectileLimit;
+                    if (projectileLimit >= targetCenterArray.Length)
+                        break;
+                }
+            }
+        }
+
+        private void StartSpin(Player player, float spinRadius, float spinVelocityDivisor)
+        {
+            if (Main.player[NPC.target].velocity.X > 0f)
+                rotationDirection = 1;
+            else if (Main.player[NPC.target].velocity.X < 0f)
+                rotationDirection = -1;
+            else
+                rotationDirection = player.direction;
+
+            NPC.velocity.X = MathHelper.Pi * spinRadius / spinVelocityDivisor;
+            NPC.velocity *= -rotationDirection;
+            NPC.netUpdate = true;
+        }
+
+        private void SpawnAncientDoomRing(Player player, float aiGateValue, float ancientDoomGateValue, ref int ancientDoomLimit, ref int ancientDoomDistance)
+        {
+            int ancientDoomScale2 = (int)(aiGateValue / ancientDoomGateValue);
+            ancientDoomLimit += ancientDoomScale2;
+            ancientDoomDistance += ancientDoomScale2 * 45;
+            int ancientDoomDegrees = 360 / ancientDoomLimit;
+            for (int i = 0; i < ancientDoomLimit; i++)
+            {
+                float ai2 = i * ancientDoomDegrees;
+                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(player.Center.X + (float)(Math.Sin(i * ancientDoomDegrees) * ancientDoomDistance)), (int)(player.Center.Y + (float)(Math.Cos(i * ancientDoomDegrees) * ancientDoomDistance)),
+                    NPCID.AncientDoom, 0, NPC.whoAmI, 0f, ai2, 0f, Main.maxPlayers);
             }
         }
 

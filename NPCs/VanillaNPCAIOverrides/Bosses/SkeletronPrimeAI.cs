@@ -23,6 +23,85 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         public static int SkullDamage = 22; // 88
         public static int RocketDamage = 30; // 120
 
+        private static float GetMeleeArmAcceleration(bool death, bool cannonAlive, bool laserAlive, bool otherMeleeArmAlive)
+        {
+            float acceleration = death ? 0.385f : 0.25f;
+            float accelerationMult = 1f;
+            if (!cannonAlive)
+            {
+                acceleration += 0.025f;
+                accelerationMult += 0.5f;
+            }
+            if (!laserAlive)
+            {
+                acceleration += 0.025f;
+                accelerationMult += 0.5f;
+            }
+            if (!otherMeleeArmAlive)
+                acceleration += 0.025f;
+            if (death)
+                acceleration *= accelerationMult;
+
+            return acceleration;
+        }
+
+        private static float GetRangedArmAcceleration(bool death, bool otherRangedArmAlive, bool viceAlive, bool sawAlive)
+        {
+            float acceleration = death ? 0.385f : 0.25f;
+            float accelerationMult = 1f;
+            if (!otherRangedArmAlive)
+            {
+                acceleration += 0.025f;
+                accelerationMult += 0.5f;
+            }
+            if (!viceAlive)
+                acceleration += 0.025f;
+            if (!sawAlive)
+                acceleration += 0.025f;
+            if (death)
+                acceleration *= accelerationMult;
+
+            return acceleration;
+        }
+
+        private static void DespawnArmIfHeadMissing(NPC arm)
+        {
+            if (!Main.npc[(int)arm.ai[1]].active || Main.npc[(int)arm.ai[1]].aiStyle != NPCAIStyleID.SkeletronPrimeHead)
+            {
+                arm.ai[2] += 10f;
+                if (arm.ai[2] > 50f || !Main.dedServ)
+                {
+                    arm.life = -1;
+                    arm.HitEffect(0, 10.0);
+                    arm.active = false;
+                }
+            }
+        }
+
+        private static bool UpdateArmSpawnGracePeriod(NPC arm)
+        {
+            float timeToNotAttack = 180f;
+            bool dontAttack = arm.Calamity().newAI[2] < timeToNotAttack;
+            if (dontAttack)
+            {
+                arm.Calamity().newAI[2] += 1f;
+                if (arm.Calamity().newAI[2] >= timeToNotAttack)
+                    arm.SyncExtraAI();
+            }
+            return dontAttack;
+        }
+
+        private static void ReturnMeleeArmToHead(NPC arm, bool death, bool cannonAlive, bool laserAlive, bool otherMeleeArmAlive)
+        {
+            float acceleration = GetMeleeArmAcceleration(death, cannonAlive, laserAlive, otherMeleeArmAlive);
+            MoveArm(arm, acceleration, death,
+                Main.npc[(int)arm.ai[1]].position.Y + 20f,
+                Main.npc[(int)arm.ai[1]].position.Y - 20f,
+                Main.npc[(int)arm.ai[1]].Center.X + 20f,
+                Main.npc[(int)arm.ai[1]].Center.X - 20f,
+                2f);
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -711,16 +790,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.spriteDirection = -(int)NPC.ai[0];
 
                 // Despawn if head is gone
-                if (!Main.npc[(int)NPC.ai[1]].active || Main.npc[(int)NPC.ai[1]].aiStyle != NPCAIStyleID.SkeletronPrimeHead)
-                {
-                    NPC.ai[2] += 10f;
-                    if (NPC.ai[2] > 50f || !Main.dedServ)
-                    {
-                        NPC.life = -1;
-                        NPC.HitEffect(0, 10.0);
-                        NPC.active = false;
-                    }
-                }
+                DespawnArmIfHeadMissing(NPC);
 
                 CalamityGlobalNPC.primeLaser = NPC.whoAmI;
 
@@ -745,31 +815,12 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 }
 
                 // Inflict 0 damage for 3 seconds after spawning
-                float timeToNotAttack = 180f;
-                bool dontAttack = NPC.Calamity().newAI[2] < timeToNotAttack;
-                if (dontAttack)
-                {
-                    NPC.Calamity().newAI[2] += 1f;
-                    if (NPC.Calamity().newAI[2] >= timeToNotAttack)
-                        NPC.SyncExtraAI();
-                }
+                bool dontAttack = UpdateArmSpawnGracePeriod(NPC);
 
                 bool normalLaserRotation = NPC.localAI[1] % 2f == 0f;
 
                 // Movement
-                float acceleration = death ? 0.385f : 0.25f;
-                float accelerationMult = 1f;
-                if (!cannonAlive)
-                {
-                    acceleration += 0.025f;
-                    accelerationMult += 0.5f;
-                }
-                if (!viceAlive)
-                    acceleration += 0.025f;
-                if (!sawAlive)
-                    acceleration += 0.025f;
-                if (death)
-                    acceleration *= accelerationMult;
+                float acceleration = GetRangedArmAcceleration(death, cannonAlive, viceAlive, sawAlive);
 
                 MoveArm(NPC, acceleration, death,
                     Main.npc[(int)NPC.ai[1]].position.Y - 70f,
@@ -913,16 +964,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 NPC.spriteDirection = -(int)NPC.ai[0];
 
-                if (!Main.npc[(int)NPC.ai[1]].active || Main.npc[(int)NPC.ai[1]].aiStyle != NPCAIStyleID.SkeletronPrimeHead)
-                {
-                    NPC.ai[2] += 10f;
-                    if (NPC.ai[2] > 50f || !Main.dedServ)
-                    {
-                        NPC.life = -1;
-                        NPC.HitEffect(0, 10.0);
-                        NPC.active = false;
-                    }
-                }
+                DespawnArmIfHeadMissing(NPC);
 
                 CalamityGlobalNPC.primeCannon = NPC.whoAmI;
 
@@ -947,14 +989,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 }
 
                 // Inflict 0 damage for 3 seconds after spawning
-                float timeToNotAttack = 180f;
-                bool dontAttack = NPC.Calamity().newAI[2] < timeToNotAttack;
-                if (dontAttack)
-                {
-                    NPC.Calamity().newAI[2] += 1f;
-                    if (NPC.Calamity().newAI[2] >= timeToNotAttack)
-                        NPC.SyncExtraAI();
-                }
+                bool dontAttack = UpdateArmSpawnGracePeriod(NPC);
 
                 bool fireSlower = false;
                 if (laserAlive)
@@ -1015,19 +1050,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 }
 
                 // Movement
-                float acceleration = death ? 0.385f : 0.25f;
-                float accelerationMult = 1f;
-                if (!laserAlive)
-                {
-                    acceleration += 0.025f;
-                    accelerationMult += 0.5f;
-                }
-                if (!viceAlive)
-                    acceleration += 0.025f;
-                if (!sawAlive)
-                    acceleration += 0.025f;
-                if (death)
-                    acceleration *= accelerationMult;
+                float acceleration = GetRangedArmAcceleration(death, laserAlive, viceAlive, sawAlive);
 
                 MoveArm(NPC, acceleration, death,
                     Main.npc[(int)NPC.ai[1]].position.Y - 70f,
@@ -1145,16 +1168,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     NPC.ai[2] = 0f;
 
                 // Despawn if head is gone
-                if (!Main.npc[(int)NPC.ai[1]].active || Main.npc[(int)NPC.ai[1]].aiStyle != NPCAIStyleID.SkeletronPrimeHead)
-                {
-                    NPC.ai[2] += 10f;
-                    if (NPC.ai[2] > 50f || !Main.dedServ)
-                    {
-                        NPC.life = -1;
-                        NPC.HitEffect(0, 10.0);
-                        NPC.active = false;
-                    }
-                }
+                DespawnArmIfHeadMissing(NPC);
 
                 CalamityGlobalNPC.primeVice = NPC.whoAmI;
 
@@ -1181,29 +1195,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 // Return to the head
                 if (NPC.ai[2] == 99f)
                 {
-                    float acceleration = death ? 0.385f : 0.25f;
-                    float accelerationMult = 1f;
-                    if (!cannonAlive)
-                    {
-                        acceleration += 0.025f;
-                        accelerationMult += 0.5f;
-                    }
-                    if (!laserAlive)
-                    {
-                        acceleration += 0.025f;
-                        accelerationMult += 0.5f;
-                    }
-                    if (!sawAlive)
-                        acceleration += 0.025f;
-                    if (death)
-                        acceleration *= accelerationMult;
-
-                    MoveArm(NPC, acceleration, death,
-                        Main.npc[(int)NPC.ai[1]].position.Y + 20f,
-                        Main.npc[(int)NPC.ai[1]].position.Y - 20f,
-                        Main.npc[(int)NPC.ai[1]].Center.X + 20f,
-                        Main.npc[(int)NPC.ai[1]].Center.X - 20f,
-                        2f);
+                    ReturnMeleeArmToHead(NPC, death, cannonAlive, laserAlive, sawAlive);
                 }
 
                 // Other phases
@@ -1233,22 +1225,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             NPC.netUpdate = true;
                         }
 
-                        float acceleration = death ? 0.385f : 0.25f;
-                        float accelerationMult = 1f;
-                        if (!cannonAlive)
-                        {
-                            acceleration += 0.025f;
-                            accelerationMult += 0.5f;
-                        }
-                        if (!laserAlive)
-                        {
-                            acceleration += 0.025f;
-                            accelerationMult += 0.5f;
-                        }
-                        if (!sawAlive)
-                            acceleration += 0.025f;
-                        if (death)
-                            acceleration *= accelerationMult;
+                        float acceleration = GetMeleeArmAcceleration(death, cannonAlive, laserAlive, sawAlive);
 
                         MoveArm(NPC, acceleration, death,
                             Main.npc[(int)NPC.ai[1]].position.Y + 100f,
@@ -1419,16 +1396,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 NPC.spriteDirection = -(int)NPC.ai[0];
 
-                if (!Main.npc[(int)NPC.ai[1]].active || Main.npc[(int)NPC.ai[1]].aiStyle != NPCAIStyleID.SkeletronPrimeHead)
-                {
-                    NPC.ai[2] += 10f;
-                    if (NPC.ai[2] > 50f || !Main.dedServ)
-                    {
-                        NPC.life = -1;
-                        NPC.HitEffect(0, 10.0);
-                        NPC.active = false;
-                    }
-                }
+                DespawnArmIfHeadMissing(NPC);
 
                 CalamityGlobalNPC.primeSaw = NPC.whoAmI;
 
@@ -1454,29 +1422,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 if (NPC.ai[2] == 99f)
                 {
-                    float acceleration = death ? 0.385f : 0.25f;
-                    float accelerationMult = 1f;
-                    if (!cannonAlive)
-                    {
-                        acceleration += 0.025f;
-                        accelerationMult += 0.5f;
-                    }
-                    if (!laserAlive)
-                    {
-                        acceleration += 0.025f;
-                        accelerationMult += 0.5f;
-                    }
-                    if (!viceAlive)
-                        acceleration += 0.025f;
-                    if (death)
-                        acceleration *= accelerationMult;
-
-                    MoveArm(NPC, acceleration, death,
-                        Main.npc[(int)NPC.ai[1]].position.Y + 20f,
-                        Main.npc[(int)NPC.ai[1]].position.Y - 20f,
-                        Main.npc[(int)NPC.ai[1]].Center.X + 20f,
-                        Main.npc[(int)NPC.ai[1]].Center.X - 20f,
-                        2f);
+                    ReturnMeleeArmToHead(NPC, death, cannonAlive, laserAlive, viceAlive);
                 }
                 else
                 {
@@ -1502,22 +1448,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             NPC.netUpdate = true;
                         }
 
-                        float acceleration = death ? 0.385f : 0.25f;
-                        float accelerationMult = 1f;
-                        if (!cannonAlive)
-                        {
-                            acceleration += 0.025f;
-                            accelerationMult += 0.5f;
-                        }
-                        if (!laserAlive)
-                        {
-                            acceleration += 0.025f;
-                            accelerationMult += 0.5f;
-                        }
-                        if (!viceAlive)
-                            acceleration += 0.025f;
-                        if (death)
-                            acceleration *= accelerationMult;
+                        float acceleration = GetMeleeArmAcceleration(death, cannonAlive, laserAlive, viceAlive);
 
                         MoveArm(NPC, acceleration, death,
                             Main.npc[(int)NPC.ai[1]].position.Y + 100f,

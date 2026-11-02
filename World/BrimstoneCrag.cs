@@ -75,19 +75,7 @@ namespace CalamityMod.World
                     tileDown.TileType != ModContent.TileType<BrimstoneSlag>() || tileLeft.TileType != ModContent.TileType<BrimstoneSlag>() ||
                     tileRight.TileType != ModContent.TileType<BrimstoneSlag>()))
                     {
-                        ShapeData circle = new ShapeData();
-                        GenAction blotchMod = new Modifiers.Blotches(2, 0.4);
-                        int radius = WorldGen.genRand.Next(5, 20);
-                        WorldUtils.Gen(new Point(x, y), new Shapes.Circle(radius), Actions.Chain(new GenAction[]
-                        {
-                            blotchMod.Output(circle)
-                        }));
-
-                        WorldUtils.Gen(new Point(x, y), new ModShapes.All(circle), Actions.Chain(new GenAction[]
-                        {
-                            new Actions.ClearTile(),
-                            new Actions.PlaceTile((ushort)ModContent.TileType<BrimstoneSlag>())
-                        }));
+                        PlaceSlagCluster(x, y, 5, 20);
                     }
                 }
             }
@@ -99,19 +87,7 @@ namespace CalamityMod.World
                 {
                     if (WorldGen.genRand.NextBool(25))
                     {
-                        ShapeData circle = new ShapeData();
-                        GenAction blotchMod = new Modifiers.Blotches(2, 0.4);
-                        int radius = WorldGen.genRand.Next(3, 7);
-                        WorldUtils.Gen(new Point(x, y), new Shapes.Circle(radius), Actions.Chain(new GenAction[]
-                        {
-                            blotchMod.Output(circle)
-                        }));
-
-                        WorldUtils.Gen(new Point(x, y), new ModShapes.All(circle), Actions.Chain(new GenAction[]
-                        {
-                            new Actions.ClearTile(),
-                            new Actions.PlaceTile((ushort)ModContent.TileType<BrimstoneSlag>())
-                        }));
+                        PlaceSlagCluster(x, y, 3, 7);
                     }
                 }
             }
@@ -374,6 +350,23 @@ namespace CalamityMod.World
         }
 
         //place ambient objects
+        private static void PlaceSlagCluster(int x, int y, int minRadius, int maxRadius)
+        {
+            ShapeData circle = new ShapeData();
+            GenAction blotchMod = new Modifiers.Blotches(2, 0.4);
+            int radius = WorldGen.genRand.Next(minRadius, maxRadius);
+            WorldUtils.Gen(new Point(x, y), new Shapes.Circle(radius), Actions.Chain(new GenAction[]
+            {
+                blotchMod.Output(circle)
+            }));
+
+            WorldUtils.Gen(new Point(x, y), new ModShapes.All(circle), Actions.Chain(new GenAction[]
+            {
+                new Actions.ClearTile(),
+                new Actions.PlaceTile((ushort)ModContent.TileType<BrimstoneSlag>())
+            }));
+        }
+
         private static void GenCragsAmbience()
         {
             int biomeStart = StartX;

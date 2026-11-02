@@ -335,40 +335,7 @@ namespace CalamityMod.Tiles
 
         public static void DresserMouseFar<T>() where T : ModItem
         {
-            Player player = Main.LocalPlayer;
-            Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
-            string chestName = TileLoader.DefaultContainerName(tile.TileType, tile.TileFrameX, tile.TileFrameY);
-            int left = Player.tileTargetX;
-            int top = Player.tileTargetY;
-            left -= (int)(tile.TileFrameX % 54 / 18);
-            if (tile.TileFrameY % 36 != 0)
-            {
-                top--;
-            }
-            int chestIndex = Chest.FindChest(left, top);
-            player.cursorItemIconID = -1;
-            if (chestIndex < 0)
-            {
-                player.cursorItemIconText = Language.GetTextValue("LegacyDresserType.0");
-            }
-            else
-            {
-                if (Main.chest[chestIndex].name != "")
-                {
-                    player.cursorItemIconText = Main.chest[chestIndex].name;
-                }
-                else
-                {
-                    player.cursorItemIconText = chestName;
-                }
-                if (player.cursorItemIconText == chestName)
-                {
-                    player.cursorItemIconID = ItemType<T>();
-                    player.cursorItemIconText = "";
-                }
-            }
-            player.noThrow = 2;
-            player.cursorItemIconEnabled = true;
+            Player player = SetDresserCursor<T>();
             if (player.cursorItemIconText == "")
             {
                 player.cursorItemIconEnabled = false;
@@ -377,6 +344,15 @@ namespace CalamityMod.Tiles
         }
 
         public static void DresserMouseOver<T>() where T : ModItem
+        {
+            Player player = SetDresserCursor<T>();
+            if (Main.tile[Player.tileTargetX, Player.tileTargetY].TileFrameY > 0)
+            {
+                player.cursorItemIconID = ItemID.FamiliarShirt;
+            }
+        }
+
+        private static Player SetDresserCursor<T>() where T : ModItem
         {
             Player player = Main.LocalPlayer;
             Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
@@ -412,10 +388,7 @@ namespace CalamityMod.Tiles
             }
             player.noThrow = 2;
             player.cursorItemIconEnabled = true;
-            if (Main.tile[Player.tileTargetX, Player.tileTargetY].TileFrameY > 0)
-            {
-                player.cursorItemIconID = ItemID.FamiliarShirt;
-            }
+            return player;
         }
 
         public static bool DresserRightClick()
@@ -797,6 +770,15 @@ namespace CalamityMod.Tiles
             Main.tileFrameImportant[mt.Type] = true;
             Main.tileLavaDeath[mt.Type] = !lavaImmune;
             Main.tileWaterDeath[mt.Type] = false;
+            SetUpBedOrBathtubObject(mt, lavaImmune);
+
+            // All bathtubs count as tables.
+            mt.AddToArray(ref TileID.Sets.RoomNeeds.CountsAsTable);
+            mt.AddMapEntry(new Color(144, 148, 144), Language.GetText("ItemName.Bathtub"));
+        }
+
+        private static void SetUpBedOrBathtubObject(ModTile mt, bool lavaImmune)
+        {
             TileObjectData.newTile.Width = 4;
             TileObjectData.newTile.Height = 2;
             TileObjectData.newTile.CoordinateHeights = new int[] { 16, 18 };
@@ -814,10 +796,6 @@ namespace CalamityMod.Tiles
             TileObjectData.newAlternate.Direction = TileObjectDirection.PlaceRight;
             TileObjectData.addAlternate(1);
             TileObjectData.addTile(mt.Type);
-
-            // All bathtubs count as tables.
-            mt.AddToArray(ref TileID.Sets.RoomNeeds.CountsAsTable);
-            mt.AddMapEntry(new Color(144, 148, 144), Language.GetText("ItemName.Bathtub"));
         }
 
         /// <summary>
@@ -838,23 +816,7 @@ namespace CalamityMod.Tiles
             TileID.Sets.InteractibleByNPCs[mt.Type] = true;
             TileID.Sets.IsValidSpawnPoint[mt.Type] = true;
             TileID.Sets.DisableSmartCursor[mt.Type] = true;
-            TileObjectData.newTile.Width = 4;
-            TileObjectData.newTile.Height = 2;
-            TileObjectData.newTile.CoordinateHeights = new int[] { 16, 18 };
-            TileObjectData.newTile.CoordinateWidth = 16;
-            TileObjectData.newTile.CoordinatePadding = 2;
-            TileObjectData.newTile.Direction = TileObjectDirection.PlaceLeft;
-            TileObjectData.newTile.StyleHorizontal = true;
-            TileObjectData.newTile.Origin = new Point16(1, 1);
-            TileObjectData.newTile.UsesCustomCanPlace = true;
-            TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile | AnchorType.SolidWithTop, 4, 0);
-            TileObjectData.newTile.LavaDeath = !lavaImmune;
-            TileObjectData.newTile.WaterPlacement = LiquidPlacement.Allowed;
-            TileObjectData.newTile.LavaPlacement = lavaImmune ? LiquidPlacement.Allowed : LiquidPlacement.NotAllowed;
-            TileObjectData.newAlternate.CopyFrom(TileObjectData.newTile);
-            TileObjectData.newAlternate.Direction = TileObjectDirection.PlaceRight;
-            TileObjectData.addAlternate(1);
-            TileObjectData.addTile(mt.Type);
+            SetUpBedOrBathtubObject(mt, lavaImmune);
 
             // All beds count as chairs.
             mt.AddToArray(ref TileID.Sets.RoomNeeds.CountsAsChair);

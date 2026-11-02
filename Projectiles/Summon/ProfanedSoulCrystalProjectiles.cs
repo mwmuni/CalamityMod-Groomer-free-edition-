@@ -21,6 +21,35 @@ namespace CalamityMod.Projectiles.Summon
 {
     internal static class ProfanedSoulCrystalProjectileUtils
     {
+        internal static void ExplodeFireball(Projectile projectile, float nightLargeDustScale = 0.75f)
+        {
+            SoundEngine.PlaySound(SoundID.Item14, projectile.position);
+            projectile.position.X = projectile.position.X + (float)(projectile.width / 2);
+            projectile.position.Y = projectile.position.Y + (float)(projectile.height / 2);
+            projectile.width = projectile.height = 200;
+            projectile.position.X = projectile.position.X - (float)(projectile.width / 2);
+            projectile.position.Y = projectile.position.Y - (float)(projectile.height / 2);
+            int dust = ProvUtils.GetDustID(!Main.dayTime);
+            for (int num621 = 0; num621 < 4; num621++)
+            {
+                int num622 = Dust.NewDust(projectile.position, projectile.width, projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
+                Main.dust[num622].velocity *= 3f;
+                if (Main.rand.NextBool())
+                {
+                    Main.dust[num622].scale = 0.5f;
+                    Main.dust[num622].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
+                }
+            }
+            for (int num623 = 0; num623 < 12; num623++)
+            {
+                int num624 = Dust.NewDust(projectile.position, projectile.width, projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 3f : nightLargeDustScale);
+                Main.dust[num624].noGravity = true;
+                Main.dust[num624].velocity *= 5f;
+                num624 = Dust.NewDust(projectile.position, projectile.width, projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
+                Main.dust[num624].velocity *= 2f;
+            }
+        }
+
         internal static bool TryFindTarget(Projectile projectile, float maxDistance, int npcCount, out NPC target, out Vector2 targetCenter)
         {
             target = null;
@@ -373,36 +402,7 @@ namespace CalamityMod.Projectiles.Summon
             return null;
         }
 
-        public override void OnKill(int timeLeft)
-        {
-
-            SoundEngine.PlaySound(SoundID.Item14, Projectile.position);
-            Projectile.position.X = Projectile.position.X + (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y + (float)(Projectile.height / 2);
-            Projectile.width = Projectile.height = 200;
-            Projectile.position.X = Projectile.position.X - (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y - (float)(Projectile.height / 2);
-            int dust = ProvUtils.GetDustID(!Main.dayTime);
-            for (int num621 = 0; num621 < 4; num621++)
-            {
-                int num622 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num622].velocity *= 3f;
-                if (Main.rand.NextBool())
-                {
-                    Main.dust[num622].scale = 0.5f;
-                    Main.dust[num622].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
-                }
-            }
-            for (int num623 = 0; num623 < 12; num623++)
-            {
-                int num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 3f : 0.75f);
-                Main.dust[num624].noGravity = true;
-                Main.dust[num624].velocity *= 5f;
-                num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num624].velocity *= 2f;
-
-            }
-        }
+        public override void OnKill(int timeLeft) => ProfanedSoulCrystalProjectileUtils.ExplodeFireball(Projectile);
     }
     #endregion
 
@@ -742,31 +742,7 @@ namespace CalamityMod.Projectiles.Summon
 
         public override void OnKill(int timeLeft)
         {
-            SoundEngine.PlaySound(SoundID.Item14, Projectile.position);
-            Projectile.position.X = Projectile.position.X + (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y + (float)(Projectile.height / 2);
-            Projectile.width = Projectile.height = 200;
-            Projectile.position.X = Projectile.position.X - (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y - (float)(Projectile.height / 2);
-            int dust = ProvUtils.GetDustID(!Main.dayTime);
-            for (int num621 = 0; num621 < 4; num621++)
-            {
-                int num622 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num622].velocity *= 3f;
-                if (Main.rand.NextBool())
-                {
-                    Main.dust[num622].scale = 0.5f;
-                    Main.dust[num622].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
-                }
-            }
-            for (int num623 = 0; num623 < 12; num623++)
-            {
-                int num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 3f : 0.75f);
-                Main.dust[num624].noGravity = true;
-                Main.dust[num624].velocity *= 5f;
-                num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num624].velocity *= 2f;
-            }
+            ProfanedSoulCrystalProjectileUtils.ExplodeFireball(Projectile);
 
             if (Projectile.scale != 1.5f)
                 return;
@@ -1954,38 +1930,7 @@ namespace CalamityMod.Projectiles.Summon
             return false;
         }
 
-        public override void OnKill(int timeLeft)
-        {
-
-            SoundEngine.PlaySound(SoundID.Item14, Projectile.position);
-            Projectile.position.X = Projectile.position.X + (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y + (float)(Projectile.height / 2);
-            Projectile.width = Projectile.height = 200;
-            Projectile.position.X = Projectile.position.X - (float)(Projectile.width / 2);
-            Projectile.position.Y = Projectile.position.Y - (float)(Projectile.height / 2);
-
-            int dust = ProvUtils.GetDustID(!Main.dayTime);
-
-            for (int num621 = 0; num621 < 4; num621++)
-            {
-                int num622 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num622].velocity *= 3f;
-                if (Main.rand.NextBool())
-                {
-                    Main.dust[num622].scale = 0.5f;
-                    Main.dust[num622].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
-                }
-            }
-            for (int num623 = 0; num623 < 12; num623++)
-            {
-                int num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 3f : 0.5f);
-                Main.dust[num624].noGravity = true;
-                Main.dust[num624].velocity *= 5f;
-                num624 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dust, 0f, 0f, 100, default, Main.dayTime ? 2f : 0.5f);
-                Main.dust[num624].velocity *= 2f;
-
-            }
-        }
+        public override void OnKill(int timeLeft) => ProfanedSoulCrystalProjectileUtils.ExplodeFireball(Projectile, nightLargeDustScale: 0.5f);
     }
 
     #endregion

@@ -504,18 +504,7 @@ namespace CalamityMod.World
                         randomPointInRoomY -= xMoveDirection;
                         int yMoveDirection = WorldGen.genRand.Next(2);
                         int areaToCheck = WorldGen.genRand.Next(8, 10);
-                        bool noDoorInWay = true;
-                        for (int dx = randomPointInRoomX - areaToCheck; dx < randomPointInRoomX + areaToCheck; dx++)
-                        {
-                            for (int dy = randomPointInRoomY - areaToCheck; dy < randomPointInRoomY + areaToCheck; dy++)
-                            {
-                                if (Main.tile[dx, dy].HasTile && Main.tile[dx, dy].TileType == TileID.ClosedDoor)
-                                {
-                                    noDoorInWay = false;
-                                    break;
-                                }
-                            }
-                        }
+                        bool noDoorInWay = IsDoorFreeSpikeArea(randomPointInRoomX, randomPointInRoomY, areaToCheck);
                         if (noDoorInWay)
                         {
                             for (int dx = randomPointInRoomX - areaToCheck; dx < randomPointInRoomX + areaToCheck; dx++)
@@ -561,18 +550,7 @@ namespace CalamityMod.World
                         randomPointInRoomX -= xMoveDirection;
                         int yMoveDirection = WorldGen.genRand.Next(2);
                         int areaToCheck = WorldGen.genRand.Next(8, 10);
-                        bool noDoorInWay = true;
-                        for (int dx = randomPointInRoomX - areaToCheck; dx < randomPointInRoomX + areaToCheck; dx++)
-                        {
-                            for (int dy = randomPointInRoomY - areaToCheck; dy < randomPointInRoomY + areaToCheck; dy++)
-                            {
-                                if (Main.tile[dx, dy].HasTile && Main.tile[dx, dy].TileType == TileID.ClosedDoor)
-                                {
-                                    noDoorInWay = false;
-                                    break;
-                                }
-                            }
-                        }
+                        bool noDoorInWay = IsDoorFreeSpikeArea(randomPointInRoomX, randomPointInRoomY, areaToCheck);
                         if (noDoorInWay)
                         {
                             for (int dx = randomPointInRoomX - areaToCheck; dx < randomPointInRoomX + areaToCheck; dx++)
@@ -624,6 +602,23 @@ namespace CalamityMod.World
             GenVars.tRooms = totalRooms;
         }
 
+        private static bool IsDoorFreeSpikeArea(int randomPointInRoomX, int randomPointInRoomY, int areaToCheck)
+        {
+            bool noDoorInWay = true;
+            for (int dx = randomPointInRoomX - areaToCheck; dx < randomPointInRoomX + areaToCheck; dx++)
+            {
+                for (int dy = randomPointInRoomY - areaToCheck; dy < randomPointInRoomY + areaToCheck; dy++)
+                {
+                    if (Main.tile[dx, dy].HasTile && Main.tile[dx, dy].TileType == TileID.ClosedDoor)
+                    {
+                        noDoorInWay = false;
+                        break;
+                    }
+                }
+            }
+            return noDoorInWay;
+        }
+
         public static void GenerateGenericRoom(Rectangle roomBounds)
         {
             int roomLeft = roomBounds.X;
@@ -644,65 +639,40 @@ namespace CalamityMod.World
             int roomCenterX = (roomLeft + roomRight) / 2;
             int roomCenterY = (roomTop + roomBottom) / 2;
 
-            // Cut out the rooms with a bit of randomness incorporated, so that the room is not entirely square.
+            void CarveRoomTile(int dx, int dy)
+            {
+                if (WorldGen.genRand.NextBool(20))
+                    offsettedRoomTop += WorldGen.genRand.NextBool(2).ToDirectionInt();
+
+                if (WorldGen.genRand.NextBool(20))
+                    offsettedRoomBottom += WorldGen.genRand.NextBool(2).ToDirectionInt();
+
+                if (WorldGen.genRand.NextBool(20))
+                    offsettedRoomLeft += WorldGen.genRand.NextBool(2).ToDirectionInt();
+
+                if (WorldGen.genRand.NextBool(20))
+                    offsettedRoomRight += WorldGen.genRand.NextBool(2).ToDirectionInt();
+
+                offsettedRoomLeft = Utils.Clamp(offsettedRoomLeft, roomLeft, roomCenterX);
+                offsettedRoomRight = Utils.Clamp(offsettedRoomRight, roomCenterX, roomRight);
+                offsettedRoomTop = Utils.Clamp(offsettedRoomTop, roomTop, roomCenterY);
+                offsettedRoomBottom = Utils.Clamp(offsettedRoomBottom, roomCenterY, roomBottom);
+
+                if (dx >= offsettedRoomLeft && (dx < offsettedRoomRight & dy >= offsettedRoomTop) && dy <= offsettedRoomBottom)
+                {
+                    Main.tile[dx, dy].Get<TileWallWireStateData>().HasTile = false;
+                    Main.tile[dx, dy].LiquidAmount = 0; // Apparently this can indeed happen, and it can interfere with furniture placement.
+                    Main.tile[dx, dy].WallType = WallID.LihzahrdBrickUnsafe;
+                }
+            }
+
+            // Both sweeps share the carving step, but keep their original traversal and RNG order.
             for (int dx = roomLeft; dx < roomRight; dx++)
-            {
                 for (int dy = roomTop; dy < roomBottom; dy++)
-                {
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomTop += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomBottom += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomLeft += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomRight += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    offsettedRoomLeft = Utils.Clamp(offsettedRoomLeft, roomLeft, roomCenterX);
-                    offsettedRoomRight = Utils.Clamp(offsettedRoomRight, roomCenterX, roomRight);
-                    offsettedRoomTop = Utils.Clamp(offsettedRoomTop, roomTop, roomCenterY);
-                    offsettedRoomBottom = Utils.Clamp(offsettedRoomBottom, roomCenterY, roomBottom);
-
-                    if (dx >= offsettedRoomLeft && (dx < offsettedRoomRight & dy >= offsettedRoomTop) && dy <= offsettedRoomBottom)
-                    {
-                        Main.tile[dx, dy].Get<TileWallWireStateData>().HasTile = false;
-                        Main.tile[dx, dy].LiquidAmount = 0; // Apparently this can indeed happen, and it can interfere with furniture placement.
-                        Main.tile[dx, dy].WallType = WallID.LihzahrdBrickUnsafe;
-                    }
-                }
-            }
+                    CarveRoomTile(dx, dy);
             for (int dy = roomBottom; dy > roomTop; dy--)
-            {
                 for (int dx = roomRight; dx > roomLeft; dx--)
-                {
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomTop += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomBottom += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomLeft += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    if (WorldGen.genRand.NextBool(20))
-                        offsettedRoomRight += WorldGen.genRand.NextBool(2).ToDirectionInt();
-
-                    offsettedRoomLeft = Utils.Clamp(offsettedRoomLeft, roomLeft, roomCenterX);
-                    offsettedRoomRight = Utils.Clamp(offsettedRoomRight, roomCenterX, roomRight);
-                    offsettedRoomTop = Utils.Clamp(offsettedRoomTop, roomTop, roomCenterY);
-                    offsettedRoomBottom = Utils.Clamp(offsettedRoomBottom, roomCenterY, roomBottom);
-
-                    if (dx >= offsettedRoomLeft && (dx < offsettedRoomRight & dy >= offsettedRoomTop) && dy <= offsettedRoomBottom)
-                    {
-                        Main.tile[dx, dy].Get<TileWallWireStateData>().HasTile = false;
-                        Main.tile[dx, dy].LiquidAmount = 0; // Apparently this can indeed happen, and it can interfere with furniture placement.
-                        Main.tile[dx, dy].WallType = WallID.LihzahrdBrickUnsafe;
-                    }
-                }
-            }
+                    CarveRoomTile(dx, dy);
         }
 
         public static void GenerateShrineRoom(Rectangle roomBounds)

@@ -530,30 +530,7 @@ namespace CalamityMod.NPCs.CalClone
                     Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>(GoreNamePrefix + "4").Type, NPC.scale);
                     Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, Mod.Find<ModGore>(GoreNamePrefix + "5").Type, NPC.scale);
                 }
-                NPC.position.X = NPC.position.X + (float)(NPC.width / 2);
-                NPC.position.Y = NPC.position.Y + (float)(NPC.height / 2);
-                NPC.width = 100;
-                NPC.height = 100;
-                NPC.position.X = NPC.position.X - (float)(NPC.width / 2);
-                NPC.position.Y = NPC.position.Y - (float)(NPC.height / 2);
-                for (int i = 0; i < 40; i++)
-                {
-                    int brimDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 2f);
-                    Main.dust[brimDust].velocity *= 3f;
-                    if (Main.rand.NextBool())
-                    {
-                        Main.dust[brimDust].scale = 0.5f;
-                        Main.dust[brimDust].fadeIn = 1f + (float)Main.rand.Next(10) * 0.1f;
-                    }
-                }
-                for (int j = 0; j < 70; j++)
-                {
-                    int brimDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 3f);
-                    Main.dust[brimDust2].noGravity = true;
-                    Main.dust[brimDust2].velocity *= 5f;
-                    brimDust2 = Dust.NewDust(NPC.position, NPC.width, NPC.height, (int)CalamityDusts.Brimstone, 0f, 0f, 100, default, 2f);
-                    Main.dust[brimDust2].velocity *= 2f;
-                }
+                CalamitasClone.CreateCloneDeathDust(NPC);
             }
         }
 

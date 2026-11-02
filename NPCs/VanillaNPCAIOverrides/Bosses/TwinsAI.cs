@@ -546,16 +546,8 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                                             int type = ModContent.ProjectileType<HomingLaserDart>();
                                             int damage = HomingDartDamage.CalculateMechDamage();
 
-                                            // Reduce mech boss projectile damage depending on the new ore progression changes
-                                            if (CalamityServerConfig.Instance.EarlyHardmodeProgressionRework && !BossRushEvent.BossRushActive)
-                                            {
-                                                double firstMechMultiplier = CalamityGlobalNPC.EarlyHardmodeProgressionReworkFirstMechStatMultiplier_Expert;
-                                                double secondMechMultiplier = CalamityGlobalNPC.EarlyHardmodeProgressionReworkSecondMechStatMultiplier_Expert;
-                                                if (!NPC.downedMechBossAny)
-                                                    damage = (int)(damage * firstMechMultiplier);
-                                                else if ((!NPC.downedMechBoss1 && !NPC.downedMechBoss2) || (!NPC.downedMechBoss2 && !NPC.downedMechBoss3) || (!NPC.downedMechBoss3 && !NPC.downedMechBoss1))
-                                                    damage = (int)(damage * secondMechMultiplier);
-                                            }
+                                            // This attack applies the progression adjustment a second time.
+                                            damage = damage.CalculateMechDamage();
 
                                             Vector2 laserDartVelocity = (Main.player[NPC.target].Center - NPC.Center).SafeNormalize(Vector2.UnitY) * laserDartSpeed;
                                             Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + NPC.velocity.SafeNormalize(Vector2.UnitY) * 60f, laserDartVelocity, type, damage, 0f, Main.myPlayer);

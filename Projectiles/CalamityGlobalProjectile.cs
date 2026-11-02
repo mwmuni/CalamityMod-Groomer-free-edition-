@@ -2968,12 +2968,7 @@ namespace CalamityMod.Projectiles
             #region Utilities
             void SmallSplashAtOffset(Vector2 offset)
             {
-                int num = Dust.NewDust(new Vector2(projectile.position.X - 6f, projectile.position.Y - 10f) + offset, projectile.width + 12, 24, Dust.dustWater());
-                Main.dust[num].velocity.Y -= 4f;
-                Main.dust[num].velocity.X *= 2.5f;
-                Main.dust[num].scale = 0.8f;
-                Main.dust[num].alpha = 100;
-                Main.dust[num].noGravity = true;
+                SmallDustAtOffset(offset, Dust.dustWater());
             }
             void SmallDustAtOffset(Vector2 offset, int dustID)
             {
@@ -3085,6 +3080,54 @@ namespace CalamityMod.Projectiles
                 }
                 return FoundWaterline;
             }
+            void FailDirectionalCatch(int playerDir, float angleStep)
+            {
+                if (owner.whoAmI == Main.myPlayer)
+                {
+                    if (playerDir >= 0)
+                    {
+                        var particle = new CustomSpark(projectile.Center, Vector2.UnitX.RotatedBy(playerDir * angleStep) * 10, "CalamityMod/Particles/HighResHollowCircleHardEdgeAlt", false, 15, 0.04f, Color.Red, new(1, 2), shrinkSpeed: -0.2f);
+                        GeneralParticleHandler.SpawnParticle(particle);
+                    }
+                    else
+                    {
+                        var particle = new CustomSpark(projectile.Center, Vector2.Zero, "CalamityMod/Particles/HighResHollowCircleHardEdge", false, 15, 0.06f, Color.Red, Vector2.One);
+                        GeneralParticleHandler.SpawnParticle(particle);
+                    }
+                }
+                TimerToCatch = 0;
+                CatchTime = 0;
+                CaughtItemID = -1;
+                PersistentFishingData = 0;
+                owner.Calamity().consecutiveCaughtFish = 0;
+            }
+
+            bool UpdateDirectionalCatch()
+            {
+                if (CatchTime == -1)
+                {
+                    projectile.localAI[1] = CaughtItemID;
+                    ReelTheBobberChecks();
+                    owner.Calamity().consecutiveCaughtFish++;
+                    if (projectile.ai[0] == 2)
+                        return false;
+                    isReelingIn = 1;
+                    CatchTime = (float)CaughtItemID;
+                    TimerToCatch = 0;
+                }
+                if (projectile.ai[0] == 0)
+                {
+                    projectile.ai[1] = CatchTime;
+                    projectile.localAI[1] = TimerToCatch;
+                    if (CaughtItemID != -1 && isReelingIn == 0)
+                    {
+                        projectile.localAI[1] = 0;
+                        projectile.ai[1] = 0;
+                    }
+                    projectile.ai[0] = isReelingIn;
+                }
+                return true;
+            }
             #endregion
             //Doze's notes on bobber AI
 
@@ -3172,48 +3215,11 @@ namespace CalamityMod.Projectiles
                             }
                             else
                             {
-                                if (owner.whoAmI == Main.myPlayer)
-                                {
-                                    if (playerDir >= 0)
-                                    {
-                                        var particle = new CustomSpark(projectile.Center, Vector2.UnitX.RotatedBy(playerDir * MathHelper.PiOver2) * 10, "CalamityMod/Particles/HighResHollowCircleHardEdgeAlt", false, 15, 0.04f, Color.Red, new(1, 2), shrinkSpeed: -0.2f);
-                                        GeneralParticleHandler.SpawnParticle(particle);
-                                    }
-                                    else
-                                    {
-                                        var particle = new CustomSpark(projectile.Center, Vector2.Zero, "CalamityMod/Particles/HighResHollowCircleHardEdge", false, 15, 0.06f, Color.Red, Vector2.One);
-                                        GeneralParticleHandler.SpawnParticle(particle);
-                                    }
-                                }
-                                TimerToCatch = 0;
-                                CatchTime = 0;
-                                CaughtItemID = -1;
-                                PersistentFishingData = 0;
-                                owner.Calamity().consecutiveCaughtFish = 0;
+                                FailDirectionalCatch(playerDir, MathHelper.PiOver2);
                             }
                         }
-                        if (CatchTime == -1)
-                        {
-                            projectile.localAI[1] = CaughtItemID;
-                            ReelTheBobberChecks();
-                            owner.Calamity().consecutiveCaughtFish++;
-                            if (projectile.ai[0] == 2)
-                                return false;
-                            isReelingIn = 1;
-                            CatchTime = (float)CaughtItemID;
-                            TimerToCatch = 0;
-                        }
-                        if (projectile.ai[0] == 0)
-                        {
-                            projectile.ai[1] = CatchTime;
-                            projectile.localAI[1] = TimerToCatch;
-                            if (CaughtItemID != -1 && isReelingIn == 0)
-                            {
-                                projectile.localAI[1] = 0;
-                                projectile.ai[1] = 0;
-                            }
-                            projectile.ai[0] = isReelingIn;
-                        }
+                        if (!UpdateDirectionalCatch())
+                            return false;
                         return false;
                     }
 
@@ -3505,50 +3511,11 @@ namespace CalamityMod.Projectiles
                             }
                             else
                             {
-                                if (owner.whoAmI == Main.myPlayer)
-                                {
-                                    if (playerDir >= 0)
-                                    {
-                                        var particle = new CustomSpark(projectile.Center, Vector2.UnitX.RotatedBy(playerDir * MathHelper.Pi) * 10, "CalamityMod/Particles/HighResHollowCircleHardEdgeAlt", false, 15, 0.04f, Color.Red, new(1, 2), shrinkSpeed: -0.2f);
-                                        GeneralParticleHandler.SpawnParticle(particle);
-                                    }
-                                    else
-                                    {
-                                        var particle = new CustomSpark(projectile.Center, Vector2.Zero, "CalamityMod/Particles/HighResHollowCircleHardEdge", false, 15, 0.06f, Color.Red, Vector2.One);
-                                        GeneralParticleHandler.SpawnParticle(particle);
-                                    }
-                                }
-                                TimerToCatch = 0;
-                                CatchTime = 0;
-                                CaughtItemID = -1;
-                                PersistentFishingData = 0;
-                                owner.Calamity().consecutiveCaughtFish = 0;
+                                FailDirectionalCatch(playerDir, MathHelper.Pi);
                             }
                         }
-                        if (CatchTime == -1)
-                        {
-                            projectile.localAI[1] = CaughtItemID;
-                            ReelTheBobberChecks();
-                            owner.Calamity().consecutiveCaughtFish++;
-                            if (projectile.ai[0] == 2)
-                                return false;
-                            isReelingIn = 1;
-                            CatchTime = (float)CaughtItemID;
-                            TimerToCatch = 0;
-                        }
-                        if (projectile.ai[0] == 0)
-                        {
-
-
-                            projectile.ai[1] = CatchTime;
-                            projectile.localAI[1] = TimerToCatch;
-                            if (CaughtItemID != -1 && isReelingIn == 0)
-                            {
-                                projectile.localAI[1] = 0;
-                                projectile.ai[1] = 0;
-                            }
-                            projectile.ai[0] = isReelingIn;
-                        }
+                        if (!UpdateDirectionalCatch())
+                            return false;
                         if (projectile.ai[0] == 0)
                             return true;
                         break;

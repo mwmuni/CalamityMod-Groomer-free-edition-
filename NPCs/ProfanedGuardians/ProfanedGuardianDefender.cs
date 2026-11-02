@@ -311,15 +311,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                 NPC.localAI[0] = 1f;
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    for (int i = 0; i < totalRocksPerRing; i++)
-                    {
-                        int rockType = Main.rand.Next(rockTypes) + 1;
-                        NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 0f, rockType, 0f);
-                        rockType = Main.rand.Next(rockTypes) + 1;
-                        NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 1f, rockType, 0f);
-                        rockType = Main.rand.Next(rockTypes) + 1;
-                        NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 2f, rockType, 0f);
-                    }
+                    SpawnRockShields(totalRocksPerRing, rockTypes, spacing, distance2);
                 }
             }
 
@@ -335,15 +327,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
                     spacing = 360 / totalRocksPerRing;
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        for (int i = 0; i < totalRocksPerRing; i++)
-                        {
-                            int rockType = Main.rand.Next(rockTypes) + 1;
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 0f, rockType, 0f);
-                            rockType = Main.rand.Next(rockTypes) + 1;
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 1f, rockType, 0f);
-                            rockType = Main.rand.Next(rockTypes) + 1;
-                            NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 2f, rockType, 0f);
-                        }
+                        SpawnRockShields(totalRocksPerRing, rockTypes, spacing, distance2);
                     }
                 }
             }
@@ -719,6 +703,19 @@ namespace CalamityMod.NPCs.ProfanedGuardians
             }
         }
 
+        private void SpawnRockShields(int totalRocksPerRing, int rockTypes, int spacing, int distance2)
+        {
+            for (int i = 0; i < totalRocksPerRing; i++)
+            {
+                int rockType = Main.rand.Next(rockTypes) + 1;
+                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 0f, rockType, 0f);
+                rockType = Main.rand.Next(rockTypes) + 1;
+                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 1f, rockType, 0f);
+                rockType = Main.rand.Next(rockTypes) + 1;
+                NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + (Math.Sin(i * spacing) * distance2)), (int)(NPC.Center.Y + (Math.Cos(i * spacing) * distance2)), ModContent.NPCType<ProfanedRocks>(), NPC.whoAmI, i * spacing, 2f, rockType, 0f);
+            }
+        }
+
         public override bool CheckActive() => false;
 
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
@@ -854,24 +851,7 @@ namespace CalamityMod.NPCs.ProfanedGuardians
         // Can only hit the target if within certain distance
         public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         {
-            cooldownSlot = ImmunityCooldownID.Bosses;
-
-            Rectangle targetHitbox = target.Hitbox;
-
-            float hitboxTopLeft = Vector2.Distance(NPC.Center, targetHitbox.TopLeft());
-            float hitboxTopRight = Vector2.Distance(NPC.Center, targetHitbox.TopRight());
-            float hitboxBotLeft = Vector2.Distance(NPC.Center, targetHitbox.BottomLeft());
-            float hitboxBotRight = Vector2.Distance(NPC.Center, targetHitbox.BottomRight());
-
-            float minDist = hitboxTopLeft;
-            if (hitboxTopRight < minDist)
-                minDist = hitboxTopRight;
-            if (hitboxBotLeft < minDist)
-                minDist = hitboxBotLeft;
-            if (hitboxBotRight < minDist)
-                minDist = hitboxBotRight;
-
-            return minDist <= 80f;
+            return ProfanedGuardianCommander.CanGuardianHitPlayer(NPC, target, ref cooldownSlot);
         }
 
         public override void OnHitPlayer(Player target, Player.HurtInfo hurtInfo)

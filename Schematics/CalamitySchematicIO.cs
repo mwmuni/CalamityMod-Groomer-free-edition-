@@ -343,6 +343,17 @@ namespace CalamityMod.Schematics
         private static string GetFullName(this ModTile mt) => $"{mt.Mod.Name}/{mt.Name}";
         private static string GetFullName(this ModWall mw) => $"{mw.Mod.Name}/{mw.Name}";
 
+        private static int GetOrAddName(IList<string> names, string fullName)
+        {
+            int index = names.IndexOf(fullName);
+            if (index == -1)
+            {
+                index = names.Count;
+                names.Add(fullName);
+            }
+            return index;
+        }
+
         private static void ComputeMetaIndices(ref SchematicData schematic, ref SchematicMetaTile smt)
         {
             // Special case: this meta tile demands that the original tile in the destination be preserved.
@@ -359,13 +370,7 @@ namespace CalamityMod.Schematics
                 {
                     // This tile has a valid modded tile. Check if that ModTile is already registered to find its index.
                     string tileFullName = mt.GetFullName();
-                    int tileNameIndex = schematic.modTileNames.IndexOf(tileFullName);
-                    if (tileNameIndex == -1)
-                    {
-                        // This modded tile is not yet registered. Register it. The list's previous length is its index.
-                        tileNameIndex = schematic.modTileNames.Count;
-                        schematic.modTileNames.Add(tileFullName);
-                    }
+                    int tileNameIndex = GetOrAddName(schematic.modTileNames, tileFullName);
 
                     // Adjust the meta tile's type so that it points to the mod tile name array.
                     // typeOriginal is unaffected so that future searches will still function.
@@ -387,13 +392,7 @@ namespace CalamityMod.Schematics
                 {
                     // This tile has a valid modded wall. Check if that ModWall is already registered to find its index.
                     string wallFullName = mw.GetFullName();
-                    int wallNameIndex = schematic.modWallNames.IndexOf(wallFullName);
-                    if (wallNameIndex == -1)
-                    {
-                        // This modded wall is not yet registered. Register it. The list's previous length is its index.
-                        wallNameIndex = schematic.modWallNames.Count;
-                        schematic.modWallNames.Add(wallFullName);
-                    }
+                    int wallNameIndex = GetOrAddName(schematic.modWallNames, wallFullName);
 
                     // Adjust the meta tile's wall so that it points to the mod wall name array.
                     // wallOriginal is unaffected so that future searches will still function.

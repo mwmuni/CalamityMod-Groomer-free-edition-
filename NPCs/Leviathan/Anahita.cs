@@ -473,45 +473,7 @@ namespace CalamityMod.NPCs.Leviathan
                     return;
                 }
 
-                float maxVelocityY = death ? 3f : 4f;
-                float maxVelocityX = death ? 7f : 8f;
-                maxVelocityY -= enrageScale;
-                maxVelocityX -= 2f * enrageScale;
-
-                if (NPC.position.Y > player.position.Y - 350f * NPC.scale)
-                {
-                    if (NPC.velocity.Y > 0f)
-                        NPC.velocity.Y *= 0.98f;
-                    NPC.velocity.Y -= death ? 0.12f : 0.1f;
-                    if (NPC.velocity.Y > maxVelocityY)
-                        NPC.velocity.Y = maxVelocityY;
-                }
-                else if (NPC.position.Y < player.position.Y - 450f * NPC.scale)
-                {
-                    if (NPC.velocity.Y < 0f)
-                        NPC.velocity.Y *= 0.98f;
-                    NPC.velocity.Y += death ? 0.12f : 0.1f;
-                    if (NPC.velocity.Y < -maxVelocityY)
-                        NPC.velocity.Y = -maxVelocityY;
-                }
-
-                if (NPC.position.X + (NPC.width / 2) > player.position.X + (player.width / 2) + 100f * NPC.scale)
-                {
-                    if (NPC.velocity.X > 0f)
-                        NPC.velocity.X *= 0.98f;
-                    NPC.velocity.X -= death ? 0.12f : 0.1f;
-                    if (NPC.velocity.X > maxVelocityX)
-                        NPC.velocity.X = maxVelocityX;
-                }
-
-                if (NPC.position.X + (NPC.width / 2) < player.position.X + (player.width / 2) - 100f * NPC.scale)
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X *= 0.98f;
-                    NPC.velocity.X += death ? 0.12f : 0.1f;
-                    if (NPC.velocity.X < -maxVelocityX)
-                        NPC.velocity.X = -maxVelocityX;
-                }
+                MoveAbovePlayer(player, death, enrageScale);
             }
 
             // Bubble spawn
@@ -559,45 +521,7 @@ namespace CalamityMod.NPCs.Leviathan
 
                 if (restingPlayerDistance > 600f * NPC.scale)
                 {
-                    float maxVelocityY = death ? 3f : 4f;
-                    float maxVelocityX = death ? 7f : 8f;
-                    maxVelocityY -= enrageScale;
-                    maxVelocityX -= 2f * enrageScale;
-
-                    if (NPC.position.Y > player.position.Y - 350f * NPC.scale)
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y *= 0.98f;
-                        NPC.velocity.Y -= death ? 0.12f : 0.1f;
-                        if (NPC.velocity.Y > maxVelocityY)
-                            NPC.velocity.Y = maxVelocityY;
-                    }
-                    else if (NPC.position.Y < player.position.Y - 450f * NPC.scale)
-                    {
-                        if (NPC.velocity.Y < 0f)
-                            NPC.velocity.Y *= 0.98f;
-                        NPC.velocity.Y += death ? 0.12f : 0.1f;
-                        if (NPC.velocity.Y < -maxVelocityY)
-                            NPC.velocity.Y = -maxVelocityY;
-                    }
-
-                    if (NPC.position.X + (NPC.width / 2) > player.position.X + (player.width / 2) + 100f * NPC.scale)
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X *= 0.98f;
-                        NPC.velocity.X -= death ? 0.12f : 0.1f;
-                        if (NPC.velocity.X > maxVelocityX)
-                            NPC.velocity.X = maxVelocityX;
-                    }
-
-                    if (NPC.position.X + (NPC.width / 2) < player.position.X + (player.width / 2) - 100f * NPC.scale)
-                    {
-                        if (NPC.velocity.X < 0f)
-                            NPC.velocity.X *= 0.98f;
-                        NPC.velocity.X += death ? 0.12f : 0.1f;
-                        if (NPC.velocity.X < -maxVelocityX)
-                            NPC.velocity.X = -maxVelocityX;
-                    }
+                    MoveAbovePlayer(player, death, enrageScale);
                 }
                 else
                     NPC.velocity *= 0.9f;
@@ -903,6 +827,49 @@ namespace CalamityMod.NPCs.Leviathan
         }
 
         // Rotation when charging
+        private void MoveAbovePlayer(Player player, bool death, float enrageScale)
+        {
+            float maxVelocityY = death ? 3f : 4f;
+            float maxVelocityX = death ? 7f : 8f;
+            maxVelocityY -= enrageScale;
+            maxVelocityX -= 2f * enrageScale;
+
+            if (NPC.position.Y > player.position.Y - 350f * NPC.scale)
+            {
+                if (NPC.velocity.Y > 0f)
+                    NPC.velocity.Y *= 0.98f;
+                NPC.velocity.Y -= death ? 0.12f : 0.1f;
+                if (NPC.velocity.Y > maxVelocityY)
+                    NPC.velocity.Y = maxVelocityY;
+            }
+            else if (NPC.position.Y < player.position.Y - 450f * NPC.scale)
+            {
+                if (NPC.velocity.Y < 0f)
+                    NPC.velocity.Y *= 0.98f;
+                NPC.velocity.Y += death ? 0.12f : 0.1f;
+                if (NPC.velocity.Y < -maxVelocityY)
+                    NPC.velocity.Y = -maxVelocityY;
+            }
+
+            if (NPC.position.X + (NPC.width / 2) > player.position.X + (player.width / 2) + 100f * NPC.scale)
+            {
+                if (NPC.velocity.X > 0f)
+                    NPC.velocity.X *= 0.98f;
+                NPC.velocity.X -= death ? 0.12f : 0.1f;
+                if (NPC.velocity.X > maxVelocityX)
+                    NPC.velocity.X = maxVelocityX;
+            }
+
+            if (NPC.position.X + (NPC.width / 2) < player.position.X + (player.width / 2) - 100f * NPC.scale)
+            {
+                if (NPC.velocity.X < 0f)
+                    NPC.velocity.X *= 0.98f;
+                NPC.velocity.X += death ? 0.12f : 0.1f;
+                if (NPC.velocity.X < -maxVelocityX)
+                    NPC.velocity.X = -maxVelocityX;
+            }
+        }
+
         private void ChargeRotation(Player player)
         {
             float playerDirection = (float)Math.Atan2(player.Center.Y - NPC.Center.Y, player.Center.X - NPC.Center.X);

@@ -509,20 +509,7 @@ namespace CalamityMod.Projectiles.Summon
                 else if (Projectile.velocity.Y == 0f)
                 {
                     Projectile.localAI[1] = 0f;
-                    if (Projectile.velocity.X == 0f)
-                    {
-                        Projectile.frameCounter++;
-                        if (Projectile.frameCounter > 4)
-                        {
-                            Projectile.frame++;
-                            Projectile.frameCounter = 0;
-                        }
-                        if (Projectile.frame >= 3)
-                        {
-                            Projectile.frame = 0;
-                        }
-                    }
-                    else if (Projectile.velocity.X < -0.8f || Projectile.velocity.X > 0.8f)
+                    if (Projectile.velocity.X < -0.8f || Projectile.velocity.X > 0.8f)
                     {
                         Projectile.frameCounter = Projectile.frameCounter + (int)Math.Abs(Projectile.velocity.X);
                         Projectile.frameCounter++;

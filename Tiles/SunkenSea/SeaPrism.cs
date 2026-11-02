@@ -68,6 +68,9 @@ namespace CalamityMod.Tiles.SunkenSea
         }
 
         public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
+            => ApplyPrismLight(i, j, ref r, ref g, ref b);
+
+        internal static void ApplyPrismLight(int i, int j, ref float r, ref float g, ref float b)
         {
             float fade1 = GetFade1(i, j);
             float fade2 = GetFade2(i, j);
@@ -186,30 +189,7 @@ namespace CalamityMod.Tiles.SunkenSea
         }
 
         public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
-        {
-            float fade1 = GetFade1(i, j);
-            float fade2 = GetFade2(i, j);
-
-            Color baseColor = new Color(162, 216, 218); //Blue
-            Color glow1 = new Color(171, 113, 215);    //Purple
-            Color glow2 = new Color(56, 174, 117);     //Green
-
-            Vector3 blended = baseColor.ToVector3();
-
-            blended = Vector3.Lerp(blended, glow1.ToVector3(), fade1 * 0.5f);
-            blended = Vector3.Lerp(blended, glow2.ToVector3(), fade2 * 0.5f);
-
-            float brightness = 0.6f;
-            blended *= brightness;
-
-            r = blended.X;
-            g = blended.Y;
-            b = blended.Z;
-        }
-
-        private static float GetFade1(int i, int j) => (MathF.Sin(Main.GlobalTimeWrappedHourly * 0.2f) + 1f) / 2f;
-
-        private static float GetFade2(int i, int j) => (MathF.Sin(Main.GlobalTimeWrappedHourly * 0.1f + i * 0.08f - j * 0.05f) + 1f) / 2f;
+            => SeaPrism.ApplyPrismLight(i, j, ref r, ref g, ref b);
 
         public override bool PreDraw(int i, int j, SpriteBatch spriteBatch) => false;
 
@@ -315,30 +295,7 @@ namespace CalamityMod.Tiles.SunkenSea
         }
 
         public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
-        {
-            float fade1 = GetFade1(i, j);
-            float fade2 = GetFade2(i, j);
-
-            Color baseColor = new Color(162, 216, 218); //Blue
-            Color glow1 = new Color(171, 113, 215);    //Purple
-            Color glow2 = new Color(56, 174, 117);     //Green
-
-            Vector3 blended = baseColor.ToVector3();
-
-            blended = Vector3.Lerp(blended, glow1.ToVector3(), fade1 * 0.5f);
-            blended = Vector3.Lerp(blended, glow2.ToVector3(), fade2 * 0.5f);
-
-            float brightness = 0.6f;
-            blended *= brightness;
-
-            r = blended.X;
-            g = blended.Y;
-            b = blended.Z;
-        }
-
-        private static float GetFade1(int i, int j) => (MathF.Sin(Main.GlobalTimeWrappedHourly * 0.2f) + 1f) / 2f;
-
-        private static float GetFade2(int i, int j) => (MathF.Sin(Main.GlobalTimeWrappedHourly * 0.1f + i * 0.08f - j * 0.05f) + 1f) / 2f;
+            => SeaPrism.ApplyPrismLight(i, j, ref r, ref g, ref b);
 
         public override bool PreDraw(int i, int j, SpriteBatch spriteBatch) => false;
 

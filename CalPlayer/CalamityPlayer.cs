@@ -3854,6 +3854,27 @@ namespace CalamityMod.CalPlayer
             }
         }
 
+        private void SpawnArmorActivationDust(int dustType, int initialDustCount)
+        {
+            for (int i = 0; i < initialDustCount; i++)
+            {
+                Dust brimDust = Dust.NewDustDirect(new Vector2(Player.position.X, Player.position.Y + 16f), Player.width, Player.height - 16, dustType, 0f, 0f, 0, default, 1f);
+                brimDust.velocity *= 3f;
+                brimDust.scale *= 1.15f;
+            }
+            int dustAmt = 36;
+            for (int j = 0; j < dustAmt; j++)
+            {
+                Vector2 dustRotation = Vector2.Normalize(Player.velocity) * new Vector2((float)Player.width / 2f, (float)Player.height) * 0.75f;
+                dustRotation = dustRotation.RotatedBy((double)((float)(j - (dustAmt / 2 - 1)) * MathHelper.TwoPi / (float)dustAmt), default) + Player.Center;
+                Vector2 dustVelocity = dustRotation - Player.Center;
+                Dust brimDust2 = Dust.NewDustDirect(dustRotation + dustVelocity, 0, 0, dustType, dustVelocity.X * 1.5f, dustVelocity.Y * 1.5f, 100, default, 1.4f);
+                brimDust2.noGravity = true;
+                brimDust2.noLight = true;
+                brimDust2.velocity = dustVelocity;
+            }
+        }
+
         public override void ArmorSetBonusActivated()
         {
             if (brimflameSet && !Player.HasCooldown(BrimflameFrenzy.ID))
@@ -3869,23 +3890,7 @@ namespace CalamityMod.CalPlayer
                     {
                         Player.AddBuff(BuffType<BrimflameFrenzyBuff>(), BrimflameCowl.FrenzyDuration, true);
                         SoundEngine.PlaySound(BrimflameCowl.ActivationSound, Player.Center);
-                        for (int i = 0; i < 36; i++)
-                        {
-                            Dust brimDust = Dust.NewDustDirect(new Vector2(Player.position.X, Player.position.Y + 16f), Player.width, Player.height - 16, (int)CalamityDusts.Brimstone, 0f, 0f, 0, default, 1f);
-                            brimDust.velocity *= 3f;
-                            brimDust.scale *= 1.15f;
-                        }
-                        int dustAmt = 36;
-                        for (int j = 0; j < dustAmt; j++)
-                        {
-                            Vector2 dustRotation = Vector2.Normalize(Player.velocity) * new Vector2((float)Player.width / 2f, (float)Player.height) * 0.75f;
-                            dustRotation = dustRotation.RotatedBy((double)((float)(j - (dustAmt / 2 - 1)) * MathHelper.TwoPi / (float)dustAmt), default) + Player.Center;
-                            Vector2 dustVelocity = dustRotation - Player.Center;
-                            Dust brimDust2 = Dust.NewDustDirect(dustRotation + dustVelocity, 0, 0, (int)CalamityDusts.Brimstone, dustVelocity.X * 1.5f, dustVelocity.Y * 1.5f, 100, default, 1.4f);
-                            brimDust2.noGravity = true;
-                            brimDust2.noLight = true;
-                            brimDust2.velocity = dustVelocity;
-                        }
+                        SpawnArmorActivationDust((int)CalamityDusts.Brimstone, 36);
                     }
                 }
             }
@@ -3902,23 +3907,7 @@ namespace CalamityMod.CalPlayer
                     Player.AddCooldown(BloodflareRangedSet.ID, BloodflareHeadRanged.SoulCooldown);
 
                 SoundEngine.PlaySound(BloodflareHeadRanged.ActivationSound, Player.Center);
-                for (int d = 0; d < 64; d++)
-                {
-                    Dust dust = Dust.NewDustDirect(new Vector2(Player.position.X, Player.position.Y + 16f), Player.width, Player.height - 16, (int)CalamityDusts.Necroplasm, 0f, 0f, 0, default, 1f);
-                    dust.velocity *= 3f;
-                    dust.scale *= 1.15f;
-                }
-                int dustAmt = 36;
-                for (int d = 0; d < dustAmt; d++)
-                {
-                    Vector2 source = Vector2.Normalize(Player.velocity) * new Vector2((float)Player.width / 2f, (float)Player.height) * 0.75f;
-                    source = source.RotatedBy((double)((float)(d - (dustAmt / 2 - 1)) * MathHelper.TwoPi / (float)dustAmt), default) + Player.Center;
-                    Vector2 dustVel = source - Player.Center;
-                    Dust phanto = Dust.NewDustDirect(source + dustVel, 0, 0, (int)CalamityDusts.Necroplasm, dustVel.X * 1.5f, dustVel.Y * 1.5f, 100, default, 1.4f);
-                    phanto.noGravity = true;
-                    phanto.noLight = true;
-                    phanto.velocity = dustVel;
-                }
+                SpawnArmorActivationDust((int)CalamityDusts.Necroplasm, 64);
 
                 if (Player.whoAmI == Main.myPlayer)
                 {
@@ -3954,23 +3943,7 @@ namespace CalamityMod.CalPlayer
             if (demonshadeSet)
             {
                 SoundEngine.PlaySound(DemonshadeHelm.ActivationSound, Player.Center);
-                for (int i = 0; i < 36; i++)
-                {
-                    Dust brimDust = Dust.NewDustDirect(new Vector2(Player.position.X, Player.position.Y + 16f), Player.width, Player.height - 16, (int)CalamityDusts.Brimstone, 0f, 0f, 0, default, 1f);
-                    brimDust.velocity *= 3f;
-                    brimDust.scale *= 1.15f;
-                }
-                int dustAmt = 36;
-                for (int j = 0; j < dustAmt; j++)
-                {
-                    Vector2 dustRotation = Vector2.Normalize(Player.velocity) * new Vector2((float)Player.width / 2f, (float)Player.height) * 0.75f;
-                    dustRotation = dustRotation.RotatedBy((double)((float)(j - (dustAmt / 2 - 1)) * MathHelper.TwoPi / (float)dustAmt), default) + Player.Center;
-                    Vector2 dustVelocity = dustRotation - Player.Center;
-                    Dust brimDust2 = Dust.NewDustDirect(dustRotation + dustVelocity, 0, 0, (int)CalamityDusts.Brimstone, dustVelocity.X * 1.5f, dustVelocity.Y * 1.5f, 100, default, 1.4f);
-                    brimDust2.noGravity = true;
-                    brimDust2.noLight = true;
-                    brimDust2.velocity = dustVelocity;
-                }
+                SpawnArmorActivationDust((int)CalamityDusts.Brimstone, 36);
                 if (Player.whoAmI == Main.myPlayer)
                 {
                     Player.AddBuff(BuffType<Enraged>(), DemonshadeHelm.EnrageDuration, false);

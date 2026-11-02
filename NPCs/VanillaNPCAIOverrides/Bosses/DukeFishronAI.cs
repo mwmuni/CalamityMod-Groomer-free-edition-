@@ -15,6 +15,41 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         public static float Phase2ContactDamageMult = 1.436f; // 201
         public static float Phase3ContactDamageMult = 1.315f; // 184
 
+        private void SpawnChargeDust()
+        {
+            int chargeDustAmt = 7;
+            for (int j = 0; j < chargeDustAmt; j++)
+            {
+                Vector2 arg_E1C_0 = (Vector2.Normalize(NPC.velocity) * new Vector2((NPC.width + 50) / 2f, NPC.height) * 0.75f).RotatedBy((j - (chargeDustAmt / 2 - 1)) * MathHelper.Pi / chargeDustAmt) + NPC.Center;
+                Vector2 chargeDustDirection = ((float)(Main.rand.NextDouble() * MathHelper.Pi) - MathHelper.PiOver2).ToRotationVector2() * Main.rand.Next(3, 8);
+                int chargeDust = Dust.NewDust(arg_E1C_0 + chargeDustDirection, 0, 0, DustID.DungeonWater, chargeDustDirection.X * 2f, chargeDustDirection.Y * 2f, 100, default, 1.4f);
+                Main.dust[chargeDust].noGravity = true;
+                Main.dust[chargeDust].noLight = true;
+                Main.dust[chargeDust].velocity /= 4f;
+                Main.dust[chargeDust].velocity -= NPC.velocity;
+            }
+        }
+
+        private void UpdatePhase3Direction(int playerDirection)
+        {
+            if (playerDirection != 0)
+            {
+                if (NPC.ai[2] == 0f && playerDirection != NPC.direction)
+                {
+                    NPC.rotation += MathHelper.Pi;
+                    for (int i = 0; i < NPC.oldPos.Length; i++)
+                        NPC.oldPos[i] = Vector2.Zero;
+                }
+
+                NPC.direction = playerDirection;
+
+                if (NPC.spriteDirection != -NPC.direction)
+                    NPC.rotation += MathHelper.Pi;
+
+                NPC.spriteDirection = -NPC.direction;
+            }
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -432,17 +467,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.velocity *= 1.01f;
 
                 // Spawn dust
-                int chargeDustAmt = 7;
-                for (int j = 0; j < chargeDustAmt; j++)
-                {
-                    Vector2 arg_E1C_0 = (Vector2.Normalize(NPC.velocity) * new Vector2((NPC.width + 50) / 2f, NPC.height) * 0.75f).RotatedBy((j - (chargeDustAmt / 2 - 1)) * MathHelper.Pi / chargeDustAmt) + NPC.Center;
-                    Vector2 chargeDustDirection = ((float)(Main.rand.NextDouble() * MathHelper.Pi) - MathHelper.PiOver2).ToRotationVector2() * Main.rand.Next(3, 8);
-                    int chargeDust = Dust.NewDust(arg_E1C_0 + chargeDustDirection, 0, 0, DustID.DungeonWater, chargeDustDirection.X * 2f, chargeDustDirection.Y * 2f, 100, default, 1.4f);
-                    Main.dust[chargeDust].noGravity = true;
-                    Main.dust[chargeDust].noLight = true;
-                    Main.dust[chargeDust].velocity /= 4f;
-                    Main.dust[chargeDust].velocity -= NPC.velocity;
-                }
+                SpawnChargeDust();
 
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
@@ -687,17 +712,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 NPC.velocity *= 1.01f;
 
                 // Spawn dust
-                int phase2ChargeDustAmt = 7;
-                for (int k = 0; k < phase2ChargeDustAmt; k++)
-                {
-                    Vector2 arg_1A97_0 = (Vector2.Normalize(NPC.velocity) * new Vector2((NPC.width + 50) / 2f, NPC.height) * 0.75f).RotatedBy((k - (phase2ChargeDustAmt / 2 - 1)) * MathHelper.Pi / phase2ChargeDustAmt) + NPC.Center;
-                    Vector2 phase2ChargeDustDirection = ((float)(Main.rand.NextDouble() * MathHelper.Pi) - MathHelper.PiOver2).ToRotationVector2() * Main.rand.Next(3, 8);
-                    int phase2ChargeDust = Dust.NewDust(arg_1A97_0 + phase2ChargeDustDirection, 0, 0, DustID.DungeonWater, phase2ChargeDustDirection.X * 2f, phase2ChargeDustDirection.Y * 2f, 100, default, 1.4f);
-                    Main.dust[phase2ChargeDust].noGravity = true;
-                    Main.dust[phase2ChargeDust].noLight = true;
-                    Main.dust[phase2ChargeDust].velocity /= 4f;
-                    Main.dust[phase2ChargeDust].velocity -= NPC.velocity;
-                }
+                SpawnChargeDust();
 
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
@@ -838,22 +853,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                 // Rotation and direction
                 int phase3SpriteFaceDirection = Math.Sign(player.Center.X - NPC.Center.X);
-                if (phase3SpriteFaceDirection != 0)
-                {
-                    if (NPC.ai[2] == 0f && phase3SpriteFaceDirection != NPC.direction)
-                    {
-                        NPC.rotation += MathHelper.Pi;
-                        for (int l = 0; l < NPC.oldPos.Length; l++)
-                            NPC.oldPos[l] = Vector2.Zero;
-                    }
-
-                    NPC.direction = phase3SpriteFaceDirection;
-
-                    if (NPC.spriteDirection != -NPC.direction)
-                        NPC.rotation += MathHelper.Pi;
-
-                    NPC.spriteDirection = -NPC.direction;
-                }
+                UpdatePhase3Direction(phase3SpriteFaceDirection);
 
                 // Phase switch
                 NPC.ai[2] += 1f;
@@ -957,17 +957,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     NPC.alpha = 0;
 
                 // Spawn dust
-                int phase3ChargeDustAmt = 7;
-                for (int m = 0; m < phase3ChargeDustAmt; m++)
-                {
-                    Vector2 arg_2444_0 = (Vector2.Normalize(NPC.velocity) * new Vector2((NPC.width + 50) / 2f, NPC.height) * 0.75f).RotatedBy((m - (phase3ChargeDustAmt / 2 - 1)) * MathHelper.Pi / phase3ChargeDustAmt) + NPC.Center;
-                    Vector2 phase3ChargeDustDirection = ((float)(Main.rand.NextDouble() * MathHelper.Pi) - MathHelper.PiOver2).ToRotationVector2() * Main.rand.Next(3, 8);
-                    int phase3ChargeDust = Dust.NewDust(arg_2444_0 + phase3ChargeDustDirection, 0, 0, DustID.DungeonWater, phase3ChargeDustDirection.X * 2f, phase3ChargeDustDirection.Y * 2f, 100, default, 1.4f);
-                    Main.dust[phase3ChargeDust].noGravity = true;
-                    Main.dust[phase3ChargeDust].noLight = true;
-                    Main.dust[phase3ChargeDust].velocity /= 4f;
-                    Main.dust[phase3ChargeDust].velocity -= NPC.velocity;
-                }
+                SpawnChargeDust();
 
                 NPC.ai[2] += 1f;
                 if (NPC.ai[2] >= chargeTime)
@@ -1015,22 +1005,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     Vector2 center = player.Center + new Vector2(-NPC.ai[1], -200f);
                     NPC.Center = center;
                     int phase3PlayerDirection = Math.Sign(player.Center.X - NPC.Center.X);
-                    if (phase3PlayerDirection != 0)
-                    {
-                        if (NPC.ai[2] == 0f && phase3PlayerDirection != NPC.direction)
-                        {
-                            NPC.rotation += MathHelper.Pi;
-                            for (int n = 0; n < NPC.oldPos.Length; n++)
-                                NPC.oldPos[n] = Vector2.Zero;
-                        }
-
-                        NPC.direction = phase3PlayerDirection;
-
-                        if (NPC.spriteDirection != -NPC.direction)
-                            NPC.rotation += MathHelper.Pi;
-
-                        NPC.spriteDirection = -NPC.direction;
-                    }
+                    UpdatePhase3Direction(phase3PlayerDirection);
                 }
 
                 NPC.ai[2] += 1f;

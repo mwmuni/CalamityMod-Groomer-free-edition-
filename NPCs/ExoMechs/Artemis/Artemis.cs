@@ -1292,18 +1292,7 @@ namespace CalamityMod.NPCs.ExoMechs.Artemis
             {
                 if (NPC.frameCounter >= 6D)
                 {
-                    // Reset frame counter
-                    NPC.frameCounter = 0D;
-
-                    // Increment the Y frame
-                    frameY++;
-
-                    // Reset the Y frame if greater than 9
-                    if (frameY == maxFramesY)
-                    {
-                        frameX++;
-                        frameY = 0;
-                    }
+                    AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
                 }
             }
             else
@@ -1315,18 +1304,7 @@ namespace CalamityMod.NPCs.ExoMechs.Artemis
 
                     if (NPC.frameCounter >= 6D)
                     {
-                        // Reset frame counter
-                        NPC.frameCounter = 0D;
-
-                        // Increment the Y frame
-                        frameY++;
-
-                        // Reset the Y frame if greater than 9
-                        if (frameY == maxFramesY)
-                        {
-                            frameX++;
-                            frameY = 0;
-                        }
+                        AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                         // Reset the frames
                         int currentFrame = (frameX * maxFramesY) + frameY;
@@ -1339,18 +1317,7 @@ namespace CalamityMod.NPCs.ExoMechs.Artemis
                     int frameLimit = phase2 ? attackFrameLimit_Phase2 : attackFrameLimit_Phase1;
                     if (NPC.frameCounter >= 6D)
                     {
-                        // Reset frame counter
-                        NPC.frameCounter = 0D;
-
-                        // Increment the Y frame
-                        frameY++;
-
-                        // Reset the Y frame if greater than 9
-                        if (frameY == maxFramesY)
-                        {
-                            frameX++;
-                            frameY = 0;
-                        }
+                        AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                         // Reset the frames
                         int currentFrame = (frameX * maxFramesY) + frameY;

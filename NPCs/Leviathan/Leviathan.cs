@@ -7,8 +7,8 @@ using CalamityMod.Items.Accessories;
 using CalamityMod.Items.Armor.Vanity;
 using CalamityMod.Items.LoreItems;
 using CalamityMod.Items.Placeables.Furniture.BossRelics;
-using CalamityMod.Items.Placeables.Furniture.Paintings;
 using CalamityMod.Items.Placeables.Furniture.Monoliths;
+using CalamityMod.Items.Placeables.Furniture.Paintings;
 using CalamityMod.Items.Placeables.Furniture.Trophies;
 using CalamityMod.Items.TreasureBags;
 using CalamityMod.Items.Weapons.Magic;
@@ -698,52 +698,36 @@ namespace CalamityMod.NPCs.Leviathan
 
             Rectangle targetHitbox = target.Hitbox;
 
-            float mouthDist1 = Vector2.Distance(mouthHitboxCenter, targetHitbox.TopLeft());
-            float mouthDist2 = Vector2.Distance(mouthHitboxCenter, targetHitbox.TopRight());
-            float mouthDist3 = Vector2.Distance(mouthHitboxCenter, targetHitbox.BottomLeft());
-            float mouthDist4 = Vector2.Distance(mouthHitboxCenter, targetHitbox.BottomRight());
-
-            float minMouthDist = mouthDist1;
-            if (mouthDist2 < minMouthDist)
-                minMouthDist = mouthDist2;
-            if (mouthDist3 < minMouthDist)
-                minMouthDist = mouthDist3;
-            if (mouthDist4 < minMouthDist)
-                minMouthDist = mouthDist4;
+            float minMouthDist = MinimumCornerDistance(mouthHitboxCenter, targetHitbox);
 
             bool insideMouthHitbox = minMouthDist <= 115f * NPC.scale;
 
-            float bodyDist1 = Vector2.Distance(bodyHitboxCenter, targetHitbox.TopLeft());
-            float bodyDist2 = Vector2.Distance(bodyHitboxCenter, targetHitbox.TopRight());
-            float bodyDist3 = Vector2.Distance(bodyHitboxCenter, targetHitbox.BottomLeft());
-            float bodyDist4 = Vector2.Distance(bodyHitboxCenter, targetHitbox.BottomRight());
-
-            float minBodyDist = bodyDist1;
-            if (bodyDist2 < minBodyDist)
-                minBodyDist = bodyDist2;
-            if (bodyDist3 < minBodyDist)
-                minBodyDist = bodyDist3;
-            if (bodyDist4 < minBodyDist)
-                minBodyDist = bodyDist4;
+            float minBodyDist = MinimumCornerDistance(bodyHitboxCenter, targetHitbox);
 
             bool insideBodyHitbox = minBodyDist <= 230f * NPC.scale;
 
-            float tailDist1 = Vector2.Distance(tailHitboxCenter, targetHitbox.TopLeft());
-            float tailDist2 = Vector2.Distance(tailHitboxCenter, targetHitbox.TopRight());
-            float tailDist3 = Vector2.Distance(tailHitboxCenter, targetHitbox.BottomLeft());
-            float tailDist4 = Vector2.Distance(tailHitboxCenter, targetHitbox.BottomRight());
-
-            float minTailDist = tailDist1;
-            if (tailDist2 < minTailDist)
-                minTailDist = tailDist2;
-            if (tailDist3 < minTailDist)
-                minTailDist = tailDist3;
-            if (tailDist4 < minTailDist)
-                minTailDist = tailDist4;
+            float minTailDist = MinimumCornerDistance(tailHitboxCenter, targetHitbox);
 
             bool insideTailHitbox = minTailDist <= 115f * NPC.scale;
 
             return insideMouthHitbox || insideBodyHitbox || insideTailHitbox;
+        }
+
+        private static float MinimumCornerDistance(Vector2 hitboxCenter, Rectangle targetHitbox)
+        {
+            float dist1 = Vector2.Distance(hitboxCenter, targetHitbox.TopLeft());
+            float dist2 = Vector2.Distance(hitboxCenter, targetHitbox.TopRight());
+            float dist3 = Vector2.Distance(hitboxCenter, targetHitbox.BottomLeft());
+            float dist4 = Vector2.Distance(hitboxCenter, targetHitbox.BottomRight());
+
+            float minDist = dist1;
+            if (dist2 < minDist)
+                minDist = dist2;
+            if (dist3 < minDist)
+                minDist = dist3;
+            if (dist4 < minDist)
+                minDist = dist4;
+            return minDist;
         }
 
         public override void HitEffect(NPC.HitInfo hit)

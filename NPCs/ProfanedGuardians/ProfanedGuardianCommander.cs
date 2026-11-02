@@ -1183,14 +1183,19 @@ namespace CalamityMod.NPCs.ProfanedGuardians
         // Can only hit the target if within certain distance
         public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         {
+            return CanGuardianHitPlayer(NPC, target, ref cooldownSlot);
+        }
+
+        internal static bool CanGuardianHitPlayer(NPC npc, Player target, ref int cooldownSlot)
+        {
             cooldownSlot = ImmunityCooldownID.Bosses;
 
             Rectangle targetHitbox = target.Hitbox;
 
-            float hitboxTopLeft = Vector2.Distance(NPC.Center, targetHitbox.TopLeft());
-            float hitboxTopRight = Vector2.Distance(NPC.Center, targetHitbox.TopRight());
-            float hitboxBotLeft = Vector2.Distance(NPC.Center, targetHitbox.BottomLeft());
-            float hitboxBotRight = Vector2.Distance(NPC.Center, targetHitbox.BottomRight());
+            float hitboxTopLeft = Vector2.Distance(npc.Center, targetHitbox.TopLeft());
+            float hitboxTopRight = Vector2.Distance(npc.Center, targetHitbox.TopRight());
+            float hitboxBotLeft = Vector2.Distance(npc.Center, targetHitbox.BottomLeft());
+            float hitboxBotRight = Vector2.Distance(npc.Center, targetHitbox.BottomRight());
 
             float minDist = hitboxTopLeft;
             if (hitboxTopRight < minDist)

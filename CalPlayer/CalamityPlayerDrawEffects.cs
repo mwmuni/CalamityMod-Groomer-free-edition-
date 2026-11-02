@@ -287,35 +287,7 @@ namespace CalamityMod.CalPlayer
 
                         for (int i = 0; i < 4; i++)
                         {
-                            Vector2 position = n.position;
-                            float distanceFromTargetX = Math.Abs(n.Center.X - Main.LocalPlayer.Center.X);
-                            float distanceFromTargetY = Math.Abs(n.Center.Y - Main.LocalPlayer.Center.Y);
-
-                            switch (i)
-                            {
-                                case 0:
-                                    position.X = Main.LocalPlayer.Center.X - distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y - distanceFromTargetY;
-                                    break;
-
-                                case 1:
-                                    position.X = Main.LocalPlayer.Center.X + distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y - distanceFromTargetY;
-                                    break;
-
-                                case 2:
-                                    position.X = Main.LocalPlayer.Center.X + distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y + distanceFromTargetY;
-                                    break;
-
-                                case 3:
-                                    position.X = Main.LocalPlayer.Center.X - distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y + distanceFromTargetY;
-                                    break;
-
-                                default:
-                                    break;
-                            }
+                            Vector2 position = GetShroomiteAfterimagePosition(n, i);
 
                             Vector2 posDiff = n.Center - position;
                             Main.instance.DrawNPCDirect(Main.spriteBatch, n, n.behindTiles, Main.screenPosition + posDiff);
@@ -337,35 +309,7 @@ namespace CalamityMod.CalPlayer
                         Vector2 storedProjPos = p.Center;
                         for (int i = 0; i < 4; i++)
                         {
-                            Vector2 position = p.position;
-                            float distanceFromTargetX = Math.Abs(p.Center.X - Main.LocalPlayer.Center.X);
-                            float distanceFromTargetY = Math.Abs(p.Center.Y - Main.LocalPlayer.Center.Y);
-
-                            switch (i)
-                            {
-                                case 0:
-                                    position.X = Main.LocalPlayer.Center.X - distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y - distanceFromTargetY;
-                                    break;
-
-                                case 1:
-                                    position.X = Main.LocalPlayer.Center.X + distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y - distanceFromTargetY;
-                                    break;
-
-                                case 2:
-                                    position.X = Main.LocalPlayer.Center.X + distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y + distanceFromTargetY;
-                                    break;
-
-                                case 3:
-                                    position.X = Main.LocalPlayer.Center.X - distanceFromTargetX;
-                                    position.Y = Main.LocalPlayer.Center.Y + distanceFromTargetY;
-                                    break;
-
-                                default:
-                                    break;
-                            }
+                            Vector2 position = GetShroomiteAfterimagePosition(p, i);
 
                             // Unfortunately unlike NPCs, there is no public function for drawing a projectile with a position parameter to spoof.
                             // So we have to spoof it by directly changing the projectile's position, then resetting it at the end.
@@ -673,6 +617,40 @@ namespace CalamityMod.CalPlayer
             }
         }
         #endregion
+
+        private static Vector2 GetShroomiteAfterimagePosition(Entity entity, int i)
+        {
+            Vector2 position = entity.position;
+            float distanceFromTargetX = Math.Abs(entity.Center.X - Main.LocalPlayer.Center.X);
+            float distanceFromTargetY = Math.Abs(entity.Center.Y - Main.LocalPlayer.Center.Y);
+
+            switch (i)
+            {
+                case 0:
+                    position.X = Main.LocalPlayer.Center.X - distanceFromTargetX;
+                    position.Y = Main.LocalPlayer.Center.Y - distanceFromTargetY;
+                    break;
+
+                case 1:
+                    position.X = Main.LocalPlayer.Center.X + distanceFromTargetX;
+                    position.Y = Main.LocalPlayer.Center.Y - distanceFromTargetY;
+                    break;
+
+                case 2:
+                    position.X = Main.LocalPlayer.Center.X + distanceFromTargetX;
+                    position.Y = Main.LocalPlayer.Center.Y + distanceFromTargetY;
+                    break;
+
+                case 3:
+                    position.X = Main.LocalPlayer.Center.X - distanceFromTargetX;
+                    position.Y = Main.LocalPlayer.Center.Y + distanceFromTargetY;
+                    break;
+
+                default:
+                    break;
+            }
+            return position;
+        }
 
         #region Profaned Moonlight Dye Colors
 

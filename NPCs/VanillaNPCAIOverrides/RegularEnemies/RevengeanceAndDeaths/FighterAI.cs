@@ -214,6 +214,90 @@ public static partial class RevengeanceAndDeathAI
             }
         }
 
+        private void UpdateMedusaStareTimer(float afterHitTime, float afterWaitTime)
+        {
+            NPC.velocity.X *= 0.9f;
+            if (NPC.velocity.Y < -2f || NPC.velocity.Y > 4f || NPC.justHit)
+            {
+                NPC.ai[2] = afterHitTime;
+            }
+            else
+            {
+                NPC.ai[2] += 1f;
+                if (NPC.ai[2] == 0f)
+                {
+                    NPC.ai[2] = afterWaitTime;
+                }
+            }
+        }
+
+        private static void ConfigureDeathModeProjectile(int proj, int timeLeft)
+        {
+            if (CalamityWorld.death)
+            {
+                Main.projectile[proj].Calamity().extraUpdatesToSync = 1;
+                Main.projectile[proj].timeLeft = timeLeft;
+                if (Main.dedServ)
+                {
+                    Main.projectile[proj].netSpam = 0;
+                    NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, proj);
+                }
+            }
+        }
+
+        private void SetFiringAnimationDirection(float distX, float distY)
+        {
+            if (Math.Abs(distY) > Math.Abs(distX) * 2f)
+            {
+                if (distY > 0f)
+                {
+                    NPC.ai[2] = 1f;
+                }
+                else
+                {
+                    NPC.ai[2] = 5f;
+                }
+            }
+            else if (Math.Abs(distX) > Math.Abs(distY) * 2f)
+            {
+                NPC.ai[2] = 3f;
+            }
+            else if (distY > 0f)
+            {
+                NPC.ai[2] = 2f;
+            }
+            else
+            {
+                NPC.ai[2] = 4f;
+            }
+        }
+
+        private void SeparateOverlappingVortexEnemies(int npcType)
+        {
+            foreach (NPC n in Main.ActiveNPCs)
+            {
+                if (n.whoAmI != NPC.whoAmI && n.type == npcType && Math.Abs(NPC.position.X - n.position.X) + Math.Abs(NPC.position.Y - n.position.Y) < (float)NPC.width)
+                {
+                    if (NPC.position.X < n.position.X)
+                    {
+                        NPC.velocity.X -= 0.05f;
+                    }
+                    else
+                    {
+                        NPC.velocity.X += 0.05f;
+                    }
+                    if (NPC.position.Y < n.position.Y)
+                    {
+                        NPC.velocity.Y -= 0.05f;
+                    }
+                    else
+                    {
+                        NPC.velocity.Y += 0.05f;
+                    }
+                }
+            }
+        }
+
         public override bool AI(Mod mod)
         {
             int npcType = NPC.type;
@@ -462,19 +546,7 @@ public static partial class RevengeanceAndDeathAI
                 {
                     if (NPC.ai[2] < 0f && NPC.ai[2] < maxTime * -1f)
                     {
-                        NPC.velocity.X *= 0.9f;
-                        if (NPC.velocity.Y < -2f || NPC.velocity.Y > 4f || NPC.justHit)
-                        {
-                            NPC.ai[2] = afterHitTime;
-                        }
-                        else
-                        {
-                            NPC.ai[2] += 1f;
-                            if (NPC.ai[2] == 0f)
-                            {
-                                NPC.ai[2] = afterWaitTime;
-                            }
-                        }
+                        UpdateMedusaStareTimer(afterHitTime, afterWaitTime);
                         float time = NPC.ai[2] + maxTime + turnToStoneTime;
                         if (time == 1f)
                         {
@@ -490,19 +562,7 @@ public static partial class RevengeanceAndDeathAI
                     if (NPC.ai[2] < 0f && NPC.ai[2] >= maxTime * -1f)
                     {
                         Lighting.AddLight(NPC.Center, 0.9f, 0.75f, 0.1f);
-                        NPC.velocity.X *= 0.9f;
-                        if (NPC.velocity.Y < -2f || NPC.velocity.Y > 4f || NPC.justHit)
-                        {
-                            NPC.ai[2] = afterHitTime;
-                        }
-                        else
-                        {
-                            NPC.ai[2] += 1f;
-                            if (NPC.ai[2] == 0f)
-                            {
-                                NPC.ai[2] = afterWaitTime;
-                            }
-                        }
+                        UpdateMedusaStareTimer(afterHitTime, afterWaitTime);
                         float time = NPC.ai[2] + maxTime;
                         if (time < 180f && (Main.rand.NextBool(3) || NPC.ai[2] % 3f == 0f))
                         {
@@ -2040,28 +2100,7 @@ PrepareToShoot:
                         dust.customData = NPC;
                     }
                     // Adjust velocity based on the other storm drivers who want to pump your face full of bullets
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.whoAmI != NPC.whoAmI && n.type == npcType && Math.Abs(NPC.position.X - n.position.X) + Math.Abs(NPC.position.Y - n.position.Y) < (float)NPC.width)
-                        {
-                            if (NPC.position.X < n.position.X)
-                            {
-                                NPC.velocity.X -= 0.05f;
-                            }
-                            else
-                            {
-                                NPC.velocity.X += 0.05f;
-                            }
-                            if (NPC.position.Y < n.position.Y)
-                            {
-                                NPC.velocity.Y -= 0.05f;
-                            }
-                            else
-                            {
-                                NPC.velocity.Y += 0.05f;
-                            }
-                        }
-                    }
+                    SeparateOverlappingVortexEnemies(npcType);
                 }
                 else if (Main.player[NPC.target].Center.Y + 100f < NPC.position.Y && Collision.CanHit(NPC.position, NPC.width, NPC.height, Main.player[NPC.target].position, Main.player[NPC.target].width, Main.player[NPC.target].height))
                 {
@@ -2150,28 +2189,7 @@ PrepareToShoot:
                             NPC.velocity.Y += CalamityWorld.revenge ? 0.25f : 0.15f;
                         }
                     }
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.whoAmI != NPC.whoAmI && n.type == npcType && Math.Abs(NPC.position.X - n.position.X) + Math.Abs(NPC.position.Y - n.position.Y) < (float)NPC.width)
-                        {
-                            if (NPC.position.X < n.position.X)
-                            {
-                                NPC.velocity.X -= 0.05f;
-                            }
-                            else
-                            {
-                                NPC.velocity.X += 0.05f;
-                            }
-                            if (NPC.position.Y < n.position.Y)
-                            {
-                                NPC.velocity.Y -= 0.05f;
-                            }
-                            else
-                            {
-                                NPC.velocity.Y += 0.05f;
-                            }
-                        }
-                    }
+                    SeparateOverlappingVortexEnemies(npcType);
                 }
                 else if (Main.player[NPC.target].Center.Y + 100f < NPC.position.Y && Collision.CanHit(NPC.position, NPC.width, NPC.height, Main.player[NPC.target].position, Main.player[NPC.target].width, Main.player[NPC.target].height))
                 {
@@ -2748,32 +2766,14 @@ PrepareToShoot:
                                 else if (npcType == NPCID.StardustSoldier)
                                 {
                                     int proj = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(), spawnPosition, new Vector2(distX, distY), projectileType, damage, 0f, Main.myPlayer, 0f, NPC.whoAmI).identity;
-                                    if (CalamityWorld.death)
-                                    {
-                                        Main.projectile[proj].Calamity().extraUpdatesToSync = 1;
-                                        Main.projectile[proj].timeLeft = 480;
-                                        if (Main.dedServ)
-                                        {
-                                            Main.projectile[proj].netSpam = 0;
-                                            NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, proj);
-                                        }
-                                    }
+                                    ConfigureDeathModeProjectile(proj, 480);
                                 }
                                 else if (npcType == NPCID.NebulaSoldier)
                                 {
                                     for (int i = 0; i < 4; i++)
                                     {
                                         int proj = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(), new Vector2(NPC.Center.X - (float)(NPC.spriteDirection * 4), NPC.Center.Y + 6f), new Vector2((float)(-3 + 2 * i) * 0.15f, (float)(-(float)Main.rand.Next(0, 3)) * 0.2f - 0.1f), projectileType, damage, 0f, Main.myPlayer, 0f, (float)NPC.whoAmI).identity;
-                                        if (CalamityWorld.death)
-                                        {
-                                            Main.projectile[proj].Calamity().extraUpdatesToSync = 1;
-                                            Main.projectile[proj].timeLeft = 1200;
-                                            if (Main.dedServ)
-                                            {
-                                                Main.projectile[proj].netSpam = 0;
-                                                NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, proj);
-                                            }
-                                        }
+                                        ConfigureDeathModeProjectile(proj, 1200);
                                     }
                                 }
                                 else if (npcType == NPCID.StardustSpiderBig)
@@ -2784,41 +2784,10 @@ PrepareToShoot:
                                 else
                                 {
                                     int proj = Projectile.NewProjectileDirect(NPC.GetSource_FromAI(), spawnPosition, new Vector2(distX, distY), projectileType, damage, 0f, Main.myPlayer).identity;
-                                    if (CalamityWorld.death)
-                                    {
-                                        Main.projectile[proj].Calamity().extraUpdatesToSync = 1;
-                                        Main.projectile[proj].timeLeft = 1200;
-                                        if (Main.dedServ)
-                                        {
-                                            Main.projectile[proj].netSpam = 0;
-                                            NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, proj);
-                                        }
-                                    }
+                                    ConfigureDeathModeProjectile(proj, 1200);
                                 }
                             }
-                            if (Math.Abs(distY) > Math.Abs(distX) * 2f)
-                            {
-                                if (distY > 0f)
-                                {
-                                    NPC.ai[2] = 1f;
-                                }
-                                else
-                                {
-                                    NPC.ai[2] = 5f;
-                                }
-                            }
-                            else if (Math.Abs(distX) > Math.Abs(distY) * 2f)
-                            {
-                                NPC.ai[2] = 3f;
-                            }
-                            else if (distY > 0f)
-                            {
-                                NPC.ai[2] = 2f;
-                            }
-                            else
-                            {
-                                NPC.ai[2] = 4f;
-                            }
+                            SetFiringAnimationDirection(distX, distY);
                         }
                         if ((NPC.velocity.Y != 0f && !isAlienQueen) || NPC.ai[1] <= 0f)
                         {
@@ -2894,29 +2863,7 @@ PrepareToShoot:
                                 distY *= playerDistance;
                                 NPC.ai[2] = 3f;
                                 NPC.ai[1] = (float)attackTimeMax;
-                                if (Math.Abs(distY) > Math.Abs(distX) * 2f)
-                                {
-                                    if (distY > 0f)
-                                    {
-                                        NPC.ai[2] = 1f;
-                                    }
-                                    else
-                                    {
-                                        NPC.ai[2] = 5f;
-                                    }
-                                }
-                                else if (Math.Abs(distX) > Math.Abs(distY) * 2f)
-                                {
-                                    NPC.ai[2] = 3f;
-                                }
-                                else if (distY > 0f)
-                                {
-                                    NPC.ai[2] = 2f;
-                                }
-                                else
-                                {
-                                    NPC.ai[2] = 4f;
-                                }
+                                SetFiringAnimationDirection(distX, distY);
                             }
                         }
                     }

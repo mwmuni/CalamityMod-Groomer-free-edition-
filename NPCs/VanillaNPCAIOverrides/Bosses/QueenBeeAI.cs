@@ -18,6 +18,61 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         // Vanilla values
         public static int StingerDamage = 11; // 44; Also applies to GFB stinger replacements
 
+        private static void ChooseBeeSpawnType(bool phase3, bool death, bool hornetLimitReached, bool beeLimitReached, ref int spawnType)
+        {
+            if (Main.zenithWorld)
+            {
+                if (phase3)
+                    spawnType = Main.rand.NextBool(3) ? ModContent.NPCType<PlagueChargerLarge>() : ModContent.NPCType<PlagueCharger>();
+                else
+                    spawnType = NPCID.Hellbat;
+            }
+            else if (death)
+            {
+                int random = hornetLimitReached ? 0 : beeLimitReached ? Main.rand.Next(6, 12) : Main.rand.Next(12);
+                switch (random)
+                {
+                    default:
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        break;
+
+                    case 6:
+                    case 7:
+                    case 8:
+                        spawnType = NPCID.LittleHornetHoney;
+                        break;
+
+                    case 9:
+                    case 10:
+                        spawnType = NPCID.HornetHoney;
+                        break;
+
+                    case 11:
+                        spawnType = NPCID.BigHornetHoney;
+                        break;
+                }
+            }
+        }
+
+        private void ConfigureSpawnedBee(int spawn, float enrageScale)
+        {
+            Vector2 beeVelocity = (Main.player[NPC.target].Center - NPC.Center).SafeNormalize(Vector2.UnitY);
+            Main.npc[spawn].velocity = beeVelocity;
+            Main.npc[spawn].velocity *= 5f;
+            if (!Main.zenithWorld)
+            {
+                Main.npc[spawn].ai[2] = enrageScale;
+                Main.npc[spawn].ai[3] = 1f;
+            }
+            Main.npc[spawn].timeLeft = 600;
+            Main.npc[spawn].netUpdate = true;
+        }
+
         public override bool AI(Mod mod)
         {
             CalamityGlobalNPC calamityGlobalNPC = NPC.Calamity();
@@ -409,57 +464,12 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
                                 int spawnType = Main.rand.Next(NPCID.Bee, NPCID.BeeSmall + 1);
-                                if (Main.zenithWorld)
-                                {
-                                    if (phase3)
-                                        spawnType = Main.rand.NextBool(3) ? ModContent.NPCType<PlagueChargerLarge>() : ModContent.NPCType<PlagueCharger>();
-                                    else
-                                        spawnType = NPCID.Hellbat;
-                                }
-                                else if (death)
-                                {
-                                    int random = hornetLimitReached ? 0 : beeLimitReached ? Main.rand.Next(6, 12) : Main.rand.Next(12);
-                                    switch (random)
-                                    {
-                                        default:
-                                        case 0:
-                                        case 1:
-                                        case 2:
-                                        case 3:
-                                        case 4:
-                                        case 5:
-                                            break;
-
-                                        case 6:
-                                        case 7:
-                                        case 8:
-                                            spawnType = NPCID.LittleHornetHoney;
-                                            break;
-
-                                        case 9:
-                                        case 10:
-                                            spawnType = NPCID.HornetHoney;
-                                            break;
-
-                                        case 11:
-                                            spawnType = NPCID.BigHornetHoney;
-                                            break;
-                                    }
-                                }
+                                ChooseBeeSpawnType(phase3, death, hornetLimitReached, beeLimitReached, ref spawnType);
 
                                 if (!beeLimitReached || !hornetLimitReached)
                                 {
                                     int spawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, spawnType);
-                                    Vector2 beeVelocity = (Main.player[NPC.target].Center - NPC.Center).SafeNormalize(Vector2.UnitY);
-                                    Main.npc[spawn].velocity = beeVelocity;
-                                    Main.npc[spawn].velocity *= 5f;
-                                    if (!Main.zenithWorld)
-                                    {
-                                        Main.npc[spawn].ai[2] = enrageScale;
-                                        Main.npc[spawn].ai[3] = 1f;
-                                    }
-                                    Main.npc[spawn].timeLeft = 600;
-                                    Main.npc[spawn].netUpdate = true;
+                                    ConfigureSpawnedBee(spawn, enrageScale);
                                 }
                             }
                         }
@@ -594,55 +604,10 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     {
 
                         int spawnType = Main.rand.Next(NPCID.Bee, NPCID.BeeSmall + 1);
-                        if (Main.zenithWorld)
-                        {
-                            if (phase3)
-                                spawnType = Main.rand.NextBool(3) ? ModContent.NPCType<PlagueChargerLarge>() : ModContent.NPCType<PlagueCharger>();
-                            else
-                                spawnType = NPCID.Hellbat;
-                        }
-                        else if (death)
-                        {
-                            int random = hornetLimitReached ? 0 : beeLimitReached ? Main.rand.Next(6, 12) : Main.rand.Next(12);
-                            switch (random)
-                            {
-                                default:
-                                case 0:
-                                case 1:
-                                case 2:
-                                case 3:
-                                case 4:
-                                case 5:
-                                    break;
-
-                                case 6:
-                                case 7:
-                                case 8:
-                                    spawnType = NPCID.LittleHornetHoney;
-                                    break;
-
-                                case 9:
-                                case 10:
-                                    spawnType = NPCID.HornetHoney;
-                                    break;
-
-                                case 11:
-                                    spawnType = NPCID.BigHornetHoney;
-                                    break;
-                            }
-                        }
+                        ChooseBeeSpawnType(phase3, death, hornetLimitReached, beeLimitReached, ref spawnType);
 
                         int spawn = NPC.NewNPC(NPC.GetSource_FromAI(), (int)beeSpawnLocation.X, (int)beeSpawnLocation.Y, spawnType);
-                        Vector2 beeVelocity = (Main.player[NPC.target].Center - NPC.Center).SafeNormalize(Vector2.UnitY);
-                        Main.npc[spawn].velocity = beeVelocity;
-                        Main.npc[spawn].velocity *= 5f;
-                        if (!Main.zenithWorld)
-                        {
-                            Main.npc[spawn].ai[2] = enrageScale;
-                            Main.npc[spawn].ai[3] = 1f;
-                        }
-                        Main.npc[spawn].timeLeft = 600;
-                        Main.npc[spawn].netUpdate = true;
+                        ConfigureSpawnedBee(spawn, enrageScale);
 
                     }
                 }

@@ -509,35 +509,17 @@ namespace CalamityMod.NPCs
                 bool hasMoved = false;
                 while (segmentPointInUse < segmentPoints.Count)
                 {
-                    if (segmentPointInUse == 0)
+                    if (aheadSeg.Center.Distance(segmentPoints[segmentPointInUse]) >= dist)
                     {
-                        if (aheadSeg.Center.Distance(segmentPoints[0]) >= dist)
-                        {
-                            thisSeg.Center = aheadSeg.Center + aheadSeg.Center.DirectionTo(segmentPoints[0]) * dist;
-                            Segments[i].velocity = Segments[i].Center.DirectionTo(aheadSeg.Center);
-                            Segments[i].rotation = Segments[i].velocity.ToRotation() + MathHelper.PiOver2;
-                            hasMoved = true;
-                            break;
-                        }
-                        else
-                        {
-                            segmentPointInUse++;
-                        }
+                        thisSeg.Center = aheadSeg.Center + aheadSeg.Center.DirectionTo(segmentPoints[segmentPointInUse]) * dist;
+                        Segments[i].velocity = Segments[i].Center.DirectionTo(aheadSeg.Center);
+                        Segments[i].rotation = Segments[i].velocity.ToRotation() + MathHelper.PiOver2;
+                        hasMoved = true;
+                        break;
                     }
                     else
                     {
-                        if (aheadSeg.Center.Distance(segmentPoints[segmentPointInUse]) >= dist)
-                        {
-                            thisSeg.Center = aheadSeg.Center + aheadSeg.Center.DirectionTo(segmentPoints[segmentPointInUse]) * dist;
-                            Segments[i].velocity = Segments[i].Center.DirectionTo(aheadSeg.Center);
-                            Segments[i].rotation = Segments[i].velocity.ToRotation() + MathHelper.PiOver2;
-                            hasMoved = true;
-                            break;
-                        }
-                        else
-                        {
-                            segmentPointInUse++;
-                        }
+                        segmentPointInUse++;
                     }
                 }
                 if (!hasMoved && segmentPointInUse >= segmentPoints.Count)

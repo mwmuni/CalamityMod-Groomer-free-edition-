@@ -1869,31 +1869,7 @@ namespace CalamityMod.CalPlayer
                     int layer = (int)(Utils.GetLerpValue(0, 10, numOfBlobs + 1) + 0.9f);
                     Projectile.NewProjectileDirect(Player.GetSource_FromThis(), Player.Center, new Vector2(0, 16).RotatedByRandom(MathHelper.Pi), ModContent.ProjectileType<TransformerBlob>(), blobDamage, 0f, Player.whoAmI, layer, numOfBlobs + 1);
 
-                    if (Player.Calamity().transformerVisual)
-                    {
-                        Particle orb2 = new CustomPulse(Player.Center, Vector2.Zero, Color.LightSkyBlue, "CalamityMod/Particles/BloomRing", new Vector2(1, 1), Main.rand.NextFloat(-10, 10), 0, 0.5f, 11);
-                        GeneralParticleHandler.SpawnParticle(orb2);
-
-                        SoundStyle transform = new("CalamityMod/Sounds/Item/NullImpact");
-                        SoundEngine.PlaySound(transform with { Volume = 0.1f, Pitch = Main.rand.NextFloat(-0.3f, -0.4f) + numOfBlobs * 0.015f, MaxInstances = -1 }, Player.Center);
-                    }
-
-                    foreach (Projectile p in Main.ActiveProjectiles)
-                    {
-                        float angleMax = MathHelper.ToRadians(360 * layer);
-                        if (numOfBlobs == 0)
-                            angleMax = 0f;
-
-                        if (p.type == ModContent.ProjectileType<TransformerBlob>() && p.owner == Player.whoAmI)
-                        {
-                            int blobNum = Player.ownedProjectileCounts[ModContent.ProjectileType<TransformerBlob>()] + 1;
-                            float insanityValue = (p.ai[1] % 10);
-                            if (p.ai[0] == layer)
-                                p.ai[2] = (insanityValue / blobNum) * angleMax - angleMax / 2f;
-
-                            p.netUpdate = true;
-                        }
-                    }
+                    UpdateTransformerBlobs(Player, layer, numOfBlobs);
                     Player.Calamity().transformerStoredKills--;
                 }
                 else
@@ -1920,33 +1896,7 @@ namespace CalamityMod.CalPlayer
                             int layer = (int)(Utils.GetLerpValue(0, 10, numOfBlobs + 1) + 0.9f);
                             Projectile.NewProjectileDirect(Player.GetSource_FromThis(), projectile.Center, projectile.velocity.SafeNormalize(Vector2.UnitX) * 16f, ModContent.ProjectileType<TransformerBlob>(), blobDamage, 0f, Player.whoAmI, layer, numOfBlobs + 1);
 
-                            if (Player.Calamity().transformerVisual)
-                            {
-                                Particle orb2 = new CustomPulse(projectile.Center, Vector2.Zero, Color.LightSkyBlue, "CalamityMod/Particles/BloomRing", new Vector2(1, 1), Main.rand.NextFloat(-10, 10), 0, 0.5f, 11);
-                                GeneralParticleHandler.SpawnParticle(orb2);
-
-                                SoundStyle transform = new("CalamityMod/Sounds/Item/NullImpact");
-                                SoundEngine.PlaySound(transform with { Volume = 0.1f, Pitch = Main.rand.NextFloat(-0.3f, -0.4f) + numOfBlobs * 0.015f, MaxInstances = -1 }, projectile.Center);
-                            }
-
-                            float index = 1f;
-                            foreach (Projectile p in Main.ActiveProjectiles)
-                            {
-                                float angleMax = MathHelper.ToRadians(360 * layer);
-                                if (numOfBlobs == 0)
-                                    angleMax = 0f;
-
-                                if (p.type == ModContent.ProjectileType<TransformerBlob>() && p.owner == Player.whoAmI)
-                                {
-                                    int blobNum = Player.ownedProjectileCounts[ModContent.ProjectileType<TransformerBlob>()] + 1;
-                                    float insanityValue = (p.ai[1] % 10);
-                                    if (p.ai[0] == layer)
-                                        p.ai[2] = (insanityValue / blobNum) * angleMax - angleMax / 2f;
-
-                                    p.netUpdate = true;
-                                    index++;
-                                }
-                            }
+                            UpdateTransformerBlobs(projectile, layer, numOfBlobs);
 
                         }
                     }
@@ -3154,6 +3104,35 @@ namespace CalamityMod.CalPlayer
             {
                 if (Player.shadowDodgeTimer < 2)
                     Player.shadowDodgeTimer = 2;
+            }
+        }
+
+        private void UpdateTransformerBlobs(Entity source, int layer, int numOfBlobs)
+        {
+            if (Player.Calamity().transformerVisual)
+            {
+                Particle orb2 = new CustomPulse(source.Center, Vector2.Zero, Color.LightSkyBlue, "CalamityMod/Particles/BloomRing", new Vector2(1, 1), Main.rand.NextFloat(-10, 10), 0, 0.5f, 11);
+                GeneralParticleHandler.SpawnParticle(orb2);
+
+                SoundStyle transform = new("CalamityMod/Sounds/Item/NullImpact");
+                SoundEngine.PlaySound(transform with { Volume = 0.1f, Pitch = Main.rand.NextFloat(-0.3f, -0.4f) + numOfBlobs * 0.015f, MaxInstances = -1 }, source.Center);
+            }
+
+            foreach (Projectile p in Main.ActiveProjectiles)
+            {
+                float angleMax = MathHelper.ToRadians(360 * layer);
+                if (numOfBlobs == 0)
+                    angleMax = 0f;
+
+                if (p.type == ModContent.ProjectileType<TransformerBlob>() && p.owner == Player.whoAmI)
+                {
+                    int blobNum = Player.ownedProjectileCounts[ModContent.ProjectileType<TransformerBlob>()] + 1;
+                    float insanityValue = (p.ai[1] % 10);
+                    if (p.ai[0] == layer)
+                        p.ai[2] = (insanityValue / blobNum) * angleMax - angleMax / 2f;
+
+                    p.netUpdate = true;
+                }
             }
         }
 

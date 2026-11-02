@@ -79,13 +79,7 @@ public static class SanePrimitiveRenderer
             if (!mesh.IsValid)
                 return;
 
-            if (_useBasicEffect)
-            {
-                var basic = (BasicEffect)_effect;
-                bool textured = mesh.UsesTexture;
-                basic.TextureEnabled = textured;
-                basic.Texture = textured ? TextureAssets.MagicPixel.Value : null;
-            }
+            ConfigureTexture(mesh.UsesTexture);
 
             int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.Indices.Length);
 
@@ -97,17 +91,21 @@ public static class SanePrimitiveRenderer
             if (!mesh.IsValid)
                 return;
 
-            if (_useBasicEffect)
-            {
-                var basic = (BasicEffect)_effect;
-                bool textured = mesh.UsesTexture;
-                basic.TextureEnabled = textured;
-                basic.Texture = textured ? TextureAssets.MagicPixel.Value : null;
-            }
+            ConfigureTexture(mesh.UsesTexture);
 
             int primitiveCount = GetPrimitiveCount(mesh.PrimitiveType, mesh.IndexCount);
 
             DrawMeshCore(_device, _effect, mesh, primitiveCount);
+        }
+
+        private void ConfigureTexture(bool textured)
+        {
+            if (_useBasicEffect)
+            {
+                var basic = (BasicEffect)_effect;
+                basic.TextureEnabled = textured;
+                basic.Texture = textured ? TextureAssets.MagicPixel.Value : null;
+            }
         }
 
         public void Dispose()
@@ -180,15 +178,7 @@ public static class SanePrimitiveRenderer
 
         Debug.Assert(_effect is not null);
 
-        bool textured = mesh.UsesTexture;
-
-        _effect.TextureEnabled = textured;
-        _effect.Texture = textured ? TextureAssets.MagicPixel.Value : null;
-        _graphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
-
-        _effect.World = world;
-        _effect.View = view;
-        _effect.Projection = projection;
+        ConfigureBasicEffect(world, view, projection, mesh.UsesTexture);
 
         var device = _graphicsDevice;
 
@@ -427,15 +417,7 @@ public static class SanePrimitiveRenderer
 
         Debug.Assert(_effect is not null);
 
-        bool textured = mesh.UsesTexture;
-
-        _effect.TextureEnabled = textured;
-        _effect.Texture = textured ? TextureAssets.MagicPixel.Value : null;
-        _graphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
-
-        _effect.World = world;
-        _effect.View = view;
-        _effect.Projection = projection;
+        ConfigureBasicEffect(world, view, projection, mesh.UsesTexture);
 
         var device = _graphicsDevice;
 
@@ -632,6 +614,17 @@ public static class SanePrimitiveRenderer
         using var scope = BeginShaderScope(effect, world, view, projection, transformMatrixParam, rasterizerState, depthState, blendState, samplerState);
         for (int i = 0; i < meshes.Count; i++)
             scope.Draw(meshes[i]);
+    }
+
+    private static void ConfigureBasicEffect(in Matrix world, in Matrix view, in Matrix projection, bool textured)
+    {
+        _effect!.TextureEnabled = textured;
+        _effect.Texture = textured ? TextureAssets.MagicPixel.Value : null;
+        _graphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
+
+        _effect.World = world;
+        _effect.View = view;
+        _effect.Projection = projection;
     }
 
     private static void DrawMeshCore(

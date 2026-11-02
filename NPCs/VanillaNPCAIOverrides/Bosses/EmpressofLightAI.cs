@@ -1,7 +1,7 @@
 ﻿using System;
 using CalamityMod.Events;
-using CalamityMod.World;
 using CalamityMod.Utilities;
+using CalamityMod.World;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -36,6 +36,23 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
         // However, some weird contraption in her Expert AI that knocks her base contact damage to the intended value of 110
         // This hasn't been found anywhere so our solution for now is avoid using defDamage altogether
         public static int ContactDamageCorrection = Main.masterMode ? 248 : 110;
+
+        private void MoveTowardsHoverPosition(ref Vector2 center, bool death)
+        {
+            if (NPC.Distance(center) > 200f)
+                center -= NPC.DirectionTo(center) * 100f;
+
+            Vector2 targetDirection = center - NPC.Center;
+            float lerpValue = Utils.GetLerpValue(100f, 600f, targetDirection.Length());
+            float targetDistance = targetDirection.Length();
+
+            float maxVelocity = death ? 24f : 21f;
+            if (targetDistance > maxVelocity)
+                targetDistance = maxVelocity;
+
+            NPC.velocity = Vector2.Lerp(targetDirection.SafeNormalize(Vector2.Zero) * targetDistance, targetDirection / 6f, lerpValue);
+            NPC.netUpdate = true;
+        }
 
         public override bool AI(Mod mod)
         {
@@ -202,19 +219,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
                         Vector2 center = targetData4.Center;
                         center += new Vector2(0f, -400f);
-                        if (NPC.Distance(center) > 200f)
-                            center -= NPC.DirectionTo(center) * 100f;
-
-                        Vector2 targetDirection = center - NPC.Center;
-                        float lerpValue = Utils.GetLerpValue(100f, 600f, targetDirection.Length());
-                        float targetDistance = targetDirection.Length();
-
-                        float maxVelocity = death ? 24f : 21f;
-                        if (targetDistance > maxVelocity)
-                            targetDistance = maxVelocity;
-
-                        NPC.velocity = Vector2.Lerp(targetDirection.SafeNormalize(Vector2.Zero) * targetDistance, targetDirection / 6f, lerpValue);
-                        NPC.netUpdate = true;
+                        MoveTowardsHoverPosition(ref center, death);
                     }
 
                     NPC.velocity *= 0.92f;
@@ -886,19 +891,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     {
                         Vector2 center = NPC.GetTargetData().Center;
                         center += new Vector2(0f, -200f);
-                        if (NPC.Distance(center) > 200f)
-                            center -= NPC.DirectionTo(center) * 100f;
-
-                        Vector2 targetDirection = center - NPC.Center;
-                        float lerpValue = Utils.GetLerpValue(100f, 600f, targetDirection.Length());
-                        float targetDistance = targetDirection.Length();
-
-                        float maxVelocity = death ? 24f : 21f;
-                        if (targetDistance > maxVelocity)
-                            targetDistance = maxVelocity;
-
-                        NPC.velocity = Vector2.Lerp(targetDirection.SafeNormalize(Vector2.Zero) * targetDistance, targetDirection / 6f, lerpValue);
-                        NPC.netUpdate = true;
+                        MoveTowardsHoverPosition(ref center, death);
                     }
                     if (NPC.ai[1] >= totalPhaseTime + extraPhaseTime)
                     {

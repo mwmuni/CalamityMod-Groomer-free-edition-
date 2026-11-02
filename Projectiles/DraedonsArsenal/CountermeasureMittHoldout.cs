@@ -112,18 +112,7 @@ namespace CalamityMod.Projectiles.DraedonsArsenal
             #region 5 Collision Line Checks
             for (int t = 0; t < 5; t++)
             {
-                float rot = t switch
-                {
-                    1 => f4r * Projectile.direction,
-                    2 => f3r * Projectile.direction,
-                    3 => f2r * Projectile.direction,
-                    4 => f1r * Projectile.direction,
-                    _ => -f5r * 0.3f * Projectile.direction,
-                };
-                float fx = t switch
-                {
-                    1 => f4x, 2 => f3x, 3 => f2x, 4 => f1x, _ => f5x,
-                };
+                var (rot, fx) = GetFingerPose(t);
 
                 Vector2 basePosition = handPos + alteredRotation.ToRotationVector2() * (t == 0 ? 2.5f : 3.3f) * Projectile.scale + (alteredRotation + rot).ToRotationVector2() * fingerLength + (alteredRotation + MathHelper.PiOver2 * -Projectile.direction).ToRotationVector2() * (t == 0 ? -3 : 3) * Projectile.scale;
                 if (fx > 0.2f)
@@ -135,6 +124,23 @@ namespace CalamityMod.Projectiles.DraedonsArsenal
 
             return (colCheck);
         }
+        private (float Rotation, float Extension) GetFingerPose(int finger)
+        {
+            float rot = finger switch
+            {
+                1 => f4r * Projectile.direction,
+                2 => f3r * Projectile.direction,
+                3 => f2r * Projectile.direction,
+                4 => f1r * Projectile.direction,
+                _ => -f5r * 0.3f * Projectile.direction,
+            };
+            float fx = finger switch
+            {
+                1 => f4x, 2 => f3x, 3 => f2x, 4 => f1x, _ => f5x,
+            };
+            return (rot, fx);
+        }
+
         public void EndSounds()
         {
             if (SoundEngine.TryGetActiveSound(AudSlot1, out var s1))
@@ -537,18 +543,7 @@ namespace CalamityMod.Projectiles.DraedonsArsenal
                 Vector2 fingerScale = new Vector2(1f, 1f) * Projectile.scale;
                 Vector2 fingerOrgin = new Vector2(0, finger.Height / 2);
 
-                float rot = i switch
-                {
-                    1 => f4r * Projectile.direction,
-                    2 => f3r * Projectile.direction,
-                    3 => f2r * Projectile.direction,
-                    4 => f1r * Projectile.direction,
-                    _ => -f5r * 0.3f * Projectile.direction,
-                };
-                float fx = i switch
-                {
-                    1 => f4x, 2 => f3x, 3 => f2x, 4 => f1x, _ => f5x,
-                };
+                var (rot, fx) = GetFingerPose(i);
                 Color fingerColor = Color.Lerp(drawColor, Color.Black, (4 - i) * 0.2f);
                 if (i == 0)
                 {

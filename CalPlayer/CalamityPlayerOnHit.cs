@@ -39,6 +39,7 @@ using CalamityMod.Systems.Collections;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using static Terraria.ModLoader.ModContent;
@@ -629,6 +630,27 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region Item
+        private void SpawnAstralStarRain(IEntitySource source, Vector2 position, float speed)
+        {
+            astralStarRainCooldown = AstralHelm.StarRainCooldown;
+            for (int n = 0; n < 3; n++)
+            {
+                int projectileType = Utils.SelectRandom(Main.rand, new int[]
+                {
+                    ProjectileType<AstralStar>(),
+                    ProjectileID.BeeCloakStar,
+                    ProjectileID.StarCloakStar,
+                    ProjectileID.StarCannonStar
+                });
+
+                int astralStarDamage = (int)Player.GetBestClassDamage().ApplyTo(AstralHelm.StarDamage);
+
+                Projectile star = CalamityUtils.ProjectileRain(source, position, 400f, 100f, 500f, 800f, speed, projectileType, astralStarDamage, 5f, Player.whoAmI);
+                if (star.whoAmI.WithinBounds(Main.maxProjectiles))
+                    star.DamageType = DamageClass.Generic;
+            }
+        }
+
         public void ItemOnHit(Item item, int damage, NPC target, bool crit, bool npcCheck, bool targetIsDummy)
         {
             Vector2 position = target.Center;
@@ -647,25 +669,7 @@ namespace CalamityMod.CalPlayer
                         CalamityUtils.ProjectileRain(source, Player.Center, 400f, 100f, 500f, 800f, 29f, ProjectileType<AstralStar>(), bulwarkStarDamage, 5f, Player.whoAmI);
                 }
                 if (astralStarRain && crit && astralStarRainCooldown <= 0)
-                {
-                    astralStarRainCooldown = AstralHelm.StarRainCooldown;
-                    for (int n = 0; n < 3; n++)
-                    {
-                        int projectileType = Utils.SelectRandom(Main.rand, new int[]
-                        {
-                            ProjectileType<AstralStar>(),
-                            ProjectileID.BeeCloakStar,
-                            ProjectileID.StarCloakStar,
-                            ProjectileID.StarCannonStar
-                        });
-
-                        int astralStarDamage = (int)Player.GetBestClassDamage().ApplyTo(AstralHelm.StarDamage);
-
-                        Projectile star = CalamityUtils.ProjectileRain(source, position, 400f, 100f, 500f, 800f, 12f, projectileType, astralStarDamage, 5f, Player.whoAmI);
-                        if (star.whoAmI.WithinBounds(Main.maxProjectiles))
-                            star.DamageType = DamageClass.Generic;
-                    }
-                }
+                    SpawnAstralStarRain(source, position, 12f);
             }
 
             if (item.CountsAsClass<MeleeDamageClass>())
@@ -716,25 +720,7 @@ namespace CalamityMod.CalPlayer
             if (npcCheck)
             {
                 if (astralStarRain && crit && astralStarRainCooldown <= 0)
-                {
-                    astralStarRainCooldown = AstralHelm.StarRainCooldown;
-                    for (int n = 0; n < 3; n++)
-                    {
-                        int projectileType = Utils.SelectRandom(Main.rand, new int[]
-                        {
-                            ProjectileType<AstralStar>(),
-                            ProjectileID.BeeCloakStar,
-                            ProjectileID.StarCloakStar,
-                            ProjectileID.StarCannonStar
-                        });
-
-                        int astralStarDamage = (int)Player.GetBestClassDamage().ApplyTo(AstralHelm.StarDamage);
-
-                        Projectile star = CalamityUtils.ProjectileRain(source, position, 400f, 100f, 500f, 800f, 25f, projectileType, astralStarDamage, 5f, Player.whoAmI);
-                        if (star.whoAmI.WithinBounds(Main.maxProjectiles))
-                            star.DamageType = DamageClass.Generic;
-                    }
-                }
+                    SpawnAstralStarRain(source, position, 25f);
             }
 
             if (ursaSergeant && ursaSergeantCooldown <= 0)
@@ -1258,30 +1244,35 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region Lifesteal
+        private void ApplySharedLifesteal(NPC target, bool checkMoonLeech)
+        {
+            if (bloodflareSet && (!checkMoonLeech || !Player.moonLeech))
+            {
+                if ((target.life < target.lifeMax * 0.5) && bloodflareHeartTimer <= 0)
+                {
+                    bloodflareHeartTimer = 300;
+                    Item.NewItem(target.GetSource_Loot(), target.Hitbox, ItemID.Heart);
+                }
+            }
+
+            if (gladiatorSword && target.life <= 0 && target.Calamity().gladiatorOnKill)
+            {
+                float healPower = 10 * Utils.GetLerpValue(300, 0, gladiatorTimer, true);
+                target.Calamity().gladiatorOnKill = false;
+                if (healPower >= 1)
+                {
+                    Projectile.NewProjectile(Player.GetSource_OnHit(target), target.Center, target.velocity * 0.5f, ProjectileType<GladiatorHealOrb>(), 0, 0, -1, (int)healPower);
+                    gladiatorTimer = 300;
+                }
+            }
+        }
+
         public void ProjLifesteal(NPC target, Projectile proj, int damage, bool crit)
         {
             CalamityGlobalProjectile modProj = proj.Calamity();
             if (target.IsAnEnemy(false))
             {
-                if (bloodflareSet && !Player.moonLeech)
-                {
-                    if ((target.life < target.lifeMax * 0.5) && bloodflareHeartTimer <= 0)
-                    {
-                        bloodflareHeartTimer = 300;
-                        Item.NewItem(target.GetSource_Loot(), target.Hitbox, ItemID.Heart);
-                    }
-                }
-
-                if (gladiatorSword && target.life <= 0 && target.Calamity().gladiatorOnKill)
-                {
-                    float healPower = 10 * Utils.GetLerpValue(300, 0, gladiatorTimer, true);
-                    target.Calamity().gladiatorOnKill = false;
-                    if (healPower >= 1)
-                    {
-                        Projectile.NewProjectile(Player.GetSource_OnHit(target), target.Center, target.velocity * 0.5f, ProjectileType<GladiatorHealOrb>(), 0, 0, -1, (int)healPower);
-                        gladiatorTimer = 300;
-                    }
-                }
+                ApplySharedLifesteal(target, checkMoonLeech: true);
 
                 if (vampiricTalisman && proj.CountsAsClass<RogueDamageClass>() && crit && proj.numHits <1)
                 {
@@ -1319,25 +1310,7 @@ namespace CalamityMod.CalPlayer
         {
             if (target.IsAnEnemy(false))
             {
-                if (bloodflareSet)
-                {
-                    if ((target.life < target.lifeMax * 0.5) && bloodflareHeartTimer <= 0)
-                    {
-                        bloodflareHeartTimer = 300;
-                        Item.NewItem(target.GetSource_Loot(), target.Hitbox, ItemID.Heart);
-                    }
-                }
-
-                if (gladiatorSword && target.life <= 0 && target.Calamity().gladiatorOnKill)
-                {
-                    float healPower = 10 * Utils.GetLerpValue(300, 0, gladiatorTimer, true);
-                    target.Calamity().gladiatorOnKill = false;
-                    if (healPower >= 1)
-                    {
-                        Projectile.NewProjectile(Player.GetSource_OnHit(target), target.Center, target.velocity * 0.5f, ProjectileType<GladiatorHealOrb>(), 0, 0, -1, (int)healPower);
-                        gladiatorTimer = 300;
-                    }
-                }
+                ApplySharedLifesteal(target, checkMoonLeech: false);
             }
         }
         #endregion

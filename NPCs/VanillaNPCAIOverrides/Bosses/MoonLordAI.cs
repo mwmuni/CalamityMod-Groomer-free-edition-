@@ -98,6 +98,81 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
             return false;
         }
 
+        private static void LimitBoltVolleyForAggression(int aggressionLevel, ref bool shootSecondBolt, ref bool shootThirdBolt)
+        {
+            switch (aggressionLevel)
+            {
+                case 6:
+                case 5:
+                case 4:
+                    break;
+                // Lower aggression fires less phantasmal bolts
+                case 3:
+                case 2:
+                    shootSecondBolt = false;
+                    break;
+                case 1:
+                    shootSecondBolt = false;
+                    shootThirdBolt = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static void ClearMoonLordProjectilesAndEyes()
+        {
+            foreach (Projectile projectile in Main.ActiveProjectiles)
+            {
+                if ((projectile.type == ProjectileID.MoonLeech || projectile.type == ProjectileID.PhantasmalBolt ||
+                    projectile.type == ProjectileID.PhantasmalDeathray || projectile.type == ProjectileID.PhantasmalEye ||
+                    projectile.type == ProjectileID.PhantasmalSphere))
+                    projectile.Kill();
+            }
+
+            foreach (NPC n in Main.ActiveNPCs)
+            {
+                if (n.type == NPCID.MoonLordFreeEye)
+                {
+                    n.HitEffect(0, 9999.0);
+                    n.active = false;
+                }
+            }
+        }
+
+        private void DespawnMoonLordParts()
+        {
+            foreach (NPC n in Main.ActiveNPCs)
+            {
+                if (n.type == NPCID.MoonLordHand || n.type == NPCID.MoonLordHead)
+                {
+                    n.active = false;
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n.whoAmI);
+                }
+            }
+
+            NPC.active = false;
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, NPC.whoAmI);
+        }
+
+        private void HealMoonLordPart(int partIndex, int missingHP, ref int maxHealAmt)
+        {
+            if (missingHP > 0 && maxHealAmt > 0)
+            {
+                // Consume the shared budget in head, core, then left-hand order.
+                int healthFailsafe = missingHP - maxHealAmt;
+                if (healthFailsafe > 0)
+                    healthFailsafe = 0;
+
+                int healingAmt = maxHealAmt + healthFailsafe;
+                maxHealAmt -= healingAmt;
+                Main.npc[partIndex].life += healingAmt;
+                NPC.HealEffect(Utils.CenteredRectangle(Main.npc[partIndex].Center, new Vector2(50f)), healingAmt);
+            }
+        }
+
         public void BuffedMoonLordCoreAI(int aggressionLevel)
         {
             // Play a random Moon Lord sound
@@ -296,22 +371,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 // Kill all projectiles and the True Eyes once the screen fades to white
                 if (NPC.ai[1] == 60f)
                 {
-                    foreach (Projectile projectile in Main.ActiveProjectiles)
-                    {
-                        if ((projectile.type == ProjectileID.MoonLeech || projectile.type == ProjectileID.PhantasmalBolt ||
-                            projectile.type == ProjectileID.PhantasmalDeathray || projectile.type == ProjectileID.PhantasmalEye ||
-                            projectile.type == ProjectileID.PhantasmalSphere))
-                            projectile.Kill();
-                    }
-
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.type == NPCID.MoonLordFreeEye)
-                        {
-                            n.HitEffect(0, 9999.0);
-                            n.active = false;
-                        }
-                    }
+                    ClearMoonLordProjectilesAndEyes();
                 }
 
                 // Dust and smoke effects
@@ -385,19 +445,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     NPC.checkDead();
 
                     // Despawn all the other parts
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.type == NPCID.MoonLordHand || n.type == NPCID.MoonLordHead)
-                        {
-                            n.active = false;
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n.whoAmI);
-                        }
-                    }
-
-                    NPC.active = false;
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, NPC.whoAmI);
+                    DespawnMoonLordParts();
 
                     return;
                 }
@@ -417,22 +465,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 // Kill all projectiles, True Eyes, and gores once the screen fades to white
                 if (NPC.ai[1] == 40f)
                 {
-                    foreach (Projectile projectile in Main.ActiveProjectiles)
-                    {
-                        if ((projectile.type == ProjectileID.MoonLeech || projectile.type == ProjectileID.PhantasmalBolt ||
-                            projectile.type == ProjectileID.PhantasmalDeathray || projectile.type == ProjectileID.PhantasmalEye ||
-                            projectile.type == ProjectileID.PhantasmalSphere))
-                            projectile.Kill();
-                    }
-
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.type == NPCID.MoonLordFreeEye)
-                        {
-                            n.HitEffect(0, 9999.0);
-                            n.active = false;
-                        }
-                    }
+                    ClearMoonLordProjectilesAndEyes();
 
                     for (int l = 0; l < Main.maxGore; l++)
                     {
@@ -445,19 +478,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 if (NPC.ai[1] >= 60f)
                 {
                     // Despawn all the other parts first
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.type == NPCID.MoonLordHand || n.type == NPCID.MoonLordHead)
-                        {
-                            n.active = false;
-                            if (Main.netMode != NetmodeID.MultiplayerClient)
-                                NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, n.whoAmI);
-                        }
-                    }
-
-                    NPC.active = false;
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                        NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, NPC.whoAmI);
+                    DespawnMoonLordParts();
 
                     NPC.LunarApocalypseIsUp = false;
                     if (Main.dedServ)
@@ -790,24 +811,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 bool shootFirstBolt = attackTimer == phaseAttackTime - 14f;
                 bool shootSecondBolt = attackTimer == phaseAttackTime - 7f;
                 bool shootThirdBolt = attackTimer == phaseAttackTime;
-                switch (aggressionLevel)
-                {
-                    case 6:
-                    case 5:
-                    case 4:
-                        break;
-                    case 3:
-                    // Lower aggression fires less phantasmal bolts
-                    case 2:
-                        shootSecondBolt = false;
-                        break;
-                    case 1:
-                        shootSecondBolt = false;
-                        shootThirdBolt = false;
-                        break;
-                    default:
-                        break;
-                }
+                LimitBoltVolleyForAggression(aggressionLevel, ref shootSecondBolt, ref shootThirdBolt);
 
                 // localAI[0] and localAI[1] are again used to control where the eye's pupil draws
                 NPC.localAI[0] = NPC.localAI[0].AngleLerp(aimDirection.ToRotation(), 0.5f);
@@ -1177,24 +1181,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 bool shootFirstBolt = handAttackTimer == phaseAttackTime - 14f;
                 bool shootSecondBolt = handAttackTimer == phaseAttackTime - 7f;
                 bool shootThirdBolt = handAttackTimer == phaseAttackTime;
-                switch (aggressionLevel)
-                {
-                    case 6:
-                    case 5:
-                    case 4:
-                        break;
-                    // Lower aggression fires less phantasmal bolts
-                    case 3:
-                    case 2:
-                        shootSecondBolt = false;
-                        break;
-                    case 1:
-                        shootSecondBolt = false;
-                        shootThirdBolt = false;
-                        break;
-                    default:
-                        break;
-                }
+                LimitBoltVolleyForAggression(aggressionLevel, ref shootSecondBolt, ref shootThirdBolt);
 
                 // localAI[0] and localAI[1] are again used to control where the eye's pupil draws
                 NPC.localAI[0] = NPC.localAI[0].AngleLerp(aimDirection.ToRotation(), 0.5f);
@@ -1837,41 +1824,9 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     int headMissingHP = Main.npc[headHeal].lifeMax - Main.npc[headHeal].life;
 
                     // Head healing.
-                    if (headMissingHP > 0 && maxHealAmt > 0)
-                    {
-                        // Each failsafe threshold ensures it will either heal the Leech's maximum heal or up to the NPC's max health.
-                        int headHealthFailsafe = headMissingHP - maxHealAmt;
-                        if (headHealthFailsafe > 0)
-                            headHealthFailsafe = 0;
-
-                        int headHealingAmt = maxHealAmt + headHealthFailsafe;
-                        // maxHealAmt gets subtracted from, if this is still greater than 0 then it can heal additional parts.
-                        maxHealAmt -= headHealingAmt;
-                        Main.npc[headHeal].life += headHealingAmt;
-                        NPC.HealEffect(Utils.CenteredRectangle(Main.npc[headHeal].Center, new Vector2(50f)), headHealingAmt);
-                    }
-                    if (coreMissingHP > 0 && maxHealAmt > 0)
-                    {
-                        int coreHealthFailsafe = coreMissingHP - maxHealAmt;
-                        if (coreHealthFailsafe > 0)
-                            coreHealthFailsafe = 0;
-
-                        int coreHealingAmt = maxHealAmt + coreHealthFailsafe;
-                        maxHealAmt -= coreHealingAmt;
-                        Main.npc[coreIndex].life += coreHealingAmt;
-                        NPC.HealEffect(Utils.CenteredRectangle(Main.npc[coreIndex].Center, new Vector2(50f)), coreHealingAmt);
-                    }
-                    if (leftHandMissingHP > 0 && maxHealAmt > 0)
-                    {
-                        int leftHandHealthFailsafe = leftHandMissingHP - maxHealAmt;
-                        if (leftHandHealthFailsafe > 0)
-                            leftHandHealthFailsafe = 0;
-
-                        int leftHandHealingAmt = maxHealAmt + leftHandHealthFailsafe;
-                        maxHealAmt -= leftHandHealingAmt;
-                        Main.npc[leftHandHeal].life += leftHandHealingAmt;
-                        NPC.HealEffect(Utils.CenteredRectangle(Main.npc[leftHandHeal].Center, new Vector2(50f)), leftHandHealingAmt);
-                    }
+                    HealMoonLordPart(headHeal, headMissingHP, ref maxHealAmt);
+                    HealMoonLordPart(coreIndex, coreMissingHP, ref maxHealAmt);
+                    HealMoonLordPart(leftHandHeal, leftHandMissingHP, ref maxHealAmt);
                     if (rightHandMissingHP > 0 && maxHealAmt > 0)
                     {
                         int rightHandHealthFailsafe = rightHandMissingHP - maxHealAmt;

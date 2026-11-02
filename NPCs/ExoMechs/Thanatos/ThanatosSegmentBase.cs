@@ -274,29 +274,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                                 NPC.ai[3] = 0f;
                                 NPC.Calamity().newAI[1] = 1f;
 
-                                int maxTargets = 3;
-                                int[] whoAmIArray = new int[maxTargets];
-                                Vector2[] targetCenterArray = new Vector2[maxTargets];
-                                int numProjectiles = 0;
-                                float maxDistance = 2400f;
-
-                                foreach (Player plr in Main.ActivePlayers)
-                                {
-                                    if (plr.dead)
-                                        continue;
-
-                                    Vector2 playerCenter = plr.Center;
-                                    float distance = Vector2.Distance(playerCenter, NPC.Center);
-                                    if (distance < maxDistance)
-                                    {
-                                        whoAmIArray[numProjectiles] = plr.whoAmI;
-                                        targetCenterArray[numProjectiles] = playerCenter;
-                                        int projectileLimit = numProjectiles + 1;
-                                        numProjectiles = projectileLimit;
-                                        if (projectileLimit >= targetCenterArray.Length)
-                                            break;
-                                    }
-                                }
+                                FindLaserTargets(out int[] whoAmIArray, out Vector2[] targetCenterArray, out int numProjectiles);
 
                                 SoundEngine.PlaySound(CommonCalamitySounds.ExoLaserShootSound with { Volume = 0.1f * CommonCalamitySounds.ExoLaserShootSound.Volume }, NPC.Center);
 
@@ -337,29 +315,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                                 NPC.ai[3] = 0f;
                                 NPC.Calamity().newAI[1] = 1f;
 
-                                int maxTargets = 3;
-                                int[] whoAmIArray = new int[maxTargets];
-                                Vector2[] targetCenterArray = new Vector2[maxTargets];
-                                int numProjectiles = 0;
-                                float maxDistance = 2400f;
-
-                                foreach (Player plr in Main.ActivePlayers)
-                                {
-                                    if (plr.dead)
-                                        continue;
-
-                                    Vector2 playerCenter = plr.Center;
-                                    float distance = Vector2.Distance(playerCenter, NPC.Center);
-                                    if (distance < maxDistance)
-                                    {
-                                        whoAmIArray[numProjectiles] = plr.whoAmI;
-                                        targetCenterArray[numProjectiles] = playerCenter;
-                                        int projectileLimit = numProjectiles + 1;
-                                        numProjectiles = projectileLimit;
-                                        if (projectileLimit >= targetCenterArray.Length)
-                                            break;
-                                    }
-                                }
+                                FindLaserTargets(out int[] whoAmIArray, out Vector2[] targetCenterArray, out int numProjectiles);
 
                                 float predictionAmt = death ? 20f : revenge ? 18f : expertMode ? 16f : 12f;
                                 if (NPC.ai[0] % 3f == 0f)
@@ -535,6 +491,33 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                 baseVelocity *= 1.15f;
         }
 
+        private void FindLaserTargets(out int[] whoAmIArray, out Vector2[] targetCenterArray, out int numProjectiles)
+        {
+            int maxTargets = 3;
+            whoAmIArray = new int[maxTargets];
+            targetCenterArray = new Vector2[maxTargets];
+            numProjectiles = 0;
+            float maxDistance = 2400f;
+
+            foreach (Player plr in Main.ActivePlayers)
+            {
+                if (plr.dead)
+                    continue;
+
+                Vector2 playerCenter = plr.Center;
+                float distance = Vector2.Distance(playerCenter, NPC.Center);
+                if (distance < maxDistance)
+                {
+                    whoAmIArray[numProjectiles] = plr.whoAmI;
+                    targetCenterArray[numProjectiles] = playerCenter;
+                    int projectileLimit = numProjectiles + 1;
+                    numProjectiles = projectileLimit;
+                    if (projectileLimit >= targetCenterArray.Length)
+                        break;
+                }
+            }
+        }
+
         public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         {
             cooldownSlot = ImmunityCooldownID.Bosses;
@@ -652,19 +635,7 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
 
             if (NPC.life <= 0)
             {
-                for (int i = 0; i < 2; i++)
-                {
-                    Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 100, new Color(0, 255, 255), 1.5f);
-                }
-                for (int j = 0; j < 20; j++)
-                {
-                    int plasmaDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 0, new Color(0, 255, 255), 2.5f);
-                    Main.dust[plasmaDust].noGravity = true;
-                    Main.dust[plasmaDust].velocity *= 3f;
-                    plasmaDust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.TerraBlade, 0f, 0f, 100, new Color(0, 255, 255), 1.5f);
-                    Main.dust[plasmaDust].velocity *= 2f;
-                    Main.dust[plasmaDust].noGravity = true;
-                }
+                ThanatosHead.CreateThanatosDeathDust(NPC);
 
                 if (!Main.dedServ)
                 {

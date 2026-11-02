@@ -181,6 +181,14 @@ namespace CalamityMod.NPCs.NormalNPCs
                 NPC.localAI[i] = reader.ReadSingle();
         }
 
+        private void StopSwineSpeak()
+        {
+            if (SoundEngine.TryGetActiveSound(SwineSpeakSoundSlot, out ActiveSound swineSpeakInstance))
+                swineSpeakInstance.Stop();
+            if (SwineSpeakSoundSlot.IsValid)
+                SwineSpeakSoundSlot = SlotId.Invalid;
+        }
+
         public override void AI()
         {
             switch ((BehaviorState)AIState)
@@ -303,10 +311,7 @@ namespace CalamityMod.NPCs.NormalNPCs
                 if (!CalamityClientConfig.Instance.MisophoniaSupport)
                     SoundEngine.PlaySound(IdleSound, NPC.Center);
 
-                if (SoundEngine.TryGetActiveSound(SwineSpeakSoundSlot, out ActiveSound swineSpeakInstance))
-                    swineSpeakInstance.Stop();
-                if (SwineSpeakSoundSlot.IsValid)
-                    SwineSpeakSoundSlot = SlotId.Invalid;
+                StopSwineSpeak();
 
                 NPC.Transform(ModContent.NPCType<Piggy>());
             }
@@ -443,10 +448,7 @@ namespace CalamityMod.NPCs.NormalNPCs
                     GeneralParticleHandler.SpawnParticle(Main.rand.NextBool() ? meatSparkle : meatLight, true, Enums.GeneralDrawLayer.AfterNPCs);
                 }
 
-                if (SoundEngine.TryGetActiveSound(SwineSpeakSoundSlot, out ActiveSound swineSpeakInstance))
-                    swineSpeakInstance.Stop();
-                if (SwineSpeakSoundSlot.IsValid)
-                    SwineSpeakSoundSlot = SlotId.Invalid;
+                StopSwineSpeak();
 
                 // Despawn immediately afterwards.
                 NPC.checkDead();
@@ -484,10 +486,7 @@ namespace CalamityMod.NPCs.NormalNPCs
                 if (!CalamityClientConfig.Instance.MisophoniaSupport)
                     SoundEngine.PlaySound(IdleSound, NPC.Center);
 
-                if (SoundEngine.TryGetActiveSound(SwineSpeakSoundSlot, out ActiveSound swineSpeakInstance))
-                    swineSpeakInstance.Stop();
-                if (SwineSpeakSoundSlot.IsValid)
-                    SwineSpeakSoundSlot = SlotId.Invalid;
+                StopSwineSpeak();
 
                 NPC.checkDead();
                 NPC.active = false;
@@ -624,10 +623,7 @@ namespace CalamityMod.NPCs.NormalNPCs
 
             if (!NPC.active)
             {
-                if (SoundEngine.TryGetActiveSound(SwineSpeakSoundSlot, out ActiveSound swineSpeakInstance))
-                    swineSpeakInstance.Stop();
-                if (SwineSpeakSoundSlot.IsValid)
-                    SwineSpeakSoundSlot = SlotId.Invalid;
+                StopSwineSpeak();
             }
 
             // Fade the music depending on the distance between the player and Divine Swine.

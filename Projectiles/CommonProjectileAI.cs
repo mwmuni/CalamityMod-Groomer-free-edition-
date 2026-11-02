@@ -61,18 +61,14 @@ internal static class CommonProjectileAI
         Vector2 targetVec = projectile.position;
         bool foundTarget = false;
         bool isButterfly = projectile.type == ProjectileType<PurpleButterfly>();
-        //Prioritize the targeted enemy if possible
-        if (player.HasMinionAttackTargetNPC)
+        void ConsiderTarget(NPC npc)
         {
-            NPC npc = Main.npc[player.MinionAttackTargetNPC];
             bool fishronCheck = npc.type == NPCID.DukeFishron && npc.active && isButterfly;
             if (npc.CanBeChasedBy(projectile, false) || fishronCheck)
             {
-                //Check the size of the target to make it easier to hit fat targets like Levi
+                // Include target size so large enemies remain easy to reach.
                 float extraDist = (npc.width / 2) + (npc.height / 2);
-
                 float targetDist = Vector2.Distance(npc.Center, projectile.Center);
-                //Some minions will ignore tiles when choosing a target like Ice Claspers, others will not
                 bool canHit = true;
                 if (extraDist < maxDist && !tileVision)
                     canHit = Collision.CanHit(projectile.Center, 1, 1, npc.Center, 1, 1);
@@ -84,27 +80,20 @@ internal static class CommonProjectileAI
                 }
             }
         }
+
+        //Prioritize the targeted enemy if possible
+        if (player.HasMinionAttackTargetNPC)
+        {
+            NPC npc = Main.npc[player.MinionAttackTargetNPC];
+            ConsiderTarget(npc);
+        }
         //If no npc is specifically targetted or the selected enemy can't be found, check through the entire array
         if (!foundTarget)
         {
             for (int npcIndex = 0; npcIndex < Main.maxNPCs; npcIndex++)
             {
                 NPC npc = Main.npc[npcIndex];
-                bool fishronCheck = npc.type == NPCID.DukeFishron && npc.active && isButterfly;
-                if (npc.CanBeChasedBy(projectile, false) || fishronCheck)
-                {
-                    float extraDist = (npc.width / 2) + (npc.height / 2);
-                    float targetDist = Vector2.Distance(npc.Center, projectile.Center);
-                    bool canHit = true;
-                    if (extraDist < maxDist && !tileVision)
-                        canHit = Collision.CanHit(projectile.Center, 1, 1, npc.Center, 1, 1);
-                    if (!foundTarget && targetDist < (maxDist + extraDist) && canHit)
-                    {
-                        maxDist = targetDist;
-                        targetVec = npc.Center;
-                        foundTarget = true;
-                    }
-                }
+                ConsiderTarget(npc);
             }
         }
 

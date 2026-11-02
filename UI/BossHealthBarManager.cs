@@ -447,121 +447,63 @@ namespace CalamityMod.UI
             public string OverridingName = null;
             public NPC AssociatedNPC => Main.npc.IndexInRange(NPCIndex) ? Main.npc[NPCIndex] : null;
             public int NPCType => AssociatedNPC?.type ?? -1;
-            public long CombinedNPCLife
+            public long CombinedNPCLife => GetCombinedLife(false);
+            public long CombinedNPCMaxLife => GetCombinedLife(true);
+
+            private long GetCombinedLife(bool useMaxLife)
             {
-                get
+                if (AssociatedNPC is null || !AssociatedNPC.active)
+                    return 0L;
+
+                long life = useMaxLife ? AssociatedNPC.lifeMax : AssociatedNPC.life;
+
+                // Immediately check for special logged edge-cases. If one is hit, go with what it says.
+                foreach (KeyValuePair<NPCSpecialHPGetRequirement, NPCSpecialHPGetFunction> requirement in SpecialHPRequirements)
                 {
-                    if (AssociatedNPC is null || !AssociatedNPC.active)
-                        return 0L;
+                    if (requirement.Key(AssociatedNPC))
+                        return requirement.Value(AssociatedNPC, useMaxLife);
+                }
 
-                    long life = AssociatedNPC.life;
-
-                    // Immediately check for special logged edge-cases. If one is hit, go with what it says.
-                    foreach (KeyValuePair<NPCSpecialHPGetRequirement, NPCSpecialHPGetFunction> requirement in SpecialHPRequirements)
-                    {
-                        if (requirement.Key(AssociatedNPC))
-                            return requirement.Value(AssociatedNPC, false);
-                    }
-
-                    // Don't check any further if the NPC is not a part of any one-to-many relationship.
-                    if (!OneToMany.ContainsKey(NPCType))
-                        return life;
-
-                    // Otherwise, check if any of said relationship NPCs are enraged.
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.life <= 0 || !OneToMany[NPCType].Contains(n.type))
-                            continue;
-
-                        life += n.life;
-                    }
-
+                // Don't check any further if the NPC is not a part of any one-to-many relationship.
+                if (!OneToMany.ContainsKey(NPCType))
                     return life;
-                }
-            }
-            public long CombinedNPCMaxLife
-            {
-                get
+
+                // Otherwise, sum the life of the related NPCs.
+                foreach (NPC n in Main.ActiveNPCs)
                 {
-                    if (AssociatedNPC is null || !AssociatedNPC.active)
-                        return 0L;
+                    if (n.life <= 0 || !OneToMany[NPCType].Contains(n.type))
+                        continue;
 
-                    long maxLife = AssociatedNPC.lifeMax;
-
-                    // Immediately check for special logged edge-cases. If one is hit, go with what it says.
-                    foreach (KeyValuePair<NPCSpecialHPGetRequirement, NPCSpecialHPGetFunction> requirement in SpecialHPRequirements)
-                    {
-                        if (requirement.Key(AssociatedNPC))
-                            return requirement.Value(AssociatedNPC, true);
-                    }
-
-                    // Don't check any further if the NPC is not a part of any one-to-many relationship.
-                    if (!OneToMany.ContainsKey(NPCType))
-                        return maxLife;
-
-                    // Otherwise, check if any of said relationship NPCs are enraged.
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.life <= 0 || !OneToMany[NPCType].Contains(n.type))
-                            continue;
-
-                        maxLife += n.lifeMax;
-                    }
-
-                    return maxLife;
+                    life += useMaxLife ? n.lifeMax : n.life;
                 }
+
+                return life;
             }
-            public bool NPCIsEnraged
+            public bool NPCIsEnraged => HasNPCStatus(false);
+            public bool NPCIsIncreasingDefenseOrDR => HasNPCStatus(true);
+
+            private bool HasNPCStatus(bool increasingDefenseOrDR)
             {
-                get
-                {
-                    if (AssociatedNPC is null || !AssociatedNPC.active)
-                        return false;
-
-                    if (AssociatedNPC.Calamity().CurrentlyEnraged)
-                        return true;
-
-                    // Don't check any further if the NPC is not a part of any one-to-many relationship.
-                    if (!OneToMany.ContainsKey(NPCType))
-                        return false;
-
-                    // Otherwise, check if any of said relationship NPCs are enraged.
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.life <= 0 || !OneToMany[NPCType].Contains(n.type))
-                            continue;
-
-                        if (n.Calamity().CurrentlyEnraged)
-                            return true;
-                    }
+                if (AssociatedNPC is null || !AssociatedNPC.active)
                     return false;
-                }
-            }
-            public bool NPCIsIncreasingDefenseOrDR
-            {
-                get
-                {
-                    if (AssociatedNPC is null || !AssociatedNPC.active)
-                        return false;
 
-                    if (AssociatedNPC.Calamity().CurrentlyIncreasingDefenseOrDR)
-                        return true;
+                if (increasingDefenseOrDR ? AssociatedNPC.Calamity().CurrentlyIncreasingDefenseOrDR : AssociatedNPC.Calamity().CurrentlyEnraged)
+                    return true;
 
-                    // Don't check any further if the NPC is not a part of any one-to-many relationship.
-                    if (!OneToMany.ContainsKey(NPCType))
-                        return false;
-
-                    // Otherwise, check if any of said relationship NPCs are increasing their defense or DR.
-                    foreach (NPC n in Main.ActiveNPCs)
-                    {
-                        if (n.life <= 0 || !OneToMany[NPCType].Contains(n.type))
-                            continue;
-
-                        if (n.Calamity().CurrentlyIncreasingDefenseOrDR)
-                            return true;
-                    }
+                // Don't check any further if the NPC is not a part of any one-to-many relationship.
+                if (!OneToMany.ContainsKey(NPCType))
                     return false;
+
+                // Otherwise, check the selected status on each related NPC.
+                foreach (NPC n in Main.ActiveNPCs)
+                {
+                    if (n.life <= 0 || !OneToMany[NPCType].Contains(n.type))
+                        continue;
+
+                    if (increasingDefenseOrDR ? n.Calamity().CurrentlyIncreasingDefenseOrDR : n.Calamity().CurrentlyEnraged)
+                        return true;
                 }
+                return false;
             }
             public float NPCLifeRatio
             {

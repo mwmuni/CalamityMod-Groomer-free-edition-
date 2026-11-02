@@ -559,13 +559,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
             if (Main.player[targetIndex].dead)
             {
                 AIState = (float)Phase.Normal;
-                NPC.localAI[0] = 0f;
-                NPC.localAI[1] = 0f;
-                NPC.localAI[2] = 0f;
-                calamityGlobalNPC.newAI[2] = 0f;
-                calamityGlobalNPC.newAI[3] = 0f;
-                for (int i = 0; i < maxCharges; i++)
-                    chargeLocations[i] = default;
+                ResetChargeState(calamityGlobalNPC);
 
                 NPC.dontTakeDamage = true;
 
@@ -638,11 +632,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                                     Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[3] = 1f;
 
                                 Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[1] = (float)Artemis.Artemis.SecondaryPhase.PassiveAndImmune;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+                                ResetArtemisTimers();
                             }
 
                             // Reset everything
@@ -654,13 +644,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                                 NPC.ai[3] = 1f;
 
                             SecondaryAIState = (float)SecondaryPhase.PassiveAndImmune;
-                            NPC.localAI[0] = 0f;
-                            NPC.localAI[1] = 0f;
-                            NPC.localAI[2] = 0f;
-                            calamityGlobalNPC.newAI[2] = 0f;
-                            calamityGlobalNPC.newAI[3] = 0f;
-                            for (int i = 0; i < maxCharges; i++)
-                                chargeLocations[i] = default;
+                            ResetChargeState(calamityGlobalNPC);
 
                             NPC.TargetClosest();
 
@@ -696,22 +680,12 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                                 Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[1] = (float)Artemis.Artemis.SecondaryPhase.Passive;
                                 Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[1] = 0f;
                                 Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+                                ResetArtemisTimers();
                             }
 
                             // Tells Apollo to return to the battle in passive state and reset everything
                             SecondaryAIState = (float)SecondaryPhase.Passive;
-                            NPC.localAI[0] = 0f;
-                            NPC.localAI[1] = 0f;
-                            NPC.localAI[2] = 0f;
-                            calamityGlobalNPC.newAI[2] = 0f;
-                            calamityGlobalNPC.newAI[3] = 0f;
-                            for (int i = 0; i < maxCharges; i++)
-                                chargeLocations[i] = default;
+                            ResetChargeState(calamityGlobalNPC);
 
                             NPC.TargetClosest();
                         }
@@ -730,11 +704,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                                 Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[1] = (float)Artemis.Artemis.SecondaryPhase.PassiveAndImmune;
                                 Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[1] = 0f;
                                 Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
-                                Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+                                ResetArtemisTimers();
                             }
 
                             // Reset everything
@@ -743,13 +713,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                             NPC.ai[0] += 1f;
 
                             SecondaryAIState = (float)SecondaryPhase.PassiveAndImmune;
-                            NPC.localAI[0] = 0f;
-                            NPC.localAI[1] = 0f;
-                            NPC.localAI[2] = 0f;
-                            calamityGlobalNPC.newAI[2] = 0f;
-                            calamityGlobalNPC.newAI[3] = 0f;
-                            for (int i = 0; i < maxCharges; i++)
-                                chargeLocations[i] = default;
+                            ResetChargeState(calamityGlobalNPC);
 
                             NPC.TargetClosest();
 
@@ -786,11 +750,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[1] = (float)Artemis.Artemis.SecondaryPhase.PassiveAndImmune;
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[1] = 0f;
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+                            ResetArtemisTimers();
                         }
 
                         // Reset everything
@@ -799,13 +759,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                         NPC.ai[0] += 1f;
 
                         SecondaryAIState = (float)SecondaryPhase.PassiveAndImmune;
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[1] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        for (int i = 0; i < maxCharges; i++)
-                            chargeLocations[i] = default;
+                        ResetChargeState(calamityGlobalNPC);
 
                         NPC.TargetClosest();
                     }
@@ -819,21 +773,11 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[1] = (float)Artemis.Artemis.SecondaryPhase.Nothing;
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[1] = 0f;
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+                            ResetArtemisTimers();
                         }
 
                         // Reset everything
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[1] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        for (int i = 0; i < maxCharges; i++)
-                            chargeLocations[i] = default;
+                        ResetChargeState(calamityGlobalNPC);
 
                         NPC.TargetClosest();
 
@@ -875,23 +819,13 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
 
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[1] = 0f;
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+                            ResetArtemisTimers();
                         }
 
                         // Tells Artemis and Apollo to return to the battle in passive state and reset everything
                         // Return to normal phases if one or more mechs have been downed
                         SecondaryAIState = totalOtherExoMechLifeRatio > 5f ? (float)SecondaryPhase.Nothing : (float)SecondaryPhase.Passive;
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[1] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        for (int i = 0; i < maxCharges; i++)
-                            chargeLocations[i] = default;
+                        ResetChargeState(calamityGlobalNPC);
 
                         NPC.TargetClosest();
 
@@ -915,21 +849,11 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[1] = (float)Artemis.Artemis.SecondaryPhase.Nothing;
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[1] = 0f;
                             Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].ai[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
-                            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+                            ResetArtemisTimers();
                         }
 
                         // Reset everything
-                        NPC.localAI[0] = 0f;
-                        NPC.localAI[1] = 0f;
-                        NPC.localAI[2] = 0f;
-                        calamityGlobalNPC.newAI[2] = 0f;
-                        calamityGlobalNPC.newAI[3] = 0f;
-                        for (int i = 0; i < maxCharges; i++)
-                            chargeLocations[i] = default;
+                        ResetChargeState(calamityGlobalNPC);
 
                         NPC.TargetClosest();
 
@@ -1360,6 +1284,26 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
         }
 
         // Plays the targeting sound from both Exo Twins, indicating that they're syncing up.
+        private void ResetChargeState(CalamityGlobalNPC calamityGlobalNPC)
+        {
+            NPC.localAI[0] = 0f;
+            NPC.localAI[1] = 0f;
+            NPC.localAI[2] = 0f;
+            calamityGlobalNPC.newAI[2] = 0f;
+            calamityGlobalNPC.newAI[3] = 0f;
+            for (int i = 0; i < maxCharges; i++)
+                chargeLocations[i] = default;
+        }
+
+        private static void ResetArtemisTimers()
+        {
+            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[0] = 0f;
+            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[1] = 0f;
+            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].localAI[2] = 0f;
+            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[2] = 0f;
+            Main.npc[CalamityGlobalNPC.draedonExoMechTwinRed].Calamity().newAI[3] = 0f;
+        }
+
         public static void PlayTargetingSound()
         {
             // Play for Artemis.
@@ -1411,18 +1355,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
             {
                 if (NPC.frameCounter >= 6D)
                 {
-                    // Reset frame counter
-                    NPC.frameCounter = 0D;
-
-                    // Increment the Y frame
-                    frameY++;
-
-                    // Reset the Y frame if greater than 9
-                    if (frameY == maxFramesY)
-                    {
-                        frameX++;
-                        frameY = 0;
-                    }
+                    AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
                 }
             }
             else
@@ -1434,18 +1367,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
 
                     if (NPC.frameCounter >= 6D)
                     {
-                        // Reset frame counter
-                        NPC.frameCounter = 0D;
-
-                        // Increment the Y frame
-                        frameY++;
-
-                        // Reset the Y frame if greater than 9
-                        if (frameY == maxFramesY)
-                        {
-                            frameX++;
-                            frameY = 0;
-                        }
+                        AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                         // Reset the frames
                         int currentFrame = (frameX * maxFramesY) + frameY;
@@ -1458,18 +1380,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                     int frameLimit = phase2 ? attackFrameLimit_Phase2 : attackFrameLimit_Phase1;
                     if (NPC.frameCounter >= 6D)
                     {
-                        // Reset frame counter
-                        NPC.frameCounter = 0D;
-
-                        // Increment the Y frame
-                        frameY++;
-
-                        // Reset the Y frame if greater than 9
-                        if (frameY == maxFramesY)
-                        {
-                            frameX++;
-                            frameY = 0;
-                        }
+                        AresBody.AdvanceAnimationFrame(NPC, ref frameX, ref frameY, maxFramesY);
 
                         // Reset the frames
                         int currentFrame = (frameX * maxFramesY) + frameY;

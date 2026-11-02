@@ -22,6 +22,18 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses.BrainOfCthulhu;
 
 public class CreeperAI : VanillaAIOverride
 {
+    private void UpdateSwipeReelback(Vector2 dashDir, float positioningTime, int reelbackTime)
+    {
+        float reelBackSpeedExponent = 2.6f;
+        float reelBackCompletion = Utils.GetLerpValue(0f, reelbackTime, Time - positioningTime, true);
+        float reelBackSpeed = MathHelper.Lerp(2.5f, 16f, MathF.Pow(reelBackCompletion, reelBackSpeedExponent));
+        Vector2 reelBackVelocity = dashDir * -reelBackSpeed;
+        NPC.velocity = Vector2.Lerp(NPC.velocity, reelBackVelocity, 0.25f);
+
+        if (Time == positioningTime + reelbackTime - 5)
+            SoundEngine.PlaySound(SoundID.DD2_MonkStaffSwing, NPC.Center);
+    }
+
     internal float FlowTime = 0;
     internal float FlowAmount => MathHelper.Lerp(0.1f, 0.15f, NPC.localAI[3]);
 
@@ -399,14 +411,7 @@ public class CreeperAI : VanillaAIOverride
 
                     if (Time < (positioningTime + reelbackTime))
                     {
-                        float reelBackSpeedExponent = 2.6f;
-                        float reelBackCompletion = Utils.GetLerpValue(0f, reelbackTime, Time - positioningTime, true);
-                        float reelBackSpeed = MathHelper.Lerp(2.5f, 16f, MathF.Pow(reelBackCompletion, reelBackSpeedExponent));
-                        Vector2 reelBackVelocity = dashDir * -reelBackSpeed;
-                        NPC.velocity = Vector2.Lerp(NPC.velocity, reelBackVelocity, 0.25f);
-
-                        if (Time == positioningTime + reelbackTime - 5)
-                            SoundEngine.PlaySound(SoundID.DD2_MonkStaffSwing, NPC.Center);
+                        UpdateSwipeReelback(dashDir, positioningTime, reelbackTime);
                     }
                     else if (Time == (positioningTime + reelbackTime))
                         NPC.velocity = dashDir * 32;
@@ -447,14 +452,7 @@ public class CreeperAI : VanillaAIOverride
 
                     if (Time <= (positioningTime + reelbackTime))
                     {
-                        float reelBackSpeedExponent = 2.6f;
-                        float reelBackCompletion = Utils.GetLerpValue(0f, reelbackTime, Time - positioningTime, true);
-                        float reelBackSpeed = MathHelper.Lerp(2.5f, 16f, MathF.Pow(reelBackCompletion, reelBackSpeedExponent));
-                        Vector2 reelBackVelocity = dashDir * -reelBackSpeed;
-                        NPC.velocity = Vector2.Lerp(NPC.velocity, reelBackVelocity, 0.25f);
-
-                        if (Time == positioningTime + reelbackTime - 5)
-                            SoundEngine.PlaySound(SoundID.DD2_MonkStaffSwing, NPC.Center);
+                        UpdateSwipeReelback(dashDir, positioningTime, reelbackTime);
 
                         if (Time == (positioningTime + reelbackTime))
                             AttackPosition = NPC.Center;
@@ -778,4 +776,3 @@ public class CreeperAI : VanillaAIOverride
 
     public override bool PreDraw(Mod mod, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
 }
-

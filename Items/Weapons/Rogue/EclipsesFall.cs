@@ -11,6 +11,7 @@ using CalamityMod.Items.Weapons.Rogue;
 using CalamityMod.Items.Weapons.Summon;
 using CalamityMod.NPCs;
 using CalamityMod.Particles;
+using CalamityMod.Projectiles;
 using CalamityMod.Projectiles.Rogue;
 using CalamityMod.Rarities;
 using CalamityMod.Tiles.Furniture.CraftingStations;
@@ -484,7 +485,7 @@ namespace CalamityMod.Projectiles.Rogue
     #endregion
 
     #region Shatter Projectiles
-    public class EclipsesFall_LightFragment : ModProjectile, ILocalizedModType
+    public class EclipsesFall_LightFragment : BaseFireTrailProjectile, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Rogue";
         public static int lifetime => 1200;
@@ -608,44 +609,10 @@ namespace CalamityMod.Projectiles.Rogue
             return false;
         }
 
-        // Matches Saros Possesion sunfire with slight edits
-        public float FireWidthFunction(float completion, Vector2 vertexPos)
-        {
-            float width;
-            float maxBodyWidth = 24f * Projectile.scale;
-            float curveRatio = 0.2f;
-            var positions = Projectile.oldPos.ToList();
-            positions.RemoveAll(x => x == Vector2.Zero);
-            if (completion < curveRatio)
-                width = MathF.Pow(completion / curveRatio, 0.5f) * maxBodyWidth;
-            else
-                width = Utils.Remap(completion, curveRatio, 1f, maxBodyWidth, 0f);
-
-            // Pulse inwards and outwards over time.
-            float pulseInterpolant = MathF.Cos(MathHelper.Pi * completion - Main.GlobalTimeWrappedHourly * 20f) * 0.5f + 0.5f;
-            float additionalPulseWidth = MathHelper.Lerp(0f, 12f, pulseInterpolant);
-            return (width + additionalPulseWidth) * positions.Count() / (float)ProjectileID.Sets.TrailCacheLength[Type];
-        }
-
         public Color FireColorFunction(float completion, Vector2 vertexPos)
         {
             Color mainColor = new Color(238, 226, 153);
             return Color.Lerp(mainColor, Color.Transparent, completion);
-        }
-
-        public float FireCoreWidthFunction(float completion, Vector2 vertexPos)
-        {
-            float width;
-            float maxBodyWidth = Projectile.scale * 16;
-            float curveRatio = 0.25f;
-            var positions = Projectile.oldPos.ToList();
-            positions.RemoveAll(x => x == Vector2.Zero);
-
-            if (completion < curveRatio)
-                width = MathF.Sin(completion / curveRatio * MathHelper.PiOver2) * maxBodyWidth + curveRatio;
-            else
-                width = Utils.Remap(completion, curveRatio, 1f, maxBodyWidth, 0f);
-            return width * positions.Count() / (float)ProjectileID.Sets.TrailCacheLength[Type];
         }
 
         public Color FireCoreColorFunction(float completion, Vector2 vertexPos)
@@ -694,7 +661,7 @@ namespace CalamityMod.Projectiles.Rogue
             Main.EntitySpriteDraw(glow, Projectile.Center - Main.screenPosition, frame, Color.White, Projectile.rotation, frame.Size() * 0.5f, Projectile.scale, SpriteEffects.None);
         }
     }
-    public class EclipsesFall_LightSpark : ModProjectile, ILocalizedModType
+    public class EclipsesFall_LightSpark : BaseFireTrailProjectile, ILocalizedModType
     {
         public new string LocalizationCategory => "Projectiles.Rogue";
         public override string Texture => "CalamityMod/Projectiles/InvisibleProj";
@@ -780,43 +747,10 @@ namespace CalamityMod.Projectiles.Rogue
             return false;
         }
 
-        public float FireWidthFunction(float completion, Vector2 vertexPos)
-        {
-            float width;
-            float maxBodyWidth = 24f * Projectile.scale;
-            float curveRatio = 0.2f;
-            var positions = Projectile.oldPos.ToList();
-            positions.RemoveAll(x => x == Vector2.Zero);
-            if (completion < curveRatio)
-                width = MathF.Pow(completion / curveRatio, 0.5f) * maxBodyWidth;
-            else
-                width = Utils.Remap(completion, curveRatio, 1f, maxBodyWidth, 0f);
-
-            // Pulse inwards and outwards over time.
-            float pulseInterpolant = MathF.Cos(MathHelper.Pi * completion - Main.GlobalTimeWrappedHourly * 20f) * 0.5f + 0.5f;
-            float additionalPulseWidth = MathHelper.Lerp(0f, 12f, pulseInterpolant);
-            return (width + additionalPulseWidth) * positions.Count() / (float)ProjectileID.Sets.TrailCacheLength[Type];
-        }
-
         public Color FireColorFunction(float completion, Vector2 vertexPos)
         {
             Color mainColor = new Color(255, 191, 73);
             return Color.Lerp(mainColor, Color.Transparent, completion);
-        }
-
-        public float FireCoreWidthFunction(float completion, Vector2 vertexPos)
-        {
-            float width;
-            float maxBodyWidth = Projectile.scale * 16;
-            float curveRatio = 0.25f;
-            var positions = Projectile.oldPos.ToList();
-            positions.RemoveAll(x => x == Vector2.Zero);
-
-            if (completion < curveRatio)
-                width = MathF.Sin(completion / curveRatio * MathHelper.PiOver2) * maxBodyWidth + curveRatio;
-            else
-                width = Utils.Remap(completion, curveRatio, 1f, maxBodyWidth, 0f);
-            return width * positions.Count() / (float)ProjectileID.Sets.TrailCacheLength[Type];
         }
 
         public Color FireCoreColorFunction(float completion, Vector2 vertexPos)

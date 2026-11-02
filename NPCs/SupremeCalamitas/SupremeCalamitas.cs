@@ -527,12 +527,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             {
                 if (!BossRushEvent.BossRushActive)
                 {
-                    string key = "Mods.CalamityMod.Status.Boss.SCalSummonText";
-                    if (permafrost)
-                        key = "Mods.CalamityMod.Status.Boss.PermafrostSummonText";
-                    else if (DownedBossSystem.downedCalamitas)
-                        key += "Rematch";
-                    CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                    BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalSummonText", "Mods.CalamityMod.Status.Boss.PermafrostSummonText");
                 }
                 startText = true;
             }
@@ -1009,13 +1004,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
-                    Vector2 goalPos = new Vector2(spawnX + (death ? 1000 : 1250), spawnY + (death ? 1000 : 1250)); // player.Center + new Vector2(0, -175)
-                    Dust.QuickDustLine(NPC.Center, goalPos + new Vector2(0, -20), 500f, permafrost ? Color.Cyan : Color.Red);
-                    NPC.velocity = Vector2.Zero;
-                    NPC.Center = goalPos;
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    teleport = true;
+                    TeleportToArenaCenter(death);
                 }
                 UpdateBulletHellEndTelegraph(player, SecondBulletHellEndValue);
 
@@ -1085,27 +1074,11 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             if (!startSecondAttack && IsAtHp_BH2)
             {
                 // Bouncy Boulders
-                if (permafrost)
-                {
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        for (int i = 0; i < 5; i++)
-                        {
-                            if (!WorldGen.SolidTile((int)(NPC.Center.X / 16f), (int)(NPC.Center.Y / 16f)))
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, (float)Main.rand.Next(-1599, 1600) * 0.01f, (float)Main.rand.Next(-1599, 1) * 0.01f, ProjectileID.BouncyBoulder, 300, 10f);
-                        }
-                    }
-                }
+                SpawnBouncyBoulders(5);
 
                 if (!BossRushEvent.BossRushActive)
                 {
-                    string key = "Mods.CalamityMod.Status.Boss.SCalBH2Text";
-                    if (permafrost)
-                        key = "Mods.CalamityMod.Status.Boss.PermafrostBH2Text";
-                    else if (DownedBossSystem.downedCalamitas)
-                        key += "Rematch";
-
-                    CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                    BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalBH2Text", "Mods.CalamityMod.Status.Boss.PermafrostBH2Text");
                 }
 
                 startSecondAttack = true;
@@ -1119,13 +1092,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
-                    Vector2 goalPos = new Vector2(spawnX + (death ? 1000 : 1250), spawnY + (death ? 1000 : 1250)); // player.Center + new Vector2(0, -175)
-                    Dust.QuickDustLine(NPC.Center, goalPos + new Vector2(0, -20), 500f, permafrost ? Color.Cyan : Color.Red);
-                    NPC.velocity = Vector2.Zero;
-                    NPC.Center = goalPos;
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    teleport = true;
+                    TeleportToArenaCenter(death);
                 }
                 UpdateBulletHellEndTelegraph(player, ThirdBulletHellEndValue);
 
@@ -1189,27 +1156,11 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             if (!startThirdAttack && IsAtHp_BH3)
             {
                 // Bouncy Boulders
-                if (permafrost)
-                {
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            if (!WorldGen.SolidTile((int)(NPC.Center.X / 16f), (int)(NPC.Center.Y / 16f)))
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, (float)Main.rand.Next(-1599, 1600) * 0.01f, (float)Main.rand.Next(-1599, 1) * 0.01f, ProjectileID.BouncyBoulder, 300, 10f);
-                        }
-                    }
-                }
+                SpawnBouncyBoulders(10);
 
                 if (!BossRushEvent.BossRushActive)
                 {
-                    string key = "Mods.CalamityMod.Status.Boss.SCalBH3Text";
-                    if (permafrost)
-                        key = "Mods.CalamityMod.Status.Boss.PermafrostBH3Text";
-                    else if (DownedBossSystem.downedCalamitas)
-                        key += "Rematch";
-
-                    CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                    BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalBH3Text", "Mods.CalamityMod.Status.Boss.PermafrostBH3Text");
                 }
 
                 startThirdAttack = true;
@@ -1274,13 +1225,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
-                    Vector2 goalPos = new Vector2(spawnX + (death ? 1000 : 1250), spawnY + (death ? 1000 : 1250)); // player.Center + new Vector2(0, -175)
-                    Dust.QuickDustLine(NPC.Center, goalPos + new Vector2(0, -20), 500f, permafrost ? Color.Cyan : Color.Red);
-                    NPC.velocity = Vector2.Zero;
-                    NPC.Center = goalPos;
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    teleport = true;
+                    TeleportToArenaCenter(death);
                 }
 
                 UpdateBulletHellEndTelegraph(player, FourthBulletHellEndValue);
@@ -1375,27 +1320,11 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             if (!startFourthAttack && IsAtHp_BH4)
             {
                 // Bouncy Boulders
-                if (permafrost)
-                {
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        for (int i = 0; i < 15; i++)
-                        {
-                            if (!WorldGen.SolidTile((int)(NPC.Center.X / 16f), (int)(NPC.Center.Y / 16f)))
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, (float)Main.rand.Next(-1599, 1600) * 0.01f, (float)Main.rand.Next(-1599, 1) * 0.01f, ProjectileID.BouncyBoulder, 300, 10f);
-                        }
-                    }
-                }
+                SpawnBouncyBoulders(15);
 
                 if (!BossRushEvent.BossRushActive)
                 {
-                    string key = "Mods.CalamityMod.Status.Boss.SCalBH4Text";
-                    if (permafrost)
-                        key = "Mods.CalamityMod.Status.Boss.PermafrostBH4Text";
-                    else if (DownedBossSystem.downedCalamitas)
-                        key += "Rematch";
-
-                    CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                    BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalBH4Text", "Mods.CalamityMod.Status.Boss.PermafrostBH4Text");
                 }
 
                 startFourthAttack = true;
@@ -1409,13 +1338,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 //At the start of the bullet hell, teleport Scal to the center of the arena
                 if (!teleport)
                 {
-                    Vector2 goalPos = new Vector2(spawnX + (death ? 1000 : 1250), spawnY + (death ? 1000 : 1250)); // player.Center + new Vector2(0, -175)
-                    Dust.QuickDustLine(NPC.Center, goalPos + new Vector2(0, -20), 500f, permafrost ? Color.Cyan : Color.Red);
-                    NPC.velocity = Vector2.Zero;
-                    NPC.Center = goalPos;
-                    Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
-                    GeneralParticleHandler.SpawnParticle(pulse);
-                    teleport = true;
+                    TeleportToArenaCenter(death);
                 }
                 UpdateBulletHellEndTelegraph(player, FifthBulletHellEndValue);
 
@@ -1501,17 +1424,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             if (!startFifthAttack && IsAtHp_BH5)
             {
                 // Bouncy Boulders
-                if (permafrost)
-                {
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
-                    {
-                        for (int i = 0; i < 20; i++)
-                        {
-                            if (!WorldGen.SolidTile((int)(NPC.Center.X / 16f), (int)(NPC.Center.Y / 16f)))
-                                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, (float)Main.rand.Next(-1599, 1600) * 0.01f, (float)Main.rand.Next(-1599, 1) * 0.01f, ProjectileID.BouncyBoulder, 300, 10f);
-                        }
-                    }
-                }
+                SpawnBouncyBoulders(20);
 
                 string key = "Mods.CalamityMod.Status.Boss.SCalBH5Text";
                 if (permafrost)
@@ -1720,13 +1633,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
                     if (!BossRushEvent.BossRushActive)
                     {
-                        string key = "Mods.CalamityMod.Status.Boss.SCalDesparationText4";
-                        if (permafrost)
-                            key = "Mods.CalamityMod.Status.Boss.PermafrostBruhText";
-                        else if (DownedBossSystem.downedCalamitas)
-                            key += "Rematch";
-
-                        CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                        BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalDesparationText4", "Mods.CalamityMod.Status.Boss.PermafrostBruhText");
                     }
 
                     gettingTired5 = true;
@@ -1764,13 +1671,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 {
                     if (!BossRushEvent.BossRushActive)
                     {
-                        string key = "Mods.CalamityMod.Status.Boss.SCalDesparationText1";
-                        if (permafrost)
-                            key = "Mods.CalamityMod.Status.Boss.PermafrostNonchalantText";
-                        else if (DownedBossSystem.downedCalamitas)
-                            key += "Rematch";
-
-                        CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                        BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalDesparationText1", "Mods.CalamityMod.Status.Boss.PermafrostNonchalantText");
                     }
 
                     gettingTired2 = true;
@@ -1816,13 +1717,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
             {
                 if (!BossRushEvent.BossRushActive)
                 {
-                    string key = "Mods.CalamityMod.Status.Boss.SCalPhase2Text";
-                    if (permafrost)
-                        key = "Mods.CalamityMod.Status.Boss.PermafrostPhase2Text";
-                    else if (DownedBossSystem.downedCalamitas)
-                        key += "Rematch";
-
-                    CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                    BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalPhase2Text", "Mods.CalamityMod.Status.Boss.PermafrostPhase2Text");
                 }
 
                 halfLife = true;
@@ -1834,13 +1729,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 {
                     if (!BossRushEvent.BossRushActive)
                     {
-                        string key = "Mods.CalamityMod.Status.Boss.SCalSeekerRingText";
-                        if (permafrost)
-                            key = "Mods.CalamityMod.Status.Boss.PermafrostHallowBossSpamText";
-                        else if (DownedBossSystem.downedCalamitas)
-                            key += "Rematch";
-
-                        CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                        BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalSeekerRingText", "Mods.CalamityMod.Status.Boss.PermafrostHallowBossSpamText");
                     }
 
                     if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -1946,31 +1835,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 {
                     if (NPC.ai[1] == 0f)
                     {
-                        // Avoid cheap bullshit
-                        NPC.damage = 0;
-
-                        // How fast SCal moves to the destination
-                        float velocity = 12f;
-                        float acceleration = 0.12f;
-
-                        if (Main.getGoodWorld)
-                        {
-                            velocity *= 1.15f;
-                            acceleration *= 1.15f;
-                        }
-
-                        // This is where SCal should be
-                        Vector2 destination = new Vector2(player.Center.X, player.Center.Y - 550f);
-
-                        // How far SCal is from where she's supposed to be
-                        Vector2 distanceFromDestination = destination - NPC.Center;
-
-                        // Movement
-                        if (!canDespawn)
-                        {
-                            // Set the velocity
-                            CalamityUtils.SmoothMovement(NPC, 0f, distanceFromDestination, velocity, acceleration, true);
-                        }
+                        MoveAbovePlayer(player);
 
                         NPC.ai[2] += 1f;
                         if (NPC.ai[2] >= 300f)
@@ -2118,79 +1983,11 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                         if (Math.Abs(NPC.velocity.X) > 0.15f)
                             NPC.spriteDirection = (NPC.velocity.X < 0f).ToDirectionInt();
 
-                        if (NPC.ai[2] >= 25f)
-                        {
-                            // Avoid cheap bullshit
-                            NPC.damage = 0;
-
-                            if (!canDespawn)
-                            {
-                                NPC.velocity *= 0.96f;
-
-                                if (NPC.velocity.X > -0.1 && NPC.velocity.X < 0.1)
-                                    NPC.velocity.X = 0f;
-                                if (NPC.velocity.Y > -0.1 && NPC.velocity.Y < 0.1)
-                                    NPC.velocity.Y = 0f;
-                            }
-                        }
-
-                        bool willChargeAgain = NPC.ai[3] + 1 < 2;
-
-                        if (NPC.ai[2] >= 70f)
-                        {
-                            // Avoid cheap bullshit
-                            NPC.damage = 0;
-
-                            NPC.ai[3] += 1f;
-                            NPC.ai[2] = 0f;
-                            NPC.TargetClosest();
-
-                            if (!willChargeAgain)
-                                NPC.ai[1] = -1f;
-                            else
-                                NPC.ai[1] = 1f;
-                        }
-
-                        if (willChargeAgain && NPC.ai[2] > 50f)
-                        {
-                            float idealRotation = NPC.AngleTo(player.Center);
-                            shieldRotation = shieldRotation.AngleLerp(idealRotation, 0.125f);
-                            shieldRotation = shieldRotation.AngleTowards(idealRotation, 0.18f);
-                        }
-
-                        FrameType = FrameAnimationType.FasterUpwardDraft;
+                        RecoverFromCharge(player, 2);
                     }
                     else if (NPC.ai[1] == 3f)
                     {
-                        // Avoid cheap bullshit
-                        NPC.damage = 0;
-
-                        // How fast SCal moves to the destination
-                        float velocity = 32f;
-                        float acceleration = 1.2f;
-
-                        if (Main.getGoodWorld)
-                        {
-                            velocity *= 1.15f;
-                            acceleration *= 1.15f;
-                        }
-
-                        int posX = 1;
-                        if (NPC.Center.X < player.position.X + player.width)
-                            posX = -1;
-
-                        // This is where SCal should be
-                        Vector2 destination = new Vector2(player.Center.X + posX * 600f, player.Center.Y);
-
-                        // How far SCal is from where she's supposed to be
-                        Vector2 distanceFromDestination = destination - NPC.Center;
-
-                        // Movement
-                        if (!canDespawn)
-                        {
-                            // Set the velocity
-                            CalamityUtils.SmoothMovement(NPC, 0f, distanceFromDestination, velocity, acceleration, true);
-                        }
+                        MoveBesidePlayer(player);
 
                         Vector2 handPosition = NPC.Center + new Vector2(NPC.spriteDirection * -18f, 2f);
 
@@ -2208,26 +2005,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
                             if (NPC.ai[3] >= 20f)
                             {
-                                NPC.ai[3] = 0f;
-                                SoundEngine.PlaySound(HellblastSound, NPC.Center);
-
-                                // Release a burst of magic dust along with a brimstone hellblast skull. (pre laugh)
-                                for (int i = 0; i < 6; i++)
-                                {
-                                    Vector2 velOffset = NPC.DirectionTo(player.Center).RotatedByRandom(0.6) * Main.rand.NextFloat(5f, 13f);
-                                    PointParticle spark2 = new PointParticle(handPosition + velOffset * 2f, velOffset * 1.5f, false, 18, Main.rand.NextFloat(0.4f, 0.65f), permafrost ? Color.Cyan : Main.rand.NextBool(3) ? Color.Lerp(Color.Red, Color.Magenta, 0.3f) : Color.Red);
-                                    GeneralParticleHandler.SpawnParticle(spark2);
-                                }
-
-                                if (Main.netMode != NetmodeID.MultiplayerClient)
-                                {
-                                    Vector2 projectileVelocity = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
-                                    Vector2 projectileSpawn = NPC.Center + projectileVelocity * 4f;
-                                    projectileVelocity *= 10f * uDieLul;
-                                    int projectileType = hellblast;
-                                    if (attackPause == 0)
-                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), projectileSpawn, projectileVelocity, projectileType, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                                }
+                                FireHellblast(player, handPosition, hellblast, 6, 18, 0.4f, 0.65f);
                             }
                         }
 
@@ -2425,31 +2203,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 {
                     if (NPC.ai[1] == 0f)
                     {
-                        // Avoid cheap bullshit
-                        NPC.damage = 0;
-
-                        // How fast SCal moves to the destination
-                        float velocity = 12f;
-                        float acceleration = 0.12f;
-
-                        if (Main.getGoodWorld)
-                        {
-                            velocity *= 1.15f;
-                            acceleration *= 1.15f;
-                        }
-
-                        // This is where SCal should be
-                        Vector2 destination = new Vector2(player.Center.X, player.Center.Y - 550f);
-
-                        // How far SCal is from where she's supposed to be
-                        Vector2 distanceFromDestination = destination - NPC.Center;
-
-                        // Movement
-                        if (!canDespawn)
-                        {
-                            // Set the velocity
-                            CalamityUtils.SmoothMovement(NPC, 0f, distanceFromDestination, velocity, acceleration, true);
-                        }
+                        MoveAbovePlayer(player);
 
                         NPC.ai[2] += 1f;
                         if (NPC.ai[2] >= 240f)
@@ -2563,80 +2317,11 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                         NPC.damage = NPC.defDamage;
 
                         NPC.ai[2] += 1f;
-                        if (NPC.ai[2] >= 25f)
-                        {
-                            // Avoid cheap bullshit
-                            NPC.damage = 0;
-
-                            if (!canDespawn)
-                            {
-                                NPC.velocity *= 0.96f;
-
-                                if (NPC.velocity.X > -0.1 && NPC.velocity.X < 0.1)
-                                    NPC.velocity.X = 0f;
-                                if (NPC.velocity.Y > -0.1 && NPC.velocity.Y < 0.1)
-                                    NPC.velocity.Y = 0f;
-                            }
-                        }
-
-
-                        bool willChargeAgain = NPC.ai[3] + 1 < 1;
-
-                        if (NPC.ai[2] >= 70f)
-                        {
-                            // Avoid cheap bullshit
-                            NPC.damage = 0;
-
-                            NPC.ai[3] += 1f;
-                            NPC.ai[2] = 0f;
-                            NPC.TargetClosest();
-
-                            if (!willChargeAgain)
-                                NPC.ai[1] = -1f;
-                            else
-                                NPC.ai[1] = 1f;
-                        }
-
-                        if (willChargeAgain && NPC.ai[2] > 50f)
-                        {
-                            float idealRotation = NPC.AngleTo(player.Center);
-                            shieldRotation = shieldRotation.AngleLerp(idealRotation, 0.125f);
-                            shieldRotation = shieldRotation.AngleTowards(idealRotation, 0.18f);
-                        }
-
-                        FrameType = FrameAnimationType.FasterUpwardDraft;
+                        RecoverFromCharge(player, 1);
                     }
                     else if (NPC.ai[1] == 3f)
                     {
-                        // Avoid cheap bullshit
-                        NPC.damage = 0;
-
-                        // How fast SCal moves to the destination
-                        float velocity = 32f;
-                        float acceleration = 1.2f;
-
-                        if (Main.getGoodWorld)
-                        {
-                            velocity *= 1.15f;
-                            acceleration *= 1.15f;
-                        }
-
-                        int posX = 1;
-                        if (NPC.Center.X < player.position.X + player.width)
-                            posX = -1;
-
-                        // This is where SCal should be
-                        Vector2 destination = new Vector2(player.Center.X + posX * 600f, player.Center.Y);
-
-                        // How far SCal is from where she's supposed to be
-                        Vector2 distanceFromDestination = destination - NPC.Center;
-
-                        // Movement
-                        if (!canDespawn)
-                        {
-                            // Set the velocity
-                            CalamityUtils.SmoothMovement(NPC, 0f, distanceFromDestination, velocity, acceleration, true);
-                        }
+                        MoveBesidePlayer(player);
 
                         Vector2 handPosition = NPC.Center + new Vector2(NPC.spriteDirection * -18f, 2f);
 
@@ -2654,26 +2339,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
                             if (NPC.ai[3] >= 24f)
                             {
-                                NPC.ai[3] = 0f;
-                                SoundEngine.PlaySound(HellblastSound, NPC.Center);
-
-                                // Release a burst of magic dust along with a brimstone hellblast skull. (post laugh)
-                                for (int i = 0; i < 9; i++)
-                                {
-                                    Vector2 velOffset = NPC.DirectionTo(player.Center).RotatedByRandom(0.6) * Main.rand.NextFloat(5f, 13f);
-                                    PointParticle spark2 = new PointParticle(handPosition + velOffset * 2f, velOffset * 1.5f, false, 9, Main.rand.NextFloat(0.5f, 0.75f), permafrost ? Color.Cyan : Main.rand.NextBool(3) ? Color.Lerp(Color.Red, Color.Magenta, 0.3f) : Color.Red);
-                                    GeneralParticleHandler.SpawnParticle(spark2);
-                                }
-
-                                if (Main.netMode != NetmodeID.MultiplayerClient)
-                                {
-                                    Vector2 projectileVelocity = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
-                                    Vector2 projectileSpawn = NPC.Center + projectileVelocity * 4f;
-                                    projectileVelocity *= 10f * uDieLul;
-                                    int projectileType = hellblast;
-                                    if (attackPause == 0)
-                                        Projectile.NewProjectile(NPC.GetSource_FromAI(), projectileSpawn, projectileVelocity, projectileType, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
-                                }
+                                FireHellblast(player, handPosition, hellblast, 9, 9, 0.5f, 0.75f);
                             }
                         }
 
@@ -2795,6 +2461,157 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                 dashVisualCounter = 0;
             }
             #endregion
+        }
+
+        private void FireHellblast(Player player, Vector2 handPosition, int hellblast, int dustCount, int dustLifetime, float minDustScale, float maxDustScale)
+        {
+            NPC.ai[3] = 0f;
+            SoundEngine.PlaySound(HellblastSound, NPC.Center);
+
+            for (int i = 0; i < dustCount; i++)
+            {
+                Vector2 velOffset = NPC.DirectionTo(player.Center).RotatedByRandom(0.6) * Main.rand.NextFloat(5f, 13f);
+                PointParticle spark2 = new PointParticle(handPosition + velOffset * 2f, velOffset * 1.5f, false, dustLifetime, Main.rand.NextFloat(minDustScale, maxDustScale), permafrost ? Color.Cyan : Main.rand.NextBool(3) ? Color.Lerp(Color.Red, Color.Magenta, 0.3f) : Color.Red);
+                GeneralParticleHandler.SpawnParticle(spark2);
+            }
+
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Vector2 projectileVelocity = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
+                Vector2 projectileSpawn = NPC.Center + projectileVelocity * 4f;
+                projectileVelocity *= 10f * uDieLul;
+                int projectileType = hellblast;
+                if (attackPause == 0)
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), projectileSpawn, projectileVelocity, projectileType, HellblastDamage, 0f, Main.myPlayer, 0f, 2f);
+            }
+        }
+
+        private void MoveAbovePlayer(Player player)
+        {
+            NPC.damage = 0;
+
+            float velocity = 12f;
+            float acceleration = 0.12f;
+
+            if (Main.getGoodWorld)
+            {
+                velocity *= 1.15f;
+                acceleration *= 1.15f;
+            }
+
+            Vector2 destination = new Vector2(player.Center.X, player.Center.Y - 550f);
+            Vector2 distanceFromDestination = destination - NPC.Center;
+
+            if (!canDespawn)
+            {
+                CalamityUtils.SmoothMovement(NPC, 0f, distanceFromDestination, velocity, acceleration, true);
+            }
+        }
+
+        private void MoveBesidePlayer(Player player)
+        {
+            NPC.damage = 0;
+
+            float velocity = 32f;
+            float acceleration = 1.2f;
+
+            if (Main.getGoodWorld)
+            {
+                velocity *= 1.15f;
+                acceleration *= 1.15f;
+            }
+
+            int posX = 1;
+            if (NPC.Center.X < player.position.X + player.width)
+                posX = -1;
+
+            Vector2 destination = new Vector2(player.Center.X + posX * 600f, player.Center.Y);
+            Vector2 distanceFromDestination = destination - NPC.Center;
+
+            if (!canDespawn)
+            {
+                CalamityUtils.SmoothMovement(NPC, 0f, distanceFromDestination, velocity, acceleration, true);
+            }
+        }
+
+        private void RecoverFromCharge(Player player, int totalCharges)
+        {
+            if (NPC.ai[2] >= 25f)
+            {
+                NPC.damage = 0;
+
+                if (!canDespawn)
+                {
+                    NPC.velocity *= 0.96f;
+
+                    if (NPC.velocity.X > -0.1 && NPC.velocity.X < 0.1)
+                        NPC.velocity.X = 0f;
+                    if (NPC.velocity.Y > -0.1 && NPC.velocity.Y < 0.1)
+                        NPC.velocity.Y = 0f;
+                }
+            }
+
+            bool willChargeAgain = NPC.ai[3] + 1 < totalCharges;
+
+            if (NPC.ai[2] >= 70f)
+            {
+                NPC.damage = 0;
+
+                NPC.ai[3] += 1f;
+                NPC.ai[2] = 0f;
+                NPC.TargetClosest();
+
+                if (!willChargeAgain)
+                    NPC.ai[1] = -1f;
+                else
+                    NPC.ai[1] = 1f;
+            }
+
+            if (willChargeAgain && NPC.ai[2] > 50f)
+            {
+                float idealRotation = NPC.AngleTo(player.Center);
+                shieldRotation = shieldRotation.AngleLerp(idealRotation, 0.125f);
+                shieldRotation = shieldRotation.AngleTowards(idealRotation, 0.18f);
+            }
+
+            FrameType = FrameAnimationType.FasterUpwardDraft;
+        }
+
+        private void BroadcastStatus(string normalKey, string permafrostKey)
+        {
+            string key = normalKey;
+            if (permafrost)
+                key = permafrostKey;
+            else if (DownedBossSystem.downedCalamitas)
+                key += "Rematch";
+
+            CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+        }
+
+        private void TeleportToArenaCenter(bool death)
+        {
+            Vector2 goalPos = new Vector2(spawnX + (death ? 1000 : 1250), spawnY + (death ? 1000 : 1250));
+            Dust.QuickDustLine(NPC.Center, goalPos + new Vector2(0, -20), 500f, permafrost ? Color.Cyan : Color.Red);
+            NPC.velocity = Vector2.Zero;
+            NPC.Center = goalPos;
+            Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 15);
+            GeneralParticleHandler.SpawnParticle(pulse);
+            teleport = true;
+        }
+
+        private void SpawnBouncyBoulders(int count)
+        {
+            if (permafrost)
+            {
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (!WorldGen.SolidTile((int)(NPC.Center.X / 16f), (int)(NPC.Center.Y / 16f)))
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, (float)Main.rand.Next(-1599, 1600) * 0.01f, (float)Main.rand.Next(-1599, 1) * 0.01f, ProjectileID.BouncyBoulder, 300, 10f);
+                    }
+                }
+            }
         }
 
         private void PrepareBulletHell()
@@ -3148,13 +2965,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
                 if (!BossRushEvent.BossRushActive)
                 {
-                    string key = "Mods.CalamityMod.Status.Boss.SCalBrothersText";
-                    if (permafrost)
-                        key = "Mods.CalamityMod.Status.Boss.PermafrostDoGText";
-                    else if (DownedBossSystem.downedCalamitas)
-                        key += "Rematch";
-
-                    CalamityUtils.BroadcastLocalizedText(key, permafrost ? permafrostTextColor : textColor);
+                    BroadcastStatus("Mods.CalamityMod.Status.Boss.SCalBrothersText", "Mods.CalamityMod.Status.Boss.PermafrostDoGText");
                 }
 
                 if (Main.netMode != NetmodeID.MultiplayerClient)

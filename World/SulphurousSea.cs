@@ -469,13 +469,7 @@ namespace CalamityMod.World
 
                         if (Math.Abs(noise) < SpaghettiCaveCarveOutThresholds[c])
                         {
-                            WorldUtils.Gen(new(x, y), new Shapes.Rectangle(1, 1), Actions.Chain(new GenAction[]
-                            {
-                                new Actions.ClearTile(true),
-                                new Actions.PlaceWall(wallID, true),
-                                new Actions.SetLiquid(LiquidID.Water, (byte)(WorldGen.genRand.NextFloat() > WaterSpreadPercentage ? 0 : byte.MaxValue)),
-                                new Actions.Smooth(true)
-                            }));
+                            CarveNoiseCaveTile(x, y, wallID);
                         }
                     }
                 }
@@ -505,17 +499,22 @@ namespace CalamityMod.World
                         biasToNegativeOneInterpolant += Utils.GetLerpValue(width - 19f, width - 4f, i, true);
                         if (noise - biasToNegativeOneInterpolant > CheeseCaveCarveOutThresholds[c])
                         {
-                            WorldUtils.Gen(new(x, y), new Shapes.Rectangle(1, 1), Actions.Chain(new GenAction[]
-                            {
-                                new Actions.ClearTile(true),
-                                new Actions.PlaceWall(wallID, true),
-                                new Actions.SetLiquid(LiquidID.Water, (byte)(WorldGen.genRand.NextFloat() > WaterSpreadPercentage ? 0 : byte.MaxValue)),
-                                new Actions.Smooth(true)
-                            }));
+                            CarveNoiseCaveTile(x, y, wallID);
                         }
                     }
                 }
             }
+        }
+
+        private static void CarveNoiseCaveTile(int x, int y, ushort wallID)
+        {
+            WorldUtils.Gen(new(x, y), new Shapes.Rectangle(1, 1), Actions.Chain(new GenAction[]
+            {
+                new Actions.ClearTile(true),
+                new Actions.PlaceWall(wallID, true),
+                new Actions.SetLiquid(LiquidID.Water, (byte)(WorldGen.genRand.NextFloat() > WaterSpreadPercentage ? 0 : byte.MaxValue)),
+                new Actions.Smooth(true)
+            }));
         }
 
         public static void ClearOutStrayTiles()

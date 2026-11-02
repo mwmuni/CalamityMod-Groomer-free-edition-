@@ -182,19 +182,7 @@ namespace CalamityMod.Systems
                 // Slightly increase the growth rate of herbs not in planter boxes
                 int herbGrowthRangeX = WorldGen.genRand.Next(10, Main.maxTilesX - 10);
                 int herbGrowthRangeY = WorldGen.genRand.Next(10, (int)Main.worldSurface - 1);
-                if (Main.tileAlch[Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileType])
-                {
-                    // If you use the wrong planter box you get fuck all
-                    if (Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileType == TileID.PlanterBox)
-                    {
-                        int herbType = Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileFrameX / 18;
-                        int planterBoxType = Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileFrameY / 18;
-                        if (IsCorrectPlanterBox(herbType: herbType, planterBoxType: planterBoxType) && WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate_PlanterBox))
-                            WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
-                    }
-                    else if (WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate))
-                        WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
-                }
+                TryGrowHerb(herbGrowthRangeX, herbGrowthRangeY, oneInXChanceToBoostHerbGrowthRate, oneInXChanceToBoostHerbGrowthRate_PlanterBox);
             }
 
             if (Main.remixWorld)
@@ -206,19 +194,7 @@ namespace CalamityMod.Systems
                     // Slightly increase the growth rate of herbs not in planter boxes
                     int herbGrowthRangeX = WorldGen.genRand.Next(10, Main.maxTilesX - 10);
                     int herbGrowthRangeY = WorldGen.genRand.Next((int)Main.worldSurface - 1, Main.maxTilesY - 20);
-                    if (Main.tileAlch[Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileType])
-                    {
-                        // If you use the wrong planter box you get fuck all
-                        if (Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileType == TileID.PlanterBox)
-                        {
-                            int herbType = Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileFrameX / 18;
-                            int planterBoxType = Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileFrameY / 18;
-                            if (IsCorrectPlanterBox(herbType: herbType, planterBoxType: planterBoxType) && WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate_PlanterBox))
-                                WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
-                        }
-                        else if (WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate))
-                            WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
-                    }
+                    TryGrowHerb(herbGrowthRangeX, herbGrowthRangeY, oneInXChanceToBoostHerbGrowthRate, oneInXChanceToBoostHerbGrowthRate_PlanterBox);
                 }
             }
             else
@@ -230,19 +206,7 @@ namespace CalamityMod.Systems
                     // Slightly increase the growth rate of herbs not in planter boxes
                     int herbGrowthRangeX = WorldGen.genRand.Next(10, Main.maxTilesX - 10);
                     int herbGrowthRangeY = WorldGen.genRand.Next((int)Main.worldSurface - 1, Main.maxTilesY - 20);
-                    if (Main.tileAlch[Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileType])
-                    {
-                        // If you use the wrong planter box you get fuck all
-                        if (Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileType == TileID.PlanterBox)
-                        {
-                            int herbType = Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileFrameX / 18;
-                            int planterBoxType = Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileFrameY / 18;
-                            if (IsCorrectPlanterBox(herbType: herbType, planterBoxType: planterBoxType) && WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate_PlanterBox))
-                                WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
-                        }
-                        else if (WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate))
-                            WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
-                    }
+                    TryGrowHerb(herbGrowthRangeX, herbGrowthRangeY, oneInXChanceToBoostHerbGrowthRate, oneInXChanceToBoostHerbGrowthRate_PlanterBox);
                 }
             }
 
@@ -524,6 +488,23 @@ namespace CalamityMod.Systems
             }
 
             return true;
+        }
+
+        private static void TryGrowHerb(int herbGrowthRangeX, int herbGrowthRangeY, int oneInXChanceToBoostHerbGrowthRate, int oneInXChanceToBoostHerbGrowthRate_PlanterBox)
+        {
+            if (Main.tileAlch[Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileType])
+            {
+                // Only the matching planter box gets the accelerated growth chance.
+                if (Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileType == TileID.PlanterBox)
+                {
+                    int herbType = Main.tile[herbGrowthRangeX, herbGrowthRangeY].TileFrameX / 18;
+                    int planterBoxType = Main.tile[herbGrowthRangeX, herbGrowthRangeY + 1].TileFrameY / 18;
+                    if (IsCorrectPlanterBox(herbType: herbType, planterBoxType: planterBoxType) && WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate_PlanterBox))
+                        WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
+                }
+                else if (WorldGen.genRand.NextBool(oneInXChanceToBoostHerbGrowthRate))
+                    WorldGen.GrowAlch(herbGrowthRangeX, herbGrowthRangeY);
+            }
         }
 
         public static bool IsCorrectPlanterBox(int herbType, int planterBoxType)

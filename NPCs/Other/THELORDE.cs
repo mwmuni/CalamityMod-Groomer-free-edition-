@@ -498,14 +498,7 @@ namespace CalamityMod.NPCs.Other
 
             if (highestPossibleDamage > antiButcherLimit)
             {
-                string key = "Mods.CalamityMod.Status.Boss.EdgyBossText8";
-                Color messageColor = Color.Cyan;
-                CalamityUtils.BroadcastLocalizedText(key, messageColor);
-
-                // The hit which triggers antibutcher has its damage capped at 1, then THE LORDE heals for 1 so that it doesn't take any net damage.
-                modifiers.SetMaxDamage(1);
-                NPC.life += 1;
-                squintTimer = 120;
+                ApplyAntiButcher(ref modifiers);
             }
         }
 
@@ -518,15 +511,20 @@ namespace CalamityMod.NPCs.Other
 
             if (highestPossibleDamage > antiButcherLimit)
             {
-                string key = "Mods.CalamityMod.Status.Boss.EdgyBossText8";
-                Color messageColor = Color.Cyan;
-                CalamityUtils.BroadcastLocalizedText(key, messageColor);
-
-                // The hit which triggers antibutcher has its damage capped at 1, then THE LORDE heals for 1 so that it doesn't take any net damage.
-                modifiers.SetMaxDamage(1);
-                NPC.life += 1;
-                squintTimer = 120;
+                ApplyAntiButcher(ref modifiers);
             }
+        }
+
+        private void ApplyAntiButcher(ref NPC.HitModifiers modifiers)
+        {
+            string key = "Mods.CalamityMod.Status.Boss.EdgyBossText8";
+            Color messageColor = Color.Cyan;
+            CalamityUtils.BroadcastLocalizedText(key, messageColor);
+
+            // Cancel the triggering hit without losing the one health point it still deals.
+            modifiers.SetMaxDamage(1);
+            NPC.life += 1;
+            squintTimer = 120;
         }
 
         // Cannot be struck by any weapons or projectiles while invincible

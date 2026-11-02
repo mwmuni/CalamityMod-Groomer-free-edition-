@@ -283,14 +283,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                                 SoundEngine.PlaySound(charge with { Volume = 0.85f, Pitch = -0.5f }, NPC.Center);
                                 NPC.velocity = NPC.DirectionTo(Target.Center) * 150f;
 
-                                for (int i = 0; i < 30; i++)
-                                {
-                                    Vector2 vel = new Vector2(7, 7).RotatedByRandom(100) * Main.rand.NextFloat(0.1f, 2.5f);
-                                    Dust catastrophedust = Dust.NewDustPerfect(NPC.Center + vel * 2, DustID.SilverFlame, vel);
-                                    catastrophedust.noGravity = true;
-                                    catastrophedust.scale = Main.rand.NextFloat(1.2f, 1.8f);
-                                    catastrophedust.color = Color.DeepSkyBlue;
-                                }
+                                SpawnSlashDust(30, 7, Color.DeepSkyBlue);
                                 dashes = 0;
                                 dashAttackTimer = 30;
                                 BigAttackTimer = 500;
@@ -305,14 +298,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                                 SoundEngine.PlaySound(slash with { Volume = 0.55f, Pitch = -0.3f }, NPC.Center);
                                 Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + NPC.DirectionTo(Target.Center).RotatedBy(0.34f) * 130, NPC.DirectionTo(Target.Center).RotatedBy(0.34f) * 90f, type, TrailedSlashDamage, 0f, Main.myPlayer, 0f, 0, 50);
                                 Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center + NPC.DirectionTo(Target.Center).RotatedBy(-0.34f) * 130, NPC.DirectionTo(Target.Center).RotatedBy(-0.34f) * 90f, type, TrailedSlashDamage, 0f, Main.myPlayer, 0f, 0, 50);
-                                for (int i = 0; i < 30; i++)
-                                {
-                                    Vector2 vel = new Vector2(7, 7).RotatedByRandom(100) * Main.rand.NextFloat(0.1f, 2.5f);
-                                    Dust catastrophedust = Dust.NewDustPerfect(NPC.Center + vel * 2, DustID.SilverFlame, vel);
-                                    catastrophedust.noGravity = true;
-                                    catastrophedust.scale = Main.rand.NextFloat(1.2f, 1.8f);
-                                    catastrophedust.color = Color.DeepSkyBlue;
-                                }
+                                SpawnSlashDust(30, 7, Color.DeepSkyBlue);
                             }
                         }
                         NPC.velocity *= 0.975f;
@@ -417,14 +403,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                     SoundStyle charge = new("CalamityMod/Sounds/Custom/Ravager/RavagerPillarSummon");
                     SoundEngine.PlaySound(charge with { Volume = 0.85f, Pitch = 0.6f }, NPC.Center);
                 }
-                for (int i = 0; i < 7; i++)
-                {
-                    Vector2 vel = new Vector2(14, 14).RotatedByRandom(100) * Main.rand.NextFloat(0.1f, 2.5f);
-                    Dust catastrophedust = Dust.NewDustPerfect(NPC.Center + vel * 2, DustID.SilverFlame, vel);
-                    catastrophedust.noGravity = true;
-                    catastrophedust.scale = Main.rand.NextFloat(1.2f, 1.8f);
-                    catastrophedust.color = Color.DeepSkyBlue;
-                }
+                SpawnSlashDust(7, 14, Color.DeepSkyBlue);
 
                 BigAttackTimer--;
             }
@@ -493,6 +472,18 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                         targetSide = !targetSide;
                     }
                 }
+            }
+        }
+
+        private void SpawnSlashDust(int count, int speed, Color color)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 vel = new Vector2(speed, speed).RotatedByRandom(100) * Main.rand.NextFloat(0.1f, 2.5f);
+                Dust catastrophedust = Dust.NewDustPerfect(NPC.Center + vel * 2, DustID.SilverFlame, vel);
+                catastrophedust.noGravity = true;
+                catastrophedust.scale = Main.rand.NextFloat(1.2f, 1.8f);
+                catastrophedust.color = color;
             }
         }
 
@@ -585,14 +576,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                         NPC scal = Main.npc[CalamityGlobalNPC.SCal];
                         if (scal.ModNPC<SupremeCalamitas>().respawnBro == true && isDeathmode && !broIsAlive)
                         {
-                            for (int i = 0; i < 45; i++)
-                            {
-                                Vector2 vel = new Vector2(14, 14).RotatedByRandom(100) * Main.rand.NextFloat(0.1f, 2.5f);
-                                Dust cataclysmdust = Dust.NewDustPerfect(NPC.Center + vel * 2, DustID.SilverFlame, vel);
-                                cataclysmdust.noGravity = true;
-                                cataclysmdust.scale = Main.rand.NextFloat(1.2f, 1.8f);
-                                cataclysmdust.color = Color.Red;
-                            }
+                            SpawnSlashDust(45, 14, Color.Red);
                             Particle pulse = new DirectionalPulseRing(NPC.Center, Vector2.Zero, Color.Red, new Vector2(1f, 1f), 0, 0.1f, 5f, 25);
                             GeneralParticleHandler.SpawnParticle(pulse);
                             Particle pulse2 = new DirectionalPulseRing(NPC.Center, Vector2.Zero, Color.Lerp(Color.Red, Color.Magenta, 0.3f), new Vector2(1f, 1f), 0, 0.05f, 4f, 28);

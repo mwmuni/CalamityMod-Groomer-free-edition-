@@ -316,17 +316,7 @@ namespace CalamityMod.Projectiles.Summon
                                 for (int i = 0; i < 3; i++)
                                 {
                                     Vector2 perturbedSpeed = targetDir.RotatedBy(MathHelper.Lerp(-0.15f, 0.15f, i / 3f)) * 24f;
-                                    var p = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, perturbedSpeed, ModContent.ProjectileType<DoGFire>(), (int)(Projectile.damage * BlueFireballDamageMult), Projectile.knockBack, Projectile.owner, 2);
-                                    if (Main.projectile.IndexInRange(p))
-                                    {
-                                        Main.projectile[p].hostile = false;
-                                        Main.projectile[p].friendly = true;
-                                        Main.projectile[p].DamageType = DamageClass.Summon;
-                                        Main.projectile[p].timeLeft = 120;
-                                        Main.projectile[p].scale = 0.5f;
-                                        Main.projectile[p].usesIDStaticNPCImmunity = true;
-                                        Main.projectile[p].idStaticNPCHitCooldown = EffectiveBlueFireIframes;
-                                    }
+                                    SpawnGuardianFireball(perturbedSpeed, blue: true);
                                 }
                             }
                         }
@@ -404,17 +394,7 @@ namespace CalamityMod.Projectiles.Summon
                                 for (int i = 0; i < 16; i++)
                                 {
                                     Vector2 perturbedSpeed = Vector2.UnitX.RotatedBy(MathHelper.TwoPi * i / 16f) * (i % 2 == 0 ? 24f : 16f);
-                                    var p = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, perturbedSpeed, ModContent.ProjectileType<DoGFire>(), (int)(Projectile.damage * PurpleFireballDamageMult), Projectile.knockBack, Projectile.owner, 0);
-                                    if (Main.projectile.IndexInRange(p))
-                                    {
-                                        Main.projectile[p].hostile = false;
-                                        Main.projectile[p].friendly = true;
-                                        Main.projectile[p].DamageType = DamageClass.Summon;
-                                        Main.projectile[p].timeLeft = 120;
-                                        Main.projectile[p].scale = 0.5f;
-                                        Main.projectile[p].usesIDStaticNPCImmunity = true;
-                                        Main.projectile[p].idStaticNPCHitCooldown = EffectivePurpleFireIframes;
-                                    }
+                                    SpawnGuardianFireball(perturbedSpeed, blue: false);
                                 }
                             }
                         }
@@ -461,6 +441,21 @@ namespace CalamityMod.Projectiles.Summon
             Projectile.position.Y = MathHelper.Clamp(Projectile.position.Y, 5, (Main.maxTilesY-5) * 16);
             Projectile.position -= Projectile.velocity;
             UpdateSegments();
+        }
+
+        private void SpawnGuardianFireball(Vector2 perturbedSpeed, bool blue)
+        {
+            var p = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, perturbedSpeed, ModContent.ProjectileType<DoGFire>(), (int)(Projectile.damage * (blue ? BlueFireballDamageMult : PurpleFireballDamageMult)), Projectile.knockBack, Projectile.owner, blue ? 2 : 0);
+            if (Main.projectile.IndexInRange(p))
+            {
+                Main.projectile[p].hostile = false;
+                Main.projectile[p].friendly = true;
+                Main.projectile[p].DamageType = DamageClass.Summon;
+                Main.projectile[p].timeLeft = 120;
+                Main.projectile[p].scale = 0.5f;
+                Main.projectile[p].usesIDStaticNPCImmunity = true;
+                Main.projectile[p].idStaticNPCHitCooldown = blue ? EffectiveBlueFireIframes : EffectivePurpleFireIframes;
+            }
         }
 
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)

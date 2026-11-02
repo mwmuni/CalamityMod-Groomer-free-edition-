@@ -215,9 +215,7 @@ namespace CalamityMod.World
                 }
                 else
                 {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillCrimsonShrineChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                    PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillCrimsonShrineChest));
                     break;
                 }
                 //FUCK YOU TOO
@@ -292,9 +290,7 @@ namespace CalamityMod.World
                 }
                 else
                 {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillDesertShrineChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                    PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillDesertShrineChest));
                     break;
                 }
 
@@ -362,9 +358,7 @@ namespace CalamityMod.World
                 }
                 else
                 {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, Main.drunkWorld ? new Action<Chest>(FillMarbleShrineChest) : new Action<Chest>(FillGraniteShrineChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                    PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, Main.drunkWorld ? new Action<Chest>(FillMarbleShrineChest) : new Action<Chest>(FillGraniteShrineChest));
 
                     // Drunk world: turns into a Marble Geode
                     if (Main.drunkWorld)
@@ -476,9 +470,7 @@ namespace CalamityMod.World
                 }
                 else
                 {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillIceShrineChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                    PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillIceShrineChest));
                     break;
                 }
 
@@ -554,9 +546,7 @@ namespace CalamityMod.World
                 }
                 else
                 {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, Main.drunkWorld ? new Action<Chest>(FillGraniteShrineChest) : new Action<Chest>(FillMarbleShrineChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                    PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, Main.drunkWorld ? new Action<Chest>(FillGraniteShrineChest) : new Action<Chest>(FillMarbleShrineChest));
 
                     // Drunk world: turns into a Granite Column
                     if (Main.drunkWorld)
@@ -695,9 +685,7 @@ namespace CalamityMod.World
                 }
                 else
                 {
-                    bool _ = true;
-                    PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillMushroomShrineChest));
-                    CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                    PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillMushroomShrineChest));
                     break;
                 }
             } while (tries <= 20000);
@@ -810,9 +798,7 @@ namespace CalamityMod.World
                             }
                             else
                             {
-                                bool _ = true;
-                                PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillSurfaceShrineChest));
-                                CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                                PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillSurfaceShrineChest));
 
                                 // Generate entrance tunnel
                                 ShapeData data = new ShapeData();
@@ -825,9 +811,7 @@ namespace CalamityMod.World
                     }
                     else
                     {
-                        bool _ = true;
-                        PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, new Action<Chest>(FillSurfaceShrineChest));
-                        CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+                        PlaceAndProtectShrine(mapKey, placementPoint, schematicSize, new Action<Chest>(FillSurfaceShrineChest));
                         break;
                     }
 
@@ -838,6 +822,13 @@ namespace CalamityMod.World
         #endregion
 
         #region Roxcalibur Shrine
+        private static void PlaceAndProtectShrine(string mapKey, Point placementPoint, Vector2 schematicSize, Action<Chest> fillChest)
+        {
+            bool _ = true;
+            PlaceSchematic(mapKey, new Point(placementPoint.X, placementPoint.Y), SchematicAnchor.TopLeft, ref _, fillChest);
+            CalamityUtils.AddProtectedStructure(new Rectangle(placementPoint.X, placementPoint.Y, (int)schematicSize.X, (int)schematicSize.Y), 4);
+        }
+
         public static void PlaceRoxShrine(StructureMap structures)
         {
             int tries = 0;

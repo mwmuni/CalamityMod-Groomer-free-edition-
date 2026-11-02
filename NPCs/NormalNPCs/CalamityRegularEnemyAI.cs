@@ -17,6 +17,30 @@ namespace CalamityMod.NPCs.NormalNPCs
     public static class CalamityRegularEnemyAI
     {
         #region Gem Crawler AI
+        private static void UpdateTurnAroundTimer(NPC npc, int turnAroundDelay, int turnAroundDelayMult, bool shouldTurnAround)
+        {
+            if (npc.ai[3] > turnAroundDelay * turnAroundDelayMult)
+            {
+                npc.ai[3] = 0f;
+            }
+            if (npc.justHit)
+            {
+                npc.ai[3] = 0f;
+            }
+            if (npc.ai[3] == turnAroundDelay)
+            {
+                npc.netUpdate = true;
+            }
+            var npcPos = new Vector2(npc.Center.X, npc.Center.Y);
+            var xDist = Main.player[npc.target].Center.X - npcPos.X;
+            var yDist = Main.player[npc.target].Center.Y - npcPos.Y;
+            var targetDist = (float)Math.Sqrt((double)(xDist * xDist + yDist * yDist));
+            if (targetDist < 200f && !shouldTurnAround)
+            {
+                npc.ai[3] = 0f;
+            }
+        }
+
         public static void GemCrawlerAI(NPC npc, Mod mod, float speedDetect, float speedAdditive)
         {
             var turnAroundDelay = 30;
@@ -37,26 +61,7 @@ namespace CalamityMod.NPCs.NormalNPCs
             {
                 npc.ai[3] -= 1f;
             }
-            if (npc.ai[3] > turnAroundDelay * 10)
-            {
-                npc.ai[3] = 0f;
-            }
-            if (npc.justHit)
-            {
-                npc.ai[3] = 0f;
-            }
-            if (npc.ai[3] == turnAroundDelay)
-            {
-                npc.netUpdate = true;
-            }
-            var npcPos = new Vector2(npc.Center.X, npc.Center.Y);
-            var xDist = Main.player[npc.target].Center.X - npcPos.X;
-            var yDist = Main.player[npc.target].Center.Y - npcPos.Y;
-            var targetDist = (float)Math.Sqrt((double)(xDist * xDist + yDist * yDist));
-            if (targetDist < 200f && !shouldTurnAround)
-            {
-                npc.ai[3] = 0f;
-            }
+            UpdateTurnAroundTimer(npc, turnAroundDelay, 10, shouldTurnAround);
             if (npc.ai[3] < turnAroundDelay)
             {
                 npc.TargetClosest(true);
@@ -257,26 +262,7 @@ namespace CalamityMod.NPCs.NormalNPCs
             {
                 npc.ai[3] -= 1f;
             }
-            if (npc.ai[3] > turnAroundDelay * turnAroundDelayMult)
-            {
-                npc.ai[3] = 0f;
-            }
-            if (npc.justHit)
-            {
-                npc.ai[3] = 0f;
-            }
-            if (npc.ai[3] == turnAroundDelay)
-            {
-                npc.netUpdate = true;
-            }
-            var npcPos = new Vector2(npc.Center.X, npc.Center.Y);
-            var xDist = Main.player[npc.target].Center.X - npcPos.X;
-            var yDist = Main.player[npc.target].Center.Y - npcPos.Y;
-            var targetDist = (float)Math.Sqrt((double)(xDist * xDist + yDist * yDist));
-            if (targetDist < 200f && !shouldTurnAround)
-            {
-                npc.ai[3] = 0f;
-            }
+            UpdateTurnAroundTimer(npc, turnAroundDelay, turnAroundDelayMult, shouldTurnAround);
             if (!DogPhase1)
             {
                 if (npc.velocity.Y == 0f && Math.Abs(npc.velocity.X) > 3f && (npc.Center.X < Main.player[npc.target].Center.X && npc.velocity.X > 0f || npc.Center.X > Main.player[npc.target].Center.X && npc.velocity.X < 0f))

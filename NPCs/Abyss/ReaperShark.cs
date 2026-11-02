@@ -476,14 +476,7 @@ namespace CalamityMod.NPCs.Abyss
                     {
                         NPC.alpha -= 15;
                     }
-                    if (NPC.alpha < 0)
-                    {
-                        NPC.alpha = 0;
-                    }
-                    if (NPC.alpha > 150)
-                    {
-                        NPC.alpha = 150;
-                    }
+                    ClampPhaseAlpha();
                 }
                 if (NPC.ai[0] == -1f)
                 {
@@ -507,14 +500,7 @@ namespace CalamityMod.NPCs.Abyss
                         {
                             NPC.alpha += 15;
                         }
-                        if (NPC.alpha < 0)
-                        {
-                            NPC.alpha = 0;
-                        }
-                        if (NPC.alpha > 150)
-                        {
-                            NPC.alpha = 150;
-                        }
+                        ClampPhaseAlpha();
                     }
                     if (NPC.ai[2] == 60f)
                     {
@@ -668,6 +654,18 @@ namespace CalamityMod.NPCs.Abyss
                 return hasBeenHit;
             }
             return null;
+        }
+
+        private void ClampPhaseAlpha()
+        {
+            if (NPC.alpha < 0)
+            {
+                NPC.alpha = 0;
+            }
+            if (NPC.alpha > 150)
+            {
+                NPC.alpha = 150;
+            }
         }
 
         public override void FindFrame(int frameHeight)

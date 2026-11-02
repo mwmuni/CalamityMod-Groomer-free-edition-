@@ -232,45 +232,58 @@ namespace CalamityMod.Projectiles.Summon
             }
         }
 
+        private void UpdateGroundMovement(bool faceOwnerWhenIdle)
+        {
+            Projectile.spriteDirection = -Projectile.direction;
+            Projectile.rotation = 0f;
+            if (Projectile.velocity.Y == 0f)
+            {
+                if (Projectile.velocity.X == 0f)
+                {
+                    Projectile.frame = 0;
+                    Projectile.frameCounter = 0;
+                    if (faceOwnerWhenIdle)
+                    {
+                        float xDist = player.Center.X - Projectile.Center.X;
+                        xDist -= 40f * player.direction;
+                        xDist -= 40f * Projectile.minionPos * player.direction;
+                        if (xDist > 0)
+                            Projectile.spriteDirection = Projectile.direction;
+                    }
+                }
+                else if (Math.Abs(Projectile.velocity.X) >= 0.5f)
+                {
+                    Projectile.frameCounter += (int)Math.Abs(Projectile.velocity.X);
+                    Projectile.frameCounter += 1;
+                    if (Projectile.frameCounter > 10)
+                    {
+                        Projectile.frame += 1;
+                        Projectile.frameCounter = 0;
+                    }
+                    if (Projectile.frame >= 6)
+                        Projectile.frame = 0;
+                }
+                else
+                {
+                    Projectile.frame = 0;
+                    Projectile.frameCounter = 0;
+                }
+            }
+            else if (Projectile.velocity.Y != 0f)
+            {
+                Projectile.frameCounter = 0;
+                Projectile.frame = 0;
+            }
+            Projectile.velocity.Y += 0.4f;
+            if (Projectile.velocity.Y > 10f)
+                Projectile.velocity.Y = 10f;
+        }
+
         private void AttackTarget()
         {
             if (Projectile.ai[0] == 2f) //attack target
             {
-                Projectile.spriteDirection = -Projectile.direction;
-                Projectile.rotation = 0f;
-                if (Projectile.velocity.Y == 0f)
-                {
-                    if (Projectile.velocity.X == 0f)
-                    {
-                        Projectile.frame = 0;
-                        Projectile.frameCounter = 0;
-                    }
-                    else if (Math.Abs(Projectile.velocity.X) >= 0.5f)
-                    {
-                        Projectile.frameCounter += (int)Math.Abs(Projectile.velocity.X);
-                        Projectile.frameCounter += 1;
-                        if (Projectile.frameCounter > 10)
-                        {
-                            Projectile.frame += 1;
-                            Projectile.frameCounter = 0;
-                        }
-                        if (Projectile.frame >= 6)
-                            Projectile.frame = 0;
-                    }
-                    else
-                    {
-                        Projectile.frame = 0;
-                        Projectile.frameCounter = 0;
-                    }
-                }
-                else if (Projectile.velocity.Y != 0f)
-                {
-                    Projectile.frameCounter = 0;
-                    Projectile.frame = 0;
-                }
-                Projectile.velocity.Y += 0.4f;
-                if (Projectile.velocity.Y > 10f)
-                    Projectile.velocity.Y = 10f;
+                UpdateGroundMovement(faceOwnerWhenIdle: false);
 
                 sparkCounter += Main.rand.Next(1, 4);
                 if (sparkCounter >= 20)
@@ -496,46 +509,7 @@ namespace CalamityMod.Projectiles.Summon
                     Projectile.direction = 1;
                 if (Projectile.velocity.X < -accelFast && direction == -1)
                     Projectile.direction = -1;
-                Projectile.spriteDirection = -Projectile.direction;
-                Projectile.rotation = 0f;
-                if (Projectile.velocity.Y == 0f)
-                {
-                    if (Projectile.velocity.X == 0f)
-                    {
-                        Projectile.frame = 0;
-                        Projectile.frameCounter = 0;
-                        float xDist = player.Center.X - Projectile.Center.X;
-                        xDist -= 40f * player.direction;
-                        xDist -= 40f * Projectile.minionPos * player.direction;
-                        if (xDist > 0)
-                            Projectile.spriteDirection = Projectile.direction;
-                    }
-                    else if (Math.Abs(Projectile.velocity.X) >= 0.5f)
-                    {
-                        Projectile.frameCounter += (int)Math.Abs(Projectile.velocity.X);
-                        Projectile.frameCounter += 1;
-                        if (Projectile.frameCounter > 10)
-                        {
-                            Projectile.frame += 1;
-                            Projectile.frameCounter = 0;
-                        }
-                        if (Projectile.frame >= 6)
-                            Projectile.frame = 0;
-                    }
-                    else
-                    {
-                        Projectile.frame = 0;
-                        Projectile.frameCounter = 0;
-                    }
-                }
-                else if (Projectile.velocity.Y != 0f)
-                {
-                    Projectile.frameCounter = 0;
-                    Projectile.frame = 0;
-                }
-                Projectile.velocity.Y += 0.4f;
-                if (Projectile.velocity.Y > 10f)
-                    Projectile.velocity.Y = 10f;
+                UpdateGroundMovement(faceOwnerWhenIdle: true);
             }
         }
 

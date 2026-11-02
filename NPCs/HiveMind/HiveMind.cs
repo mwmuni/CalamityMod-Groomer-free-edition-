@@ -444,24 +444,7 @@ namespace CalamityMod.NPCs.HiveMind
                             Gore.NewGore(NPC.GetSource_FromAI(), NPC.Center, NPC.velocity, Mod.Find<ModGore>("HiveMindGore" + i).Type, 1f);
                     }
 
-                    for (int i = 0; i < 20; i++)
-                    {
-                        int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
-                        Main.dust[dust].velocity *= 3f;
-                        if (Main.rand.NextBool())
-                        {
-                            Main.dust[dust].scale = 0.5f;
-                            Main.dust[dust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
-                        }
-                    }
-                    for (int j = 0; j < 35; j++)
-                    {
-                        int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 3f);
-                        Main.dust[dust].noGravity = true;
-                        Main.dust[dust].velocity *= 5f;
-                        dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
-                        Main.dust[dust].velocity *= 2f;
-                    }
+                    CreateDemoniteBurst();
 
                     SoundEngine.PlaySound(SoundID.NPCDeath1, NPC.Center);
 
@@ -550,24 +533,7 @@ namespace CalamityMod.NPCs.HiveMind
 
                         NPC.ai[3] = NPC.life;
 
-                        for (int i = 0; i < 20; i++)
-                        {
-                            int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
-                            Main.dust[dust].velocity *= 3f;
-                            if (Main.rand.NextBool())
-                            {
-                                Main.dust[dust].scale = 0.5f;
-                                Main.dust[dust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
-                            }
-                        }
-                        for (int j = 0; j < 35; j++)
-                        {
-                            int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 3f);
-                            Main.dust[dust].noGravity = true;
-                            Main.dust[dust].velocity *= 5f;
-                            dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
-                            Main.dust[dust].velocity *= 2f;
-                        }
+                        CreateDemoniteBurst();
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
@@ -612,22 +578,7 @@ namespace CalamityMod.NPCs.HiveMind
                     if (NPC.alpha < 0)
                         NPC.alpha = 0;
 
-                    int burrowedDust = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 2.5f * NPC.scale);
-                    Main.dust[burrowedDust].velocity *= 2f;
-                    if (Main.rand.NextBool())
-                    {
-                        Main.dust[burrowedDust].scale = 0.5f;
-                        Main.dust[burrowedDust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
-                    }
-
-                    for (int i = 0; i < 2; i++)
-                    {
-                        int burrowedDust2 = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 3.5f * NPC.scale);
-                        Main.dust[burrowedDust2].noGravity = true;
-                        Main.dust[burrowedDust2].velocity *= 3.5f;
-                        burrowedDust2 = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 2.5f * NPC.scale);
-                        Main.dust[burrowedDust2].velocity *= 1f;
-                    }
+                    CreateBurrowDust();
                 }
                 else if (burrowTimer == -60)
                 {
@@ -664,22 +615,7 @@ namespace CalamityMod.NPCs.HiveMind
                     if (NPC.alpha > 255)
                         NPC.alpha = 255;
 
-                    int burrowedDust = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 2.5f * NPC.scale);
-                    Main.dust[burrowedDust].velocity *= 2f;
-                    if (Main.rand.NextBool())
-                    {
-                        Main.dust[burrowedDust].scale = 0.5f;
-                        Main.dust[burrowedDust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
-                    }
-
-                    for (int i = 0; i < 2; i++)
-                    {
-                        int burrowedDust2 = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 3.5f * NPC.scale);
-                        Main.dust[burrowedDust2].noGravity = true;
-                        Main.dust[burrowedDust2].velocity *= 3.5f;
-                        burrowedDust2 = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 2.5f * NPC.scale);
-                        Main.dust[burrowedDust2].velocity *= 1f;
-                    }
+                    CreateBurrowDust();
                 }
                 else if (burrowTimer == 0)
                 {
@@ -1150,24 +1086,7 @@ namespace CalamityMod.NPCs.HiveMind
                     {
                         SoundEngine.PlaySound(SoundID.NPCDeath22, NPC.Center);
 
-                        for (int i = 0; i < 20; i++)
-                        {
-                            int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
-                            Main.dust[dust].velocity *= 3f;
-                            if (Main.rand.NextBool())
-                            {
-                                Main.dust[dust].scale = 0.5f;
-                                Main.dust[dust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
-                            }
-                        }
-                        for (int j = 0; j < 35; j++)
-                        {
-                            int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 3f);
-                            Main.dust[dust].noGravity = true;
-                            Main.dust[dust].velocity *= 5f;
-                            dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
-                            Main.dust[dust].velocity *= 2f;
-                        }
+                        CreateDemoniteBurst();
 
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                         {
@@ -1181,6 +1100,48 @@ namespace CalamityMod.NPCs.HiveMind
                         }
                     }
                 }
+            }
+        }
+
+        private void CreateDemoniteBurst()
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
+                Main.dust[dust].velocity *= 3f;
+                if (Main.rand.NextBool())
+                {
+                    Main.dust[dust].scale = 0.5f;
+                    Main.dust[dust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
+                }
+            }
+            for (int j = 0; j < 35; j++)
+            {
+                int dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 3f);
+                Main.dust[dust].noGravity = true;
+                Main.dust[dust].velocity *= 5f;
+                dust = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Demonite, 0f, 0f, 100, default, 2f);
+                Main.dust[dust].velocity *= 2f;
+            }
+        }
+
+        private void CreateBurrowDust()
+        {
+            int burrowedDust = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 2.5f * NPC.scale);
+            Main.dust[burrowedDust].velocity *= 2f;
+            if (Main.rand.NextBool())
+            {
+                Main.dust[burrowedDust].scale = 0.5f;
+                Main.dust[burrowedDust].fadeIn = 1f + Main.rand.Next(10) * 0.1f;
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                int burrowedDust2 = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 3.5f * NPC.scale);
+                Main.dust[burrowedDust2].noGravity = true;
+                Main.dust[burrowedDust2].velocity *= 3.5f;
+                burrowedDust2 = Dust.NewDust(new Vector2(NPC.position.X, NPC.Center.Y), NPC.width, NPC.height / 2, DustID.Demonite, 0f, -3f, 100, default, 2.5f * NPC.scale);
+                Main.dust[burrowedDust2].velocity *= 1f;
             }
         }
 

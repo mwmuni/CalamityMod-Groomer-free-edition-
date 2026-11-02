@@ -445,29 +445,7 @@ namespace CalamityMod.Projectiles.Magic
             int dustCount = 80;
             for (int i = 0; i < dustCount; i++)
             {
-                Vector2 startingVelocity = Vector2.Zero;
-                Vector2 endingVelocity = Vector2.Zero;
-
-                switch (i / (dustCount / 4))
-                {
-                    case 0:
-                        startingVelocity = Vector2.UnitY;
-                        endingVelocity = Vector2.UnitX;
-                        break;
-                    case 1:
-                        startingVelocity = Vector2.UnitX;
-                        endingVelocity = -Vector2.UnitY;
-                        break;
-                    case 2:
-                        startingVelocity = -Vector2.UnitY;
-                        endingVelocity = -Vector2.UnitX;
-                        break;
-                    case 3:
-                        startingVelocity = -Vector2.UnitX;
-                        endingVelocity = Vector2.UnitY;
-                        break;
-                }
-                Vector2 velocity = Vector2.Lerp(startingVelocity, endingVelocity, i / (dustCount / 4f) % 1f);
+                Vector2 velocity = DiamondEdgeVelocity(i, dustCount);
                 velocity = velocity.RotatedBy(offsetAngle);
                 velocity *= diamondBurstSpeed;
                 velocity.X *= 0.667f;
@@ -659,29 +637,7 @@ namespace CalamityMod.Projectiles.Magic
             int dustCount = 60;
             for (int i = 0; i < dustCount; i++)
             {
-                Vector2 startingVelocity = Vector2.Zero;
-                Vector2 endingVelocity = Vector2.Zero;
-
-                switch (i / (dustCount / 4))
-                {
-                    case 0:
-                        startingVelocity = Vector2.UnitY;
-                        endingVelocity = Vector2.UnitX;
-                        break;
-                    case 1:
-                        startingVelocity = Vector2.UnitX;
-                        endingVelocity = -Vector2.UnitY;
-                        break;
-                    case 2:
-                        startingVelocity = -Vector2.UnitY;
-                        endingVelocity = -Vector2.UnitX;
-                        break;
-                    case 3:
-                        startingVelocity = -Vector2.UnitX;
-                        endingVelocity = Vector2.UnitY;
-                        break;
-                }
-                Vector2 velocity = Vector2.Lerp(startingVelocity, endingVelocity, i / (dustCount / 4f) % 1f);
+                Vector2 velocity = DiamondEdgeVelocity(i, dustCount);
                 velocity *= starBurstSpeed;
                 velocity.X *= 0.75f;
 
@@ -696,6 +652,32 @@ namespace CalamityMod.Projectiles.Magic
                 dust.velocity = dust.velocity.RotatedBy(MathHelper.PiOver4);
                 dust.color = Color.White;
             }
+        }
+        private static Vector2 DiamondEdgeVelocity(int i, int dustCount)
+        {
+            Vector2 startingVelocity = Vector2.Zero;
+            Vector2 endingVelocity = Vector2.Zero;
+
+            switch (i / (dustCount / 4))
+            {
+                case 0:
+                    startingVelocity = Vector2.UnitY;
+                    endingVelocity = Vector2.UnitX;
+                    break;
+                case 1:
+                    startingVelocity = Vector2.UnitX;
+                    endingVelocity = -Vector2.UnitY;
+                    break;
+                case 2:
+                    startingVelocity = -Vector2.UnitY;
+                    endingVelocity = -Vector2.UnitX;
+                    break;
+                case 3:
+                    startingVelocity = -Vector2.UnitX;
+                    endingVelocity = Vector2.UnitY;
+                    break;
+            }
+            return Vector2.Lerp(startingVelocity, endingVelocity, i / (dustCount / 4f) % 1f);
         }
         #endregion
     }

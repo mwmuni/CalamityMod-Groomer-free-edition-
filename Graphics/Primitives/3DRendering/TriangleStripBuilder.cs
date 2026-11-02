@@ -502,25 +502,7 @@ public static class TriangleStripBuilder
         var upNormalized = up.LengthSquared() < 1e-6f ? Vector3.UnitZ : Vector3.Normalize(up);
 
         int segmentCount = workingPath.Count - 1;
-        var segmentDirs = new Vector3[segmentCount];
-        var segmentRights = new Vector3[segmentCount];
-
-        for (int i = 0; i < segmentCount; i++)
-        {
-            Vector3 dir = workingPath[i + 1] - workingPath[i];
-            if (dir.LengthSquared() < 1e-6f)
-                dir = i > 0 ? segmentDirs[i - 1] : Vector3.UnitY;
-            dir.Normalize();
-
-            Vector3 right = Vector3.Cross(upNormalized, dir);
-            if (right.LengthSquared() < 1e-6f)
-                right = FindPerpendicular(dir);
-            else
-                right.Normalize();
-
-            segmentDirs[i] = dir;
-            segmentRights[i] = right;
-        }
+        ComputeSegmentFrames(workingPath, upNormalized, segmentCount, out var segmentDirs, out var segmentRights);
 
         Vector3 lastTangent = segmentDirs[0];
 
@@ -561,35 +543,7 @@ public static class TriangleStripBuilder
             Vector3 prevRight = segmentRights[Math.Max(i - 1, 0)];
             Vector3 nextRight = segmentRights[Math.Min(i, segmentCount - 1)];
 
-            Vector3 rightOffset;
-            Vector3 leftOffset;
-
-            if (joinStyle == StripJoinStyle.Miter)
-            {
-                rightOffset = ComputeMiterOffset(prevRight, nextRight, i == 0, i == segmentCount, halfWidth);
-                leftOffset = ComputeMiterOffset(-prevRight, -nextRight, i == 0, i == segmentCount, halfWidth);
-            }
-            else
-            {
-                Vector3 joinNormal;
-                if (i == 0)
-                    joinNormal = nextRight;
-                else if (i == segmentCount)
-                    joinNormal = prevRight;
-                else
-                {
-                    joinNormal = prevRight + nextRight;
-                    if (joinNormal.LengthSquared() < 1e-6f)
-                        joinNormal = nextRight;
-                }
-
-                if (joinNormal.LengthSquared() < 1e-6f)
-                    joinNormal = Vector3.UnitY;
-
-                joinNormal.Normalize();
-                rightOffset = joinNormal * halfWidth;
-                leftOffset = -joinNormal * halfWidth;
-            }
+            ComputeJoinOffsets(prevRight, nextRight, i == 0, i == segmentCount, halfWidth, joinStyle, out Vector3 rightOffset, out Vector3 leftOffset);
 
             Vector3 leftPos = position + leftOffset;
             Vector3 rightPos = position + rightOffset;
@@ -758,25 +712,7 @@ public static class TriangleStripBuilder
         var upNormalized = up.LengthSquared() < 1e-6f ? Vector3.UnitZ : Vector3.Normalize(up);
 
         int segmentCount = workingPath.Count - 1;
-        var segmentDirs = new Vector3[segmentCount];
-        var segmentRights = new Vector3[segmentCount];
-
-        for (int i = 0; i < segmentCount; i++)
-        {
-            Vector3 dir = workingPath[i + 1] - workingPath[i];
-            if (dir.LengthSquared() < 1e-6f)
-                dir = i > 0 ? segmentDirs[i - 1] : Vector3.UnitY;
-            dir.Normalize();
-
-            Vector3 right = Vector3.Cross(upNormalized, dir);
-            if (right.LengthSquared() < 1e-6f)
-                right = FindPerpendicular(dir);
-            else
-                right.Normalize();
-
-            segmentDirs[i] = dir;
-            segmentRights[i] = right;
-        }
+        ComputeSegmentFrames(workingPath, upNormalized, segmentCount, out var segmentDirs, out var segmentRights);
 
         Vector3 lastTangent = segmentDirs[0];
 
@@ -816,35 +752,7 @@ public static class TriangleStripBuilder
             Vector3 prevRight = segmentRights[Math.Max(i - 1, 0)];
             Vector3 nextRight = segmentRights[Math.Min(i, segmentCount - 1)];
 
-            Vector3 rightOffset;
-            Vector3 leftOffset;
-
-            if (joinStyle == StripJoinStyle.Miter)
-            {
-                rightOffset = ComputeMiterOffset(prevRight, nextRight, i == 0, i == segmentCount, halfWidth);
-                leftOffset = ComputeMiterOffset(-prevRight, -nextRight, i == 0, i == segmentCount, halfWidth);
-            }
-            else
-            {
-                Vector3 joinNormal;
-                if (i == 0)
-                    joinNormal = nextRight;
-                else if (i == segmentCount)
-                    joinNormal = prevRight;
-                else
-                {
-                    joinNormal = prevRight + nextRight;
-                    if (joinNormal.LengthSquared() < 1e-6f)
-                        joinNormal = nextRight;
-                }
-
-                if (joinNormal.LengthSquared() < 1e-6f)
-                    joinNormal = Vector3.UnitY;
-
-                joinNormal.Normalize();
-                rightOffset = joinNormal * halfWidth;
-                leftOffset = -joinNormal * halfWidth;
-            }
+            ComputeJoinOffsets(prevRight, nextRight, i == 0, i == segmentCount, halfWidth, joinStyle, out Vector3 rightOffset, out Vector3 leftOffset);
 
             Vector3 leftPos = position + leftOffset;
             Vector3 rightPos = position + rightOffset;
@@ -960,6 +868,59 @@ public static class TriangleStripBuilder
             vertexList.CopyTo(0, lease.ColorVertices, 0, vertexList.Count);
             indexList.CopyTo(0, lease.Indices, 0, indexList.Count);
             return lease;
+        }
+    }
+
+    private static void ComputeSegmentFrames(IReadOnlyList<Vector3> workingPath, Vector3 upNormalized, int segmentCount, out Vector3[] segmentDirs, out Vector3[] segmentRights)
+    {
+        segmentDirs = new Vector3[segmentCount];
+        segmentRights = new Vector3[segmentCount];
+
+        for (int i = 0; i < segmentCount; i++)
+        {
+            Vector3 dir = workingPath[i + 1] - workingPath[i];
+            if (dir.LengthSquared() < 1e-6f)
+                dir = i > 0 ? segmentDirs[i - 1] : Vector3.UnitY;
+            dir.Normalize();
+
+            Vector3 right = Vector3.Cross(upNormalized, dir);
+            if (right.LengthSquared() < 1e-6f)
+                right = FindPerpendicular(dir);
+            else
+                right.Normalize();
+
+            segmentDirs[i] = dir;
+            segmentRights[i] = right;
+        }
+    }
+
+    private static void ComputeJoinOffsets(Vector3 prevRight, Vector3 nextRight, bool isStart, bool isEnd, float halfWidth, StripJoinStyle joinStyle, out Vector3 rightOffset, out Vector3 leftOffset)
+    {
+        if (joinStyle == StripJoinStyle.Miter)
+        {
+            rightOffset = ComputeMiterOffset(prevRight, nextRight, isStart, isEnd, halfWidth);
+            leftOffset = ComputeMiterOffset(-prevRight, -nextRight, isStart, isEnd, halfWidth);
+        }
+        else
+        {
+            Vector3 joinNormal;
+            if (isStart)
+                joinNormal = nextRight;
+            else if (isEnd)
+                joinNormal = prevRight;
+            else
+            {
+                joinNormal = prevRight + nextRight;
+                if (joinNormal.LengthSquared() < 1e-6f)
+                    joinNormal = nextRight;
+            }
+
+            if (joinNormal.LengthSquared() < 1e-6f)
+                joinNormal = Vector3.UnitY;
+
+            joinNormal.Normalize();
+            rightOffset = joinNormal * halfWidth;
+            leftOffset = -joinNormal * halfWidth;
         }
     }
 

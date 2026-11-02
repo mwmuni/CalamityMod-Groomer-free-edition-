@@ -328,6 +328,18 @@ namespace CalamityMod.Systems
             if (IsBasedOn(mode)) return true;
             return false;
         }
+
+        protected static void SetVanillaDifficulty(bool enabled, int enabledMode, int disabledMode)
+        {
+            if (!Main.GameModeInfo.IsJourneyMode)
+            {
+                Main.GameMode = enabled == true ? enabledMode : disabledMode;
+            }
+            else
+            {
+                DifficultyModeSystem.AlignJourneyDifficultySlider();
+            }
+        }
     }
 
     public class NoDifficulty : DifficultyMode
@@ -335,17 +347,7 @@ namespace CalamityMod.Systems
         public override bool Enabled
         {
             get => true;
-            set
-            {
-                if (!Main.GameModeInfo.IsJourneyMode)
-                {
-                    Main.GameMode = value == true ? GameModeID.Normal : GameModeID.Expert;
-                }
-                else
-                {
-                    DifficultyModeSystem.AlignJourneyDifficultySlider();
-                }
-            }
+            set => SetVanillaDifficulty(value, GameModeID.Normal, GameModeID.Expert);
         }
 
         public override Asset<Texture2D> Texture => _texture ??= ModContent.Request<Texture2D>("CalamityMod/UI/ModeIndicator/ModeIndicator_Classic");
@@ -373,17 +375,7 @@ namespace CalamityMod.Systems
         public override bool Enabled
         {
             get => Main.expertMode;
-            set
-            {
-                if (!Main.GameModeInfo.IsJourneyMode)
-                {
-                    Main.GameMode = value == true ? GameModeID.Expert : GameModeID.Normal;
-                }
-                else
-                {
-                    DifficultyModeSystem.AlignJourneyDifficultySlider();
-                }
-            }
+            set => SetVanillaDifficulty(value, GameModeID.Expert, GameModeID.Normal);
         }
 
         public override Asset<Texture2D> Texture => _texture ??= ModContent.Request<Texture2D>("CalamityMod/UI/ModeIndicator/ModeIndicator_Expert");
@@ -410,17 +402,7 @@ namespace CalamityMod.Systems
         public override bool Enabled
         {
             get => Main.masterMode;
-            set
-            {
-                if (!Main.GameModeInfo.IsJourneyMode)
-                {
-                    Main.GameMode = value == true ? GameModeID.Master : GameModeID.Expert;
-                }
-                else
-                {
-                    DifficultyModeSystem.AlignJourneyDifficultySlider();
-                }
-            }
+            set => SetVanillaDifficulty(value, GameModeID.Master, GameModeID.Expert);
         }
 
         public override Asset<Texture2D> Texture => _texture ??= ModContent.Request<Texture2D>("CalamityMod/UI/ModeIndicator/ModeIndicator_Master");
@@ -449,17 +431,7 @@ namespace CalamityMod.Systems
         public override bool Enabled
         {
             get => CalamityWorld.LegendaryMode;
-            set
-            {
-                if (!Main.GameModeInfo.IsJourneyMode)
-                {
-                    Main.GameMode = value == true ? GameModeID.Master : GameModeID.Expert;
-                }
-                else
-                {
-                    DifficultyModeSystem.AlignJourneyDifficultySlider();
-                }
-            }
+            set => SetVanillaDifficulty(value, GameModeID.Master, GameModeID.Expert);
         }
 
         public override Asset<Texture2D> Texture => _texture ??= ModContent.Request<Texture2D>("CalamityMod/UI/ModeIndicator/ModeIndicator_Legendary");
@@ -534,14 +506,7 @@ namespace CalamityMod.Systems
             {
                 if (Main.getGoodWorld)
                 {
-                    if (!Main.GameModeInfo.IsJourneyMode)
-                    {
-                        Main.GameMode = value == true ? GameModeID.Expert : GameModeID.Normal;
-                    }
-                    else
-                    {
-                        DifficultyModeSystem.AlignJourneyDifficultySlider();
-                    }
+                    SetVanillaDifficulty(value, GameModeID.Expert, GameModeID.Normal);
                     CalamityWorld.death = value;
                 }
                 else

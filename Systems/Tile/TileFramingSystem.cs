@@ -493,36 +493,12 @@ namespace CalamityMod.Systems
         }
 
         internal static bool BetterGemsparkFraming(int x, int y, bool resetFrame)
-        {
-            if (x < 0 || x >= Main.maxTilesX)
-                return false;
-            if (y < 0 || y >= Main.maxTilesY)
-                return false;
-
-            var tile = Main.tile[x, y];
-            if (tile.Slope > 0 && TileID.Sets.HasSlopeFrames[tile.TileType])
-            {
-                return true;
-            }
-
-            GetAdjacentTiles(x, y, out var up, out var down, out var left, out var right, out var upLeft, out var upRight, out var downLeft, out var downRight);
-
-            // Reset the tile's random frame style if the frame is being reset.
-            int randomFrame;
-            if (resetFrame)
-            {
-                randomFrame = WorldGen.genRand.Next(3);
-                Main.tile[x, y].Get<TileWallWireStateData>().TileFrameNumber = randomFrame;
-            }
-            else
-            {
-                randomFrame = Main.tile[x, y].TileFrameNumber;
-            }
-
-            return GemsparkAndBrimstoneFraming(tile, randomFrame, false, up, down, left, right, upLeft, upRight, downLeft, downRight);
-        }
+            => GemsparkAndBrimstoneFraming(x, y, resetFrame, false);
 
         internal static bool BrimstoneFraming(int x, int y, bool resetFrame)
+            => GemsparkAndBrimstoneFraming(x, y, resetFrame, true);
+
+        private static bool GemsparkAndBrimstoneFraming(int x, int y, bool resetFrame, bool brimstone)
         {
             if (x < 0 || x >= Main.maxTilesX)
                 return false;
@@ -544,7 +520,7 @@ namespace CalamityMod.Systems
             }
             else
                 randomFrame = Main.tile[x, y].TileFrameNumber;
-            return GemsparkAndBrimstoneFraming(tile, randomFrame, true, up, down, left, right, upLeft, upRight, downLeft, downRight);
+            return GemsparkAndBrimstoneFraming(tile, randomFrame, brimstone, up, down, left, right, upLeft, upRight, downLeft, downRight);
         }
 
         private static bool GemsparkAndBrimstoneFraming(

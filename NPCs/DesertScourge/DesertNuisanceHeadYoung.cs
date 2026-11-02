@@ -31,7 +31,6 @@ namespace CalamityMod.NPCs.DesertScourge
 
         public const float OpenMouthForBiteDistance = 220f;
 
-        private const int OpenMouthStopFrame = 4;
 
         public override void SetStaticDefaults()
         {
@@ -347,135 +346,11 @@ namespace CalamityMod.NPCs.DesertScourge
             if (!shouldFly)
             {
                 NPC.velocity.Y += 0.1f;
-                if (NPC.velocity.Y > maxChaseSpeed)
-                    NPC.velocity.Y = maxChaseSpeed;
-
-                // This bool exists to stop the strange wiggle behavior when worms are falling down
-                bool slowXVelocity = Math.Abs(NPC.velocity.X) > speed;
-                if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.4)
-                {
-                    if (NPC.velocity.X < 0f)
-                        NPC.velocity.X -= speed * 1.1f;
-                    else
-                        NPC.velocity.X += speed * 1.1f;
-                }
-                else if (NPC.velocity.Y == maxChaseSpeed)
-                {
-                    if (slowXVelocity)
-                    {
-                        if (NPC.velocity.X < playerX)
-                            NPC.velocity.X += speed;
-                        else if (NPC.velocity.X > playerX)
-                            NPC.velocity.X -= speed;
-                    }
-                    else
-                        NPC.velocity.X = 0f;
-                }
-                else if (NPC.velocity.Y > 4f)
-                {
-                    if (slowXVelocity)
-                    {
-                        if (NPC.velocity.X < 0f)
-                            NPC.velocity.X += speed * 0.9f;
-                        else
-                            NPC.velocity.X -= speed * 0.9f;
-                    }
-                    else
-                        NPC.velocity.X = 0f;
-                }
+                DesertScourgeHead.UpdateFallingVelocity(NPC, maxChaseSpeed, speed, playerX);
             }
             else
             {
-                if (NPC.soundDelay == 0)
-                {
-                    float soundDelay = targetDistance / 40f;
-                    if (soundDelay < 10f)
-                        soundDelay = 10f;
-                    if (soundDelay > 20f)
-                        soundDelay = 20f;
-
-                    NPC.soundDelay = (int)soundDelay;
-                    SoundEngine.PlaySound(SoundID.WormDig, NPC.Center);
-                }
-
-                targetDistance = (float)Math.Sqrt((double)(playerX * playerX + targettingPosition * targettingPosition));
-                float absolutePlayerX = Math.Abs(playerX);
-                float absoluteTargetPos = Math.Abs(targettingPosition);
-                float timeToReachTarget = maxChaseSpeed / targetDistance;
-                playerX *= timeToReachTarget;
-                targettingPosition *= timeToReachTarget;
-
-                if (((NPC.velocity.X > 0f && playerX > 0f) || (NPC.velocity.X < 0f && playerX < 0f)) && ((NPC.velocity.Y > 0f && targettingPosition > 0f) || (NPC.velocity.Y < 0f && targettingPosition < 0f)))
-                {
-                    if (NPC.velocity.X < playerX)
-                        NPC.velocity.X += turnSpeed;
-                    else if (NPC.velocity.X > playerX)
-                        NPC.velocity.X -= turnSpeed;
-
-                    if (NPC.velocity.Y < targettingPosition)
-                        NPC.velocity.Y += turnSpeed;
-                    else if (NPC.velocity.Y > targettingPosition)
-                        NPC.velocity.Y -= turnSpeed;
-                }
-
-                if ((NPC.velocity.X > 0f && playerX > 0f) || (NPC.velocity.X < 0f && playerX < 0f) || (NPC.velocity.Y > 0f && targettingPosition > 0f) || (NPC.velocity.Y < 0f && targettingPosition < 0f))
-                {
-                    if (NPC.velocity.X < playerX)
-                        NPC.velocity.X += speed;
-                    else if (NPC.velocity.X > playerX)
-                        NPC.velocity.X -= speed;
-
-                    if (NPC.velocity.Y < targettingPosition)
-                        NPC.velocity.Y += speed;
-                    else if (NPC.velocity.Y > targettingPosition)
-                        NPC.velocity.Y -= speed;
-
-                    if ((double)Math.Abs(targettingPosition) < maxChaseSpeed * 0.2 && ((NPC.velocity.X > 0f && playerX < 0f) || (NPC.velocity.X < 0f && playerX > 0f)))
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y += speed * 2f;
-                        else
-                            NPC.velocity.Y -= speed * 2f;
-                    }
-
-                    if ((double)Math.Abs(playerX) < maxChaseSpeed * 0.2 && ((NPC.velocity.Y > 0f && targettingPosition < 0f) || (NPC.velocity.Y < 0f && targettingPosition > 0f)))
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X += speed * 2f;
-                        else
-                            NPC.velocity.X -= speed * 2f;
-                    }
-                }
-                else if (absolutePlayerX > absoluteTargetPos)
-                {
-                    if (NPC.velocity.X < playerX)
-                        NPC.velocity.X += speed * 1.1f;
-                    else if (NPC.velocity.X > playerX)
-                        NPC.velocity.X -= speed * 1.1f;
-
-                    if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
-                    {
-                        if (NPC.velocity.Y > 0f)
-                            NPC.velocity.Y += speed;
-                        else
-                            NPC.velocity.Y -= speed;
-                    }
-                }
-                else
-                {
-                    if (NPC.velocity.Y < targettingPosition)
-                        NPC.velocity.Y += speed * 1.1f;
-                    else if (NPC.velocity.Y > targettingPosition)
-                        NPC.velocity.Y -= speed * 1.1f;
-
-                    if ((double)(Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y)) < maxChaseSpeed * 0.5)
-                    {
-                        if (NPC.velocity.X > 0f)
-                            NPC.velocity.X += speed;
-                        else
-                            NPC.velocity.X -= speed;
-                    }
-                }
+                DesertScourgeHead.UpdateDiggingVelocity(NPC, targetDistance, playerX, targettingPosition, maxChaseSpeed, speed, turnSpeed);
             }
 
             Vector2 destination = Main.player[NPC.target].Center;
@@ -547,68 +422,7 @@ namespace CalamityMod.NPCs.DesertScourge
                 (Main.player[NPC.target].Center - NPC.Center).SafeNormalize(Vector2.UnitY).ToRotation().AngleTowards(NPC.velocity.ToRotation(), MathHelper.PiOver4) == NPC.velocity.ToRotation() &&
                 NPC.ai[3] == 0f;
 
-            bool closeMouthBite = NPC.ai[3] == 1f;
-            if (closeMouthBite)
-            {
-                // Force mouth open for a bite if it's not open.
-                if (NPC.frame.Y < frameHeight * OpenMouthStopFrame)
-                {
-                    NPC.frame.Y = frameHeight * OpenMouthStopFrame;
-                    NPC.frameCounter = 0D;
-                }
-
-                NPC.frameCounter += 1D;
-                if (NPC.frameCounter > 4D)
-                {
-                    NPC.frame.Y += frameHeight;
-                    NPC.frameCounter = 0D;
-                }
-                if (NPC.frame.Y >= frameHeight * Main.npcFrameCount[Type])
-                {
-                    NPC.ai[3] = 2f;
-                    NPC.ForceNetUpdate();
-                    NPC.frame.Y = 0;
-                }
-            }
-            else if (openMouth || aboutToSpitSpread)
-            {
-                NPC.frameCounter += 1D;
-                if (NPC.frameCounter > 4D)
-                {
-                    NPC.frame.Y += frameHeight;
-                    NPC.frameCounter = 0D;
-                }
-                if (NPC.frame.Y >= frameHeight * OpenMouthStopFrame)
-                    NPC.frame.Y = frameHeight * OpenMouthStopFrame;
-            }
-
-            // Close mouth.
-            else
-            {
-                if (NPC.frame.Y > 0)
-                {
-                    if (NPC.frame.Y >= frameHeight * Main.npcFrameCount[Type])
-                    {
-                        NPC.frame.Y = 0;
-                        NPC.ai[3] = 0f;
-                        NPC.ForceNetUpdate();
-                    }
-                    else
-                    {
-                        NPC.frameCounter += 1D;
-                        if (NPC.frameCounter > 4D)
-                        {
-                            NPC.frame.Y -= frameHeight;
-                            NPC.frameCounter = 0D;
-                        }
-                    }
-                }
-                else
-                {
-                    NPC.ai[3] = 0f;
-                    NPC.ForceNetUpdate();
-                }
-            }
+            DesertScourgeHead.UpdateMouthFrame(NPC, Type, frameHeight, openMouth || aboutToSpitSpread);
         }
 
         public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)
