@@ -15,51 +15,46 @@ float2 uImageSize1;
 matrix uWorldViewProjection;
 float4 uShaderSpecificData;
 
-struct VertexShaderInput
-{
-    float4 Position : POSITION0;
-    float4 Color : COLOR0;
-    float3 TextureCoordinates : TEXCOORD0;
+struct VertexShaderInput {
+  float4 Position : POSITION0;
+  float4 Color : COLOR0;
+  float3 TextureCoordinates : TEXCOORD0;
 };
 
-struct VertexShaderOutput
-{
-    float4 Position : SV_POSITION;
-    float4 Color : COLOR0;
-    float3 TextureCoordinates : TEXCOORD0;
+struct VertexShaderOutput {
+  float4 Position : SV_POSITION;
+  float4 Color : COLOR0;
+  float3 TextureCoordinates : TEXCOORD0;
 };
 
-VertexShaderOutput VertexShaderFunction(in VertexShaderInput input)
-{
-    VertexShaderOutput output = (VertexShaderOutput) 0;
-    float4 pos = mul(input.Position, uWorldViewProjection);
-    output.Position = pos;
-    output.Color = input.Color;
-    output.TextureCoordinates = input.TextureCoordinates;
+VertexShaderOutput VertexShaderFunction(in VertexShaderInput input) {
+  VertexShaderOutput output = (VertexShaderOutput)0;
+  float4 pos = mul(input.Position, uWorldViewProjection);
+  output.Position = pos;
+  output.Color = input.Color;
+  output.TextureCoordinates = input.TextureCoordinates;
 
-    return output;
+  return output;
 }
 
-// The X coordinate is the trail completion, the Y coordinate is the same as any other.
-// This is simply how the primitive TextCoord is layed out in the C# code.
-float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
-{
-    float4 color = input.Color;
-    float2 coords = input.TextureCoordinates;
-    
-    // Account for texture distortion artifacts.
-    coords.y = (coords.y - 0.5) / input.TextureCoordinates.z + 0.5;
-    
-    float slashMapColor = tex2D(uImage1, coords);
-    float opacity = 1 - slashMapColor.r;
-    return color * pow(opacity, 3);
+// The X coordinate is the trail completion, the Y coordinate is the same as any
+// other. This is simply how the primitive TextCoord is layed out in the C#
+// code.
+float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0 {
+  float4 color = input.Color;
+  float2 coords = input.TextureCoordinates;
+
+  // Account for texture distortion artifacts.
+  coords.y = (coords.y - 0.5) / input.TextureCoordinates.z + 0.5;
+
+  float slashMapColor = tex2D(uImage1, coords);
+  float opacity = 1 - slashMapColor.r;
+  return color * pow(opacity, 3);
 }
 
-technique Technique1
-{
-    pass TrailPass
-    {
-        VertexShader = compile vs_2_0 VertexShaderFunction();
-        PixelShader = compile ps_2_0 PixelShaderFunction();
-    }
+technique Technique1 {
+  pass TrailPass {
+    VertexShader = compile vs_2_0 VertexShaderFunction();
+    PixelShader = compile ps_2_0 PixelShaderFunction();
+  }
 }

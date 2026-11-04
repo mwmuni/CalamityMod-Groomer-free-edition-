@@ -14,20 +14,15 @@ float2 uImageSize0;
 float2 uImageSize1;
 float4 uShaderSpecificData;
 
-float4 Recolor(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
-{
-    
-    float4 color = tex2D(uImage0, coords);
-    float originalAlpha = color.a;
-    color.rbg = lerp(color.rbg, uColor, uOpacity);
-    return color * originalAlpha * uSaturation;
-    
+float4 Recolor(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0)
+    : COLOR0 {
+
+  float4 color = tex2D(uImage0, coords);
+  float originalAlpha = color.a;
+  color.rbg = lerp(color.rbg, uColor, uOpacity);
+  return color * originalAlpha * uSaturation;
 }
 
-technique Technique1
-{
-    pass TintPass
-    {
-        PixelShader = compile ps_2_0 Recolor();
-    }
+technique Technique1 {
+  pass TintPass { PixelShader = compile ps_2_0 Recolor(); }
 }

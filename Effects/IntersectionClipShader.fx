@@ -18,23 +18,22 @@ float2 uIntersectionNormal;
 float2 uSize;
 float4 uShaderSpecificData;
 
-float2 RotatedBy(float2 xy, float theta)
-{
-    return float2(xy.x * sin(theta + 1.57) - xy.y * sin(theta), xy.x * sin(theta) + xy.y * sin(theta + 1.57));
+float2 RotatedBy(float2 xy, float theta) {
+  return float2(xy.x * sin(theta + 1.57) - xy.y * sin(theta),
+                xy.x * sin(theta) + xy.y * sin(theta + 1.57));
 }
-float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
-{
-    float2 worldPos = uWorldPosition + RotatedBy(coords - 0.5, uRotation) * uSize;
-    if (sign(dot(uIntersectionNormal, normalize(worldPos - uIntersectionPosition))) == uIntersectionCutoffDirection)
-        return 0;
-    
-    return tex2D(uImage0, coords) * sampleColor;
+float4 PixelShaderFunction(float4 sampleColor : COLOR0,
+                           float2 coords : TEXCOORD0)
+    : COLOR0 {
+  float2 worldPos = uWorldPosition + RotatedBy(coords - 0.5, uRotation) * uSize;
+  if (sign(dot(uIntersectionNormal,
+               normalize(worldPos - uIntersectionPosition))) ==
+      uIntersectionCutoffDirection)
+    return 0;
+
+  return tex2D(uImage0, coords) * sampleColor;
 }
 
-technique Technique1
-{
-    pass ClipPass
-    {
-        PixelShader = compile ps_2_0 PixelShaderFunction();
-    }
+technique Technique1 {
+  pass ClipPass { PixelShader = compile ps_2_0 PixelShaderFunction(); }
 }

@@ -19,58 +19,55 @@ matrix uWorldViewProjection;
 float4 uShaderSpecificData;
 bool flipped;
 
-struct VertexShaderInput
-{
-    float4 Position : POSITION0;
-    float4 Color : COLOR0;
-    float3 TextureCoordinates : TEXCOORD0;
+struct VertexShaderInput {
+  float4 Position : POSITION0;
+  float4 Color : COLOR0;
+  float3 TextureCoordinates : TEXCOORD0;
 };
 
-struct VertexShaderOutput
-{
-    float4 Position : SV_POSITION;
-    float4 Color : COLOR0;
-    float3 TextureCoordinates : TEXCOORD0;
+struct VertexShaderOutput {
+  float4 Position : SV_POSITION;
+  float4 Color : COLOR0;
+  float3 TextureCoordinates : TEXCOORD0;
 };
 
-VertexShaderOutput VertexShaderFunction(in VertexShaderInput input)
-{
-    VertexShaderOutput output = (VertexShaderOutput) 0;
-    float4 pos = mul(input.Position, uWorldViewProjection);
-    output.Position = pos;
-    output.Color = input.Color;
-    output.TextureCoordinates = input.TextureCoordinates;
+VertexShaderOutput VertexShaderFunction(in VertexShaderInput input) {
+  VertexShaderOutput output = (VertexShaderOutput)0;
+  float4 pos = mul(input.Position, uWorldViewProjection);
+  output.Position = pos;
+  output.Color = input.Color;
+  output.TextureCoordinates = input.TextureCoordinates;
 
-    return output;
+  return output;
 }
 
-float InverseLerp(float from, float to, float x)
-{
-    return saturate((x - from) / (to - from));
+float InverseLerp(float from, float to, float x) {
+  return saturate((x - from) / (to - from));
 }
 
-float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
-{
-    float4 color = input.Color;
-    float2 coords = input.TextureCoordinates;
-    
-    // Account for texture distortion artifacts.
-    coords.y = (coords.y - 0.5) / input.TextureCoordinates.z + 0.5;
-    
-    float bloomOpacity = pow(sin(coords.y * 3.141), 5.6);
-    float noise = tex2D(uImage1, coords * 3 - float2(uTime * 2.44, 0));
-    float brightnessStreak = tex2D(uImage2, coords * float2(2, 1) - float2(uTime * 1.61, 0)) + noise * bloomOpacity;
-    float4 energyColor = float4(lerp(uColor, uSecondaryColor, noise), 1);
-    float widthOpacity = pow(sin(coords.y * 3.141), InverseLerp(0.1, 0, coords.x) * 20);
-    
-    return (energyColor * bloomOpacity + brightnessStreak * bloomOpacity) * color.a * pow(1 - coords.x, 1.6) * widthOpacity;
+float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0 {
+  float4 color = input.Color;
+  float2 coords = input.TextureCoordinates;
+
+  // Account for texture distortion artifacts.
+  coords.y = (coords.y - 0.5) / input.TextureCoordinates.z + 0.5;
+
+  float bloomOpacity = pow(sin(coords.y * 3.141), 5.6);
+  float noise = tex2D(uImage1, coords * 3 - float2(uTime * 2.44, 0));
+  float brightnessStreak =
+      tex2D(uImage2, coords * float2(2, 1) - float2(uTime * 1.61, 0)) +
+      noise * bloomOpacity;
+  float4 energyColor = float4(lerp(uColor, uSecondaryColor, noise), 1);
+  float widthOpacity =
+      pow(sin(coords.y * 3.141), InverseLerp(0.1, 0, coords.x) * 20);
+
+  return (energyColor * bloomOpacity + brightnessStreak * bloomOpacity) *
+         color.a * pow(1 - coords.x, 1.6) * widthOpacity;
 }
 
-technique Technique1
-{
-    pass PiercePass
-    {
-        VertexShader = compile vs_2_0 VertexShaderFunction();
-        PixelShader = compile ps_2_0 PixelShaderFunction();
-    }
+technique Technique1 {
+  pass PiercePass {
+    VertexShader = compile vs_2_0 VertexShaderFunction();
+    PixelShader = compile ps_2_0 PixelShaderFunction();
+  }
 }

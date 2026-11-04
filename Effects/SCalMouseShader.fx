@@ -14,19 +14,17 @@ float2 uImageSize0;
 float2 uImageSize1;
 float4 uShaderSpecificData;
 
-float4 PixelShaderFunction(float4 sampleColor : TEXCOORD, float2 coords : TEXCOORD0) : COLOR0
-{
-    float fadeInterpolant = cos(coords.y * coords.x * 6.283 - uTime * 13.1) * 0.5 + 0.5;
-    
-    float4 fadeColor = float4(lerp(uColor, uSecondaryColor, fadeInterpolant), 1);
-    float4 color = tex2D(uImage0, coords) * fadeColor;
-    color *= 1 + fadeInterpolant * 0.5;
-    return color;
+float4 PixelShaderFunction(float4 sampleColor : TEXCOORD,
+                           float2 coords : TEXCOORD0)
+    : COLOR0 {
+  float fadeInterpolant =
+      cos(coords.y * coords.x * 6.283 - uTime * 13.1) * 0.5 + 0.5;
+
+  float4 fadeColor = float4(lerp(uColor, uSecondaryColor, fadeInterpolant), 1);
+  float4 color = tex2D(uImage0, coords) * fadeColor;
+  color *= 1 + fadeInterpolant * 0.5;
+  return color;
 }
-technique Technique1
-{
-    pass DyePass
-    {
-        PixelShader = compile ps_2_0 PixelShaderFunction();
-    }
+technique Technique1 {
+  pass DyePass { PixelShader = compile ps_2_0 PixelShaderFunction(); }
 }
