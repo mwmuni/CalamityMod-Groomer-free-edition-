@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Debugging\PerformanceCapture.cs" Link="Source\PerformanceCapture.cs" />
+    <Compile Include="..\..\Debugging\PerformanceDiagnosticsSystem.cs" Link="Source\PerformanceDiagnosticsSystem.cs" />
+    <Compile Include="..\..\Debugging\PerformanceCommand.cs" Link="Source\PerformanceCommand.cs" />
+    <Compile Include="..\..\Particles\GeneralParticleHandler.cs" Link="Source\GeneralParticleHandler.cs" />
+    <Compile Include="..\..\Enums\GeneralDrawLayer.cs" Link="Source\GeneralDrawLayer.cs" />
+  </ItemGroup>
+</Project>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using CalamityMod.Debugging;
 using CalamityMod.Enums;
 using CalamityMod.Systems.Graphic;
 using CalamityMod.Systems.Graphic.PixelationSystem;
@@ -254,6 +255,8 @@ namespace CalamityMod.Particles
             if (Main.dedServ)
                 return;
 
+            using var measurement = PerformanceRecorder.Measure(PerformanceMetric.ParticleUpdate);
+
             // Spawn queued particles.
             foreach (var collectionsByDrawLayer in particlesToSpawnNextFrame)
             {
@@ -296,6 +299,8 @@ namespace CalamityMod.Particles
         {
             if (Main.dedServ)
                 return;
+
+            using var measurement = PerformanceRecorder.Measure(PerformanceMetric.ParticleDraw);
 
             DrawParticleCollection(particlesToDraw, drawLayer);
             DrawParticleCollection(particlesToDraw_Pixelated, drawLayer, true);
@@ -393,7 +398,7 @@ namespace CalamityMod.Particles
                 foreach (var blendStateParticleListPair in shaderDrawCollectionPair.Value)
                 {
                     if (blendStateParticleListPair.Value.Count == 0)
-                        return;
+                        continue;
 
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, blendStateParticleListPair.Key, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, shaderDrawCollectionPair.Key, Main.GameViewMatrix.TransformationMatrix);
 

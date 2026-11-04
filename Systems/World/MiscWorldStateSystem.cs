@@ -218,7 +218,7 @@ namespace CalamityMod
                 downedAres, downedThanatos, downedArtemisAndApollo, TalkedToDraedon);
             BitsByte flags12 = CreateFlags(
                 downedCragmawMire, downedMauler, downedNuclearTerror, downedBossRush,
-                DraedonMechdusa, downedHorribleHog, false, false);
+                DraedonMechdusa, downedHorribleHog, unlockedTownPig, false);
 
             writer.Write(flags);
             writer.Write(flags2);
@@ -304,7 +304,7 @@ namespace CalamityMod
             downedNuclearTerror = flags12[2];
             downedBossRush = flags12[3];
             DraedonMechdusa = flags12[4];
-            unlockedTownPig = flags12[5];
+            unlockedTownPig = flags12[6];
             downedHorribleHog = flags12[5];
 
             RecipeUnlockHandler.ReceiveData(reader);

@@ -78,7 +78,7 @@ namespace CalamityMod.NPCs
         public override void PostAI(NPC npc)
         {
             // Only Server should update this!
-            if (!Main.dedServ)
+            if (Main.netMode != NetmodeID.Server)
                 return;
 
             // Obviously deactived npc is not on our interest (not sure if this is case though)
@@ -100,7 +100,7 @@ namespace CalamityMod.NPCs
                 if (distance <= 1499.0f)
                     continue;
 
-                npc.SyncNPCPosAndRotOnly(); //Light-weight version to sync it's position
+                Packets.SyncNPCPosAndRotOnlyPacket.Send(npc, toClient: player.whoAmI);
             }
         }
 

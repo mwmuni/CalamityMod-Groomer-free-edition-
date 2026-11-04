@@ -31,10 +31,11 @@ namespace CalamityMod.Packets
             if (cooldowns is null)
                 return;
 
+            var snapshot = cooldowns.ToArray();
             var packet = Instance.CreateBasePacket();
             packet.WriteWhoAmI(player);
-            packet.Write(player.cooldowns.Count);
-            foreach (CooldownInfoTuple cd in cooldowns)
+            packet.Write(snapshot.Length);
+            foreach (CooldownInfoTuple cd in snapshot)
             {
                 packet.Write(cd.netID);
                 packet.Write(cd.duration);
@@ -47,6 +48,8 @@ namespace CalamityMod.Packets
         {
             var player = packet.ReadCalamityPlayer();
             int count = packet.ReadInt32();
+            if (count < 0 || count > ushort.MaxValue + 1 || count > (packet.BaseStream.Length - packet.BaseStream.Position) / 10)
+                throw new InvalidDataException($"Invalid cooldown snapshot count: {count}.");
 
             Dictionary<ushort, CooldownInfoTuple> receivedCooldowns = new(count);
             for (int i = 0; i < count; ++i)
@@ -54,51 +57,49 @@ namespace CalamityMod.Packets
                 var netID = packet.ReadUInt16();
                 var duration = packet.ReadInt32();
                 var timeLeft = packet.ReadInt32();
+                if (netID >= CooldownRegistry.registry.Length || CooldownRegistry.registry[netID] is null)
+                    throw new InvalidDataException($"Unknown cooldown ID: {netID}.");
+
                 receivedCooldowns[netID] = (netID, duration, timeLeft);
             }
 
             if (player is null)
                 return;
 
+            if (Main.netMode == NetmodeID.Server && player.Player.whoAmI != sender)
+            {
+                CalamityMod.Log.Warn($"Ignored cooldown snapshot sent by client {sender} for player {player.Player.whoAmI}.");
+                return;
+            }
+
             if (Main.netMode == NetmodeID.MultiplayerClient)
             {
-                HashSet<ushort> localIDs = [.. player.cooldowns.Values.Select(cd => cd.netID)];
-                HashSet<ushort> receivedIDs = [.. receivedCooldowns.Keys];
-
-                HashSet<ushort> combinedIDSet = [];
-                combinedIDSet.UnionWith(localIDs);
-                combinedIDSet.UnionWith(receivedIDs);
-
-                foreach (ushort netID in combinedIDSet)
+                List<string> removedIDs = [];
+                foreach (var local in player.cooldowns)
                 {
-                    bool existsLocally = localIDs.Contains(netID);
-                    bool existsRemotely = receivedIDs.Contains(netID);
-                    string id = CooldownRegistry.registry[netID].ID;
+                    if (!receivedCooldowns.ContainsKey(local.Value.netID))
+                        removedIDs.Add(local.Key);
+                }
+                foreach (string id in removedIDs)
+                    player.cooldowns.Remove(id);
 
-                    // Exists locally but not remotely = cull -- destroy the local copy.
-                    if (existsLocally && !existsRemotely)
+                foreach (var received in receivedCooldowns.Values)
+                {
+                    string id = CooldownRegistry.registry[received.netID].ID;
+                    if (player.cooldowns.TryGetValue(id, out var local))
                     {
-                        player.cooldowns.Remove(id);
+                        local.duration = received.duration;
+                        local.timeLeft = received.timeLeft;
                     }
-                    // Exists remotely but not locally = add -- insert into the dictionary.
-                    else if (existsRemotely && !existsLocally)
+                    else
                     {
-                        var cdToAdd = receivedCooldowns[netID];
-                        player.cooldowns[id] = new CooldownInstance(player.Player, cdToAdd.netID, cdToAdd.duration, cdToAdd.timeLeft);
-                    }
-                    // Exists in both places = update -- update timing fields but don't replace the instance.
-                    else if (existsLocally && existsRemotely)
-                    {
-                        CooldownInstance localInstance = player.cooldowns[id];
-                        localInstance.duration = receivedCooldowns[netID].duration;
-                        localInstance.timeLeft = receivedCooldowns[netID].timeLeft;
+                        player.cooldowns[id] = new CooldownInstance(player.Player, received.netID, received.duration, received.timeLeft);
                     }
                 }
             }
             else if (Main.dedServ)
             {
-                // Server should NOT handle cooldown itself!
-                // Server doesn't have information for cooldown netIDs!
+                // The server validates IDs but leaves cooldown handler execution to clients.
                 Send(player, receivedCooldowns.Values, ignoreClient: sender);
             }
         }

@@ -393,7 +393,7 @@ namespace CalamityMod.NPCs.ExoMechs.Ares
                         neurontimer = 0;
                     }
                 }
-                if (NPC.CountNPCS(ModContent.NPCType<Artemis.Artemis>()) > 0 || NPC.CountNPCS(ModContent.NPCType<ThanatosHead>()) > 0)
+                if (NPC.AnyNPCs(ModContent.NPCType<Artemis.Artemis>()) || NPC.AnyNPCs(ModContent.NPCType<ThanatosHead>()))
                 {
                     NPC.TargetClosest();
                     Vector2 where2 = new Vector2(Main.player[NPC.target].Center.X + 600, Main.player[NPC.target].Center.Y - 200);

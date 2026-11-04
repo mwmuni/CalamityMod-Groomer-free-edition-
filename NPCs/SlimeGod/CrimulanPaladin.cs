@@ -651,16 +651,17 @@ namespace CalamityMod.NPCs.SlimeGod
 
         internal static void FireAtPlayers(NPC npc, float projectileVelocity, int type, int damage)
         {
-            List<int> targets = new List<int>();
+            Span<int> targets = stackalloc int[2];
+            int targetCount = 0;
             foreach (Player plr in Main.ActivePlayers)
             {
                 if (!plr.dead)
-                    targets.Add(plr.whoAmI);
+                    targets[targetCount++] = plr.whoAmI;
 
-                if (targets.Count > 1)
+                if (targetCount > 1)
                     break;
             }
-            foreach (int t in targets)
+            foreach (int t in targets[..targetCount])
             {
                 Vector2 projFireDirection = Vector2.Normalize(Main.player[t].Center - npc.Center) * projectileVelocity;
                 Projectile.NewProjectile(npc.GetSource_FromAI(), npc.Center + Vector2.Normalize(projFireDirection) * 30f * npc.scale, projFireDirection, type, damage, 0f, Main.myPlayer);

@@ -49,6 +49,11 @@ namespace CalamityMod.NPCs.Leviathan
         public static readonly SoundStyle RoarChargeSound = new("CalamityMod/Sounds/Custom/LeviathanRoarCharge");
         public static readonly SoundStyle EmergeSound = new("CalamityMod/Sounds/Custom/LeviathanEmerge");
 
+        private static readonly SoundStyle[] IdleSounds =
+        {
+            SoundID.Zombie38, SoundID.Zombie39, SoundID.Zombie40
+        };
+
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[Type] = 3;
@@ -171,12 +176,7 @@ namespace CalamityMod.NPCs.Leviathan
             }
 
             SoundStyle soundChoiceRage = SoundID.Zombie92;
-            SoundStyle soundChoice = Utils.SelectRandom(Main.rand, new SoundStyle[]
-            {
-                SoundID.Zombie38,
-                SoundID.Zombie39,
-                SoundID.Zombie40
-            });
+            SoundStyle soundChoice = Utils.SelectRandom(Main.rand, IdleSounds);
 
             if (soundDelay > 0)
                 soundDelay--;

@@ -734,16 +734,17 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                             }
 
                             // Fire gel balls directly at players with a max of 3
-                            List<int> targets = new List<int>();
+                            Span<int> targets = stackalloc int[3];
+                            int targetCount = 0;
                             for (int p = 0; p < Main.maxPlayers; p++)
                             {
                                 if (Main.player[p].active && !Main.player[p].dead)
-                                    targets.Add(p);
+                                    targets[targetCount++] = p;
 
-                                if (targets.Count > 2)
+                                if (targetCount > 2)
                                     break;
                             }
-                            foreach (int t in targets)
+                            foreach (int t in targets[..targetCount])
                             {
                                 Vector2 velocity2 = (Main.player[t].Center - NPC.Center).SafeNormalize(Vector2.UnitY) * projectileVelocity;
                                 int proj = Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, velocity2, type, LargeGelDamage, 0f, Main.myPlayer, 0f, -2f);

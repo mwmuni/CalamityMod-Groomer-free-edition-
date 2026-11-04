@@ -292,8 +292,7 @@ namespace CalamityMod.NPCs.Polterghast
                 int gate = threeAM ? 60 : phase4 ? 300 : phase3 ? 420 : phase2 ? 540 : 600;
                 if (soundTimer % gate == 0)
                 {
-                    SoundStyle[] creepyArray = creepySounds.ToArray();
-                    SoundStyle selectedSound = creepyArray[Main.rand.Next(0, creepyArray.Length - 1)];
+                    SoundStyle selectedSound = creepySounds[Main.rand.Next(0, creepySounds.Count - 1)];
                     SoundEngine.PlaySound(selectedSound with { Pitch = selectedSound.Pitch - 0.8f, Volume = selectedSound.Volume - 0.2f }, NPC.Center);
                 }
             }

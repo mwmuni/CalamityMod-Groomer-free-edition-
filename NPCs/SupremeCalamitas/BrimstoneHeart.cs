@@ -112,13 +112,13 @@ namespace CalamityMod.NPCs.SupremeCalamitas
 
             spriteBatch.ExitShaderRegion();
 
+            Span<Vector2> points = stackalloc Vector2[5];
             for (int i = 0; i < ChainEndpoints.Count; i++)
             {
                 float dist = NPC.Distance(ChainEndpoints[i]);
-                List<Vector2> points = new List<Vector2>();
                 for (int j = 0; j < 4; j++)
-                    points.Add(NPC.Center + NPC.DirectionTo(ChainEndpoints[i]) * dist * 0.25f * j);
-                points.Add(ChainEndpoints[i] + NPC.DirectionTo(ChainEndpoints[i]) * 18f);
+                    points[j] = NPC.Center + NPC.DirectionTo(ChainEndpoints[i]) * dist * 0.25f * j;
+                points[4] = ChainEndpoints[i] + NPC.DirectionTo(ChainEndpoints[i]) * 18f;
 
                 PrimitiveRenderer.RenderTrail(points, new(PrimitiveWidthFunction, PrimitiveColorFunction), 40);
             }

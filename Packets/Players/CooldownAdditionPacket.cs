@@ -38,6 +38,15 @@ namespace CalamityMod.Packets
             if (player is null)
                 return;
 
+            if (Main.netMode == NetmodeID.Server && player.Player.whoAmI != sender)
+            {
+                CalamityMod.Log.Warn($"Ignored cooldown addition sent by client {sender} for player {player.Player.whoAmI}.");
+                return;
+            }
+
+            if (netID >= CooldownRegistry.registry.Length || CooldownRegistry.registry[netID] is null)
+                throw new InvalidDataException($"Unknown cooldown ID: {netID}.");
+
             if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 CooldownInstance instance = new CooldownInstance(player.Player, netID, duration, timeLeft);
@@ -48,8 +57,7 @@ namespace CalamityMod.Packets
             }
             else if (Main.dedServ)
             {
-                // Server should NOT handle cooldown itself!
-                // Server doesn't have information for cooldown netIDs!
+                // The server validates IDs but leaves cooldown handler execution to clients.
                 Send(player, netID, duration, timeLeft, ignoreClient: sender);
             }
         }

@@ -29,14 +29,25 @@ namespace CalamityMod.Packets
         {
             var player = packet.ReadCalamityPlayer();
             var count = packet.ReadInt32();
+            if (count < 0 || count > ushort.MaxValue + 1 || count > (packet.BaseStream.Length - packet.BaseStream.Position) / sizeof(ushort))
+                throw new InvalidDataException($"Invalid cooldown removal count: {count}.");
+
             var netIDsToRemove = new ushort[count];
             for (int i = 0; i < count; i++)
             {
                 netIDsToRemove[i] = packet.ReadUInt16();
+                if (netIDsToRemove[i] >= CooldownRegistry.registry.Length || CooldownRegistry.registry[netIDsToRemove[i]] is null)
+                    throw new InvalidDataException($"Unknown cooldown ID: {netIDsToRemove[i]}.");
             }
 
             if (player is null)
                 return;
+
+            if (Main.netMode == NetmodeID.Server && player.Player.whoAmI != sender)
+            {
+                CalamityMod.Log.Warn($"Ignored cooldown removal sent by client {sender} for player {player.Player.whoAmI}.");
+                return;
+            }
 
             if (Main.netMode == NetmodeID.MultiplayerClient)
             {
@@ -47,8 +58,7 @@ namespace CalamityMod.Packets
             }
             else if (Main.dedServ)
             {
-                // Server should NOT handle cooldown itself!
-                // Server doesn't have information for cooldown netIDs!
+                // The server validates IDs but leaves cooldown handler execution to clients.
                 Send(player, netIDsToRemove, ignoreClient: sender);
             }
         }

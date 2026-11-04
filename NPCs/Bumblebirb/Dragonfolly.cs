@@ -432,7 +432,7 @@ namespace CalamityMod.NPCs.Bumblebirb
                                         NPC.ai[3] -= 1f;
                                 }
                             }
-                            else if (NPC.CountNPCS(ModContent.NPCType<DraconicSwarmer>()) < maxBirbs && NPC.localAI[3] == 0f)
+                            else if (NPC.localAI[3] == 0f && NPC.CountNPCS(ModContent.NPCType<DraconicSwarmer>()) < maxBirbs)
                             {
                                 NPC.TargetClosest();
                                 NPC.ai[0] = 4f;
@@ -737,7 +737,7 @@ namespace CalamityMod.NPCs.Bumblebirb
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         bool gfbSpawnFlag = Main.zenithWorld && (NPC.ai[1] == 145f || NPC.ai[1] == 150f || NPC.ai[1] == 160f || NPC.ai[1] == 165f);
-                        bool spawnFlag = NPC.CountNPCS(ModContent.NPCType<DraconicSwarmer>()) < maxBirbs && (NPC.ai[1] == 140f || (revenge && NPC.ai[1] == 155f) || NPC.ai[1] == 170f || gfbSpawnFlag);
+                        bool spawnFlag = (NPC.ai[1] == 140f || (revenge && NPC.ai[1] == 155f) || NPC.ai[1] == 170f || gfbSpawnFlag) && NPC.CountNPCS(ModContent.NPCType<DraconicSwarmer>()) < maxBirbs;
                         if (spawnFlag)
                         {
                             Vector2 follySpawnCenter = NPC.Center + (MathHelper.TwoPi * Main.rand.NextFloat()).ToRotationVector2() * new Vector2(2f, 1f) * 50f * (0.6f + Main.rand.NextFloat() * 0.4f);

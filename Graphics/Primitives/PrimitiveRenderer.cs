@@ -143,7 +143,20 @@ namespace CalamityMod.Graphics.Primitives
         public static void RenderTrail(Vector2[] positions, PrimitiveSettings settings, int? pointsToCreate = null)
         {
             PerformPixelationSafetyChecks(settings);
+            RenderTrailCore(positions.AsSpan(0, positions.Length), settings, pointsToCreate);
+        }
 
+        /// <summary>
+        /// Renders caller-owned positions synchronously without retaining their storage.
+        /// </summary>
+        internal static void RenderTrail(ReadOnlySpan<Vector2> positions, PrimitiveSettings settings, int? pointsToCreate = null)
+        {
+            PerformPixelationSafetyChecks(settings);
+            RenderTrailCore(positions, settings, pointsToCreate);
+        }
+
+        private static void RenderTrailCore(ReadOnlySpan<Vector2> positions, PrimitiveSettings settings, int? pointsToCreate)
+        {
             // Return if not enough to draw anything.
             if (positions.Length <= 2)
                 return;
@@ -221,7 +234,7 @@ namespace CalamityMod.Graphics.Primitives
         #endregion
 
         #region Set Preperation
-        private static bool AssignPointsRectangleTrail(Vector2[] positions, PrimitiveSettings settings, int pointsToCreate)
+        private static bool AssignPointsRectangleTrail(ReadOnlySpan<Vector2> positions, PrimitiveSettings settings, int pointsToCreate)
         {
             // Don't smoothen the points unless explicitly told do so.
             if (!settings.Smoothen)

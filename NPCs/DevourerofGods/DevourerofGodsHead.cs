@@ -1988,15 +1988,12 @@ namespace CalamityMod.NPCs.DevourerofGods
                 if (Main.rand.NextBool(5))
                     SoundEngine.PlaySound(DeathSegmentSound, NPC.Center);
 
-                List<int> segments = new List<int>()
-                {
-                    ModContent.NPCType<DevourerofGodsBody>(),
-                    ModContent.NPCType<DevourerofGodsTail>()
-                };
+                int bodyType = ModContent.NPCType<DevourerofGodsBody>();
+                int tailType = ModContent.NPCType<DevourerofGodsTail>();
                 foreach (NPC n in Main.ActiveNPCs)
                 {
-                    if (segments.Contains(n.type) && n.active &&
-                        (n.type == segments[1] || n.ModNPC<DevourerofGodsBody>().SegmentIndex == index))
+                    if ((n.type == bodyType || n.type == tailType) && n.active &&
+                        (n.type == tailType || n.ModNPC<DevourerofGodsBody>().SegmentIndex == index))
                     {
                         for (int j = 0; j < 20; j++)
                         {

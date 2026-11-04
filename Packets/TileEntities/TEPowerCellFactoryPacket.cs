@@ -9,7 +9,7 @@ namespace CalamityMod.Packets
     {
         public static TEPowerCellFactoryPacket Instance { get; private set; }
 
-        public static void Send(TEPowerCellFactory cellFactory, long time, int stack, int toClient = -1, int ignoreClient = -1)
+        public static void Send(TEPowerCellFactory cellFactory, long time, short stack, int toClient = -1, int ignoreClient = -1)
         {
             if (cellFactory is null)
                 return;
@@ -37,7 +37,7 @@ namespace CalamityMod.Packets
 
             // When a server gets this packet, it immediately sends an equivalent packet to all clients.
             if (Main.dedServ)
-                Send(cellFactory, time, cellStack);
+                Send(cellFactory, cellFactory.Time, cellStack, ignoreClient: sender);
         }
     }
 }

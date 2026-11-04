@@ -1256,16 +1256,17 @@ namespace CalamityMod.NPCs.Providence
                     // Fire a flame towards every player, with a limit of 5
                     if (NPC.ai[3] % 60f == 0f && expertMode)
                     {
-                        List<int> targets = new List<int>();
+                        Span<int> targets = stackalloc int[5];
+                        int targetCount = 0;
                         foreach (Player plr in Main.ActivePlayers)
                         {
                             if (!plr.dead)
-                                targets.Add(plr.whoAmI);
+                                targets[targetCount++] = plr.whoAmI;
 
-                            if (targets.Count > 4)
+                            if (targetCount > 4)
                                 break;
                         }
-                        foreach (int t in targets)
+                        foreach (int t in targets[..targetCount])
                         {
                             Vector2 velocity2 = Vector2.Normalize(Main.player[t].Center - fireSparklesFrom) * cocoonProjVelocity * 1.5f;
                             if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -2508,7 +2509,7 @@ namespace CalamityMod.NPCs.Providence
         {
             if (challenge)
             {
-                List<int> exceptionList = new List<int>()
+                ReadOnlySpan<int> exceptionList = stackalloc int[]
                 {
                     ModContent.ProjectileType<MiniGuardianDefense>(),
                     ModContent.ProjectileType<MiniGuardianAttack>(),
@@ -2531,7 +2532,7 @@ namespace CalamityMod.NPCs.Providence
                 // Absorber on-hit effects likely won't proc this but Deific Amulet and Astral Bulwark stars will proc this.
                 bool allowedBabs = Main.player[projectile.owner].Calamity().pSoulArtifact && !Main.player[projectile.owner].Calamity().profanedCrystalBuffs;
 
-                if ((exceptionList.TrueForAll(x => projectile.type != x) && !allowedDamage) || !allowedBabs)
+                if ((!exceptionList.Contains(projectile.type) && !allowedDamage) || !allowedBabs)
                 {
                     challenge = false;
 

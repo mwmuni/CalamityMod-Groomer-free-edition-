@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using CalamityMod.TileEntities;
+using Terraria;
+using Terraria.ID;
 
 namespace CalamityMod.Packets
 {
@@ -37,6 +39,9 @@ namespace CalamityMod.Packets
             codeBreaker.InitialCellCountBeforeDecrypting = cellCountBeforeDecrypting;
             codeBreaker.HeldSchematicID = schematicID;
             codeBreaker.ContainsBloodyVein = containsBloodyVein;
+
+            if (Main.netMode == NetmodeID.Server)
+                Send(codeBreaker, ignoreClient: sender);
         }
     }
 }

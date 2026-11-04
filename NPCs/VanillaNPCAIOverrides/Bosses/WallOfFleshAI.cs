@@ -428,7 +428,7 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                     {
                         int hungryAmt = 0;
                         int maxHungries = 10;
-                        float[] array = new float[maxHungries];
+                        Span<float> array = stackalloc float[maxHungries];
                         for (int j = 0; j < Main.maxNPCs; j++)
                         {
                             if (hungryAmt < maxHungries && Main.npc[j].active && Main.npc[j].type == NPCID.TheHungry)

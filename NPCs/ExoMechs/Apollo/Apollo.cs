@@ -1466,6 +1466,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
             }
 
             // Draw ribbons near the main thruster
+            Span<Vector2> ribbonDrawPositions = stackalloc Vector2[12];
             for (int direction = -1; direction <= 1; direction += 2)
             {
                 if (NPC.IsABestiaryIconDummy)
@@ -1475,7 +1476,6 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                 ribbonOffset += Vector2.UnitX.RotatedBy(NPC.rotation) * direction * 26f;
 
                 float currentSegmentRotation = NPC.rotation;
-                List<Vector2> ribbonDrawPositions = new List<Vector2>();
                 for (int i = 0; i < 12; i++)
                 {
                     float ribbonCompletionRatio = i / 12f;
@@ -1490,7 +1490,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
 
                     Vector2 sinusoidalOffset = Vector2.UnitY.RotatedBy(NPC.rotation + sinusoidalRotationOffset) * sinusoidalRotationOffsetFactor;
                     Vector2 ribbonSegmentOffset = Vector2.UnitY.RotatedBy(currentSegmentRotation) * ribbonCompletionRatio * 540f + sinusoidalOffset;
-                    ribbonDrawPositions.Add(NPC.Center + ribbonSegmentOffset + ribbonOffset);
+                    ribbonDrawPositions[i] = NPC.Center + ribbonSegmentOffset + ribbonOffset;
 
                     currentSegmentRotation += segmentRotationOffset;
                 }
@@ -1540,6 +1540,7 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
             // Draw a flame trail on the thrusters if needed. This happens during charges.
             if (ChargeComboFlash > 0f && !NPC.IsABestiaryIconDummy)
             {
+                Span<Vector2> drawPositions = stackalloc Vector2[2];
                 for (int direction = -1; direction <= 1; direction++)
                 {
                     Vector2 baseDrawOffset = new Vector2(0f, direction == 0f ? 18f : 60f).RotatedBy(NPC.rotation);
@@ -1548,11 +1549,8 @@ namespace CalamityMod.NPCs.ExoMechs.Apollo
                     float backFlameLength = direction == 0f ? 700f : 190f;
                     Vector2 drawStart = NPC.Center + baseDrawOffset;
                     Vector2 drawEnd = drawStart - (NPC.rotation - MathHelper.PiOver2).ToRotationVector2() * ChargeComboFlash * backFlameLength;
-                    Vector2[] drawPositions = new Vector2[]
-                    {
-                        drawStart,
-                        drawEnd
-                    };
+                    drawPositions[0] = drawStart;
+                    drawPositions[1] = drawEnd;
 
                     if (direction == 0)
                     {

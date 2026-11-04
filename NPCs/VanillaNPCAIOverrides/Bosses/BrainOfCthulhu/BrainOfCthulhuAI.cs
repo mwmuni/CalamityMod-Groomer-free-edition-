@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using CalamityMod.DataStructures;
 using CalamityMod.Enums;
 using CalamityMod.Events;
@@ -24,6 +26,66 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses.BrainOfCthulhu;
 
 public class BrainOfCthulhuAI : VanillaAIOverride
 {
+    // Keep reference snapshots local to this operation, including across spawning/drawing callbacks.
+    private readonly ref struct SnapshotBuffer<T>
+    {
+        private readonly T[] buffer;
+
+        internal SnapshotBuffer(int capacity) => buffer = ArrayPool<T>.Shared.Rent(capacity);
+
+        internal Span<T> Span => buffer;
+
+        public void Dispose() => ArrayPool<T>.Shared.Return(buffer, clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<T>());
+    }
+
+    private enum CreeperFilter
+    {
+        All,
+        Idle,
+        Unassigned,
+        Orbit
+    }
+
+    private Comparison<NPC> creeperDrawComparison;
+
+    private int CollectCreepers(Span<NPC> buffer, CreeperFilter filter, int? parity = null)
+    {
+        int count = 0;
+        foreach (NPC creeper in Main.npc)
+        {
+            if (!creeper.active || creeper.type != NPCID.Creeper)
+                continue;
+            if (filter == CreeperFilter.Orbit)
+            {
+                if (!creeper.TryGetAIOverride<CreeperAI>(out var ai) || ai.CachedValue2 != -1)
+                    continue;
+            }
+            else if (filter != CreeperFilter.All)
+            {
+                CreeperAI ai = creeper.AIOverride<CreeperAI>();
+                if (ai.Time != -1 || (parity.HasValue && ai.CreeperID % 2 != parity.Value))
+                    continue;
+                if (filter == CreeperFilter.Unassigned && AttackList.Contains((byte)creeper.whoAmI))
+                    continue;
+            }
+            buffer[count++] = creeper;
+        }
+        return count;
+    }
+
+    private int CompareCreeperDrawDistance(NPC a, NPC b) =>
+        b.DistanceSQ(NPC.Center).CompareTo(a.DistanceSQ(NPC.Center));
+
+    private static int IndexOfCreeper(ReadOnlySpan<NPC> creepers, NPC target)
+    {
+        for (int i = 0; i < creepers.Length; i++)
+        {
+            if (EqualityComparer<NPC>.Default.Equals(creepers[i], target))
+                return i;
+        }
+        return -1;
+    }
+
     private static SoundStyle StunnedHit = new SoundStyle("CalamityMod/Sounds/Custom/BrainOfCthulhu/BoC_Rev_Stun_Hit", 3);
     private static SoundStyle ShieldDown = new SoundStyle("CalamityMod/Sounds/Custom/BrainOfCthulhu/BoC_Rev_Shield_Down") with { PauseBehavior = PauseBehavior.PauseWithGame };
     private static SoundStyle ShieldUp = new SoundStyle("CalamityMod/Sounds/Custom/BrainOfCthulhu/BoC_Rev_Shield_Up") with { PauseBehavior = PauseBehavior.PauseWithGame };
@@ -264,8 +326,11 @@ public class BrainOfCthulhuAI : VanillaAIOverride
     private static float CreeperHPRatio { get
         {
             float ratio = 0f;
-            foreach (NPC creeper in Main.npc.Where(n => n.active && n.type == NPCID.Creeper))
-                ratio += creeper.life / (float)creeper.lifeMax;
+            foreach (NPC creeper in Main.npc)
+            {
+                if (creeper.active && creeper.type == NPCID.Creeper)
+                    ratio += creeper.life / (float)creeper.lifeMax;
+            }
             if (ratio != 0f)
                 ratio /= GetBrainOfCthuluCreepersCountRevDeath();
             return ratio;
@@ -632,16 +697,18 @@ public class BrainOfCthulhuAI : VanillaAIOverride
             if(SpawnDelay == 1 && Main.netMode != NetmodeID.MultiplayerClient)
             {
                 bool targetLeft = AttackCounter % 2 == 0;
-                List<NPC> creepers = Main.npc.Where(n => n.active && n.type == NPCID.Creeper && n.AIOverride<CreeperAI>().Time == -1 && n.AIOverride<CreeperAI>().CreeperID % 2 == (targetLeft ? 0 : 1)).ToList();
+                using var storage = new SnapshotBuffer<NPC>(Main.npc.Length);
+                Span<NPC> creepers = storage.Span;
+                int creeperCount = CollectCreepers(creepers, CreeperFilter.Idle, targetLeft ? 0 : 1);
 
-                if (creepers.Count > 0)
+                if (creeperCount > 0)
                 {
-                    AttackTime = creepers[Main.rand.Next(creepers.Count)].whoAmI;
+                    AttackTime = creepers[Main.rand.Next(creeperCount)].whoAmI;
                 }
                 else
                 {
-                    creepers = Main.npc.Where(n => n.active && n.type == NPCID.Creeper && n.AIOverride<CreeperAI>().Time == -1).ToList();
-                    AttackTime = creepers.Count == 0 ? -1 : creepers[Main.rand.Next(creepers.Count)].whoAmI;
+                    creeperCount = CollectCreepers(creepers, CreeperFilter.Idle);
+                    AttackTime = creeperCount == 0 ? -1 : creepers[Main.rand.Next(creeperCount)].whoAmI;
                 }
 
                 NPC.netUpdate = true;
@@ -713,8 +780,11 @@ public class BrainOfCthulhuAI : VanillaAIOverride
                 availableAttacks.RemoveAt(pick);
                 PreviousAttack = AIState;
 
-                foreach (NPC creep in Main.npc.Where(n => n.active && n.type == NPCID.Creeper))
-                    creep.AIOverride<CreeperAI>().Time = -1;
+                foreach (NPC creep in Main.npc)
+                {
+                    if (creep.active && creep.type == NPCID.Creeper)
+                        creep.AIOverride<CreeperAI>().Time = -1;
+                }
 
                 SoundEngine.PlaySound(Growl, NPC.Center);
 
@@ -882,39 +952,41 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
                 int checkCount = 8;
                 float wallDist = CalamityUtils.PreciseDistanceToTileCollisionHit(NPC.Center, AttackSign == -1 ? MathHelper.Pi : 0, 480 + NPC.width) - NPC.width;
-                Vector2[] starts = new Vector2[checkCount];
+                Span<Vector2> starts = stackalloc Vector2[checkCount];
                 for (int i = 0; i < checkCount; i++)
                 {
                     float completion = (i + 1) / (float)(checkCount + 1);
                     starts[i] = NPC.Center + (Vector2.UnitX * ((wallDist * completion) + NPC.width) * AttackSign);
                 }
 
-                Vector2[] ends = new Vector2[checkCount];
-                List<Vector2> goodEnds = [];
-                List<Vector2> farEnds = [];
-                List<Vector2> closeEnds = [];
+                Span<Vector2> goodEnds = stackalloc Vector2[checkCount];
+                Span<Vector2> farEnds = stackalloc Vector2[checkCount];
+                Span<Vector2> closeEnds = stackalloc Vector2[checkCount];
+                int goodCount = 0;
+                int farCount = 0;
+                int closeCount = 0;
+                float maxDist = 960;
+                float floorDist = CalamityUtils.PreciseDistanceToTileCollisionHit(NPC.Center, Vector2.UnitY.ToRotation(), maxDist);
 
                 for (int i = 0; i < checkCount; i++)
                 {
-                    float maxDist = 960;
-                    float floorDist = CalamityUtils.PreciseDistanceToTileCollisionHit(NPC.Center, Vector2.UnitY.ToRotation(), maxDist);
-                    ends[i] = starts[i] + (Vector2.UnitY * (floorDist + 48));
+                    Vector2 end = starts[i] + (Vector2.UnitY * (floorDist + 48));
                     if (floorDist >= 600)
-                        farEnds.Add(ends[i]);
+                        farEnds[farCount++] = end;
                     else if (floorDist > 240)
-                        goodEnds.Add(ends[i]);
+                        goodEnds[goodCount++] = end;
                     else
-                        closeEnds.Add(ends[i]);
+                        closeEnds[closeCount++] = end;
                 }
 
                 Vector2 chosenEnd;
 
-                if (goodEnds.Count > 0)
-                    chosenEnd = goodEnds[Main.rand.Next(goodEnds.Count)];
-                else if (closeEnds.Count > 0)
-                    chosenEnd = closeEnds[Main.rand.Next(closeEnds.Count)];
+                if (goodCount > 0)
+                    chosenEnd = goodEnds[Main.rand.Next(goodCount)];
+                else if (closeCount > 0)
+                    chosenEnd = closeEnds[Main.rand.Next(closeCount)];
                 else
-                    chosenEnd = farEnds[Main.rand.Next(farEnds.Count)];
+                    chosenEnd = farEnds[Main.rand.Next(farCount)];
 
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                     Projectile.NewProjectile(NPC.GetSource_FromThis(), chosenEnd, Vector2.Zero, ModContent.ProjectileType<TelekineticEnemyGrab>(), 10, 0.5f);
@@ -1264,8 +1336,11 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
         if (Time > delay)
         {
-            foreach (NPC creeper in Main.npc.Where(n => n.active && n.type == NPCID.Creeper && n.AIOverride<CreeperAI>().Time == -1 && !AttackList.Contains((byte)n.whoAmI)))
-                creeper.position += NPC.velocity;
+            foreach (NPC creeper in Main.npc)
+            {
+                if (creeper.active && creeper.type == NPCID.Creeper && creeper.AIOverride<CreeperAI>().Time == -1 && !AttackList.Contains((byte)creeper.whoAmI))
+                    creeper.position += NPC.velocity;
+            }
 
             int crushCount;
             int attackDelay;
@@ -1283,8 +1358,10 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
             if (Time < attackDur && Time % attackDelay == 0)
             {
-                List<NPC> creepers = Main.npc.Where(n => n.active && n.type == NPCID.Creeper && n.AIOverride<CreeperAI>().Time == -1 && !AttackList.Contains((byte)n.whoAmI)).ToList();
-                if (creepers.Count > 1 && Main.netMode != NetmodeID.MultiplayerClient)
+                using var storage = new SnapshotBuffer<NPC>(Main.npc.Length);
+                Span<NPC> creepers = storage.Span;
+                int creeperCount = CollectCreepers(creepers, CreeperFilter.Unassigned);
+                if (creeperCount > 1 && Main.netMode != NetmodeID.MultiplayerClient)
                 {
                     float rotation;
                     if (!OnSecondCreeperPhase)
@@ -1297,16 +1374,17 @@ public class BrainOfCthulhuAI : VanillaAIOverride
                     else
                         rotation = Main.rand.NextFloat(0, MathHelper.TwoPi);
 
-                    int rand = Main.rand.Next(creepers.Count);
+                    int rand = Main.rand.Next(creeperCount);
                     NPC first = creepers[rand];
                     first.netUpdate = true;
                     CreeperAI creeper1 = first.AIOverride<CreeperAI>();
                     AttackList.Add((byte)first.whoAmI);
                     //creeper1.Time = 0;
                     creeper1.AttackAngle = rotation;
-                    creepers.RemoveAt(rand);
+                    creepers[(rand + 1)..creeperCount].CopyTo(creepers[rand..]);
+                    creeperCount--;
 
-                    NPC second = creepers[Main.rand.Next(creepers.Count)];
+                    NPC second = creepers[Main.rand.Next(creeperCount)];
                     second.netUpdate = true;
                     CreeperAI creeper2 = second.AIOverride<CreeperAI>();
                     AttackList.Add((byte)second.whoAmI);
@@ -1440,18 +1518,20 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         }
         else if (Time >= OrbitAttackInterval && Time < OrbitDuration && Time % OrbitAttackInterval == 0 && Main.netMode != NetmodeID.MultiplayerClient)
         {
-            List<NPC> mainOrbitMembers = Main.npc.Where(n => n.active && n.type == NPCID.Creeper && n.TryGetAIOverride<CreeperAI>(out var ai) && ai.CachedValue2 == -1).ToList();
-            if (mainOrbitMembers.Count > 0)
+            using var storage = new SnapshotBuffer<NPC>(Main.npc.Length);
+            Span<NPC> mainOrbitMembers = storage.Span;
+            int memberCount = CollectCreepers(mainOrbitMembers, CreeperFilter.Orbit);
+            if (memberCount > 0)
             {
-                int rand = Main.rand.Next(mainOrbitMembers.Count);
+                int rand = Main.rand.Next(memberCount);
                 for (int i = 0; i < OrbitAttackParticipantCount; i++)
                 {
-                    if (rand >= mainOrbitMembers.Count)
-                        rand -= mainOrbitMembers.Count;
+                    if (rand >= memberCount)
+                        rand -= memberCount;
                     NPC creeper = mainOrbitMembers[rand];
                     AttackList.Add((byte)creeper.whoAmI);
                     //creeper.AIOverride<CreeperAI>().Time = 0;
-                    rand += (int)Math.Round(mainOrbitMembers.Count / (float)OrbitAttackParticipantCount);
+                    rand += (int)Math.Round(memberCount / (float)OrbitAttackParticipantCount);
                 }
 
                 NPC.netUpdate = true;
@@ -2597,13 +2677,13 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         BoCDrawOffset *= 0.6f;
         NPC.Opacity = BringOpacityTo(NPC.Opacity, 1, 0.1f);
 
-        (float angle, Vector2 offset, int time)[] bloodGushingData = [
+        ReadOnlySpan<(float angle, Vector2 offset, int time)> bloodGushingData = stackalloc (float, Vector2, int)[] {
             (MathHelper.Pi / 6f, new(18, 12), 60),
             (MathHelper.Pi, new(-30, -10), 150),
             (-MathHelper.Pi / 4f, new(20, -40), 210),
             (MathHelper.Pi + MathHelper.Pi / 4f, new(-20, -40), 240),
             (MathHelper.Pi / 1.75f, new(-5, 22), 260)
-        ];
+        };
         float EndTime = 270f;
 
         for (int i = 0; i < bloodGushingData.Length; i++)
@@ -2828,22 +2908,26 @@ public class BrainOfCthulhuAI : VanillaAIOverride
 
         if (phase1)
         {
-            List<NPC> creepers = Main.npc.Where(n => n.active && n.type == NPCID.Creeper).ToList();
-            creepers.Sort((a, b) => b.DistanceSQ(NPC.Center).CompareTo(a.DistanceSQ(NPC.Center)));
+            using var creeperStorage = new SnapshotBuffer<NPC>(Main.npc.Length);
+            Span<NPC> creepers = creeperStorage.Span;
+            creepers = creepers[..CollectCreepers(creepers, CreeperFilter.All)];
+            creepers.Sort(creeperDrawComparison ??= CompareCreeperDrawDistance);
 
-            var tendrils = BrainOfCthulhuSystem.VerletTendrils.ToList();
-            tendrils.Sort((a, b) => {
-                int bIndex = creepers.IndexOf(Main.npc[b.creeper]);
-                if (bIndex == -1)
-                    bIndex = int.MaxValue;
-                int aIndex = creepers.IndexOf(Main.npc[a.creeper]);
-                if (aIndex == -1)
-                    aIndex = int.MaxValue;
-                return bIndex.CompareTo(aIndex);
-            });
-
-            foreach (var v in tendrils)
+            var sourceTendrils = BrainOfCthulhuSystem.VerletTendrils;
+            using var tendrilStorage = new SnapshotBuffer<(int creeper, List<VerletSimulatedSegment> tendril, int reelInTimer)>(sourceTendrils.Length);
+            Span<(int creeper, List<VerletSimulatedSegment> tendril, int reelInTimer)> tendrils = tendrilStorage.Span;
+            sourceTendrils.AsSpan().CopyTo(tendrils);
+            Span<(int Rank, int Index)> drawOrder = stackalloc (int, int)[sourceTendrils.Length];
+            for (int i = 0; i < drawOrder.Length; i++)
             {
+                int rank = IndexOfCreeper(creepers, Main.npc[tendrils[i].creeper]);
+                drawOrder[i] = (rank == -1 ? int.MaxValue : rank, i);
+            }
+            drawOrder.Sort(static (a, b) => b.Rank.CompareTo(a.Rank));
+
+            foreach (var entry in drawOrder)
+            {
+                var v = tendrils[entry.Index];
                 List<VerletSimulatedSegment> curvePoints = v.tendril;
                 if (curvePoints is null)
                     continue;
@@ -2896,12 +2980,20 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         }
         else
         {
-            List<NPC> falseBrains = Main.npc.Where(n => n.active && n.type == ModContent.NPCType<FalseBrain>()).ToList();
-            if (falseBrains.Count > 0)
+            using var storage = new SnapshotBuffer<NPC>(Main.npc.Length + 1);
+            Span<NPC> falseBrains = storage.Span;
+            int brainCount = 0;
+            foreach (NPC brain in Main.npc)
+            {
+                if (brain.active && brain.type == ModContent.NPCType<FalseBrain>())
+                    falseBrains[brainCount++] = brain;
+            }
+            if (brainCount > 0)
             {
                 drawBrain = false;
 
-                falseBrains.Add(NPC);
+                falseBrains[brainCount++] = NPC;
+                falseBrains = falseBrains[..brainCount];
                 falseBrains.Sort((Comparison<NPC>)((a, b) =>
                 {
                     float aValue;
@@ -3008,8 +3100,17 @@ public class BrainOfCthulhuAI : VanillaAIOverride
         options.maxSearchRange = DespawnRange;
         options.targetType = NPCTargetType.ForceSwitch;
 
-        var available = GetAllValidTargets(NPC.Center);
-        if (available.Any(p => !TargetsSet.Contains(p)))
+        Vector2 brainPosition = NPC.Center;
+        bool hasUnvisitedTarget = false;
+        foreach (Player player in Main.ActivePlayers)
+        {
+            if (ValidateTarget(player, brainPosition) && !TargetsSet.Contains(player.whoAmI))
+            {
+                hasUnvisitedTarget = true;
+                break;
+            }
+        }
+        if (hasUnvisitedTarget)
             options.excludedPlayers = TargetsSet;
         else
         {

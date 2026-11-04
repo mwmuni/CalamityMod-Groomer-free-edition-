@@ -2854,7 +2854,7 @@ namespace CalamityMod.NPCs.SupremeCalamitas
                         spawnX2 = spawnXReset2;
                         spawnY = spawnYReset;
 
-                        if (NPC.CountNPCS(ModContent.NPCType<SepulcherHead>()) <= 0) // Check is here for the zenith seed
+                        if (!NPC.AnyNPCs(ModContent.NPCType<SepulcherHead>())) // Check is here for the zenith seed
                             NPC.NewNPC(NPC.GetSource_FromAI(), (int)(safeBox.Center().X), (int)(safeBox.Bottom().Y), ModContent.NPCType<SepulcherHead>());
                     }
 

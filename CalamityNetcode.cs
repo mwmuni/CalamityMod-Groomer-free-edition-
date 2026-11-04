@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CalamityMod.Debugging;
 using CalamityMod.Packets;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -12,13 +13,25 @@ namespace CalamityMod
 {
     public class CalamityNetcode : ModSystem
     {
-        private static List<CalamityPacket> _PacketHandlers = [];
+        private static readonly List<CalamityPacket> _PacketHandlers = [];
+        private static bool _worldSyncPending;
 
         internal static ushort RegisterHandler(CalamityPacket handler)
         {
+            if (_PacketHandlers.Count > ushort.MaxValue)
+                throw new InvalidOperationException("Too many Calamity packet handlers registered.");
+
             var id = (ushort)_PacketHandlers.Count;
             _PacketHandlers.Add(handler);
             return id;
+        }
+
+        internal static string[] GetPacketHandlerNames()
+        {
+            string[] names = new string[_PacketHandlers.Count];
+            for (int i = 0; i < names.Length; i++)
+                names[i] = _PacketHandlers[i].GetType().FullName;
+            return names;
         }
 
         internal static void WriteHandlerNetID(BinaryWriter packet, ushort netID)
@@ -37,16 +50,38 @@ namespace CalamityMod
                 return packet.ReadByte();
         }
 
+        public override void ClearWorld() => _worldSyncPending = false;
+
+        public override void OnWorldUnload() => _worldSyncPending = false;
+
         public override void OnModUnload()
         {
-            _PacketHandlers = null;
+            _PacketHandlers.Clear();
+            _worldSyncPending = false;
+        }
+
+        public override void PostUpdateEverything()
+        {
+            if (!_worldSyncPending)
+                return;
+
+            _worldSyncPending = false;
+            if (Main.dedServ)
+                NetMessage.SendData(MessageID.WorldData);
         }
 
         public static void HandlePacket(Mod mod, BinaryReader reader, int whoAmI)
         {
+            using var measurement = PerformanceRecorder.Measure(PerformanceMetric.PacketReceive);
+            int handlerID = -1;
+            bool threwException = false;
             try
             {
                 var netID = ReadHandlerNetID(reader);
+                handlerID = netID;
+                if (netID >= _PacketHandlers.Count)
+                    throw new InvalidDataException($"No Calamity packet exists with ID {netID}.");
+
                 var packetHandler = _PacketHandlers[netID];
                 if (packetHandler is not null)
                 {
@@ -65,7 +100,10 @@ namespace CalamityMod
             }
             catch (Exception e)
             {
-                if (e is EndOfStreamException eose)
+                threwException = true;
+                if (e is InvalidDataException ide)
+                    CalamityMod.Log.Error("Failed to parse Calamity packet: Invalid packet data.", ide);
+                else if (e is EndOfStreamException eose)
                     CalamityMod.Log.Error("Failed to parse Calamity packet: Packet was too short, missing data, or otherwise corrupt.", eose);
                 else if (e is ObjectDisposedException ode)
                     CalamityMod.Log.Error("Failed to parse Calamity packet: Packet reader disposed or destroyed.", ode);
@@ -74,12 +112,16 @@ namespace CalamityMod
                 else
                     throw; // this either will crash the game or be caught by TML's packet policing
             }
+            finally
+            {
+                measurement.RecordReceivedPacket(handlerID, threwException);
+            }
         }
 
         public static void SyncWorld()
         {
             if (Main.dedServ)
-                NetMessage.SendData(MessageID.WorldData);
+                _worldSyncPending = true;
         }
 
         /// <summary>

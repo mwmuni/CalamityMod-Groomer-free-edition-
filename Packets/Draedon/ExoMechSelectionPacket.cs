@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using CalamityMod.World;
+using Terraria;
+using Terraria.ID;
 
 namespace CalamityMod.Packets
 {
@@ -17,6 +19,9 @@ namespace CalamityMod.Packets
         public override void HandlePacket(BinaryReader packet, int sender)
         {
             CalamityWorld.DraedonMechToSummon = (ExoMech)packet.ReadInt32();
+
+            if (Main.netMode == NetmodeID.Server)
+                Send(ignoreClient: sender);
         }
     }
 }

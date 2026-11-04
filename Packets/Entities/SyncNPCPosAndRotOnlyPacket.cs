@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Terraria;
+using Terraria.ID;
 
 namespace CalamityMod.Packets
 {
@@ -10,7 +11,7 @@ namespace CalamityMod.Packets
 
         public static void Send(NPC npc, int toClient = -1, int ignoreClient = -1)
         {
-            if (npc is null)
+            if (Main.netMode != NetmodeID.Server || npc is null)
                 return;
 
             var packet = Instance.CreateBasePacket();
@@ -22,6 +23,12 @@ namespace CalamityMod.Packets
 
         public override void HandlePacket(BinaryReader packet, int sender)
         {
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                CalamityMod.Log.Warn("Ignored a non-server NPC position snapshot.");
+                return;
+            }
+
             var npc = packet.ReadNPC();
             var position = packet.ReadVector2();
             var rotation = (float)packet.ReadHalf();
@@ -32,10 +39,6 @@ namespace CalamityMod.Packets
             npc.position = position;
             npc.rotation = rotation;
 
-            if (Main.dedServ)
-            {
-                Send(npc, ignoreClient: sender);
-            }
         }
     }
 }

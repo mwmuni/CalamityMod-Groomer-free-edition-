@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using CalamityMod.TileEntities;
+using Terraria;
+using Terraria.ID;
 
 namespace CalamityMod.Packets
 {
@@ -28,6 +30,9 @@ namespace CalamityMod.Packets
                 return;
 
             codeBreaker.DecryptionCountdown = countdown;
+
+            if (Main.netMode == NetmodeID.Server)
+                Send(codeBreaker, ignoreClient: sender);
         }
     }
 }

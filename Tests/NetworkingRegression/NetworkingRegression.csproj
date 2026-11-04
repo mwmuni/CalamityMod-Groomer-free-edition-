@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Debugging\PerformanceCapture.cs" Link="Source\PerformanceCapture.cs" />
+    <Compile Include="..\..\CalamityNetcode.cs" Link="Source\CalamityNetcode.cs" />
+    <Compile Include="..\..\Packets\CalamityPacket.cs" Link="Source\CalamityPacket.cs" />
+    <Compile Include="..\..\Utilities\NetcodeUtils.cs" Link="Source\NetcodeUtils.cs" />
+    <Compile Include="..\..\CalPlayer\CalamityPlayerNetcode.cs" Link="Source\CalamityPlayerNetcode.cs" />
+    <Compile Include="..\..\NPCs\CalamityNetImportantNPC.cs" Link="Source\CalamityNetImportantNPC.cs" />
+    <Compile Include="..\..\NPCs\LongDistanceNetSyncAttribute.cs" Link="Source\LongDistanceNetSyncAttribute.cs" />
+    <Compile Include="..\..\Packets\Players\RageSyncPacket.cs" Link="Source\RageSyncPacket.cs" />
+    <Compile Include="..\..\Packets\Players\AdrenalineSyncPacket.cs" Link="Source\AdrenalineSyncPacket.cs" />
+    <Compile Include="..\..\Packets\Players\DefenseDamageSyncPacket.cs" Link="Source\DefenseDamageSyncPacket.cs" />
+    <Compile Include="..\..\Packets\Players\CombatStatsSyncPacket.cs" Link="Source\CombatStatsSyncPacket.cs" />
+    <Compile Include="..\..\Packets\Players\Mouse*SyncPacket.cs" Link="Source\%(Filename)%(Extension)" />
+    <Compile Include="..\..\Packets\Players\RightClickSyncPacket.cs" Link="Source\RightClickSyncPacket.cs" />
+    <Compile Include="..\..\Packets\Players\ExaltationDirectionSyncPacket.cs" Link="Source\ExaltationDirectionSyncPacket.cs" />
+    <Compile Include="..\..\Packets\Players\SyncPlayerDrawParameterPacket.cs" Link="Source\SyncPlayerDrawParameterPacket.cs" />
+    <Compile Include="..\..\Packets\Players\*Cooldown*Packet.cs" Link="Source\%(Filename)%(Extension)" />
+    <Compile Include="..\..\Packets\Entities\SyncCalamityNPCAIArrayPacket.cs" Link="Source\SyncCalamityNPCAIArrayPacket.cs" />
+    <Compile Include="..\..\Packets\Entities\SyncVanillaNPCLocalAIArrayPacket.cs" Link="Source\SyncVanillaNPCLocalAIArrayPacket.cs" />
+    <Compile Include="..\..\Packets\Entities\SyncNPCPosAndRotOnlyPacket.cs" Link="Source\SyncNPCPosAndRotOnlyPacket.cs" />
+    <Compile Include="..\..\Packets\TileEntities\TEPowerCellFactoryPacket.cs" Link="Source\TEPowerCellFactoryPacket.cs" />
+    <Compile Include="..\..\Packets\TileEntities\TEUpdateCodebreaker*Packet.cs" Link="Source\%(Filename)%(Extension)" />
+    <Compile Include="..\..\Packets\Draedon\*.cs" Link="Source\%(Filename)%(Extension)" />
+    <Compile Include="..\..\Systems\World\MiscWorldStateSystem.cs" Link="Source\MiscWorldStateSystem.cs" />
+  </ItemGroup>
+</Project>

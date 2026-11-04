@@ -528,8 +528,8 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                             if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
                                 int maxTargets = 2;
-                                int[] whoAmIArray = new int[maxTargets];
-                                Vector2[] targetCenterArray = new Vector2[maxTargets];
+                                Span<int> whoAmIArray = stackalloc int[maxTargets];
+                                Span<Vector2> targetCenterArray = stackalloc Vector2[maxTargets];
                                 int numProjectiles = 0;
                                 float maxDistance = 2400f;
 
@@ -638,8 +638,8 @@ namespace CalamityMod.NPCs.PrimordialWyrm
                         if (calamityGlobalNPC.newAI[2] % 60f == 0f && calamityGlobalNPC.newAI[2] < iceMistDuration && Main.netMode != NetmodeID.MultiplayerClient)
                         {
                             int maxTargets = 2;
-                            int[] whoAmIArray = new int[maxTargets];
-                            Vector2[] targetCenterArray = new Vector2[maxTargets];
+                            Span<int> whoAmIArray = stackalloc int[maxTargets];
+                            Span<Vector2> targetCenterArray = stackalloc Vector2[maxTargets];
                             int numProjectiles = 0;
                             float maxDistance = 2400f;
 
@@ -1117,7 +1117,7 @@ namespace CalamityMod.NPCs.PrimordialWyrm
             }
         }
 
-        private void SelectProjectileTargets(int[] whoAmIArray, Vector2[] targetCenterArray, ref int numProjectiles, float maxDistance)
+        private void SelectProjectileTargets(Span<int> whoAmIArray, Span<Vector2> targetCenterArray, ref int numProjectiles, float maxDistance)
         {
             foreach (Player plr in Main.ActivePlayers)
             {

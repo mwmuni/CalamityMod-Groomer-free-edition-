@@ -71,7 +71,27 @@ public class CreeperAI : VanillaAIOverride
         }
     }
 
-    int localCreeperID => Main.npc.Where(n => n.active && n.type == NPCID.Creeper).ToList().IndexOf(NPC);
+    int localCreeperID => GetGroupPosition().Index;
+
+    private (int Index, int Count) GetGroupPosition(bool onlyOrbit = false, int? tendrilID = null)
+    {
+        int index = -1;
+        int count = 0;
+        foreach (NPC creeper in Main.npc)
+        {
+            if (!creeper.active || creeper.type != NPCID.Creeper)
+                continue;
+            if (onlyOrbit && !(creeper.TryGetAIOverride<CreeperAI>(out var ai) && ai.CachedValue2 == -1))
+                continue;
+            if (tendrilID.HasValue && (creeper.ai[0] % TendrilCount) + 1 != tendrilID.Value)
+                continue;
+
+            if (index < 0 && EqualityComparer<NPC>.Default.Equals(creeper, NPC))
+                index = count;
+            count++;
+        }
+        return (index, count);
+    }
 
     float CreeperAmountRatio => creeperCount / (float)GetBrainOfCthuluCreepersCountRevDeath();
 
@@ -113,17 +133,15 @@ public class CreeperAI : VanillaAIOverride
         if (bocAI.AIState < BrainAIState.SurfaceSpawnAnimation)
             NPC.damage = 0;
 
-        List<BrainAIState> bossAIStatesToUse = [
-            BrainAIState.UndergroundSpawnAnimation,
-            BrainAIState.SurfaceSpawnAnimation,
-            BrainAIState.Stunned,
-            BrainAIState.CreeperSwipes,
-            BrainAIState.CreeperSwings,
-            BrainAIState.CreeperOrbit,
-            BrainAIState.CreeperSpiral,
-            BrainAIState.TelekineticOnslaught
-        ];
-        useBossAIState = bossAIStatesToUse.Contains(bocAI.AIState) && bossCounter >= 0;
+        useBossAIState = bocAI.AIState is (
+            BrainAIState.UndergroundSpawnAnimation or
+            BrainAIState.SurfaceSpawnAnimation or
+            BrainAIState.Stunned or
+            BrainAIState.CreeperSwipes or
+            BrainAIState.CreeperSwings or
+            BrainAIState.CreeperOrbit or
+            BrainAIState.CreeperSpiral or
+            BrainAIState.TelekineticOnslaught) && bossCounter >= 0;
 
         if (bocAI.AIState == BrainAIState.UndergroundSpawnAnimation || bocAI.AIState == BrainAIState.SurfaceSpawnAnimation || bocAI.AIState == BrainAIState.Stunned)
             NPC.dontTakeDamage = true;
@@ -532,8 +550,8 @@ public class CreeperAI : VanillaAIOverride
         {
             if (bossCounter == 1)
             {
-                List<NPC> mainOrbitMembers = Main.npc.Where(n => n.active && n.type == NPCID.Creeper && n.TryGetAIOverride<CreeperAI>(out var ai) && ai.CachedValue2 == -1).ToList();
-                CachedValue1 = MathHelper.TwoPi / mainOrbitMembers.Count * mainOrbitMembers.IndexOf(NPC);
+                var group = GetGroupPosition(onlyOrbit: true);
+                CachedValue1 = MathHelper.TwoPi / group.Count * group.Index;
             }
             else if (bossCounter == 0 && Main.netMode != NetmodeID.MultiplayerClient)
             {
@@ -611,9 +629,9 @@ public class CreeperAI : VanillaAIOverride
         if (bossCounter == 0 && Main.netMode != NetmodeID.MultiplayerClient)
         {
             AttackPosition = NPC.Center;
-            List<NPC> myGroup = Main.npc.Where(n => n.active && n.type == NPCID.Creeper && (n.ai[0] % TendrilCount) + 1 == tendrilID).ToList();
-            CachedValue1 = myGroup.IndexOf(NPC);
-            CachedValue2 = myGroup.Count;
+            var group = GetGroupPosition(tendrilID: tendrilID);
+            CachedValue1 = group.Index;
+            CachedValue2 = group.Count;
             
             AttackAngle = 0;
             NPC.netUpdate = true;

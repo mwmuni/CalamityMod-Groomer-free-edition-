@@ -52,7 +52,7 @@ namespace CalamityMod.Packets
             }
 
             if (Main.dedServ)
-                Send(chargingStn, timer, cellStack, chargeOrNaN);
+                Send(chargingStn, chargingStn.Internal_ChargingTimer, cellStack, chargeOrNaN, ignoreClient: sender);
         }
     }
 }

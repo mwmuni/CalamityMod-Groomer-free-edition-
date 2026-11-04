@@ -36,7 +36,7 @@ namespace CalamityMod.Packets
 
             // When a server gets this packet, it immediately sends an equivalent packet to all clients.
             if (Main.dedServ)
-                Send(painting, posX, posY, scale);
+                Send(painting, posX, posY, scale, ignoreClient: sender);
         }
     }
 }

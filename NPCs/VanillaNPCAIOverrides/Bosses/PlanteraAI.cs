@@ -153,7 +153,6 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
 
             // Find positions of hooks
             int maxHooks = 3;
-            int[] hookArray = new int[maxHooks];
             float hookPositionX = 0f;
             float hookPositionY = 0f;
             int numHooksSpawned = 0;
@@ -163,8 +162,6 @@ namespace CalamityMod.NPCs.VanillaNPCAIOverrides.Bosses
                 {
                     hookPositionX += n.Center.X;
                     hookPositionY += n.Center.Y;
-                    hookArray[numHooksSpawned] = n.whoAmI;
-
                     numHooksSpawned++;
                     if (numHooksSpawned >= maxHooks)
                         break;

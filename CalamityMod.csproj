@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <Compile Remove="Tests\**\*.cs" />
     <PackageReference Include="Krafs.Publicizer" Version="2.3.0" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 

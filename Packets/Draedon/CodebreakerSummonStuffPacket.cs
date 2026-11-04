@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using CalamityMod.World;
 using Terraria;
+using Terraria.ID;
 
 namespace CalamityMod.Packets
 {
@@ -22,6 +23,9 @@ namespace CalamityMod.Packets
             CalamityWorld.DraedonSummonCountdown = packet.ReadInt32();
             CalamityWorld.DraedonSummonPosition = packet.ReadVector2();
             CalamityWorld.DraedonMechdusa = packet.ReadBoolean();
+
+            if (Main.netMode == NetmodeID.Server)
+                Send(ignoreClient: sender);
         }
     }
 }

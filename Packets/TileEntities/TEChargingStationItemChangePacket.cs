@@ -32,7 +32,7 @@ namespace CalamityMod.Packets
 
             // When a server gets this packet, it immediately sends an equivalent packet to all clients.
             if (Main.dedServ)
-                Send(chargingStn, thePlug);
+                Send(chargingStn, thePlug, ignoreClient: sender);
         }
     }
 }

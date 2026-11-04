@@ -274,7 +274,9 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                                 NPC.ai[3] = 0f;
                                 NPC.Calamity().newAI[1] = 1f;
 
-                                FindLaserTargets(out int[] whoAmIArray, out Vector2[] targetCenterArray, out int numProjectiles);
+                                Span<int> whoAmIArray = stackalloc int[3];
+                                Span<Vector2> targetCenterArray = stackalloc Vector2[3];
+                                FindLaserTargets(whoAmIArray, targetCenterArray, out int numProjectiles);
 
                                 SoundEngine.PlaySound(CommonCalamitySounds.ExoLaserShootSound with { Volume = 0.1f * CommonCalamitySounds.ExoLaserShootSound.Volume }, NPC.Center);
 
@@ -315,7 +317,9 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                                 NPC.ai[3] = 0f;
                                 NPC.Calamity().newAI[1] = 1f;
 
-                                FindLaserTargets(out int[] whoAmIArray, out Vector2[] targetCenterArray, out int numProjectiles);
+                                Span<int> whoAmIArray = stackalloc int[3];
+                                Span<Vector2> targetCenterArray = stackalloc Vector2[3];
+                                FindLaserTargets(whoAmIArray, targetCenterArray, out int numProjectiles);
 
                                 float predictionAmt = death ? 20f : revenge ? 18f : expertMode ? 16f : 12f;
                                 if (NPC.ai[0] % 3f == 0f)
@@ -491,11 +495,8 @@ namespace CalamityMod.NPCs.ExoMechs.Thanatos
                 baseVelocity *= 1.15f;
         }
 
-        private void FindLaserTargets(out int[] whoAmIArray, out Vector2[] targetCenterArray, out int numProjectiles)
+        private void FindLaserTargets(Span<int> whoAmIArray, Span<Vector2> targetCenterArray, out int numProjectiles)
         {
-            int maxTargets = 3;
-            whoAmIArray = new int[maxTargets];
-            targetCenterArray = new Vector2[maxTargets];
             numProjectiles = 0;
             float maxDistance = 2400f;
 

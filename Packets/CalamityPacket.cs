@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityMod.Packets
@@ -38,21 +39,28 @@ namespace CalamityMod.Packets
 
         public void CloneAndBroadcast(BinaryReader packet, long startIndex, int length, int ignoreClient = -1)
         {
-            if (!Main.dedServ)
+            if (Main.netMode != NetmodeID.Server)
                 return;
 
-            if (startIndex < 0)
-                return;
+            var stream = packet.BaseStream;
+            if (startIndex < 0 || startIndex > stream.Length || length < 0 || length > stream.Length - startIndex)
+                throw new InvalidDataException("Invalid Calamity packet relay range.");
 
-            packet.BaseStream.Position = startIndex;
+            long originalPosition = stream.Position;
+            try
+            {
+                stream.Position = startIndex;
+                Span<byte> buffer = length <= 256 ? stackalloc byte[length] : new byte[length];
+                stream.ReadExactly(buffer);
 
-            // Limit stackalloc size to 256 bytes
-            Span<byte> buffer = length <= 256 ? stackalloc byte[length] : new byte[length];
-            packet.BaseStream.Read(buffer);
-
-            var newPacket = CreateBasePacket();
-            newPacket.Write(buffer);
-            newPacket.Send(ignoreClient);
+                var newPacket = CreateBasePacket();
+                newPacket.Write(buffer);
+                newPacket.Send(ignoreClient: ignoreClient);
+            }
+            finally
+            {
+                stream.Position = originalPosition;
+            }
         }
 
         public ModPacket CreateBasePacket()

@@ -400,7 +400,7 @@ namespace CalamityMod.NPCs.AstrumAureus
 
                                 int type = ModContent.ProjectileType<AstralLaser>();
                                 int centralLaser = maxProjectiles / 2;
-                                int[] lasersToNotFire = new int[6] { centralLaser - 3, centralLaser - 2, centralLaser - 1, centralLaser + 1, centralLaser + 2, centralLaser + 3 };
+                                ReadOnlySpan<int> lasersToNotFire = stackalloc int[6] { centralLaser - 3, centralLaser - 2, centralLaser - 1, centralLaser + 1, centralLaser + 2, centralLaser + 3 };
                                 Vector2 projectileVelocity = Vector2.Normalize(player.Center - NPC.Center) * walkingProjectileVelocity;
                                 float rotation = MathHelper.ToRadians(spread);
                                 for (int i = 0; i < maxProjectiles; i++)
@@ -765,7 +765,7 @@ namespace CalamityMod.NPCs.AstrumAureus
                             int spread = !phase3 ? (death ? 18 : 16) : (death ? 22 : 20);
 
                             int type = ModContent.ProjectileType<AstralLaser>();
-                            int[] lasersToNotFire = new int[4] { 1, 3, maxProjectiles - 2, maxProjectiles - 4 };
+                            ReadOnlySpan<int> lasersToNotFire = stackalloc int[4] { 1, 3, maxProjectiles - 2, maxProjectiles - 4 };
                             Vector2 projectileVelocity = Vector2.Normalize(player.Center - NPC.Center) * laserVelocity;
                             float rotation = MathHelper.ToRadians(spread);
                             for (int i = 0; i < maxProjectiles; i++)
