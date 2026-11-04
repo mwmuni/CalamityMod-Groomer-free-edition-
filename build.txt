@@ -1,4 +1,4 @@
-author = The Calamity Dev Team
+author = The Calamity Dev Team Without Groomers
 version = 2.2.2
 displayName = Calamity Mod
 modReferences = CalamityModMusic
