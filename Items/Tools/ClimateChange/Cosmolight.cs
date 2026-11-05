@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using CalamityMod.Items.Materials;
+﻿using CalamityMod.Items.Materials;
 using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.GameContent.NetModules;
@@ -73,9 +72,14 @@ namespace CalamityMod.Items.Tools.ClimateChange
     {
         public override void ModifyTimeRate(ref double timeRate, ref double tileUpdateRate, ref double eventUpdateRate)
         {
-            if (Main.player.Any(x => x.active && x.channel && x.altFunctionUse != 2 && x.HeldItem.type == ModContent.ItemType<Cosmolight>()))
+            int cosmolightType = ModContent.ItemType<Cosmolight>();
+            foreach (Player player in Main.player)
             {
-                timeRate *= 120;
+                if (player.active && player.channel && player.altFunctionUse != 2 && player.HeldItem.type == cosmolightType)
+                {
+                    timeRate *= 120;
+                    break;
+                }
             }
         }
     }

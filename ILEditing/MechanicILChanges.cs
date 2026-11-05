@@ -218,7 +218,7 @@ namespace CalamityMod.ILEditing
                 return;
             }
 
-            if (CalamityKeybinds.DashHotkey.GetAssignedKeysOrEmpty(PlayerInput.CurrentInputMode).Count == 0)
+            if (!CalamityKeybinds.DashHotkey.HasAssignedKeys(PlayerInput.CurrentInputMode))
                 orig(self, out dir, out dashing, dashStartAction);
             else
             {
@@ -236,7 +236,7 @@ namespace CalamityMod.ILEditing
                 return;
             }
 
-            if ((CalamityKeybinds.ArmorSetBonusHotKey.GetAssignedKeysOrEmpty().Count != 0 && CalamityClientConfig.Instance.SetBonusDoubleTap == SetBonusDoubleTapOptions.Auto) || CalamityClientConfig.Instance.SetBonusDoubleTap == SetBonusDoubleTapOptions.Off)
+            if ((CalamityKeybinds.ArmorSetBonusHotKey.HasAssignedKeys() && CalamityClientConfig.Instance.SetBonusDoubleTap == SetBonusDoubleTapOptions.Auto) || CalamityClientConfig.Instance.SetBonusDoubleTap == SetBonusDoubleTapOptions.Off)
                 return;
 
             orig(self, keyDir);

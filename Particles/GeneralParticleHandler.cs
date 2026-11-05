@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using CalamityMod.Debugging;
 using CalamityMod.Enums;
 using CalamityMod.Systems.Graphic;
@@ -59,6 +59,21 @@ namespace CalamityMod.Particles
         private static Dictionary<GeneralDrawLayer, Queue<Particle>> particlesToSpawnNextFrame;
         private static Dictionary<GeneralDrawLayer, Queue<Particle>> particlesToSpawnNextFrame_Pixelated;
 
+        // Scratch state that keeps particle cleanup linear when many particles are removed in one update.
+        // It is only populated inside Update and is always empty between updates.
+        private const int KillLookupThreshold = 32;
+        private const int ImmediateDrawCollectionRemovalLimit = 8;
+        private const int BatchedRemovalThreshold = 32;
+        private static int immediateDrawCollectionRemovals;
+        private static HashSet<Particle> particlesToKillLookup;
+        private static List<(int CollectionIndex, Particle Particle)> pendingDrawCollectionRemovals;
+        private static List<List<Particle>> drawCollectionsWithRemovals;
+        private static List<int> drawCollectionRemovalCounts;
+        private static Dictionary<Particle, int> pendingRemovalCounts;
+
+        // Set in PostSetupContent once every particle type is known. While false, particle searches fall back to List<T>'s own equality checks.
+        private static bool particlesUseReferenceEquality;
+
         // Collections for correctly organizing active prticles for drawing.
         private static Dictionary<BlendState, List<Particle>> particlesToDraw;
         private static Dictionary<BlendState, List<Particle>> particlesToDraw_Pixelated;
@@ -87,6 +102,8 @@ namespace CalamityMod.Particles
                 particleTexturesByIDs[ID] = ModContent.Request<Texture2D>(texturePath, instance.TextureRequestMode);
             });
 #pragma warning restore CS0618 // Type or member is obsolete
+
+            ConfigureParticleEquality(particleIDsByTypes.Keys);
         }
 
         public override void Load()
@@ -98,6 +115,13 @@ namespace CalamityMod.Particles
             particlesToKill = [];
             particlesToSpawnNextFrame = [];
             particlesToSpawnNextFrame_Pixelated = [];
+
+            particlesToKillLookup = [];
+            pendingDrawCollectionRemovals = [];
+            drawCollectionsWithRemovals = [];
+            drawCollectionRemovalCounts = [];
+            pendingRemovalCounts = [];
+            particlesUseReferenceEquality = false;
 
             particlesToDraw = [];
             particlesToDraw_Pixelated = [];
@@ -116,6 +140,13 @@ namespace CalamityMod.Particles
             particlesToSpawnNextFrame = null;
             particlesToSpawnNextFrame_Pixelated = null;
 
+            particlesToKillLookup = null;
+            pendingDrawCollectionRemovals = null;
+            drawCollectionsWithRemovals = null;
+            drawCollectionRemovalCounts = null;
+            pendingRemovalCounts = null;
+            particlesUseReferenceEquality = false;
+
             particlesToDraw = null;
             particlesToDraw_Pixelated = null;
             particlesToDraw_CustomShader = null;
@@ -127,6 +158,12 @@ namespace CalamityMod.Particles
             particlesToKill.Clear();
             particlesToSpawnNextFrame.Clear();
             particlesToSpawnNextFrame_Pixelated.Clear();
+
+            particlesToKillLookup.Clear();
+            pendingDrawCollectionRemovals.Clear();
+            drawCollectionsWithRemovals.Clear();
+            drawCollectionRemovalCounts.Clear();
+            pendingRemovalCounts.Clear();
 
             particlesToDraw.Clear();
             particlesToDraw_Pixelated.Clear();
@@ -236,7 +273,7 @@ namespace CalamityMod.Particles
             if (Main.dedServ || activeParticles == null)
                 return 0;
 
-            return CalamityClientConfig.Instance.ParticleLimit - activeParticles.Count();
+            return CalamityClientConfig.Instance.ParticleLimit - activeParticles.Count;
         }
 
         /// <summary>
@@ -281,18 +318,228 @@ namespace CalamityMod.Particles
                 particle.Update();
             }
 
+            RemoveDeadParticles();
+        }
+
+        // Kept separate so Update stays small enough for the JIT to keep the particle loop's enumerator in registers.
+        private static void RemoveDeadParticles()
+        {
             //Clear out particles whose time is up
-            activeParticles.RemoveAll(particle =>
+            try
             {
-                if ((particle.Time >= particle.Lifetime && particle.SetLifetime) || particlesToKill.Contains(particle))
+                // Large kill batches are looked up through a set instead of scanning the kill list for every active particle.
+                if (particlesToKill.Count > KillLookupThreshold)
                 {
-                    ReturnAssociatedDrawCollection(particle).Remove(particle);
-                    return true;
+                    foreach (Particle particle in particlesToKill)
+                        particlesToKillLookup.Add(particle);
                 }
-                return false;
-            });
+
+                // Every batch size shares this RemoveAll call site, so the JIT's profile always sees it run and inlines it with the predicate.
+                // With a call site per batch size, the common one could be profiled as cold and left making a delegate call per particle.
+                activeParticles.RemoveAll(static particle =>
+                {
+                    if ((particle.Time >= particle.Lifetime && particle.SetLifetime) || (particlesToKill.Count != 0 && IsInKillList(particle)))
+                    {
+                        RemoveFromDrawCollection(particle);
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            finally
+            {
+                particlesToKillLookup.Clear();
+                immediateDrawCollectionRemovals = 0;
+                ApplyPendingDrawCollectionRemovals();
+            }
 
             particlesToKill.Clear();
+        }
+
+        /// <summary>
+        /// Whether a particle is queued in <see cref="particlesToKill"/>. Batches above <see cref="KillLookupThreshold"/> are copied into
+        /// <see cref="particlesToKillLookup"/> before the removal pass, so they are checked there instead of by scanning the list.
+        /// </summary>
+        private static bool IsInKillList(Particle particle) =>
+            particlesToKillLookup.Count != 0 ? particlesToKillLookup.Contains(particle) : IndexOfParticle(particlesToKill, particle) >= 0;
+
+        /// <summary>
+        /// Removes a particle that is leaving <see cref="activeParticles"/> from its draw collection.
+        /// <br>The first few removals of an update happen straight away. Any beyond that are grouped by collection and deferred to
+        /// <see cref="ApplyPendingDrawCollectionRemovals"/> so bursts can be compacted per collection.</br>
+        /// </summary>
+        private static void RemoveFromDrawCollection(Particle particle)
+        {
+            List<Particle> collection = ReturnAssociatedDrawCollection(particle);
+            if (immediateDrawCollectionRemovals < ImmediateDrawCollectionRemovalLimit)
+            {
+                immediateDrawCollectionRemovals++;
+                RemoveParticleFrom(collection, particle);
+                return;
+            }
+
+            // There are only a handful of draw collections, so a linear search finds this one's index cheapest.
+            Span<List<Particle>> collections = CollectionsMarshal.AsSpan(drawCollectionsWithRemovals);
+            int collectionIndex = 0;
+            while (collectionIndex < collections.Length && collections[collectionIndex] != collection)
+                collectionIndex++;
+
+            if (collectionIndex == collections.Length)
+            {
+                drawCollectionsWithRemovals.Add(collection);
+                drawCollectionRemovalCounts.Add(0);
+            }
+
+            CollectionsMarshal.AsSpan(drawCollectionRemovalCounts)[collectionIndex]++;
+            pendingDrawCollectionRemovals.Add((collectionIndex, particle));
+        }
+
+        /// <summary>
+        /// Applies the draw collection removals deferred during <see cref="Update"/>, producing the same collections as calling
+        /// <see cref="List{T}.Remove(T)"/> once per removed particle.
+        /// </summary>
+        private static void ApplyPendingDrawCollectionRemovals()
+        {
+            if (pendingDrawCollectionRemovals.Count == 0)
+                return;
+
+            try
+            {
+                // Removals from different collections are independent, so each collection with many removals is compacted on its own.
+                for (int i = 0; i < drawCollectionsWithRemovals.Count; i++)
+                {
+                    int collectionRemovalCount = drawCollectionRemovalCounts[i];
+                    if (collectionRemovalCount <= BatchedRemovalThreshold)
+                        continue;
+
+                    foreach (var (collectionIndex, particle) in pendingDrawCollectionRemovals)
+                    {
+                        if (collectionIndex == i)
+                            CollectionsMarshal.GetValueRefOrAddDefault(pendingRemovalCounts, particle, out _)++;
+                    }
+
+                    RemoveFirstOccurrences(drawCollectionsWithRemovals[i], collectionRemovalCount);
+                    pendingRemovalCounts.Clear();
+                }
+
+                // A few individual searches are cheaper than a full pass over the collection.
+                foreach (var (collectionIndex, particle) in pendingDrawCollectionRemovals)
+                {
+                    if (drawCollectionRemovalCounts[collectionIndex] <= BatchedRemovalThreshold)
+                        RemoveParticleFrom(drawCollectionsWithRemovals[collectionIndex], particle);
+                }
+            }
+            finally
+            {
+                pendingDrawCollectionRemovals.Clear();
+                drawCollectionsWithRemovals.Clear();
+                drawCollectionRemovalCounts.Clear();
+                pendingRemovalCounts.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Chooses how particles are compared while dead particles are cleaned up, once every particle type is known.
+        /// <br>If every type uses reference equality, searches compare references directly and the scratch lookups use reference comparers,
+        /// skipping a virtual <see cref="object.Equals(object)"/> call per comparison. Otherwise everything keeps the default equality checks.</br>
+        /// </summary>
+        internal static void ConfigureParticleEquality(IEnumerable<Type> particleTypes)
+        {
+            particlesUseReferenceEquality = UsesReferenceEquality(particleTypes);
+            IEqualityComparer<Particle> comparer = particlesUseReferenceEquality ? ReferenceEqualityComparer.Instance : EqualityComparer<Particle>.Default;
+            particlesToKillLookup = new HashSet<Particle>(comparer);
+            pendingRemovalCounts = new Dictionary<Particle, int>(comparer);
+        }
+
+        /// <summary>
+        /// Whether <see cref="List{T}"/> searches compare the given particle types by reference. That holds when <see cref="Particle"/> does not
+        /// implement <see cref="IEquatable{T}"/> and none of the types override <see cref="object.Equals(object)"/>.
+        /// </summary>
+        internal static bool UsesReferenceEquality(IEnumerable<Type> particleTypes)
+        {
+            if (typeof(IEquatable<Particle>).IsAssignableFrom(typeof(Particle)))
+                return false;
+
+            foreach (Type type in particleTypes)
+            {
+                if (type.GetMethod(nameof(Equals), [typeof(object)])?.DeclaringType != typeof(object))
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Finds the first occurrence of a particle in a collection, exactly like <see cref="List{T}.IndexOf(T)"/>.
+        /// <br>When every particle type uses reference equality, this compares references directly instead of calling
+        /// <see cref="object.Equals(object)"/> on every element.</br>
+        /// </summary>
+        private static int IndexOfParticle(List<Particle> collection, Particle particle)
+        {
+            if (!particlesUseReferenceEquality)
+                return collection.IndexOf(particle);
+
+            ReadOnlySpan<Particle> particles = CollectionsMarshal.AsSpan(collection);
+            for (int i = 0; i < particles.Length; i++)
+            {
+                if (ReferenceEquals(particles[i], particle))
+                    return i;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Removes the first occurrence of a particle from a collection, exactly like <see cref="List{T}.Remove(T)"/>.
+        /// </summary>
+        private static void RemoveParticleFrom(List<Particle> collection, Particle particle)
+        {
+            int index = IndexOfParticle(collection, particle);
+            if (index >= 0)
+                collection.RemoveAt(index);
+        }
+
+        /// <summary>
+        /// Removes the first occurrences of the particles counted in <see cref="pendingRemovalCounts"/> in a single stable pass.
+        /// <br>Removing a particle k times this way leaves the same order as k sequential <see cref="List{T}.Remove(T)"/> calls.</br>
+        /// </summary>
+        private static void RemoveFirstOccurrences(List<Particle> collection, int removalCount)
+        {
+            Span<Particle> particles = CollectionsMarshal.AsSpan(collection);
+
+            // Everything before the first removed particle stays where it is, so compaction starts there.
+            int index = 0;
+            while (index < particles.Length && !TryTakePendingRemoval(particles[index]))
+                index++;
+
+            if (index == particles.Length)
+                return;
+
+            int kept = index++;
+            removalCount--;
+            for (; index < particles.Length && removalCount > 0; index++)
+            {
+                Particle particle = particles[index];
+                if (TryTakePendingRemoval(particle))
+                    removalCount--;
+                else
+                    particles[kept++] = particle;
+            }
+
+            int removed = index - kept;
+            particles[index..].CopyTo(particles[kept..]);
+            collection.RemoveRange(particles.Length - removed, removed);
+        }
+
+        private static bool TryTakePendingRemoval(Particle particle)
+        {
+            if (particle is null)
+                return false;
+
+            ref int pendingCount = ref CollectionsMarshal.GetValueRefOrNullRef(pendingRemovalCounts, particle);
+            if (Unsafe.IsNullRef(ref pendingCount) || pendingCount == 0)
+                return false;
+
+            pendingCount--;
+            return true;
         }
 
         private static void DrawParticleCollectionsAtSpecificLayer(GeneralDrawLayer drawLayer)
@@ -309,7 +556,8 @@ namespace CalamityMod.Particles
 
         private static void DrawParticleInstance(Particle particle)
         {
-            int drawIterations = Main.LocalPlayer.Calamity().trippy ? 4 : 1;
+            bool trippy = Main.LocalPlayer.Calamity().trippy;
+            int drawIterations = trippy ? 4 : 1;
             for (int i = 0; i < drawIterations; i++)
             {
                 // If you have shrooms, manually spoof the position of the particle for each clone location
@@ -330,7 +578,7 @@ namespace CalamityMod.Particles
                         break;
                 }
 
-                if (Main.LocalPlayer.Calamity().trippy)
+                if (trippy)
                     particle.Color = Main.DiscoColor;
 
                 // The actual drawing step
@@ -344,8 +592,9 @@ namespace CalamityMod.Particles
                     if (particle.AffectedByLight)
                         lightColor = particle.Color.MultiplyRGB(Lighting.GetColor((particle.Position / 16).ToPoint()));
 
-                    Rectangle frame = particleTexturesByIDs[particle.Type].Frame(1, particle.FrameVariants, 0, particle.Variant);
-                    Main.spriteBatch.Draw(particleTexturesByIDs[particle.Type].Value, particle.Position - Main.screenPosition, frame, lightColor, particle.Rotation, frame.Size() * 0.5f, particle.Scale, SpriteEffects.None, 0f);
+                    Asset<Texture2D> texture = particleTexturesByIDs[particle.Type];
+                    Rectangle frame = texture.Frame(1, particle.FrameVariants, 0, particle.Variant);
+                    Main.spriteBatch.Draw(texture.Value, particle.Position - Main.screenPosition, frame, lightColor, particle.Rotation, frame.Size() * 0.5f, particle.Scale, SpriteEffects.None, 0f);
                 }
 
                 // Since the switch case directly modifies the particle position, this resets it to the proper location
@@ -364,30 +613,28 @@ namespace CalamityMod.Particles
             {
                 if (pixelated)
                 {
-                    PixelationManager.AddPixelatedDrawer((pixelationMatrix) =>
-                    {
-                        var particlesAtSpecifiedLayer = keyValuePair.Value.Where(p => p.DrawLayer == drawLayer);
-                        if (particlesAtSpecifiedLayer.Any())
-                        {
-                            foreach (Particle particle in particlesAtSpecifiedLayer)
-                                DrawParticleInstance(particle);
-                        }
-
-                    }, drawLayer, keyValuePair.Key);
+                    // Copy the captured values into branch locals so non-pixelated collections don't allocate a closure.
+                    List<Particle> particles = keyValuePair.Value;
+                    GeneralDrawLayer pixelatedDrawLayer = drawLayer;
+                    PixelationManager.AddPixelatedDrawer((pixelationMatrix) => DrawParticlesAtLayer(particles, pixelatedDrawLayer), drawLayer, keyValuePair.Key);
                 }
                 else
                 {
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, keyValuePair.Key, SamplerState.LinearClamp, DepthStencilState.None, scissorRectRasterizer, null, Main.GameViewMatrix.TransformationMatrix);
 
-                    var particlesAtSpecifiedLayer = keyValuePair.Value.Where(p => p.DrawLayer == drawLayer);
-                    if (particlesAtSpecifiedLayer.Any())
-                    {
-                        foreach (Particle particle in particlesAtSpecifiedLayer)
-                            DrawParticleInstance(particle);
-                    }
+                    DrawParticlesAtLayer(keyValuePair.Value, drawLayer);
 
                     Main.spriteBatch.End();
                 }
+            }
+        }
+
+        private static void DrawParticlesAtLayer(List<Particle> particles, GeneralDrawLayer drawLayer)
+        {
+            foreach (Particle particle in particles)
+            {
+                if (particle.DrawLayer == drawLayer)
+                    DrawParticleInstance(particle);
             }
         }
 
@@ -402,9 +649,11 @@ namespace CalamityMod.Particles
 
                     Main.spriteBatch.Begin(SpriteSortMode.Immediate, blendStateParticleListPair.Key, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, shaderDrawCollectionPair.Key, Main.GameViewMatrix.TransformationMatrix);
 
-                    var particlesAtDrawLayer = blendStateParticleListPair.Value.Where(p => p.DrawLayer == drawLayer);
-                    foreach (Particle particle in particlesAtDrawLayer)
+                    foreach (Particle particle in blendStateParticleListPair.Value)
                     {
+                        if (particle.DrawLayer != drawLayer)
+                            continue;
+
                         particle.PrepareCustomShader(shaderDrawCollectionPair.Key);
                         DrawParticleInstance(particle);
                     }

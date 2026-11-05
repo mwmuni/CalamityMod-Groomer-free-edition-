@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using CalamityMod.Buffs.Alcohol;
 using CalamityMod.Buffs.Potions;
 using CalamityMod.Buffs.StatBuffs;
@@ -145,7 +144,21 @@ namespace CalamityMod.CalPlayer
             bool nearSafeZone = false;
             if (SulphuricWaterSafeZoneSystem.NearbySafeTiles.Count >= 1)
             {
-                Point closestSafeZone = SulphuricWaterSafeZoneSystem.NearbySafeTiles.Keys.OrderBy(t => t.ToVector2().DistanceSQ(Player.Center / 16f)).First();
+                // Manual minimum search (first closest in enumeration order, as OrderBy().First() would pick) to avoid sorting and closure allocations every tick.
+                Vector2 playerTileCenter = Player.Center / 16f;
+                Point closestSafeZone = default;
+                float closestDistanceSQ = 0f;
+                bool foundSafeZone = false;
+                foreach (Point safeTile in SulphuricWaterSafeZoneSystem.NearbySafeTiles.Keys)
+                {
+                    float distanceSQ = safeTile.ToVector2().DistanceSQ(playerTileCenter);
+                    if (!foundSafeZone || distanceSQ < closestDistanceSQ)
+                    {
+                        closestSafeZone = safeTile;
+                        closestDistanceSQ = distanceSQ;
+                        foundSafeZone = true;
+                    }
+                }
                 if (Vector2.Distance(Player.Center.ToTileCoordinates().ToVector2(), closestSafeZone.ToVector2()) < SulphuricWaterSafeZoneSystem.NearbySafeTiles[closestSafeZone] * 17f)
                     nearSafeZone = true;
             }
@@ -337,7 +350,7 @@ namespace CalamityMod.CalPlayer
             }
 
             // Permafrost's Concoction increases life regen while afflicted with a fire debuff
-            if (permafrostsConcoction && Player.buffType.Any(l => CalamityBuffSets.DebuffDataset[l] is not null && CalamityBuffSets.DebuffDataset[l].HeatDebuffScaling > 0))
+            if (permafrostsConcoction && HasHeatScalingDebuff())
                 Player.lifeRegen += 6;
 
             if (grandDadHealTimer == 0 && grandDadHealPool >= 7)
@@ -449,6 +462,17 @@ namespace CalamityMod.CalPlayer
             //Finally, update the state of hadLifeRegenHinderingDebuff for next frame. Needs to check for 2 frames of 0 regen time to be sure they had a debuff
             hadLifeRegenHinderingDebuff = hasLifeRegenHinderingDebuff && _hasNoNaturalRegen;
             _hasNoNaturalRegen = hasLifeRegenHinderingDebuff;
+        }
+
+        private bool HasHeatScalingDebuff()
+        {
+            foreach (int buffType in Player.buffType)
+            {
+                var debuffData = CalamityBuffSets.DebuffDataset[buffType];
+                if (debuffData is not null && debuffData.HeatDebuffScaling > 0)
+                    return true;
+            }
+            return false;
         }
         #endregion
 

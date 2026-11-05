@@ -244,8 +244,7 @@ namespace CalamityMod.CalPlayer
             direction = DashDirection.Directionless;
 
             // If the manual hotkey is bound, standard Terraria dashes cannot be triggered by double tapping.
-            var manualDashHotkeys = CalamityKeybinds.DashHotkey.GetAssignedKeysOrEmpty();
-            bool manualHotkeyBound = (manualDashHotkeys?.Count ?? 0) > 0;
+            bool manualHotkeyBound = CalamityKeybinds.DashHotkey.HasAssignedKeys();
             bool pressedManualHotkey = manualHotkeyBound && (CalamityKeybinds.DashHotkey.JustPressed || forceDash);
 
             int dashDirectionToUse = 0;

@@ -288,6 +288,11 @@ namespace CalamityMod
                 return true;
             if (npc.type == NPCID.EaterofWorldsBody || npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.EaterofWorldsTail)
                 return true;
+
+            // The remaining checks are all for Calamity NPCs, which can never have a vanilla NPC ID.
+            if (npc.type < NPCID.Count)
+                return false;
+
             return npc.type == NPCType<EbonianPaladin>() || npc.type == NPCType<CrimulanPaladin>() ||
                 npc.type == NPCType<SplitEbonianPaladin>() || npc.type == NPCType<SplitCrimulanPaladin>();
         }
@@ -595,18 +600,16 @@ namespace CalamityMod
 
                     if (Main.npc[index].CanBeChasedBy(null, false))
                     {
+                        // Tile line of sight is by far the most expensive check, so only NPCs closer than the current target need it.
+                        // It is still skipped when tiles are ignored or when the NPC's half width plus half height reaches that distance.
+                        float targetDistance = Vector2.Distance(origin, Main.npc[index].Center);
                         float extraDistance = (Main.npc[index].width / 2) + (Main.npc[index].height / 2);
-
-                        bool canHit = true;
-                        if (extraDistance < distance && !ignoreTiles)
-                            canHit = Collision.CanHit(origin, 1, 1, Main.npc[index].Center, 1, 1);
-
-                        if (Vector2.Distance(origin, Main.npc[index].Center) < distance && canHit)
+                        if (targetDistance < distance && (ignoreTiles || extraDistance >= distance || Collision.CanHit(origin, 1, 1, Main.npc[index].Center, 1, 1)))
                         {
                             if (Main.npc[index].boss || Main.npc[index].type == NPCID.WallofFleshEye)
                                 bossFound = true;
 
-                            distance = Vector2.Distance(origin, Main.npc[index].Center);
+                            distance = targetDistance;
                             closestTarget = Main.npc[index];
                         }
                     }
@@ -618,15 +621,12 @@ namespace CalamityMod
                 {
                     if (Main.npc[index].CanBeChasedBy(null, false))
                     {
+                        // As above, line of sight is only checked for NPCs closer than the current target.
+                        float targetDistance = Vector2.Distance(origin, Main.npc[index].Center);
                         float extraDistance = (Main.npc[index].width / 2) + (Main.npc[index].height / 2);
-
-                        bool canHit = true;
-                        if (extraDistance < distance && !ignoreTiles)
-                            canHit = Collision.CanHit(origin, 1, 1, Main.npc[index].Center, 1, 1);
-
-                        if (Vector2.Distance(origin, Main.npc[index].Center) < distance && canHit)
+                        if (targetDistance < distance && (ignoreTiles || extraDistance >= distance || Collision.CanHit(origin, 1, 1, Main.npc[index].Center, 1, 1)))
                         {
-                            distance = Vector2.Distance(origin, Main.npc[index].Center);
+                            distance = targetDistance;
                             closestTarget = Main.npc[index];
                         }
                     }

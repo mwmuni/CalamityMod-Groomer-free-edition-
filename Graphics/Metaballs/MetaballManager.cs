@@ -39,11 +39,10 @@ namespace CalamityMod.Graphics.Metaballs
 
         public override void PostUpdateEverything()
         {
-
-            var activeMetaballs = metaballs.Where(m => m.AnythingToDraw);
-            foreach (Metaball metaball in activeMetaballs)
+            foreach (Metaball metaball in metaballs)
             {
-                if (metaball.IgnoreFPS)
+                // IgnoreFPS is a constant, while AnythingToDraw can scan particles or projectiles, so check the cheap condition first.
+                if (metaball.IgnoreFPS && metaball.AnythingToDraw)
                     metaball.Update();
             }
         }

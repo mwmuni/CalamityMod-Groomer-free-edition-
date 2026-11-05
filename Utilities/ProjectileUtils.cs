@@ -51,9 +51,27 @@ namespace CalamityMod
             return false;
         }
 
-        public static int CountProjectiles(int projectileID) => Main.projectile.Count(proj => proj.type == projectileID && proj.active);
+        public static int CountProjectiles(int projectileID)
+        {
+            int count = 0;
+            foreach (Projectile proj in Main.projectile)
+            {
+                if (proj.type == projectileID && proj.active)
+                    count++;
+            }
+            return count;
+        }
 
-        public static int CountHookProj() => Main.projectile.Count(proj => Main.projHook[proj.type] && proj.ai[0] == 2f && proj.active && proj.owner == Main.myPlayer);
+        public static int CountHookProj()
+        {
+            int count = 0;
+            foreach (Projectile proj in Main.projectile)
+            {
+                if (Main.projHook[proj.type] && proj.ai[0] == 2f && proj.active && proj.owner == Main.myPlayer)
+                    count++;
+            }
+            return count;
+        }
 
         public static Projectile FindProjectileByIdentity(int identity, int ownerIndex)
         {
@@ -423,11 +441,9 @@ namespace CalamityMod
                     {
                         float extraDistance = (n.width / 2) + (n.height / 2);
 
-                        bool canHit = true;
-                        if (extraDistance < maxDistance)
-                            canHit = Collision.CanHit(projectile.Center, 1, 1, n.Center, 1, 1);
-
-                        if (projectile.WithinRange(n.Center, maxDistance + extraDistance) && canHit)
+                        // Tile line of sight is by far the most expensive check, so it is only done for NPCs within range.
+                        // It is still skipped when the NPC's half width plus half height reaches the search distance.
+                        if (projectile.WithinRange(n.Center, maxDistance + extraDistance) && (extraDistance >= maxDistance || Collision.CanHit(projectile.Center, 1, 1, n.Center, 1, 1)))
                         {
                             if (targetArrayIndex < maxTargets)
                             {

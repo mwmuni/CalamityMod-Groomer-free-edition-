@@ -66,7 +66,7 @@ namespace CalamityMod.Items.Armor.Vanity
 
         public override void EquipFrameEffects(Player player, EquipType type)
         {
-            player.back = (sbyte)EquipLoader.GetEquipSlot(Mod, Name, EquipType.Back);
+            player.back = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, Name, EquipType.Back);
         }
 
         public override void AddRecipes()

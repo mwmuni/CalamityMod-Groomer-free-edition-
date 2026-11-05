@@ -538,6 +538,9 @@ namespace CalamityMod.Projectiles
             }
         }
 
+        // Collision.LaserScan overwrites every sample, so the Moon Lord deathray override can reuse one buffer.
+        private static readonly float[] moonLordDeathrayScanSamples = new float[3];
+
         public override bool PreAI(Projectile projectile)
         {
             //Light Pets will add light to the abyss darkness.
@@ -1400,8 +1403,8 @@ namespace CalamityMod.Projectiles
                     if (projectile.ai[0] % 30f == 0f && projectile.ai[0] < 180f && Main.netMode != NetmodeID.MultiplayerClient)
                     {
                         int maxTargets = 2;
-                        int[] array6 = new int[maxTargets];
-                        Vector2[] array7 = new Vector2[maxTargets];
+                        Span<int> array6 = stackalloc int[maxTargets];
+                        Span<Vector2> array7 = stackalloc Vector2[maxTargets];
                         int num731 = 0;
                         float num732 = 2000f;
 
@@ -1714,7 +1717,7 @@ namespace CalamityMod.Projectiles
                     if (Main.myPlayer == projectile.owner && (target == -1 || !Main.npc[target].CanBeChasedBy(projectile)))
                     {
                         target = -1;
-                        int[] array = new int[Main.maxNPCs];
+                        Span<int> array = stackalloc int[Main.maxNPCs];
                         int randomTargets = 0;
                         float homingDistance = 800f;
                         for (int i = 0; i < Main.maxNPCs; i++)
@@ -2834,7 +2837,7 @@ namespace CalamityMod.Projectiles
                             samplingPoint = vector78.Value;
                         }
 
-                        float[] array3 = new float[(int)num805];
+                        float[] array3 = moonLordDeathrayScanSamples;
                         Collision.LaserScan(samplingPoint, projectile.velocity, num806 * projectile.scale, 2400f, array3);
                         float num807 = 0f;
                         int num3;

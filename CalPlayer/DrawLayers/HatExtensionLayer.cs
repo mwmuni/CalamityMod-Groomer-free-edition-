@@ -27,7 +27,7 @@ namespace CalamityMod.CalPlayer.DrawLayers
             if (headItem is IExtendedHat extendedHatDrawer)
             {
                 string equipSlotName = extendedHatDrawer.EquipSlotName(drawPlayer) != "" ? extendedHatDrawer.EquipSlotName(drawPlayer) : headItem.Name;
-                int equipSlot = EquipLoader.GetEquipSlot(Mod, equipSlotName, EquipType.Head);
+                int equipSlot = CalamityUtils.GetCachedEquipSlot(Mod, equipSlotName, EquipType.Head);
 
                 if (extendedHatDrawer.PreDrawExtension(drawInfo) && !drawInfo.drawPlayer.dead && equipSlot == drawPlayer.head)
                 {

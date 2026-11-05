@@ -263,11 +263,17 @@ namespace CalamityMod.Projectiles.Boss
 
         public override void PostUpdateProjectiles()
         {
+            // These lists only feed the trail drawing, which never happens on a dedicated server.
+            if (Main.dedServ)
+                return;
+
+            int holyBurnOrbType = ModContent.ProjectileType<HolyBurnOrb>();
+            int holyLightType = ModContent.ProjectileType<HolyLight>();
             foreach (var item in Main.ActiveProjectiles)
             {
-                if (item.type == ModContent.ProjectileType<HolyBurnOrb>() && !HolyBurnOrbs.Contains(item))
+                if (item.type == holyBurnOrbType && !HolyBurnOrbs.Contains(item))
                     HolyBurnOrbs.Add(item);
-                if (item.type == ModContent.ProjectileType<HolyLight>() && !HolyLights.Contains(item))
+                if (item.type == holyLightType && !HolyLights.Contains(item))
                     HolyLights.Add(item);
             }
 

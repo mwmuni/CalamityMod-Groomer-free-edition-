@@ -2044,13 +2044,24 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region ResetEffects
+        private bool AnyViridVanguardBladeZenithSlashing()
+        {
+            int bladeType = ModContent.ProjectileType<ViridVanguardBlade>();
+            foreach (Projectile proj in Main.projectile)
+            {
+                if (proj.active && proj.type == bladeType && proj.owner == Player.whoAmI && proj.ModProjectile<ViridVanguardBlade>().CurrentState == ViridVanguardBlade.ViridVanguardAIState.PhotonRipperZenithSlashes)
+                    return true;
+            }
+            return false;
+        }
+
         public override void ResetEffects()
         {
             if (!areThereAnyDamnBosses)
             {
                 DoGHeadHitCounter = 0;
             }
-            ViridVanguardActiveAttackerThisFrame = Main.projectile.Any(x => x.active && x.type == ModContent.ProjectileType<ViridVanguardBlade>() && x.owner == Player.whoAmI && x.ModProjectile<ViridVanguardBlade>().CurrentState == ViridVanguardBlade.ViridVanguardAIState.PhotonRipperZenithSlashes);
+            ViridVanguardActiveAttackerThisFrame = AnyViridVanguardBladeZenithSlashing();
             ViridVanguardRotation = MathHelper.WrapAngle(ViridVanguardRotation + ViridVanguardRotationToAdd);
             ViridVanguardRotationToAdd = ViridVanguard.IdleCirclingSpeed;
 
@@ -2460,7 +2471,7 @@ namespace CalamityMod.CalPlayer
             copyrightInfringementShield = false;
 
             ConsumableDodgeCooldown = BalancingConstants.DodgeCooldownMax;
-            DodgeEffects = [];
+            DodgeEffects.Clear();
 
         daedalusReflect = false;
             daedalusSplit = false;
@@ -4560,7 +4571,7 @@ namespace CalamityMod.CalPlayer
                     if (intersectPreVel)
                     {
                         Player.position += npc.velocity;
-                        if (Collision.SolidCollision(Player.position, Player.Hitbox.Width, Player.Hitbox.Height) || Main.npc.Any(x => x.active && x.type == ModContent.NPCType<RockPillar>() && x.Opacity > 0.9f && x.whoAmI != npc.whoAmI && x.Hitbox.Intersects(Player.Hitbox)))
+                        if (Collision.SolidCollision(Player.position, Player.Hitbox.Width, Player.Hitbox.Height) || AnyOtherOpaqueRockPillarIntersects(npc.whoAmI, Player.Hitbox))
                         {
                             npc.damage = npc.defDamage;
                             npc.ai[0] = 1;
@@ -4721,6 +4732,17 @@ namespace CalamityMod.CalPlayer
         #endregion
 
         #region PostUpdateEquips
+        private static bool AnyOtherOpaqueRockPillarIntersects(int ignoredWhoAmI, Rectangle hitbox)
+        {
+            int rockPillarType = ModContent.NPCType<RockPillar>();
+            foreach (NPC other in Main.npc)
+            {
+                if (other.active && other.type == rockPillarType && other.Opacity > 0.9f && other.whoAmI != ignoredWhoAmI && other.Hitbox.Intersects(hitbox))
+                    return true;
+            }
+            return false;
+        }
+
         private void ResolvePillarCollisionAxis(NPC npc, bool horizontal, float originalVelocity)
         {
             bool lowerSide = horizontal ? Player.Center.X < npc.Center.X : Player.Center.Y < npc.Center.Y;
@@ -5527,19 +5549,19 @@ namespace CalamityMod.CalPlayer
             {
                 // Body
                 if (Player.armor[1].type == ItemType<AuricTeslaBodyArmor>())
-                    Player.body = EquipLoader.GetEquipSlot(Mod, "AuricTeslaBodyArmor", EquipType.Body);
+                    Player.body = CalamityUtils.GetCachedEquipSlot(Mod, "AuricTeslaBodyArmor", EquipType.Body);
                 else if (Player.armor[1].type == ItemType<DaedalusBreastplate>())
-                    Player.body = EquipLoader.GetEquipSlot(Mod, "DaedalusBreastplate", EquipType.Body);
+                    Player.body = CalamityUtils.GetCachedEquipSlot(Mod, "DaedalusBreastplate", EquipType.Body);
                 else if (Player.armor[1].type == ItemType<EmpyreanCloak>())
-                    Player.body = EquipLoader.GetEquipSlot(Mod, "EmpyreanCloak", EquipType.Body);
+                    Player.body = CalamityUtils.GetCachedEquipSlot(Mod, "EmpyreanCloak", EquipType.Body);
                 else if (Player.armor[1].type == ItemType<SnowRuffianChestplate>())
-                    Player.body = EquipLoader.GetEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Body);
+                    Player.body = CalamityUtils.GetCachedEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Body);
                 else if (Player.armor[1].type == ItemType<VictideBreastplate>())
-                    Player.body = EquipLoader.GetEquipSlot(Mod, "VictideBreastplate", EquipType.Body);
+                    Player.body = CalamityUtils.GetCachedEquipSlot(Mod, "VictideBreastplate", EquipType.Body);
 
                 // Legs
                 if (Player.armor[2].type == ItemType<VictideGreaves>())
-                    Player.legs = EquipLoader.GetEquipSlot(Mod, "VictideGreaves", EquipType.Legs);
+                    Player.legs = CalamityUtils.GetCachedEquipSlot(Mod, "VictideGreaves", EquipType.Legs);
 
                 // Set Bonus
                 if (Player.armor[0].type == ItemType<SnowRuffianMask>()
@@ -5551,29 +5573,29 @@ namespace CalamityMod.CalPlayer
             if (Player.Calamity().andromedaState == AndromedaPlayerState.LargeRobot ||
                 Player.Calamity().andromedaState == AndromedaPlayerState.SpecialAttack)
             {
-                Player.head = EquipLoader.GetEquipSlot(Mod, "HeadlessEquipTexture", EquipType.Head); // To make the head invisible on the map. The map was having a hissy fit because of hitbox changes.
+                Player.head = CalamityUtils.GetCachedEquipSlot(Mod, "HeadlessEquipTexture", EquipType.Head); // To make the head invisible on the map. The map was having a hissy fit because of hitbox changes.
             }
             else if (AresExoskeleton.ArmExists(Player))
-                Player.body = EquipLoader.GetEquipSlot(Mod, "AresExoskeleton", EquipType.Body);
+                Player.body = CalamityUtils.GetCachedEquipSlot(Mod, "AresExoskeleton", EquipType.Body);
             else if (meldTransformationPower || meldTransformationForce)
             {
-                Player.legs = EquipLoader.GetEquipSlot(Mod, "MeldTransformation", EquipType.Legs);
-                Player.body = EquipLoader.GetEquipSlot(Mod, "MeldTransformation", EquipType.Body);
-                Player.neck = (sbyte)EquipLoader.GetEquipSlot(Mod, "MeldTransformation", EquipType.Neck);
-                Player.head = EquipLoader.GetEquipSlot(Mod, "MeldTransformation", EquipType.Head);
+                Player.legs = CalamityUtils.GetCachedEquipSlot(Mod, "MeldTransformation", EquipType.Legs);
+                Player.body = CalamityUtils.GetCachedEquipSlot(Mod, "MeldTransformation", EquipType.Body);
+                Player.neck = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "MeldTransformation", EquipType.Neck);
+                Player.head = CalamityUtils.GetCachedEquipSlot(Mod, "MeldTransformation", EquipType.Head);
                 Player.face = -1;
             }
             else if (omegaBlueTransformationPower || omegaBlueTransformationForce)
             {
                 bool hasOmegaBlueCooldown = cooldowns.TryGetValue(OmegaBlue.ID, out CooldownInstance cd);
                 if (hasOmegaBlueCooldown && cd.timeLeft > 1500)
-                    Player.head = EquipLoader.GetEquipSlot(Mod, "OmegaBlueTransformation", EquipType.Head);
+                    Player.head = CalamityUtils.GetCachedEquipSlot(Mod, "OmegaBlueTransformation", EquipType.Head);
             }
 
 
             if (snowRuffianSet)
             {
-                Player.wings = EquipLoader.GetEquipSlot(Mod, "SnowRuffianMask", EquipType.Wings);
+                Player.wings = CalamityUtils.GetCachedEquipSlot(Mod, "SnowRuffianMask", EquipType.Wings);
                 bool falling = Player.gravDir == -1 ? Player.velocity.Y < 0.05f : Player.velocity.Y > 0.05f;
                 if (Player.controlJump && falling)
                 {
@@ -5586,34 +5608,34 @@ namespace CalamityMod.CalPlayer
                     Player.fallStart = (int)(Player.position.Y / 16f);
                 }
             }
-            if (Player.body == EquipLoader.GetEquipSlot(Mod, "AuricTeslaBodyArmor", EquipType.Body))
+            if (Player.body == CalamityUtils.GetCachedEquipSlot(Mod, "AuricTeslaBodyArmor", EquipType.Body))
             {
-                Player.back = (sbyte)EquipLoader.GetEquipSlot(Mod, "AuricTeslaBodyArmor", EquipType.Back);
+                Player.back = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "AuricTeslaBodyArmor", EquipType.Back);
             }
 
-            if (Player.body == EquipLoader.GetEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Body))
+            if (Player.body == CalamityUtils.GetCachedEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Body))
             {
-                Player.back = (sbyte)EquipLoader.GetEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Back);
-                Player.neck = (sbyte)EquipLoader.GetEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Neck);
+                Player.back = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Back);
+                Player.neck = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "SnowRuffianChestplate", EquipType.Neck);
             }
 
-            if (Player.body == EquipLoader.GetEquipSlot(Mod, "EmpyreanCloak", EquipType.Body) && !meldTransformationPower && !meldTransformationForce)
+            if (Player.body == CalamityUtils.GetCachedEquipSlot(Mod, "EmpyreanCloak", EquipType.Body) && !meldTransformationPower && !meldTransformationForce)
             {
-                Player.back = (sbyte)EquipLoader.GetEquipSlot(Mod, "EmpyreanCloak", EquipType.Back);
-                Player.neck = (sbyte)EquipLoader.GetEquipSlot(Mod, "EmpyreanCloak", EquipType.Neck);
+                Player.back = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "EmpyreanCloak", EquipType.Back);
+                Player.neck = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "EmpyreanCloak", EquipType.Neck);
             }
 
-            if (Player.body == EquipLoader.GetEquipSlot(Mod, "DaedalusBreastplate", EquipType.Body))
+            if (Player.body == CalamityUtils.GetCachedEquipSlot(Mod, "DaedalusBreastplate", EquipType.Body))
             {
                 //Put the faulds on the chestplate
-                Player.waist = (sbyte)EquipLoader.GetEquipSlot(Mod, "DaedalusBreastplate", EquipType.Waist);
+                Player.waist = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "DaedalusBreastplate", EquipType.Waist);
             }
 
-            bool victideBreastplateVisible = Player.body == EquipLoader.GetEquipSlot(Mod, "VictideBreastplate", EquipType.Body);
+            bool victideBreastplateVisible = Player.body == CalamityUtils.GetCachedEquipSlot(Mod, "VictideBreastplate", EquipType.Body);
             //Give the player faulds if either the body armor or the leggings are equipped
-            if (victideBreastplateVisible || Player.legs == EquipLoader.GetEquipSlot(Mod, "VictideGreaves", EquipType.Legs))
+            if (victideBreastplateVisible || Player.legs == CalamityUtils.GetCachedEquipSlot(Mod, "VictideGreaves", EquipType.Legs))
             {
-                Player.waist = (sbyte)EquipLoader.GetEquipSlot(Mod, "VictideFaulds", EquipType.Waist);
+                Player.waist = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, "VictideFaulds", EquipType.Waist);
 
                 //Also prevent the player from having any front drawing accs which would be wildly offset because of the different proportions.
                 if (victideBreastplateVisible)
@@ -5662,62 +5684,72 @@ namespace CalamityMod.CalPlayer
             if (Player.ownedProjectileCounts[ProjectileType<GiantIbanRobotOfDoom>()] > 0)
                 Player.yoraiz0rEye = 0;
 
-            int totalMoonlightDyes = Player.dye.Count(dyeItem => dyeItem.type == ItemType<ProfanedMoonlightDye>());
-            if (totalMoonlightDyes > 0)
+            int totalMoonlightDyes = 0;
+            int moonlightDyeType = ItemType<ProfanedMoonlightDye>();
+            foreach (Item dyeItem in Player.dye)
             {
-                // Initialize the aurora drawer.
-                int size = 340;
-                FluidFieldManager.AdjustSizeRelativeToGraphicsQuality(ref size);
-
-                float scale = MathHelper.Max(Main.screenWidth, Main.screenHeight) / size * 0.4f;
-                if (ProfanedMoonlightAuroraDrawer is null || ProfanedMoonlightAuroraDrawer.Size != size)
-                {
-                    ProfanedMoonlightAuroraDrawer?.Dispose();
-                    ProfanedMoonlightAuroraDrawer = FluidFieldManager.CreateField(size, scale, 0.1f, 50f, 0.992f);
-                }  
-
-                int sourceArea = (int)Math.Ceiling(6f / ProfanedMoonlightAuroraDrawer.Scale) + 1;
-                ProfanedMoonlightAuroraDrawer.ShouldUpdate = Player.miscCounter % 2 == 0;
-                ProfanedMoonlightAuroraDrawer.UpdateAction = () =>
-                {
-                    // Aurora Count does not scale to save on resources if you have a lot of dyes
-                    int auroraCount = 5;
-                    float unclampedAuroraPower = totalMoonlightDyes / 3f;
-                    float timeScalar1 = Main.GlobalTimeWrappedHourly * 0.56f;
-                    float timeScalar2 = Main.GlobalTimeWrappedHourly * 0.32f;
-                    float timeScalar3 = Main.GlobalTimeWrappedHourly * 0.91f;
-                    Vector2 velocityScale = new Vector2(0.15f, 1f);
-                    Vector2 playerVelocityOffset = Vector2.UnitX * Player.velocity.X / 9f;
-                    Vector2 drawPosition = Main.LocalPlayer.Center - Main.screenPosition;
-                    Vector2 auroraOffset = drawPosition - Vector2.UnitY * 15f;
-                    int origin = size / 2;
-                    float auroraPower = MathHelper.Clamp(unclampedAuroraPower, 0f, 1f);
-                    for (int i = 0; i < auroraCount; i++)
-                    {
-                        float offsetAngle = MathHelper.TwoPi * i / auroraCount + timeScalar1;
-                        Color auroraColor = GetCurrentMoonlightDyeColor(offsetAngle) * 0.8f;
-                        auroraColor.A = 0;
-
-                        Vector2 auroraVelocity = (offsetAngle / 3f + timeScalar2).ToRotationVector2();
-                        auroraVelocity.Y = -Math.Abs(auroraVelocity.Y);
-                        auroraVelocity = (auroraVelocity * velocityScale - playerVelocityOffset).SafeNormalize(Vector2.UnitY) * 0.07f;
-
-                        Vector2 auroraSpawnPosition = auroraOffset;
-                        auroraSpawnPosition.X += (float)Math.Cos(offsetAngle + timeScalar3) * 75f;
-
-                        int x = (int)((auroraSpawnPosition.X - drawPosition.X) / ProfanedMoonlightAuroraDrawer.Scale);
-                        int y = (int)((auroraSpawnPosition.Y - drawPosition.Y) / ProfanedMoonlightAuroraDrawer.Scale);
-                        for (int j = -sourceArea; j <= sourceArea; j++)
-                        {
-                            for (int k = -sourceArea; k <= sourceArea; k++)
-                                ProfanedMoonlightAuroraDrawer.CreateSource(x + origin + j, y + origin + k, auroraPower, auroraColor, auroraVelocity);
-                        }
-                    }
-                };
+                if (dyeItem.type == moonlightDyeType)
+                    totalMoonlightDyes++;
             }
+            if (totalMoonlightDyes > 0)
+                UpdateProfanedMoonlightAurora(totalMoonlightDyes);
 
             if (NOU)
                 NOULOL();
+        }
+
+        // Kept separate from ForceVariousEffects so the aurora closure is only allocated while a Profaned Moonlight Dye is equipped.
+        private void UpdateProfanedMoonlightAurora(int totalMoonlightDyes)
+        {
+            // Initialize the aurora drawer.
+            int size = 340;
+            FluidFieldManager.AdjustSizeRelativeToGraphicsQuality(ref size);
+
+            float scale = MathHelper.Max(Main.screenWidth, Main.screenHeight) / size * 0.4f;
+            if (ProfanedMoonlightAuroraDrawer is null || ProfanedMoonlightAuroraDrawer.Size != size)
+            {
+                ProfanedMoonlightAuroraDrawer?.Dispose();
+                ProfanedMoonlightAuroraDrawer = FluidFieldManager.CreateField(size, scale, 0.1f, 50f, 0.992f);
+            }
+
+            int sourceArea = (int)Math.Ceiling(6f / ProfanedMoonlightAuroraDrawer.Scale) + 1;
+            ProfanedMoonlightAuroraDrawer.ShouldUpdate = Player.miscCounter % 2 == 0;
+            ProfanedMoonlightAuroraDrawer.UpdateAction = () =>
+            {
+                // Aurora Count does not scale to save on resources if you have a lot of dyes
+                int auroraCount = 5;
+                float unclampedAuroraPower = totalMoonlightDyes / 3f;
+                float timeScalar1 = Main.GlobalTimeWrappedHourly * 0.56f;
+                float timeScalar2 = Main.GlobalTimeWrappedHourly * 0.32f;
+                float timeScalar3 = Main.GlobalTimeWrappedHourly * 0.91f;
+                Vector2 velocityScale = new Vector2(0.15f, 1f);
+                Vector2 playerVelocityOffset = Vector2.UnitX * Player.velocity.X / 9f;
+                Vector2 drawPosition = Main.LocalPlayer.Center - Main.screenPosition;
+                Vector2 auroraOffset = drawPosition - Vector2.UnitY * 15f;
+                int origin = size / 2;
+                float auroraPower = MathHelper.Clamp(unclampedAuroraPower, 0f, 1f);
+                for (int i = 0; i < auroraCount; i++)
+                {
+                    float offsetAngle = MathHelper.TwoPi * i / auroraCount + timeScalar1;
+                    Color auroraColor = GetCurrentMoonlightDyeColor(offsetAngle) * 0.8f;
+                    auroraColor.A = 0;
+
+                    Vector2 auroraVelocity = (offsetAngle / 3f + timeScalar2).ToRotationVector2();
+                    auroraVelocity.Y = -Math.Abs(auroraVelocity.Y);
+                    auroraVelocity = (auroraVelocity * velocityScale - playerVelocityOffset).SafeNormalize(Vector2.UnitY) * 0.07f;
+
+                    Vector2 auroraSpawnPosition = auroraOffset;
+                    auroraSpawnPosition.X += (float)Math.Cos(offsetAngle + timeScalar3) * 75f;
+
+                    int x = (int)((auroraSpawnPosition.X - drawPosition.X) / ProfanedMoonlightAuroraDrawer.Scale);
+                    int y = (int)((auroraSpawnPosition.Y - drawPosition.Y) / ProfanedMoonlightAuroraDrawer.Scale);
+                    for (int j = -sourceArea; j <= sourceArea; j++)
+                    {
+                        for (int k = -sourceArea; k <= sourceArea; k++)
+                            ProfanedMoonlightAuroraDrawer.CreateSource(x + origin + j, y + origin + k, auroraPower, auroraColor, auroraVelocity);
+                    }
+                }
+            };
         }
 
         private void DisableDashes()

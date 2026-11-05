@@ -21,11 +21,11 @@ namespace CalamityMod.Items.VanillaArmorChanges
             for (int i = 0; i < ArmorChanges.Count; i++)
             {
                 bool isValidHeadPiece = (ArmorChanges[i].HeadPieceID ?? ItemID.None) == checkItem.type ||
-                    ArmorChanges[i].AlternativeHeadPieceIDs.Contains(checkItem.type);
+                    ArmorChanges[i].CachedAlternativeHeadPieceIDs.Contains(checkItem.type);
                 bool isValidBodyPiece = (ArmorChanges[i].BodyPieceID ?? ItemID.None) == checkItem.type ||
-                    ArmorChanges[i].AlternativeBodyPieceIDs.Contains(checkItem.type);
+                    ArmorChanges[i].CachedAlternativeBodyPieceIDs.Contains(checkItem.type);
                 bool isValidLegPiece = (ArmorChanges[i].LegPieceID ?? ItemID.None) == checkItem.type ||
-                    ArmorChanges[i].AlternativeLegPieceIDs.Contains(checkItem.type);
+                    ArmorChanges[i].CachedAlternativeLegPieceIDs.Contains(checkItem.type);
                 if ((isValidHeadPiece || isValidBodyPiece || isValidLegPiece) && !ArmorChanges[i].NeedsToCreateSetBonusTextManually)
                     ArmorChanges[i].UpdateSetBonusText(ref setBonusText);
             }

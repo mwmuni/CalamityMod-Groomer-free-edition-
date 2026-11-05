@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,8 @@ internal static class Program
         TestCommandAndHooks();
         TestShaderBuckets();
         TestQueuedParticles();
+        TestBulkParticleRemoval();
+        TestCustomParticleEquality();
         Console.WriteLine($"PASS: {_assertions} performance/runtime assertions.");
     }
 
@@ -289,6 +292,7 @@ internal static class Program
         var handler = new GeneralParticleHandler();
         handler.Load();
         GeneralParticleHandler.particleIDsByTypes[typeof(TestParticle)] = 0;
+        GeneralParticleHandler.ConfigureParticleEquality(GeneralParticleHandler.particleIDsByTypes.Keys);
         return handler;
     }
 
@@ -334,12 +338,145 @@ internal static class Program
         handler.OnWorldUnload();
     }
 
-    private sealed class TestParticle : Particle
+    private static void TestBulkParticleRemoval()
+    {
+        var handler = SetUpParticles();
+        var drawLog = new List<TestParticle>();
+        var particles = new TestParticle[60];
+        for (int i = 0; i < particles.Length; i++)
+        {
+            particles[i] = new TestParticle { Additive = i % 3 == 0, Lifetime = i % 7 == 0 ? 1 : 0, DrawLog = drawLog };
+            GeneralParticleHandler.SpawnParticle(particles[i]);
+        }
+
+        // Exceed the kill lookup and batched removal thresholds with kills, expiries, repeated requests,
+        // an instance spawned twice, nulls and a particle that was never spawned.
+        TestParticle duplicate = particles[4];
+        GeneralParticleHandler.SpawnParticle(duplicate);
+        for (int i = 1; i < particles.Length; i += 2)
+            GeneralParticleHandler.RemoveParticle(particles[i]);
+        GeneralParticleHandler.RemoveParticle(particles[1]);
+        GeneralParticleHandler.RemoveParticle(duplicate);
+        GeneralParticleHandler.RemoveParticle(null);
+        GeneralParticleHandler.RemoveParticle(new TestParticle());
+        GeneralParticleHandler.Update();
+
+        static bool Survives(int i) => i % 2 == 0 && i % 7 != 0 && i != 4;
+        TestParticle[] survivors =
+        [
+            .. Enumerable.Range(0, particles.Length).Where(i => i % 3 == 0 && Survives(i)).Select(i => particles[i]),
+            .. Enumerable.Range(0, particles.Length).Where(i => i % 3 != 0 && Survives(i)).Select(i => particles[i]),
+        ];
+        GeneralDrawLayerSystem.Draw(GeneralDrawLayer.AfterDusts);
+        Check(drawLog.SequenceEqual(survivors),
+            "Bulk particle removal must remove killed, expired and duplicate entries while preserving survivor draw order.");
+        Check(GeneralParticleHandler.FreeSpacesAvailable() == CalamityClientConfig.Instance.ParticleLimit - survivors.Length,
+            "Bulk particle removal must remove exactly the killed and expired particles from the active list.");
+        Check(!Terraria.Main.spriteBatch.IsDrawing, "Particle drawing must balance every sprite-batch begin/end.");
+
+        // Kill requests from an earlier bulk removal must not affect a particle that is spawned again afterwards.
+        TestParticle respawned = particles[1];
+        GeneralParticleHandler.SpawnParticle(respawned);
+        for (int i = 0; i < 9; i++)
+            GeneralParticleHandler.RemoveParticle(new TestParticle());
+        GeneralParticleHandler.Update();
+        Check(respawned.Time == 2 && survivors.All(p => p.Time == 2),
+            "Earlier kill requests must not remove respawned or surviving particles.");
+
+        GeneralParticleHandler.RemoveParticlesOfType<TestParticle>();
+        GeneralParticleHandler.Update();
+        drawLog.Clear();
+        GeneralDrawLayerSystem.Draw(GeneralDrawLayer.AfterDusts);
+        Check(drawLog.Count == 0 && GeneralParticleHandler.FreeSpacesAvailable() == CalamityClientConfig.Instance.ParticleLimit,
+            "Removing every particle of a type must empty the active list and draw collections.");
+
+        foreach (TestParticle particle in particles.Take(12))
+            GeneralParticleHandler.SpawnParticle(particle);
+        GeneralParticleHandler.RemoveAllParticles();
+        GeneralParticleHandler.Update();
+        GeneralDrawLayerSystem.Draw(GeneralDrawLayer.AfterDusts);
+        Check(drawLog.Count == 0 && GeneralParticleHandler.FreeSpacesAvailable() == CalamityClientConfig.Instance.ParticleLimit,
+            "Removing all particles must empty the active list and draw collections.");
+
+        var reclassified = new TestParticle();
+        GeneralParticleHandler.SpawnParticle(reclassified);
+        reclassified.Additive = true;
+        GeneralParticleHandler.RemoveParticle(reclassified);
+        GeneralParticleHandler.Update();
+        GeneralParticleHandler.Update();
+        Check(reclassified.Time == 1, "Removed particles must stop updating even if their draw classification changed after spawning.");
+
+        // The reclassified particle left a stale draw entry ahead of later ones, so removals must take the first occurrence like List<T>.Remove.
+        reclassified.Additive = false;
+        reclassified.DrawLog = drawLog;
+        var later = new TestParticle { DrawLog = drawLog };
+        GeneralParticleHandler.SpawnParticle(later);
+        GeneralParticleHandler.SpawnParticle(reclassified);
+        GeneralParticleHandler.RemoveParticle(reclassified);
+        GeneralParticleHandler.Update();
+        drawLog.Clear();
+        GeneralDrawLayerSystem.Draw(GeneralDrawLayer.AfterDusts);
+        Check(drawLog.SequenceEqual([later, reclassified]), "Draw collection removals must take the first matching entry, like List<T>.Remove.");
+        handler.OnWorldUnload();
+    }
+
+    private static void TestCustomParticleEquality()
+    {
+        Check(GeneralParticleHandler.UsesReferenceEquality([typeof(TestParticle)]),
+            "Particle types without custom equality must allow reference searches.");
+        Check(!GeneralParticleHandler.UsesReferenceEquality([typeof(TestParticle), typeof(KeyedParticle)]),
+            "A particle type with custom equality must disable reference searches.");
+
+        var handler = SetUpParticles();
+        GeneralParticleHandler.particleIDsByTypes[typeof(KeyedParticle)] = 1;
+        GeneralParticleHandler.ConfigureParticleEquality(GeneralParticleHandler.particleIDsByTypes.Keys);
+        int limit = CalamityClientConfig.Instance.ParticleLimit;
+
+        // Removal counts cover immediate, individually deferred and batched draw collection removals, and both kill search paths.
+        foreach (int count in new[] { 1, 20, 50 })
+        {
+            var drawLog = new List<TestParticle>();
+            KeyedParticle[] spawned = [.. Enumerable.Range(0, 60).Select(key => new KeyedParticle { Key = key, DrawLog = drawLog })];
+            foreach (KeyedParticle particle in spawned)
+                GeneralParticleHandler.SpawnParticle(particle);
+            for (int key = 0; key < count; key++)
+                GeneralParticleHandler.RemoveParticle(new KeyedParticle { Key = key });
+            GeneralParticleHandler.Update();
+            GeneralDrawLayerSystem.Draw(GeneralDrawLayer.AfterDusts);
+            Check(drawLog.SequenceEqual(spawned.Skip(count), ReferenceEqualityComparer.Instance)
+                && GeneralParticleHandler.FreeSpacesAvailable() == limit - (spawned.Length - count),
+                "Kill requests must remove particles that are equal to them under the particle type's own equality.");
+            GeneralParticleHandler.RemoveAllParticles();
+            GeneralParticleHandler.Update();
+
+            // List<T>.Remove takes out the first equal entry, so an expiring particle removes an earlier equal one from its draw collection.
+            drawLog.Clear();
+            KeyedParticle[] earlier = [.. Enumerable.Range(0, count).Select(key => new KeyedParticle { Key = key, DrawLog = drawLog })];
+            KeyedParticle[] expiring = [.. Enumerable.Range(0, count).Select(key => new KeyedParticle { Key = key, Lifetime = 1, DrawLog = drawLog })];
+            foreach (KeyedParticle particle in earlier.Concat(expiring))
+                GeneralParticleHandler.SpawnParticle(particle);
+            GeneralParticleHandler.Update();
+            GeneralDrawLayerSystem.Draw(GeneralDrawLayer.AfterDusts);
+            Check(drawLog.SequenceEqual(expiring, ReferenceEqualityComparer.Instance) && GeneralParticleHandler.FreeSpacesAvailable() == limit - count,
+                "Draw collection removals must use the particle type's own equality, like List<T>.Remove.");
+
+            GeneralParticleHandler.RemoveAllParticles();
+            GeneralParticleHandler.Update();
+            drawLog.Clear();
+            GeneralDrawLayerSystem.Draw(GeneralDrawLayer.AfterDusts);
+            Check(drawLog.Count == 0 && GeneralParticleHandler.FreeSpacesAvailable() == limit,
+                "Removing all particles with custom equality must empty the active list and draw collections.");
+        }
+        handler.OnWorldUnload();
+    }
+
+    private class TestParticle : Particle
     {
         public Effect Shader;
         public bool Additive;
         public int Draws, ShaderPreparations;
         public Action OnFirstUpdate;
+        public List<TestParticle> DrawLog;
         public override Effect CustomShader => Shader;
         public override bool UseAdditiveBlend => Additive;
         public override bool UseCustomDraw => true;
@@ -350,6 +487,17 @@ internal static class Program
                 OnFirstUpdate?.Invoke();
         }
         public override void PrepareCustomShader(Effect shader) => ShaderPreparations++;
-        public override void CustomDraw(SpriteBatch spriteBatch) => Draws++;
+        public override void CustomDraw(SpriteBatch spriteBatch)
+        {
+            Draws++;
+            DrawLog?.Add(this);
+        }
+    }
+
+    private sealed class KeyedParticle : TestParticle
+    {
+        public int Key;
+        public override bool Equals(object obj) => obj is KeyedParticle other && other.Key == Key;
+        public override int GetHashCode() => Key;
     }
 }

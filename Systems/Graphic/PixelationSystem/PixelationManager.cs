@@ -124,10 +124,12 @@ namespace CalamityMod.Systems.Graphic.PixelationSystem
                     Main.spriteBatch.Begin(default, blendStateTargetPair.Key, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, pixelationMatrix);
 
                     // Select only drawers who match this target's BlendState.
-                    var drawersByBlendState = drawerCollection.Where(d => d.DefaultBlendState == blendStateTargetPair.Key).ToList();
-                    if (drawersByBlendState.Count > 0)
+                    // Drawers appended while this target draws are left for the next target, as with the previous snapshot.
+                    int drawerCount = drawerCollection.Count;
+                    for (int i = 0; i < drawerCount; i++)
                     {
-                        foreach (PixelatedDrawer drawer in drawersByBlendState)
+                        PixelatedDrawer drawer = drawerCollection[i];
+                        if (drawer.DefaultBlendState == blendStateTargetPair.Key)
                             drawer.DrawAction.Invoke(pixelationMatrix);
                     }
 

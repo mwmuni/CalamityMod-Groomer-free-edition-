@@ -64,8 +64,7 @@ namespace CalamityMod.Items.Weapons.Melee
             var blastTooltip = tooltips.FirstOrDefault(x => x.Text.Contains("[BLAST]") && x.Mod == "Terraria");
             if (blastTooltip != null)
             {
-                var key = Item.GetDynamicModHotkey().GetAssignedKeysOrEmpty(PlayerInput.CurrentInputMode);
-                if (key.Count > 0)
+                if (Item.GetDynamicModHotkey().HasAssignedKeys(PlayerInput.CurrentInputMode))
                     blastTooltip.Text = Lang.SupportGlyphs(this.GetLocalizedValue("BlastInfoKeybind"));
                 else
                     blastTooltip.Text = Lang.SupportGlyphs(this.GetLocalizedValue("BlastInfo"));
@@ -146,7 +145,7 @@ namespace CalamityMod.Items.Weapons.Melee
                 bool canExecuteBlast = Charge > 0 && blast is null;
                 bool canExecuteParry = parrier is null && !canExecuteBlast;
                 //Disable blast usage if hotkey is bound
-                if (Item.GetDynamicModHotkey().GetAssignedKeysOrEmpty(PlayerInput.CurrentInputMode).Count > 0)
+                if (Item.GetDynamicModHotkey().HasAssignedKeys(PlayerInput.CurrentInputMode))
                     canExecuteBlast = false;
 
                 // The blast is checked first, so that it overrides the first right click triggering a parry. Blasts delete any active parry holdouts on use.

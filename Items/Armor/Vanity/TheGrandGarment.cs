@@ -28,7 +28,7 @@ namespace CalamityMod.Items.Armor.Vanity
 
         public override void EquipFrameEffects(Player player, EquipType type)
         {
-            player.waist = (sbyte)EquipLoader.GetEquipSlot(Mod, Name, EquipType.Waist);
+            player.waist = (sbyte)CalamityUtils.GetCachedEquipSlot(Mod, Name, EquipType.Waist);
         }
 
         public override void AddRecipes()

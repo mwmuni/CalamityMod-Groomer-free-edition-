@@ -25,7 +25,7 @@ namespace CalamityMod.CalPlayer.DrawLayers
             if (ModContent.GetModItem(bodyItem.type) is IDrawArmOverShoulderpad frontArmDrawer)
             {
                 string equipSlotName = frontArmDrawer.EquipSlotName(drawPlayer) != "" ? frontArmDrawer.EquipSlotName(drawPlayer) : bodyItem.ModItem.Name;
-                int equipSlot = EquipLoader.GetEquipSlot(Mod, equipSlotName, EquipType.Body);
+                int equipSlot = CalamityUtils.GetCachedEquipSlot(Mod, equipSlotName, EquipType.Body);
                 if (drawPlayer.body != equipSlot)
                     return;
 

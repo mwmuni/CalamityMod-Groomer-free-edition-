@@ -99,7 +99,9 @@ namespace CalamityMod
         }
         public override void PostUpdateEverything()
         {
-            RentedKeybinds = KeybindRentalQueue.ToList();
+            // Reuse the rented list rather than allocating a copy every tick.
+            RentedKeybinds.Clear();
+            RentedKeybinds.AddRange(KeybindRentalQueue);
             KeybindRentalQueue.Clear();
         }
     }
@@ -219,13 +221,6 @@ namespace CalamityMod
             return null;
         }
        
-        public static bool HasBoundDynamicHotkey(this Item item)
-        {
-            var h = item.GetDynamicModHotkey();
-            if (h == null) return false;
-            if (h?.GetAssignedKeysOrEmpty(PlayerInput.CurrentInputMode).Count == 0)
-                return false;
-            return true;
-        }
+        public static bool HasBoundDynamicHotkey(this Item item) => item.GetDynamicModHotkey().HasAssignedKeys(PlayerInput.CurrentInputMode);
     }
 }

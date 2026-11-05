@@ -20,7 +20,10 @@ namespace CalamityMod.NPCs
         #endregion
 
         #region Filtering Fields
-        public static List<int> MiracleBlightExcludedNPCs => new()
+        private static List<int> miracleBlightExcludedNPCs;
+
+        // Built once on first use since this is checked for every NPC every tick.
+        public static List<int> MiracleBlightExcludedNPCs => miracleBlightExcludedNPCs ??= new()
         {
             // List the reason why the NPC(s) are excluded :)
 
@@ -49,6 +52,7 @@ namespace CalamityMod.NPCs
         {
             DrawingMiracleBlight = null;
             DrawingPolarity = null;
+            miracleBlightExcludedNPCs = null;
         }
         #endregion
 
@@ -68,6 +72,10 @@ namespace CalamityMod.NPCs
 
         public override bool PreAI(NPC npc)
         {
+            // These parameters are only read while drawing NPCs, which never happens on a dedicated server.
+            if (Main.dedServ)
+                return true;
+
             if (npc is null)
                 return true;
 

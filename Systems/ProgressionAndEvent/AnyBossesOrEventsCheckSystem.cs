@@ -13,7 +13,9 @@ namespace CalamityMod.Systems
         public override void PreUpdateEntities()
         {
             // Bool for if the SCal ritual effect is ongoing.
-            SCalSky.RitualDramaProjectileIsPresent = CalamityUtils.CountProjectiles(ModContent.ProjectileType<SCalRitualDrama>()) > 0;
+            // Only the client-side SCal sky reads this, so dedicated servers skip the projectile scan entirely.
+            if (!Main.dedServ)
+                SCalSky.RitualDramaProjectileIsPresent = CalamityUtils.AnyProjectiles(ModContent.ProjectileType<SCalRitualDrama>());
 
             // Bool for any existing bosses, true if any boss NPC is active.
             CalamityPlayer.areThereAnyDamnBosses = CalamityUtils.AnyBossNPCS();

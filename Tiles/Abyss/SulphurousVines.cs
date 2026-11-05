@@ -11,6 +11,35 @@ namespace CalamityMod.Tiles.Abyss
 {
     public class SulphurousVines : ModTile
     {
+        /// <summary>
+        /// Sulphurous host tiles stop growing new vines once this many vines exist in the 31x31 area around them.
+        /// </summary>
+        internal const int MaxNearbyVines = 5;
+
+        /// <summary>
+        /// Returns whether at least <see cref="MaxNearbyVines"/> vines exist in the 31x31 area centred on the given tile.<br />
+        /// This is the result of a full count compared against the limit, but the scan stops as soon as the limit is reached.
+        /// </summary>
+        internal static bool TooManyVinesNearby(int i, int j)
+        {
+            ushort vineType = (ushort)ModContent.TileType<SulphurousVines>();
+            int nearbyVineCount = 0;
+            for (int x = i - 15; x <= i + 15; x++)
+            {
+                for (int y = j - 15; y <= j + 15; y++)
+                {
+                    if (!WorldGen.InWorld(x, y))
+                        continue;
+
+                    Tile tile = Main.tile[x, y];
+                    if (tile.HasTile && tile.TileType == vineType && ++nearbyVineCount >= MaxNearbyVines)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         public override void SetStaticDefaults()
         {
             Main.tileLighted[Type] = true;

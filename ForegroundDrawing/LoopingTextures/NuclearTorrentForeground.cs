@@ -82,6 +82,10 @@ namespace CalamityMod.ForegroundDrawing.LoopingTextures
                 }
             }
 
+            // Raindrops are purely visual; dedicated servers never draw them.
+            if (Main.dedServ)
+                return;
+
             NuclearRaindrop dr = new NuclearRaindrop(new Vector2(Main.screenWidth / 2f, -100) + new Vector2(Main.rand.NextFloat(-Main.screenWidth, Main.screenWidth), -Main.screenWidth * 0.65f).RotatedBy(-Main.windSpeedCurrent),
                new Vector2(0, 20).RotatedBy(-Main.windSpeedCurrent));
             Raindrops.Add(dr);

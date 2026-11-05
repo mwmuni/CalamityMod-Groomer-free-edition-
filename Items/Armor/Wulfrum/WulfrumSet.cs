@@ -392,8 +392,8 @@ namespace CalamityMod.Items.Armor.Wulfrum
         public override void FrameEffects()
         {
             //Give the braids variant to w*men
-            if (!Player.Male && Player.head == EquipLoader.GetEquipSlot(Mod, "WulfrumHat", EquipType.Head))
-                Player.head = EquipLoader.GetEquipSlot(Mod, "WulfrumHatFemale", EquipType.Head);
+            if (!Player.Male && Player.head == CalamityUtils.GetCachedEquipSlot(Mod, "WulfrumHat", EquipType.Head))
+                Player.head = CalamityUtils.GetCachedEquipSlot(Mod, "WulfrumHatFemale", EquipType.Head);
         }
     }
 }

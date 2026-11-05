@@ -26,6 +26,9 @@ namespace CalamityMod.Systems
         public virtual int[] AdditionalNPCs => new int[] { };
         #endregion
 
+        // AdditionalNPCs overrides build a new array on every access; scenes are singletons with fixed NPC lists.
+        private int[] cachedAdditionalNPCs;
+
         #region Overridable Methods
         public virtual bool AdditionalCheck() => true;
         #endregion
@@ -72,6 +75,7 @@ namespace CalamityMod.Systems
 
             Rectangle screenRect = new Rectangle((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
             int musicDistance = MusicDistance * 2;
+            int[] additionalNPCs = cachedAdditionalNPCs ??= AdditionalNPCs;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 bool inList = false;
@@ -81,9 +85,9 @@ namespace CalamityMod.Systems
                 }
                 else
                 {
-                    for (int i = 0; i < AdditionalNPCs.Length; i++)
+                    for (int i = 0; i < additionalNPCs.Length; i++)
                     {
-                        if (npc.type == AdditionalNPCs[i])
+                        if (npc.type == additionalNPCs[i])
                         {
                             inList = true;
                             break;

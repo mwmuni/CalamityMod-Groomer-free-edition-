@@ -671,64 +671,77 @@ namespace CalamityMod.NPCs
                 }
             }
 
-            for (int i = 0; i < bobbitWormBottom.Length; i++)
-                ResetSavedIndex(ref bobbitWormBottom[i], NPCType<BobbitWormSegment>());
+            // Most saved indices are -1 almost all of the time, so only resolve the expected modded NPC type(s) when an index is actually in use.
+            void ResetSavedModIndex<T>(ref int type) where T : ModNPC
+            {
+                if (type >= 0)
+                    ResetSavedIndex(ref type, NPCType<T>());
+            }
 
-            ResetSavedIndex(ref hiveMind, NPCType<HiveMind.HiveMind>());
-            ResetSavedIndex(ref perfHive, NPCType<PerforatorHive>());
-            ResetSavedIndex(ref slimeGodPurple, NPCType<EbonianPaladin>(), NPCType<SplitEbonianPaladin>());
-            ResetSavedIndex(ref slimeGodRed, NPCType<CrimulanPaladin>(), NPCType<SplitCrimulanPaladin>());
-            ResetSavedIndex(ref slimeGod, NPCType<SlimeGodCore>());
+            void ResetSavedModIndexEither<T1, T2>(ref int type) where T1 : ModNPC where T2 : ModNPC
+            {
+                if (type >= 0)
+                    ResetSavedIndex(ref type, NPCType<T1>(), NPCType<T2>());
+            }
+
+            for (int i = 0; i < bobbitWormBottom.Length; i++)
+                ResetSavedModIndex<BobbitWormSegment>(ref bobbitWormBottom[i]);
+
+            ResetSavedModIndex<HiveMind.HiveMind>(ref hiveMind);
+            ResetSavedModIndex<PerforatorHive>(ref perfHive);
+            ResetSavedModIndexEither<EbonianPaladin, SplitEbonianPaladin>(ref slimeGodPurple);
+            ResetSavedModIndexEither<CrimulanPaladin, SplitCrimulanPaladin>(ref slimeGodRed);
+            ResetSavedModIndex<SlimeGodCore>(ref slimeGod);
             ResetSavedIndex(ref laserEye, NPCID.Retinazer);
             ResetSavedIndex(ref fireEye, NPCID.Spazmatism);
             ResetSavedIndex(ref primeLaser, NPCID.PrimeLaser);
             ResetSavedIndex(ref primeCannon, NPCID.PrimeCannon);
             ResetSavedIndex(ref primeVice, NPCID.PrimeVice);
             ResetSavedIndex(ref primeSaw, NPCID.PrimeSaw);
-            ResetSavedIndex(ref aquaticScourge, NPCType<AquaticScourgeHead>());
-            ResetSavedIndex(ref brimstoneElemental, NPCType<BrimstoneElemental.BrimstoneElemental>());
-            ResetSavedIndex(ref cataclysm, NPCType<Cataclysm>());
-            ResetSavedIndex(ref catastrophe, NPCType<Catastrophe>());
-            ResetSavedIndex(ref calamitas, NPCType<CalamitasClone>());
-            ResetSavedIndex(ref LeviAndAna, NPCType<Leviathan.Leviathan>(), NPCType<Anahita>());
-            ResetSavedIndex(ref leviathan, NPCType<Leviathan.Leviathan>());
-            ResetSavedIndex(ref siren, NPCType<Anahita>());
-            ResetSavedIndex(ref astrumAureus, NPCType<AstrumAureus.AstrumAureus>());
-            ResetSavedIndex(ref scavenger, NPCType<RavagerBody>());
-            ResetSavedIndex(ref energyFlame, NPCType<ProfanedEnergyBody>());
-            ResetSavedIndex(ref doughnutBoss, NPCType<ProfanedGuardianCommander>());
-            ResetSavedIndex(ref doughnutBossDefender, NPCType<ProfanedGuardianDefender>());
-            ResetSavedIndex(ref doughnutBossHealer, NPCType<ProfanedGuardianHealer>());
-            ResetSavedIndex(ref holyBossAttacker, NPCType<ProvSpawnOffense>());
-            ResetSavedIndex(ref holyBossDefender, NPCType<ProvSpawnDefense>());
-            ResetSavedIndex(ref holyBossHealer, NPCType<ProvSpawnHealer>());
-            ResetSavedIndex(ref holyBoss, NPCType<Providence.Providence>());
-            ResetSavedIndex(ref voidBoss, NPCType<CeaselessVoid.CeaselessVoid>());
-            ResetSavedIndex(ref signus, NPCType<Signus.Signus>());
-            ResetSavedIndex(ref ghostBossClone, NPCType<PolterPhantom>());
-            ResetSavedIndex(ref ghostBoss, NPCType<Polterghast.Polterghast>());
-            ResetSavedIndex(ref DoGHead, NPCType<DevourerofGodsHead>());
-            ResetSavedIndex(ref DoGP2, NPCType<DevourerofGodsHead>());
-            ResetSavedIndex(ref yharon, NPCType<Yharon.Yharon>());
-            ResetSavedIndex(ref yharonP2, NPCType<Yharon.Yharon>());
-            ResetSavedIndex(ref SCalCataclysm, NPCType<SupremeCataclysm>());
-            ResetSavedIndex(ref SCalCatastrophe, NPCType<SupremeCatastrophe>());
-            ResetSavedIndex(ref SCal, NPCType<SupremeCalamitas.SupremeCalamitas>());
-            ResetSavedIndex(ref SCalGrief, NPCType<SupremeCalamitas.SupremeCalamitas>());
-            ResetSavedIndex(ref SCalLament, NPCType<SupremeCalamitas.SupremeCalamitas>());
-            ResetSavedIndex(ref SCalEpiphany, NPCType<SupremeCalamitas.SupremeCalamitas>());
-            ResetSavedIndex(ref SCalAcceptance, NPCType<SupremeCalamitas.SupremeCalamitas>());
-            ResetSavedIndex(ref SCalWorm, NPCType<SepulcherHead>());
+            ResetSavedModIndex<AquaticScourgeHead>(ref aquaticScourge);
+            ResetSavedModIndex<BrimstoneElemental.BrimstoneElemental>(ref brimstoneElemental);
+            ResetSavedModIndex<Cataclysm>(ref cataclysm);
+            ResetSavedModIndex<Catastrophe>(ref catastrophe);
+            ResetSavedModIndex<CalamitasClone>(ref calamitas);
+            ResetSavedModIndexEither<Leviathan.Leviathan, Anahita>(ref LeviAndAna);
+            ResetSavedModIndex<Leviathan.Leviathan>(ref leviathan);
+            ResetSavedModIndex<Anahita>(ref siren);
+            ResetSavedModIndex<AstrumAureus.AstrumAureus>(ref astrumAureus);
+            ResetSavedModIndex<RavagerBody>(ref scavenger);
+            ResetSavedModIndex<ProfanedEnergyBody>(ref energyFlame);
+            ResetSavedModIndex<ProfanedGuardianCommander>(ref doughnutBoss);
+            ResetSavedModIndex<ProfanedGuardianDefender>(ref doughnutBossDefender);
+            ResetSavedModIndex<ProfanedGuardianHealer>(ref doughnutBossHealer);
+            ResetSavedModIndex<ProvSpawnOffense>(ref holyBossAttacker);
+            ResetSavedModIndex<ProvSpawnDefense>(ref holyBossDefender);
+            ResetSavedModIndex<ProvSpawnHealer>(ref holyBossHealer);
+            ResetSavedModIndex<Providence.Providence>(ref holyBoss);
+            ResetSavedModIndex<CeaselessVoid.CeaselessVoid>(ref voidBoss);
+            ResetSavedModIndex<Signus.Signus>(ref signus);
+            ResetSavedModIndex<PolterPhantom>(ref ghostBossClone);
+            ResetSavedModIndex<Polterghast.Polterghast>(ref ghostBoss);
+            ResetSavedModIndex<DevourerofGodsHead>(ref DoGHead);
+            ResetSavedModIndex<DevourerofGodsHead>(ref DoGP2);
+            ResetSavedModIndex<Yharon.Yharon>(ref yharon);
+            ResetSavedModIndex<Yharon.Yharon>(ref yharonP2);
+            ResetSavedModIndex<SupremeCataclysm>(ref SCalCataclysm);
+            ResetSavedModIndex<SupremeCatastrophe>(ref SCalCatastrophe);
+            ResetSavedModIndex<SupremeCalamitas.SupremeCalamitas>(ref SCal);
+            ResetSavedModIndex<SupremeCalamitas.SupremeCalamitas>(ref SCalGrief);
+            ResetSavedModIndex<SupremeCalamitas.SupremeCalamitas>(ref SCalLament);
+            ResetSavedModIndex<SupremeCalamitas.SupremeCalamitas>(ref SCalEpiphany);
+            ResetSavedModIndex<SupremeCalamitas.SupremeCalamitas>(ref SCalAcceptance);
+            ResetSavedModIndex<SepulcherHead>(ref SCalWorm);
 
-            ResetSavedIndex(ref draedon, NPCType<Draedon>());
-            ResetSavedIndex(ref draedonAmbience, NPCType<Draedon>());
-            ResetSavedIndex(ref draedonExoMechWorm, NPCType<ThanatosHead>());
-            ResetSavedIndex(ref draedonExoMechTwinRed, NPCType<Artemis>());
-            ResetSavedIndex(ref draedonExoMechTwinGreen, NPCType<Apollo>());
-            ResetSavedIndex(ref draedonExoMechPrime, NPCType<AresBody>());
-            ResetSavedIndex(ref draedonExoMechPrimePlasmaCannon, NPCType<AresPlasmaFlamethrower>());
+            ResetSavedModIndex<Draedon>(ref draedon);
+            ResetSavedModIndex<Draedon>(ref draedonAmbience);
+            ResetSavedModIndex<ThanatosHead>(ref draedonExoMechWorm);
+            ResetSavedModIndex<Artemis>(ref draedonExoMechTwinRed);
+            ResetSavedModIndex<Apollo>(ref draedonExoMechTwinGreen);
+            ResetSavedModIndex<AresBody>(ref draedonExoMechPrime);
+            ResetSavedModIndex<AresPlasmaFlamethrower>(ref draedonExoMechPrimePlasmaCannon);
 
-            ResetSavedIndex(ref adultEidolonWyrmHead, NPCType<PrimordialWyrmHead>());
+            ResetSavedModIndex<PrimordialWyrmHead>(ref adultEidolonWyrmHead);
 
             // Reset the enraged state every frame. The expectation is that bosses will continuously set it back to true if necessary.
             CurrentlyEnraged = false;
@@ -810,6 +823,17 @@ namespace CalamityMod.NPCs
         #endregion
 
         #region Life Regen
+        private static bool HasWaterScalingDebuff(NPC npc)
+        {
+            foreach (int buffType in npc.buffType)
+            {
+                DebuffData debuffData = CalamityBuffSets.DebuffDataset[buffType];
+                if (debuffData is not null && debuffData.WaterDebuffScaling > 0)
+                    return true;
+            }
+            return false;
+        }
+
         public override void UpdateLifeRegen(NPC npc, ref int damage)
         {
             if (npc.defDamage > 0 && !npc.boss && !npc.friendly && !npc.dontTakeDamage && BiomeTileCounterSystem.SulphurTiles > 30 &&
@@ -887,7 +911,7 @@ namespace CalamityMod.NPCs
             {
                 ActiveWaterDebuffMultiplier += 0.5f;
             }
-            if (npc.buffType.Any(i => CalamityBuffSets.DebuffDataset[i] is not null && CalamityBuffSets.DebuffDataset[i].WaterDebuffScaling > 0) || npc.wet || npc.honeyWet || npc.dripping)
+            if (npc.wet || npc.honeyWet || npc.dripping || HasWaterScalingDebuff(npc))
             {
                 windChilledMult = 1.5f;
             }
@@ -2933,6 +2957,9 @@ namespace CalamityMod.NPCs
         #endregion
 
         #region Post AI
+        // Reused by the Auric repulsion check below; PostAI always runs on the main thread.
+        private static readonly List<Point> auricRejectionEdgeTiles = [];
+
         public override void PostAI(NPC npc)
         {
             // Worm heads emit dust when close enough to the player and digging through tiles
@@ -3291,7 +3318,8 @@ namespace CalamityMod.NPCs
 
                 // Get a list of tiles near the npc
                 // This is just Collision.GetEntityTiles but with a larger detection square because the sheer speed from auric boosts causes the detection to fail at higher speeds
-                List<Point> EdgeTiles = [];
+                List<Point> EdgeTiles = auricRejectionEdgeTiles;
+                EdgeTiles.Clear();
                 int extraDist = (int)(8 * npc.velocity.Length() / 6) + 1;
                 int left = (int)npc.position.X - extraDist;
                 int up = (int)npc.position.Y - extraDist;
@@ -4149,7 +4177,6 @@ namespace CalamityMod.NPCs
                 int checkPositionY = (int)(playerCenterY + Main.rand.Next(24, 45) * Main.rand.NextBool().ToDirectionInt());
                 Vector2 checkPosition = new Vector2(checkPositionX, checkPositionY);
 
-                Tile aboveSpawnTile = CalamityUtils.ParanoidTileRetrieval(checkPositionX, checkPositionY - 1);
                 bool nearLab = CalamityUtils.ManhattanDistance(checkPosition, sunkenSeaLabCenter) < 180f;
                 nearLab |= CalamityUtils.ManhattanDistance(checkPosition, planetoidLabCenter) < 180f;
                 nearLab |= CalamityUtils.ManhattanDistance(checkPosition, jungleLabCenter) < 180f;
@@ -4157,9 +4184,14 @@ namespace CalamityMod.NPCs
                 nearLab |= CalamityUtils.ManhattanDistance(checkPosition, iceLabCenter) < 180f;
                 bool nearPlagueLab = CalamityUtils.ManhattanDistance(checkPosition, jungleLabCenter) < 180f;
 
+                // The tile and wall checks are only relevant near a lab, so skip them (and their random tile read) everywhere else.
+                if (!nearLab)
+                    continue;
+
+                Tile aboveSpawnTile = CalamityUtils.ParanoidTileRetrieval(checkPositionX, checkPositionY - 1);
                 bool isLabWall = aboveSpawnTile.WallType == WallType<HazardChevronWall>() || aboveSpawnTile.WallType == WallType<LaboratoryPanelWall>() || aboveSpawnTile.WallType == WallType<LaboratoryPlateBeam>();
                 isLabWall |= aboveSpawnTile.WallType == WallType<LaboratoryPlatePillar>() || aboveSpawnTile.WallType == WallType<LaboratoryPlatingWall>() || aboveSpawnTile.WallType == WallType<RustedPlateBeam>();
-                if (!isLabWall || !nearLab || Collision.SolidCollision((checkPosition - new Vector2(2f, 2f)).ToWorldCoordinates(), 4, 4) || player.nearbyActiveNPCs >= maxSpawnCount || !Main.rand.NextBool(spawnRate))
+                if (!isLabWall || Collision.SolidCollision((checkPosition - new Vector2(2f, 2f)).ToWorldCoordinates(), 4, 4) || player.nearbyActiveNPCs >= maxSpawnCount || !Main.rand.NextBool(spawnRate))
                     continue;
 
                 WeightedRandom<int> pool = new WeightedRandom<int>();

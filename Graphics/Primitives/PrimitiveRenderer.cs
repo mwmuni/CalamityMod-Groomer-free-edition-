@@ -65,6 +65,11 @@ namespace CalamityMod.Graphics.Primitives
 
         private static float[] MainCompletionRatios;
 
+        // Reused by the list overload of RenderTrail instead of allocating a copy of the list for every trail.
+        private static Vector2[] ListPositionsSnapshot;
+
+        private static bool ListPositionsSnapshotInUse;
+
         private static float TotalTrailLength;
 
         public const float Epsilon = 1e-6f;
@@ -108,6 +113,7 @@ namespace CalamityMod.Graphics.Primitives
                 MainNormals = null;
                 WireframeVertices = null;
                 NonSmoothIndexScratch = null;
+                ListPositionsSnapshot = null;
                 VertexBuffer?.Dispose();
                 VertexBuffer = null;
                 IndexBuffer?.Dispose();
@@ -132,7 +138,36 @@ namespace CalamityMod.Graphics.Primitives
         /// <param name="positions">The list of positions to use. Keep in mind that these are expected to be in <b>world position</b>, and <see cref="Main.screenPosition"/> is automatically subtracted from them all.<br/>At least 4 points are required to use smoothing.</param>
         /// <param name="settings">The primitive draw settings to use.</param>
         /// <param name="pointsToCreate">The amount of points to use. More is higher detailed, but less performant. By default, is the number of positions provided. <b>Going above 100 is NOT recommended.</b></param>
-        public static void RenderTrail(List<Vector2> positions, PrimitiveSettings settings, int? pointsToCreate = null) => RenderTrail(positions.ToArray(), settings, pointsToCreate);
+        public static void RenderTrail(List<Vector2> positions, PrimitiveSettings settings, int? pointsToCreate = null)
+        {
+            int positionCount = positions.Count;
+
+            // A trail rendered from inside another list trail's callbacks must not overwrite the outer snapshot.
+            if (ListPositionsSnapshotInUse)
+            {
+                RenderTrail(positions.ToArray(), settings, pointsToCreate);
+                return;
+            }
+
+            PerformPixelationSafetyChecks(settings);
+
+            // The core ignores trails outside this range, so they don't need a snapshot.
+            if (positionCount <= 2 || positionCount > MaxPositions)
+                return;
+
+            // Render from a copy so callbacks that modify the list can't affect the trail being built.
+            Vector2[] snapshot = ListPositionsSnapshot ??= new Vector2[MaxPositions];
+            positions.CopyTo(snapshot);
+            ListPositionsSnapshotInUse = true;
+            try
+            {
+                RenderTrailCore(snapshot.AsSpan(0, positionCount), settings, pointsToCreate);
+            }
+            finally
+            {
+                ListPositionsSnapshotInUse = false;
+            }
+        }
 
         /// <summary>
         /// Renders a primitive trail.

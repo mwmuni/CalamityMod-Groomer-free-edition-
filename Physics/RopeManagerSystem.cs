@@ -37,6 +37,13 @@ public sealed class RopeManagerSystem : ModSystem
     {
         for (var i = 0; i < Ropes.Length; i++)
         {
+            // Skip whole chunks with no active ropes. Non-empty chunks are still re-checked bit by bit, as before.
+            if (i % BitsPerChunk == 0 && ActivityBitChunks[i / BitsPerChunk] == 0uL)
+            {
+                i += BitsPerChunk - 1;
+                continue;
+            }
+
             var bitIndex = i % BitsPerChunk;
             var active = (ActivityBitChunks[i / BitsPerChunk] >> bitIndex & 1) == 1;
             if (active)

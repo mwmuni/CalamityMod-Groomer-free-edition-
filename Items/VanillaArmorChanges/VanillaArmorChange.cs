@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,11 +16,23 @@ namespace CalamityMod.Items.VanillaArmorChanges
 
         public abstract int? LegPieceID { get; }
 
-        public virtual int[] AlternativeHeadPieceIDs => new int[0];
+        public virtual int[] AlternativeHeadPieceIDs => Array.Empty<int>();
 
-        public virtual int[] AlternativeBodyPieceIDs => new int[0];
+        public virtual int[] AlternativeBodyPieceIDs => Array.Empty<int>();
 
-        public virtual int[] AlternativeLegPieceIDs => new int[0];
+        public virtual int[] AlternativeLegPieceIDs => Array.Empty<int>();
+
+        // Overrides build their alternative ID arrays on every access, and these are checked for every player every tick,
+        // so they are resolved once on first use (after loading, so modded item IDs are valid).
+        private int[] cachedAlternativeHeadPieceIDs;
+        private int[] cachedAlternativeBodyPieceIDs;
+        private int[] cachedAlternativeLegPieceIDs;
+
+        internal int[] CachedAlternativeHeadPieceIDs => cachedAlternativeHeadPieceIDs ??= AlternativeHeadPieceIDs ?? Array.Empty<int>();
+
+        internal int[] CachedAlternativeBodyPieceIDs => cachedAlternativeBodyPieceIDs ??= AlternativeBodyPieceIDs ?? Array.Empty<int>();
+
+        internal int[] CachedAlternativeLegPieceIDs => cachedAlternativeLegPieceIDs ??= AlternativeLegPieceIDs ?? Array.Empty<int>();
 
         public virtual string ArmorSetName => null;
 
@@ -39,11 +52,11 @@ namespace CalamityMod.Items.VanillaArmorChanges
         {
             // Check each individual piece of armor on the player with the respective expected item ID.
             // If no ID is applied/it's null, that signals that it doesn't matter, and to just fall through anyway.
-            if ((HeadPieceID ?? player.armor[0].type) != player.armor[0].type && !AlternativeHeadPieceIDs.Contains(player.armor[0].type))
+            if ((HeadPieceID ?? player.armor[0].type) != player.armor[0].type && !CachedAlternativeHeadPieceIDs.Contains(player.armor[0].type))
                 return false;
-            if ((BodyPieceID ?? player.armor[1].type) != player.armor[1].type && !AlternativeBodyPieceIDs.Contains(player.armor[1].type))
+            if ((BodyPieceID ?? player.armor[1].type) != player.armor[1].type && !CachedAlternativeBodyPieceIDs.Contains(player.armor[1].type))
                 return false;
-            if ((LegPieceID ?? player.armor[2].type) != player.armor[2].type && !AlternativeLegPieceIDs.Contains(player.armor[2].type))
+            if ((LegPieceID ?? player.armor[2].type) != player.armor[2].type && !CachedAlternativeLegPieceIDs.Contains(player.armor[2].type))
                 return false;
 
             return true;
@@ -51,11 +64,11 @@ namespace CalamityMod.Items.VanillaArmorChanges
 
         public void ApplyIndividualPieceEffects(Player player)
         {
-            if ((HeadPieceID ?? ItemID.None) == player.armor[0].type || AlternativeHeadPieceIDs.Contains(player.armor[0].type))
+            if ((HeadPieceID ?? ItemID.None) == player.armor[0].type || CachedAlternativeHeadPieceIDs.Contains(player.armor[0].type))
                 ApplyHeadPieceEffect(player);
-            if ((BodyPieceID ?? ItemID.None) == player.armor[1].type || AlternativeBodyPieceIDs.Contains(player.armor[1].type))
+            if ((BodyPieceID ?? ItemID.None) == player.armor[1].type || CachedAlternativeBodyPieceIDs.Contains(player.armor[1].type))
                 ApplyBodyPieceEffect(player);
-            if ((LegPieceID ?? ItemID.None) == player.armor[2].type || AlternativeLegPieceIDs.Contains(player.armor[2].type))
+            if ((LegPieceID ?? ItemID.None) == player.armor[2].type || CachedAlternativeLegPieceIDs.Contains(player.armor[2].type))
                 ApplyLegPieceEffect(player);
         }
 

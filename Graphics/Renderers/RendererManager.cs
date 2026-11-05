@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using CalamityMod.Enums;
 using CalamityMod.Systems.Graphic;
 using CalamityMod.Utilities.Daybreak;
@@ -65,16 +64,23 @@ namespace CalamityMod.Graphics.Renderers
         #region Drawing
         private static void DrawRendererAtLayer(GeneralDrawLayer drawLayer)
         {
-            var renderers = Renderers.Where(renderer => renderer.ShouldDraw && renderer.Layer == drawLayer);
-            if (renderers.Any())
+            bool begunDrawing = false;
+            foreach (var renderer in Renderers)
             {
-                Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise);
+                if (!renderer.ShouldDraw || renderer.Layer != drawLayer)
+                    continue;
 
-                foreach (var renderer in renderers)
-                    renderer.DrawTarget(Main.spriteBatch);
+                if (!begunDrawing)
+                {
+                    Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise);
+                    begunDrawing = true;
+                }
 
-                Main.spriteBatch.End();
+                renderer.DrawTarget(Main.spriteBatch);
             }
+
+            if (begunDrawing)
+                Main.spriteBatch.End();
         }
 
         private void DrawToTargets()

@@ -41,25 +41,11 @@ namespace CalamityMod.Tiles.Abyss
         public override void RandomUpdate(int i, int j)
         {
             int vineLength = WorldGen.genRand.Next((int)Main.rockLayer, (int)(Main.rockLayer + (double)Main.maxTilesY * 0.143));
-            int nearbyVineCount = 0;
-            for (int x = i - 15; x <= i + 15; x++)
-            {
-                for (int y = j - 15; y <= j + 15; y++)
-                {
-                    if (WorldGen.InWorld(x, y))
-                    {
-                        if (CalamityUtils.ParanoidTileRetrieval(x, y).HasTile &&
-                            CalamityUtils.ParanoidTileRetrieval(x, y).TileType == (ushort)ModContent.TileType<SulphurousVines>())
-                        {
-                            nearbyVineCount++;
-                        }
-                    }
-                }
-            }
 
-            if (Main.tile[i, j + 1] != null && nearbyVineCount < 5 && j >= SulphurousSea.VineGrowTopLimit)
+            if (Main.tile[i, j + 1] != null && j >= SulphurousSea.VineGrowTopLimit)
             {
-                if (!Main.tile[i, j + 1].HasTile && Main.tile[i, j + 1].TileType != (ushort)ModContent.TileType<SulphurousVines>())
+                // The nearby vine scan is by far the most expensive check, so it runs last.
+                if (!Main.tile[i, j + 1].HasTile && Main.tile[i, j + 1].TileType != (ushort)ModContent.TileType<SulphurousVines>() && !SulphurousVines.TooManyVinesNearby(i, j))
                 {
                     if (Main.tile[i, j + 1].LiquidAmount == 255 &&
                         Main.tile[i, j + 1].LiquidType != LiquidID.Lava)

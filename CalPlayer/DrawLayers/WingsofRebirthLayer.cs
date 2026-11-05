@@ -18,7 +18,7 @@ namespace CalamityMod.CalPlayer.DrawLayers
 
         public override Position GetDefaultPosition() => new AfterParent(PlayerDrawLayers.Wings);
 
-        public override bool GetDefaultVisibility(PlayerDrawSet drawInfo) => drawInfo.drawPlayer.wings == EquipLoader.GetEquipSlot(Mod, "WingsofRebirth", EquipType.Wings);
+        public override bool GetDefaultVisibility(PlayerDrawSet drawInfo) => drawInfo.drawPlayer.wings == CalamityUtils.GetCachedEquipSlot(Mod, "WingsofRebirth", EquipType.Wings);
 
         protected override void Draw(ref PlayerDrawSet drawInfo)
         {

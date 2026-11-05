@@ -251,13 +251,13 @@ namespace CalamityMod.Items.Accessories
             switch (type)
             {
                 case EquipType.Legs:
-                    player.legs = EquipLoader.GetEquipSlot(Mod, Main.dayTime ? "ProfanedSoulCrystal" : "PscNightLegs", type);
+                    player.legs = CalamityUtils.GetCachedEquipSlot(Mod, Main.dayTime ? "ProfanedSoulCrystal" : "PscNightLegs", type);
                     return true;
                 case EquipType.Head:
-                    player.head = EquipLoader.GetEquipSlot(Mod, Main.dayTime ? "ProfanedSoulCrystal" : "PscNightHead", type);
+                    player.head = CalamityUtils.GetCachedEquipSlot(Mod, Main.dayTime ? "ProfanedSoulCrystal" : "PscNightHead", type);
                     return true;
                 case EquipType.Wings:
-                    player.wings = EquipLoader.GetEquipSlot(Mod, Main.dayTime ? "ProfanedSoulCrystal" : "PscNightWings", type);
+                    player.wings = CalamityUtils.GetCachedEquipSlot(Mod, Main.dayTime ? "ProfanedSoulCrystal" : "PscNightWings", type);
                     return true;
             }
             return false;
@@ -569,8 +569,8 @@ namespace CalamityMod.Items.Accessories
 
         public override void TransformPostUpdate(Player player)
         {
-            bool validEquipSlot = player.legs == EquipLoader.GetEquipSlot(Mod, "ProfanedSoulCrystal", EquipType.Legs) ||
-                                  player.legs == EquipLoader.GetEquipSlot(Mod, "PscNightLegs", EquipType.Legs);
+            bool validEquipSlot = player.legs == CalamityUtils.GetCachedEquipSlot(Mod, "ProfanedSoulCrystal", EquipType.Legs) ||
+                                  player.legs == CalamityUtils.GetCachedEquipSlot(Mod, "PscNightLegs", EquipType.Legs);
             if (player.Transformation().Type == ModContent.ItemType<ProfanedSoulCrystal>() && validEquipSlot)
             {
                 bool usingCarpet = player.carpetTime > 0 && player.controlJump; //doesn't make sense for carpet to use jump frame since you have solid ground

@@ -1252,7 +1252,7 @@ namespace CalamityMod.Items
             EditTooltipIf(item.type == ItemID.LunarCraftingStation, 0, (line) => line.Text = EditedTooltip("LunarCraftingStation"));
 
             // Replace the double tap line if double tap dash is overridden
-            EditTooltipIf((item.type == ItemID.EoCShield || item.type == ItemID.Tabi) && CalamityKeybinds.DashHotkey.GetAssignedKeysOrEmpty().Count != 0, 1, (line) => line.Text = CalamityUtils.GetText("Vanilla.DashKey").Format(CalamityKeybinds.DashHotkey.TooltipHotkeyString()));
+            EditTooltipIf((item.type == ItemID.EoCShield || item.type == ItemID.Tabi) && CalamityKeybinds.DashHotkey.HasAssignedKeys(), 1, (line) => line.Text = CalamityUtils.GetText("Vanilla.DashKey").Format(CalamityKeybinds.DashHotkey.TooltipHotkeyString()));
             #endregion
         }
         #endregion

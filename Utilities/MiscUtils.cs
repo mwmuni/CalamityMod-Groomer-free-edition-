@@ -323,5 +323,16 @@ namespace CalamityMod
                 return [];
             }
         }
+
+        /// <summary>
+        /// Returns whether <paramref name="keybind"/> has any keys assigned. Unlike <see cref="GetAssignedKeysOrEmpty"/>, this does not allocate on servers or for null keybinds.
+        /// </summary>
+        public static bool HasAssignedKeys(this ModKeybind keybind, InputMode mode = InputMode.Keyboard)
+        {
+            if (keybind == null || Main.dedServ)
+                return false;
+
+            return keybind.GetAssignedKeysOrEmpty(mode).Count > 0;
+        }
     }
 }

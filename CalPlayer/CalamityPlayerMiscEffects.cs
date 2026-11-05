@@ -94,6 +94,44 @@ namespace CalamityMod.CalPlayer
 {
     public partial class CalamityPlayer : ModPlayer
     {
+        // Constant and scratch data reused by per-tick effects to avoid allocating on every update.
+        private static readonly Color[] RipperLightColors =
+        [
+            Color.PaleVioletRed,
+            Color.Coral,
+            Color.Khaki,
+            Color.PaleGreen,
+            Color.Turquoise,
+            Color.Violet
+        ];
+
+        private static int[] summonDeleteTypes;
+        private static int[] SummonDeleteTypes => summonDeleteTypes ??=
+        [
+            ModContent.ProjectileType<BrimstoneElementalMinion>(),
+            ModContent.ProjectileType<WaterElementalMinion>(),
+            ModContent.ProjectileType<SandElementalHealer>(),
+            ModContent.ProjectileType<SandElementalMinion>(),
+            ModContent.ProjectileType<CloudElementalMinion>(),
+            ModContent.ProjectileType<FungalClumpMinion>(),
+            ModContent.ProjectileType<HowlsHeartHowl>(),
+            ModContent.ProjectileType<HowlsHeartCalcifer>(),
+            ModContent.ProjectileType<HowlsHeartTurnipHead>(),
+            ModContent.ProjectileType<MiniGuardianAttack>(),
+            ModContent.ProjectileType<MiniGuardianDefense>(),
+            ModContent.ProjectileType<MiniGuardianHealer>()
+        ];
+
+        private static int[] laudanumAffectedBuffs;
+        private static int[] LaudanumAffectedBuffs => laudanumAffectedBuffs ??=
+        [
+            ModContent.BuffType<ArmorCrunch>(), ModContent.BuffType<WhisperingDeath>(), BuffID.VortexDebuff, BuffID.Ichor, BuffID.Bleeding,
+            BuffID.Chilled, BuffID.BrokenArmor, BuffID.Weak, BuffID.Slow, BuffID.Confused, BuffID.Cursed, BuffID.Silenced, BuffID.Blackout, BuffID.Darkness
+        ];
+
+        private readonly List<Point> tileEffectEdgeTiles = [];
+        private readonly List<string> expiredCooldownScratch = new(16);
+
         #region Post Update Misc Effects
         public override void PostUpdateMiscEffects()
         {
@@ -694,19 +732,9 @@ namespace CalamityMod.CalPlayer
                 rageDiff += rageMax * GaelsGreatsword.RagePerSecond / 60f;
 
             float rate = Main.GlobalTimeWrappedHourly * 29;
-            List<Color> eColors = new List<Color>()
-            {
-                Color.PaleVioletRed,
-                Color.Coral,
-                Color.Khaki,
-                Color.PaleGreen,
-                Color.Turquoise,
-                Color.Violet
-            };
-
-            int colorIndex = (int)(rate / 2 % eColors.Count);
-            Color currentColor = eColors[colorIndex];
-            Color nextColor = eColors[(colorIndex + 1) % eColors.Count];
+            int colorIndex = (int)(rate / 2 % RipperLightColors.Length);
+            Color currentColor = RipperLightColors[colorIndex];
+            Color nextColor = RipperLightColors[(colorIndex + 1) % RipperLightColors.Length];
             lightRGB = Color.Lerp(currentColor, nextColor, rate % 2f > 1f ? 1f : rate % 1f);
 
             // Calculate and grant proximity rage.
@@ -919,7 +947,8 @@ namespace CalamityMod.CalPlayer
             float auricRejectionKB = Player.noKnockback ? 20f : 40f;
 
             // Get a list of tiles that are colliding with the player.
-            List<Point> EdgeTiles = new List<Point>();
+            List<Point> EdgeTiles = tileEffectEdgeTiles;
+            EdgeTiles.Clear();
             Collision.GetEntityEdgeTiles(EdgeTiles, Player);
             foreach (Point touchedTile in EdgeTiles)
             {
@@ -1119,7 +1148,8 @@ namespace CalamityMod.CalPlayer
         }
         private void MiscEffects()
         {
-            if (Player.inventory.Any(x => x.type == ItemID.Pwnhammer) && !Player.inventory.Any(x => x.type == ModContent.ItemType<EvilSmasher>()) && Player.adjTile[TileID.DemonAltar] && DemonAltarDialogueCooldown <= 0 && Player.miscCounter % 30 == 0)
+            // Cheap checks run first so the inventory is only scanned near a demon altar.
+            if (Player.adjTile[TileID.DemonAltar] && DemonAltarDialogueCooldown <= 0 && Player.miscCounter % 30 == 0 && Player.inventory.Any(x => x.type == ItemID.Pwnhammer) && !Player.inventory.Any(x => x.type == ModContent.ItemType<EvilSmasher>()))
             {
                 DemonAltarTalking();
             }
@@ -1192,7 +1222,7 @@ namespace CalamityMod.CalPlayer
                     DoGCartSegments[i].Update(Player, DoGCartSegments[i - 1].Center + waveOffset, DoGCartSegments[i - 1].Rotation);
                 }
             }
-            else
+            else if (Array.Exists(DoGCartSegments, segment => segment is not null))
                 DoGCartSegments = new DoGCartSegment[DoGCartSegments.Length];
 
             // Dust on hand when holding the phosphorescent gauntlet.
@@ -2230,7 +2260,8 @@ namespace CalamityMod.CalPlayer
             // Tick all cooldowns.
             // Depending on the code for each individual cooldown, this isn't guaranteed to do anything.
             // It may not tick down the timer or not do anything at all.
-            IList<string> expiredCooldowns = new List<string>(16);
+            List<string> expiredCooldowns = expiredCooldownScratch;
+            expiredCooldowns.Clear();
             var cdIterator = cooldowns.GetEnumerator();
             while (cdIterator.MoveNext())
             {
@@ -2525,7 +2556,13 @@ namespace CalamityMod.CalPlayer
                 shieldOfTheHighRulerDashVelocityBoosted = false;
 
             // Auric dye cinders.
-            int auricDyeCount = Player.dye.Count(dyeItem => dyeItem.type == ModContent.ItemType<AuricDye>());
+            int auricDyeCount = 0;
+            int auricDyeType = ModContent.ItemType<AuricDye>();
+            foreach (Item dyeItem in Player.dye)
+            {
+                if (dyeItem.type == auricDyeType)
+                    auricDyeCount++;
+            }
             if (auricDyeCount > 0)
             {
                 int sparkCreationChance = (int)MathHelper.Lerp(15f, 50f, Utils.GetLerpValue(4f, 1f, auricDyeCount, true));
@@ -2737,7 +2774,7 @@ namespace CalamityMod.CalPlayer
                 Player.GetDamage<GenericDamageClass>() += Affliction.DamageBoost;
             }
 
-            float[] light = new float[3];
+            Span<float> light = stackalloc float[3];
             if (cFreeze)
             {
                 light[0] += 0.3f;
@@ -4109,23 +4146,9 @@ namespace CalamityMod.CalPlayer
                 }
             }
 
-            List<int> summonDeleteList = new List<int>()
-            {
-                ModContent.ProjectileType<BrimstoneElementalMinion>(),
-                ModContent.ProjectileType<WaterElementalMinion>(),
-                ModContent.ProjectileType<SandElementalHealer>(),
-                ModContent.ProjectileType<SandElementalMinion>(),
-                ModContent.ProjectileType<CloudElementalMinion>(),
-                ModContent.ProjectileType<FungalClumpMinion>(),
-                ModContent.ProjectileType<HowlsHeartHowl>(),
-                ModContent.ProjectileType<HowlsHeartCalcifer>(),
-                ModContent.ProjectileType<HowlsHeartTurnipHead>(),
-                ModContent.ProjectileType<MiniGuardianAttack>(),
-                ModContent.ProjectileType<MiniGuardianDefense>(),
-                ModContent.ProjectileType<MiniGuardianHealer>()
-            };
+            int[] summonDeleteList = SummonDeleteTypes;
             int projAmt = 1;
-            for (int i = 0; i < summonDeleteList.Count; i++)
+            for (int i = 0; i < summonDeleteList.Length; i++)
             {
                 if (Player.ownedProjectileCounts[summonDeleteList[i]] > projAmt)
                 {
@@ -4134,7 +4157,7 @@ namespace CalamityMod.CalPlayer
                         Projectile proj = Main.projectile[projIndex];
                         if (proj.active && proj.owner == Player.whoAmI)
                         {
-                            if (summonDeleteList.Contains(proj.type))
+                            if (Array.IndexOf(summonDeleteList, proj.type) >= 0)
                             {
                                 proj.Kill();
                             }
@@ -4344,8 +4367,7 @@ namespace CalamityMod.CalPlayer
             if (laudanum)
             {
                 // Laudanum removes immunity to debuffs that it counters, so that you can get inflicted with them
-                int[] buffsAffected = [ModContent.BuffType<ArmorCrunch>(), ModContent.BuffType<WhisperingDeath>(), BuffID.VortexDebuff, BuffID.Ichor, BuffID.Bleeding,
-                    BuffID.Chilled, BuffID.BrokenArmor, BuffID.Weak, BuffID.Slow, BuffID.Confused, BuffID.Cursed, BuffID.Silenced, BuffID.Blackout, BuffID.Darkness];
+                int[] buffsAffected = LaudanumAffectedBuffs;
 
                 for (int i = 0; i < buffsAffected.Length; i++)
                     Player.buffImmune[buffsAffected[i]] = false;

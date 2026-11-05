@@ -31,7 +31,7 @@ namespace CalamityMod.Items.Armor.Vanity
         public override void SetMatch(bool male, ref int equipSlot, ref bool robes)
         {
             robes = true;
-            equipSlot = EquipLoader.GetEquipSlot(Mod, Name, EquipType.Legs);
+            equipSlot = CalamityUtils.GetCachedEquipSlot(Mod, Name, EquipType.Legs);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace CalamityMod.CalPlayer.DrawLayers
             if (ModContent.GetModItem(bodyItem.type) is IBulkyArmor chestplateBulkDrawer)
             {
                 string equipSlotName = chestplateBulkDrawer.EquipSlotName(drawPlayer) != "" ? chestplateBulkDrawer.EquipSlotName(drawPlayer) : bodyItem.ModItem.Name;
-                int equipSlot = EquipLoader.GetEquipSlot(Mod, equipSlotName, EquipType.Body);
+                int equipSlot = CalamityUtils.GetCachedEquipSlot(Mod, equipSlotName, EquipType.Body);
                 if (drawPlayer.body != equipSlot)
                     return;
 

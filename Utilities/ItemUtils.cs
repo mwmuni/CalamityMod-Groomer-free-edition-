@@ -664,5 +664,36 @@ namespace CalamityMod
             return badPrefixes.Contains(prefix);
         }
         #endregion
+
+        #region Equip Slots
+        private static readonly Dictionary<(Mod, string, EquipType), int> cachedEquipSlots = new();
+
+        // Set once Calamity's content has autoloaded, after which missing equip textures (e.g. client-only ones on servers) are final.
+        internal static bool EquipSlotLookupsFinal;
+
+        /// <summary>
+        /// Equivalent to <see cref="EquipLoader.GetEquipSlot(Mod, string, EquipType)"/> for main-thread per-frame code.<br />
+        /// tModLoader allocates a new lookup key on every call; registered equip slots never change, so lookups are cached.
+        /// </summary>
+        public static int GetCachedEquipSlot(Mod mod, string name, EquipType type)
+        {
+            var key = (mod, name, type);
+            if (cachedEquipSlots.TryGetValue(key, out int slot))
+                return slot;
+
+            slot = EquipLoader.GetEquipSlot(mod, name, type);
+
+            // Misses during loading are not cached because the texture may not have been registered yet.
+            if (slot >= 0 || EquipSlotLookupsFinal)
+                cachedEquipSlots[key] = slot;
+            return slot;
+        }
+
+        internal static void UnloadEquipSlotCache()
+        {
+            cachedEquipSlots.Clear();
+            EquipSlotLookupsFinal = false;
+        }
+        #endregion
     }
 }

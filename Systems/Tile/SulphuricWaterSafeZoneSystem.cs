@@ -15,6 +15,10 @@ namespace CalamityMod.Systems
 
         public override void PreUpdateEntities()
         {
+            // Avoid allocating LINQ iterators every tick when there are no safe tiles.
+            if (NearbySafeTiles.Count == 0)
+                return;
+
             // Make the potency of the current safe tiles gradually dissipate, and eventually disappear from the dictionary once completely gone.
             foreach (Point p in NearbySafeTiles.Keys)
                 NearbySafeTiles[p] -= 0.06f;

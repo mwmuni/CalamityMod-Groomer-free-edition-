@@ -17,6 +17,10 @@ namespace CalamityMod.Items.BaseItems
         
         public virtual (EquipType Type, string AssetName, string EquipName)[] EquipSlots => [];
 
+        // EquipSlots overrides build a new array on every access, but their contents are fixed.
+        private (EquipType Type, string AssetName, string EquipName)[] cachedEquipSlots;
+        internal (EquipType Type, string AssetName, string EquipName)[] CachedEquipSlots => cachedEquipSlots ??= EquipSlots;
+
         public virtual float Priority => 1;
 
         public virtual Func<Player, bool> ShouldTransform => (player) => true;
@@ -203,49 +207,49 @@ namespace CalamityMod.Items.BaseItems
             switch (type)
             {
                 case EquipType.Head:
-                    player.head = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.head = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Body:
-                    player.body = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.body = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Legs:
-                    player.legs = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.legs = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.HandsOn:
-                    player.handon = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.handon = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.HandsOff:
-                    player.handoff = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.handoff = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Back:
-                    player.back = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.back = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Front:
-                    player.front = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.front = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Shoes:
-                    player.shoe = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.shoe = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Waist:
-                    player.waist = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.waist = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Wings:
-                    player.wings = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.wings = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Shield:
-                    player.shield = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.shield = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Neck:
-                    player.neck = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.neck = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Face:
-                    player.face = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.face = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Balloon:
-                    player.balloon = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.balloon = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
                 case EquipType.Beard:
-                    player.beard = name == null ? -1 : EquipLoader.GetEquipSlot(mod, name, type);
+                    player.beard = name == null ? -1 : CalamityUtils.GetCachedEquipSlot(mod, name, type);
                     break;
             }
         }
@@ -272,8 +276,8 @@ namespace CalamityMod.Items.BaseItems
 
         public static void EquipTransformation(TransformationAccessory trans, Player self, Mod mod)
         {
-            bool[] list = new bool[15];
-            foreach (var (Type, AssetName, EquipName) in trans.EquipSlots)
+            Span<bool> list = stackalloc bool[15];
+            foreach (var (Type, AssetName, EquipName) in trans.CachedEquipSlots)
             {
                 string name = AssetName == null ? null : EquipName ?? trans.Name;
                 if (!trans.CustomSetEquipType(self, Type, mod, name) && !list[(int)Type])

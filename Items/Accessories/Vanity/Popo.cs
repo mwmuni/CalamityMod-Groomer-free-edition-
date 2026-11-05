@@ -31,7 +31,7 @@ namespace CalamityMod.Items.Accessories.Vanity
         {
             if (type == EquipType.Head)
             {
-                player.head = EquipLoader.GetEquipSlot(Mod, player.Calamity().snowmanNoseless ? "PopoNoseless" : "Popo", EquipType.Head);
+                player.head = CalamityUtils.GetCachedEquipSlot(Mod, player.Calamity().snowmanNoseless ? "PopoNoseless" : "Popo", EquipType.Head);
                 return true;
             }
             return false;

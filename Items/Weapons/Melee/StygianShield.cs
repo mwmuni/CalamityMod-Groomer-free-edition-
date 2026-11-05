@@ -113,7 +113,7 @@ namespace CalamityMod.Items.Weapons.Melee
         {
             if (Player.HeldItem.type == ModContent.ItemType<StygianShield>())
             {
-                Player.shield = EquipLoader.GetEquipSlot(Mod, "StygianShield", EquipType.Shield);
+                Player.shield = CalamityUtils.GetCachedEquipSlot(Mod, "StygianShield", EquipType.Shield);
                 Player.cShield = 0;
             }
         }

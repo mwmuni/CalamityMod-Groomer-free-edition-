@@ -41,6 +41,9 @@ namespace CalamityMod
             CalamityGlobalItem.LoadTweaks();
             CalamityGlobalProjectile.LoadTweaks();
 
+            // All of Calamity's ILoadables (and therefore its equip textures) have loaded by the time Mod.Load runs.
+            CalamityUtils.EquipSlotLookupsFinal = true;
+
             if (!Main.dedServ)
             {
                 // This must be done separately from immediate loading, as loading is now multithreaded.
@@ -56,6 +59,7 @@ namespace CalamityMod
             NPCStats.UnloadDebuffs();
             CalamityGlobalItem.UnloadTweaks();
             CalamityGlobalProjectile.UnloadTweaks();
+            CalamityUtils.UnloadEquipSlotCache();
 
             Main.QueueMainThreadAction(() =>
             {

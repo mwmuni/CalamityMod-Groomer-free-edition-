@@ -13,7 +13,6 @@ namespace CalamityMod.NPCs
     {
         private float curPolarity = 0;
         public List<Particle> pulses;
-        private List<Particle> pulsesToClear;
 
         public bool isPolarized => curPolarity != 0;
 
@@ -35,8 +34,6 @@ namespace CalamityMod.NPCs
         {
             CurPolarity = 0;
             pulses = new List<Particle>();
-            pulsesToClear = new List<Particle>();
-
         }
 
         //Applies a new polarity to the target
@@ -81,16 +78,17 @@ namespace CalamityMod.NPCs
 
         public void HandlePulses()
         {
+            if (pulses.Count == 0)
+                return;
+
             foreach (Particle pulse in pulses)
             {
                 pulse.Time++;
                 pulse.Update();
-                if (pulse.Time > pulse.Lifetime)
-                    pulsesToClear.Add(pulse);
             }
 
-            pulses.RemoveAll(n => pulsesToClear.Contains(n));
-            pulsesToClear.Clear();
+            // Non-capturing predicate, so no closure or delegate is allocated per NPC per tick.
+            pulses.RemoveAll(pulse => pulse.Time > pulse.Lifetime);
         }
 
         public override void PostDraw(NPC npc, SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
